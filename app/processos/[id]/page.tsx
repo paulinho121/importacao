@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
+import AddItemForm from "@/components/AddItemForm";
 import { db } from "@/db/client";
-import { processes, suppliers, processItems, processEvents, processDocuments } from "@/db/schema";
+import {
+  processes,
+  suppliers,
+  processItems,
+  processEvents,
+  processDocuments,
+  products,
+} from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
@@ -12,6 +20,13 @@ import {
   formatDate,
   type ProcessStatus,
 } from "@/lib/status";
+import {
+  advanceProcessStep,
+  updateProcessStatus,
+  addProcessItem,
+  uploadProcessDocument,
+} from "@/app/processos/actions";
+import { getSignedDocumentUrl } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +69,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents] = await Promise.all([
+  const [items, events, documents, productRows] = await Promise.all([
     db.select().from(processItems).where(eq(processItems.processId, id)),
     db
       .select()
@@ -62,9 +77,27 @@ export default async function ProcessDetailPage({
       .where(eq(processEvents.processId, id))
       .orderBy(desc(processEvents.eventDate)),
     db.select().from(processDocuments).where(eq(processDocuments.processId, id)),
+    db
+      .select({ id: products.id, sku: products.sku, description: products.description })
+      .from(products)
+      .orderBy(products.sku),
   ]);
 
   const dias = diasRestantes(process.etaEstimated);
+  const boundAdvanceStep = advanceProcessStep.bind(null, id);
+  const boundUpdateStatus = updateProcessStatus.bind(null, id);
+  const boundAddItem = addProcessItem.bind(null, id);
+  const nextStepLabel =
+    process.currentStep < WORKFLOW_STEPS.length ? WORKFLOW_STEPS[process.currentStep] : null;
+
+  const signedUrlByDocType = new Map<string, string | null>();
+  await Promise.all(
+    documents
+      .filter((d) => d.status === "UPLOADED" && d.storagePath)
+      .map(async (d) => {
+        signedUrlByDocType.set(d.docType, await getSignedDocumentUrl(d.storagePath!));
+      }),
+  );
 
   return (
     <AppShell title="Detalhe do Processo">
@@ -103,6 +136,27 @@ export default async function ProcessDetailPage({
               {process.externalReference ? ` · Ref: ${process.externalReference}` : ""}
               {process.destination ? ` · Destino: ${process.destination}` : ""}
             </p>
+          </div>
+          <div className="lg:col-span-4 flex items-center lg:justify-end">
+            <form action={boundUpdateStatus} className="flex items-center gap-2">
+              <select
+                name="status"
+                defaultValue={process.status}
+                className="bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+              >
+                {Object.entries(STATUS_LABEL).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
+              >
+                Alterar Status
+              </button>
+            </form>
           </div>
         </div>
 
@@ -164,6 +218,16 @@ export default async function ProcessDetailPage({
                 );
               })}
             </div>
+            {nextStepLabel && (
+              <form action={boundAdvanceStep} className="mt-6 pt-4 border-t border-outline-variant">
+                <button
+                  type="submit"
+                  className="w-full px-4 py-3 rounded-lg bg-secondary text-white font-bold text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all"
+                >
+                  Avançar para: {nextStepLabel}
+                </button>
+              </form>
+            )}
           </div>
 
           <div className="lg:col-span-8 space-y-stack-lg">
@@ -232,6 +296,7 @@ export default async function ProcessDetailPage({
                     ))}
                   </ul>
                 )}
+                <AddItemForm action={boundAddItem} products={productRows} />
               </section>
             </div>
 
@@ -246,24 +311,52 @@ export default async function ProcessDetailPage({
                 {DOC_TYPES.map(({ type, label, icon }) => {
                   const doc = documents.find((d) => d.docType === type);
                   const uploaded = doc?.status === "UPLOADED";
+                  const signedUrl = signedUrlByDocType.get(type);
+                  const boundUpload = uploadProcessDocument.bind(null, id, type);
                   return (
                     <div
                       key={type}
-                      className={`relative p-4 rounded-lg flex flex-col items-center text-center ${
+                      className={`relative p-4 rounded-lg flex flex-col items-center text-center gap-2 ${
                         uploaded
                           ? "border border-outline-variant bg-surface-container-lowest"
                           : "border border-dashed border-outline"
                       }`}
                     >
                       <span
-                        className={`material-symbols-outlined text-4xl mb-2 ${uploaded ? "text-primary" : "text-on-surface-variant"}`}
+                        className={`material-symbols-outlined text-4xl ${uploaded ? "text-primary" : "text-on-surface-variant"}`}
                       >
                         {icon}
                       </span>
-                      <span className="font-bold text-sm mb-1">{label}</span>
-                      <span className={`text-xs ${uploaded ? "text-on-surface-variant" : "text-error font-medium"}`}>
+                      <span className="font-bold text-sm">{label}</span>
+                      <span
+                        className={`text-xs break-all ${uploaded ? "text-on-surface-variant" : "text-error font-medium"}`}
+                      >
                         {uploaded ? doc?.fileName ?? "Enviado" : "Pendente de envio"}
                       </span>
+                      {uploaded && signedUrl && (
+                        <a
+                          href={signedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold text-secondary hover:underline"
+                        >
+                          Visualizar
+                        </a>
+                      )}
+                      <form action={boundUpload} className="w-full flex flex-col items-center gap-1.5 mt-1">
+                        <input
+                          type="file"
+                          name="file"
+                          required
+                          className="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
+                        />
+                        <button
+                          type="submit"
+                          className="w-full px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
+                        >
+                          {uploaded ? "Substituir" : "Enviar"}
+                        </button>
+                      </form>
                     </div>
                   );
                 })}

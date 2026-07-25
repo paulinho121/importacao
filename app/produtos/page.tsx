@@ -1,0 +1,88 @@
+import Link from "next/link";
+import AppShell from "@/components/AppShell";
+import { db } from "@/db/client";
+import { products, suppliers, processItems } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProdutosPage() {
+  const rows = await db
+    .select({
+      id: products.id,
+      sku: products.sku,
+      manufacturerSku: products.manufacturerSku,
+      ncm: products.ncm,
+      description: products.description,
+      supplierName: suppliers.name,
+      usageCount: sql<number>`count(${processItems.id})`.mapWith(Number),
+    })
+    .from(products)
+    .leftJoin(suppliers, eq(products.defaultSupplierId, suppliers.id))
+    .leftJoin(processItems, eq(processItems.productId, products.id))
+    .groupBy(products.id, suppliers.name)
+    .orderBy(products.sku);
+
+  return (
+    <AppShell title="Produtos">
+      <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="font-display-lg text-display-lg text-primary">Produtos</h2>
+            <p className="text-on-surface-variant font-body-md text-body-md mt-1">
+              Catálogo mestre com NCM e SKU do fabricante — itens de processo referenciam este
+              cadastro em vez de descrição digitada solta.
+            </p>
+          </div>
+          <Link
+            href="/produtos/novo"
+            className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:bg-secondary/90 transition-all shadow-sm flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Novo Produto
+          </Link>
+        </div>
+
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-surface-container-low border-b border-outline-variant">
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SKU INTERNO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SKU FABRICANTE</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NCM</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DESCRIÇÃO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
+                {rows.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-6 text-on-surface-variant text-center">
+                      Nenhum produto cadastrado ainda.
+                    </td>
+                  </tr>
+                )}
+                {rows.map((p) => (
+                  <tr key={p.id} className="hover:bg-surface-container-high transition-colors">
+                    <td className="px-6 py-3 font-mono-data">
+                      <Link href={`/produtos/${p.id}`} className="text-secondary hover:underline">
+                        {p.sku}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-3 font-mono-data">{p.manufacturerSku ?? "—"}</td>
+                    <td className="px-6 py-3 font-mono-data">{p.ncm ?? "—"}</td>
+                    <td className="px-6 py-3 font-medium">{p.description}</td>
+                    <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
+                    <td className="px-6 py-3 font-mono-data">{p.usageCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </AppShell>
+  );
+}

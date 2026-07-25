@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "dashboard" },
   { href: "/processos", label: "Processos", icon: "receipt_long" },
+  { href: "/produtos", label: "Produtos", icon: "inventory_2" },
   { href: "/fornecedores", label: "Fornecedores", icon: "factory" },
 ] as const;
 

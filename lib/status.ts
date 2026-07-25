@@ -43,6 +43,19 @@ export const WORKFLOW_STEPS = [
   "Entregue",
 ] as const;
 
+// Regra de negócio: qual status resulta de estar em cada etapa do fluxo.
+// ATRASADO fica fora dessa progressão — é uma correção manual (ver
+// updateProcessStatus), não uma etapa alcançada ao avançar.
+export const STATUS_BY_STEP: Record<number, ProcessStatus> = {
+  1: "AGUARDANDO_EMBARQUE",
+  2: "AGUARDANDO_EMBARQUE",
+  3: "AGUARDANDO_EMBARQUE",
+  4: "EMBARCADO",
+  5: "EM_TRANSITO",
+  6: "EM_DESEMBARACO",
+  7: "CONCLUIDO",
+};
+
 // Datas de processo (etd/eta) são valores de calendário puros (sem hora),
 // vindos de uma coluna `date` do Postgres. new Date("YYYY-MM-DD") interpreta
 // isso como meia-noite UTC — se formatarmos/comparamos em horário local

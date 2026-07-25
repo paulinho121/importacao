@@ -86,13 +86,34 @@ export const processes = pgTable("processes", {
     .defaultNow(),
 });
 
+// Catálogo mestre de produtos. Itens de processo podem referenciar um
+// produto daqui (FK opcional) em vez de digitar SKU/descrição soltos —
+// garante NCM correto (obrigatório para desembaraço) e evita duplicidade.
+export const products = pgTable("products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sku: text("sku").notNull().unique(),
+  manufacturerSku: text("manufacturer_sku"),
+  ncm: text("ncm"),
+  description: text("description").notNull(),
+  defaultSupplierId: uuid("default_supplier_id").references(() => suppliers.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Itens/SKUs de cada processo. sku é sempre string — corrige a perda de
 // zero à esquerda observada na planilha quando o Excel converte código em número.
+// productId é opcional: item pode vir do catálogo (sku/description copiados
+// no momento da inclusão, como snapshot) ou ser avulso (digitado na hora).
 export const processItems = pgTable("process_items", {
   id: uuid("id").primaryKey().defaultRandom(),
   processId: uuid("process_id")
     .notNull()
     .references(() => processes.id, { onDelete: "cascade" }),
+  productId: uuid("product_id").references(() => products.id, { onDelete: "set null" }),
   sku: text("sku"),
   description: text("description").notNull(),
   quantity: numeric("quantity", { precision: 10, scale: 2 }),
@@ -125,6 +146,7 @@ export const processDocuments = pgTable("process_documents", {
     .references(() => processes.id, { onDelete: "cascade" }),
   docType: documentTypeEnum("doc_type").notNull(),
   fileName: text("file_name"),
+  storagePath: text("storage_path"),
   status: documentStatusEnum("status").notNull().default("PENDING"),
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }),
 });

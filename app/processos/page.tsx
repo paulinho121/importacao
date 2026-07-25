@@ -73,7 +73,16 @@ export default async function ProcessosPage({
 
   return (
     <AppShell title="Processos de Importação">
-      <div className="p-gutter lg:px-stack-lg lg:pt-stack-lg">
+      <div className="p-gutter lg:px-stack-lg lg:pt-stack-lg flex justify-end">
+        <Link
+          href="/processos/novo"
+          className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:bg-secondary/90 transition-all shadow-sm flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          Novo Processo
+        </Link>
+      </div>
+      <div className="p-gutter lg:px-stack-lg">
         <form className="flex flex-col md:flex-row gap-4 items-end md:items-center" action="/processos">
           <div className="relative flex-1 w-full">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
