@@ -78,6 +78,21 @@ export const processes = pgTable("processes", {
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
   volumeM3: numeric("volume_m3", { precision: 10, scale: 2 }),
   notes: text("notes"),
+  // Rastreamento AIS (só relevante para modal marítimo). vesselImo/Mmsi são
+  // identificadores digitados manualmente — a API de rastreamento não
+  // descobre sozinha qual navio pertence a qual processo. Os campos
+  // vessel* seguintes são um CACHE da última consulta (API paga por
+  // chamada, nunca consultada automaticamente — só quando o usuário
+  // clicar "Atualizar Posição").
+  vesselName: text("vessel_name"),
+  vesselImo: text("vessel_imo"),
+  vesselMmsi: text("vessel_mmsi"),
+  vesselLat: numeric("vessel_lat", { precision: 9, scale: 6 }),
+  vesselLon: numeric("vessel_lon", { precision: 9, scale: 6 }),
+  vesselSpeedKnots: numeric("vessel_speed_knots", { precision: 5, scale: 2 }),
+  vesselHeading: integer("vessel_heading"),
+  vesselDestination: text("vessel_destination"),
+  vesselPositionUpdatedAt: timestamp("vessel_position_updated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

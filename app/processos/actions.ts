@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { STATUS_BY_STEP, WORKFLOW_STEPS, type ProcessStatus } from "@/lib/status";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
+import { fetchVesselPosition } from "@/lib/datalastic";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -184,4 +185,63 @@ export async function uploadProcessDocument(
   });
 
   revalidatePath(`/processos/${processId}`);
+}
+
+export async function updateVesselInfo(processId: string, formData: FormData) {
+  await db
+    .update(processes)
+    .set({
+      vesselName: optionalText(formData, "vesselName"),
+      vesselImo: optionalText(formData, "vesselImo"),
+      vesselMmsi: optionalText(formData, "vesselMmsi"),
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export type VesselActionState = { error: string } | null;
+
+// Assinatura (state, formData) para funcionar com useActionState no client
+// component — precisamos devolver mensagem de erro pra UI (navio não
+// encontrado, key inválida, etc) sem derrubar a página inteira, já que a
+// Datalastic é uma API externa que pode falhar por motivos fora do nosso
+// controle.
+export async function refreshVesselPosition(
+  processId: string,
+  _prevState: VesselActionState,
+  _formData: FormData,
+): Promise<VesselActionState> {
+  const [process] = await db
+    .select({ vesselImo: processes.vesselImo, vesselMmsi: processes.vesselMmsi })
+    .from(processes)
+    .where(eq(processes.id, processId));
+  if (!process) return { error: "Processo não encontrado." };
+
+  const result = await fetchVesselPosition({ imo: process.vesselImo, mmsi: process.vesselMmsi });
+  if (!result.ok) return { error: result.error };
+
+  await db
+    .update(processes)
+    .set({
+      vesselLat: String(result.data.lat),
+      vesselLon: String(result.data.lon),
+      vesselSpeedKnots: result.data.speedKnots !== null ? String(result.data.speedKnots) : null,
+      vesselHeading: result.data.heading,
+      vesselDestination: result.data.destination,
+      vesselPositionUpdatedAt: new Date(),
+      ...(result.data.name ? { vesselName: result.data.name } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  await db.insert(processEvents).values({
+    processId,
+    eventDate: new Date(),
+    eventType: "Posição do navio atualizada",
+  });
+
+  revalidatePath(`/processos/${processId}`);
+  return null;
 }

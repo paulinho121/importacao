@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import AddItemForm from "@/components/AddItemForm";
+import VesselTracker from "@/components/VesselTracker";
 import { db } from "@/db/client";
 import {
   processes,
@@ -60,6 +61,15 @@ export default async function ProcessDetailPage({
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,
       notes: processes.notes,
+      vesselName: processes.vesselName,
+      vesselImo: processes.vesselImo,
+      vesselMmsi: processes.vesselMmsi,
+      vesselLat: processes.vesselLat,
+      vesselLon: processes.vesselLon,
+      vesselSpeedKnots: processes.vesselSpeedKnots,
+      vesselHeading: processes.vesselHeading,
+      vesselDestination: processes.vesselDestination,
+      vesselPositionUpdatedAt: processes.vesselPositionUpdatedAt,
       supplierName: suppliers.name,
       supplierId: suppliers.id,
     })
@@ -299,6 +309,25 @@ export default async function ProcessDetailPage({
                 <AddItemForm action={boundAddItem} products={productRows} />
               </section>
             </div>
+
+            {(process.modal === "SEA_FCL" || process.modal === "SEA_LCL") && (
+              <VesselTracker
+                processId={id}
+                vessel={{
+                  vesselName: process.vesselName,
+                  vesselImo: process.vesselImo,
+                  vesselMmsi: process.vesselMmsi,
+                  vesselLat: process.vesselLat,
+                  vesselLon: process.vesselLon,
+                  vesselSpeedKnots: process.vesselSpeedKnots,
+                  vesselHeading: process.vesselHeading,
+                  vesselDestination: process.vesselDestination,
+                  vesselPositionUpdatedAt: process.vesselPositionUpdatedAt
+                    ? process.vesselPositionUpdatedAt.toISOString()
+                    : null,
+                }}
+              />
+            )}
 
             <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-stack-md">

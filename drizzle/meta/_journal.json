@@ -15,6 +15,13 @@
       "when": 1784991561168,
       "tag": "0001_watery_ultimatum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785013297328,
+      "tag": "0002_soft_gabe_jones",
+      "breakpoints": true
     }
   ]
 }
