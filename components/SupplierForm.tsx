@@ -28,8 +28,8 @@ export default function SupplierForm({
 }) {
   return (
     <form action={action} className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="sm:col-span-2">
           <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
             Nome do Fornecedor
           </label>
@@ -74,8 +74,8 @@ export default function SupplierForm({
       </div>
 
       <div className="pt-6 border-t border-outline-variant">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="sm:col-span-2">
             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
               Pessoa de Contato
             </label>

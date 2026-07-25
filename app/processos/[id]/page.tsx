@@ -172,7 +172,7 @@ export default async function ProcessDetailPage({
                 <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
                   Dados do Processo
                 </h3>
-                <dl className="grid grid-cols-2 gap-4 font-body-sm text-body-sm">
+                <dl className="grid grid-cols-1 gap-3 font-body-sm text-body-sm">
                   <Field label="Modal" value={process.modal ?? "—"} />
                   <Field label="Invoice" value={process.invoiceNumber ?? "—"} />
                   <Field label="ETD" value={formatDate(process.etd)} />
