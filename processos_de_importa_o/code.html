@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ImportFlow TMS - Active Processes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fbf9fa;
+        }
+        /* Custom scrollbar for data-heavy views */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4c6cd;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #74777d;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#fbf9fa",
+                        "on-tertiary-container": "#20a571",
+                        "on-secondary-fixed-variant": "#0040a2",
+                        "on-tertiary-fixed": "#002113",
+                        "on-primary-fixed-variant": "#38485a",
+                        "on-secondary": "#ffffff",
+                        "primary": "#041627",
+                        "secondary-fixed-dim": "#b2c5ff",
+                        "on-secondary-fixed": "#001848",
+                        "primary-fixed-dim": "#b7c8de",
+                        "on-surface-variant": "#44474c",
+                        "surface-dim": "#dbd9db",
+                        "background": "#fbf9fa",
+                        "on-primary-container": "#8192a7",
+                        "secondary-fixed": "#dae2ff",
+                        "on-primary-fixed": "#0b1d2d",
+                        "surface-container-high": "#e9e7e9",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e4e2e3",
+                        "on-background": "#1b1c1d",
+                        "tertiary": "#001a0e",
+                        "surface-container-highest": "#e4e2e3",
+                        "surface": "#fbf9fa",
+                        "primary-container": "#1a2b3c",
+                        "inverse-on-surface": "#f2f0f2",
+                        "outline-variant": "#c4c6cd",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#d2e4fb",
+                        "on-tertiary-fixed-variant": "#005235",
+                        "on-secondary-container": "#fefcff",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#4f6073",
+                        "inverse-primary": "#b7c8de",
+                        "tertiary-fixed-dim": "#65dca4",
+                        "surface-container": "#efedef",
+                        "error-container": "#ffdad6",
+                        "secondary": "#0453cd",
+                        "inverse-surface": "#303032",
+                        "tertiary-container": "#00311e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#82f9be",
+                        "secondary-container": "#356ee7",
+                        "on-surface": "#1b1c1d",
+                        "outline": "#74777d",
+                        "surface-container-low": "#f5f3f4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "container-padding": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "mono-data": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "mono-data": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface">
+<div class="flex min-h-screen">
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="flex flex-col gap-unit py-stack-lg px-gutter h-screen sticky top-0 bg-surface border-r border-outline-variant h-full w-[240px] hidden md:block">
+<div class="mb-stack-lg">
+<h1 class="font-headline-md text-headline-md text-primary font-bold">ImportFlow</h1>
+</div>
+<div class="flex items-center gap-3 mb-stack-lg p-3 bg-surface-container-low rounded-lg">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="font-body-md text-body-md font-bold text-primary">Logistics Manager</div>
+<div class="text-[10px] text-outline uppercase tracking-wider">Import ID: 8842</div>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer select-none font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-secondary-fixed-variant bg-secondary-fixed font-bold rounded-lg transition-all cursor-pointer select-none font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Import Processes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer select-none font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span>Supplier Directory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer select-none font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">settings_applications</span>
+<span>System Settings</span>
+</a>
+</nav>
+</aside>
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-gutter h-16 w-full sticky top-0 z-40 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary">Active Processes</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="hidden sm:block w-px h-6 bg-outline-variant"></div>
+<button class="hidden sm:flex items-center gap-2 text-primary font-bold">
+<span class="font-label-md text-label-md">GLOBAL OPS</span>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</header>
+<!-- Search & Filter Bar -->
+<div class="p-gutter lg:px-stack-lg lg:pt-stack-lg">
+<div class="flex flex-col md:flex-row gap-4 items-end md:items-center">
+<div class="relative flex-1 w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:border-secondary transition-colors font-body-md text-body-md" placeholder="Search SKU, supplier, or invoice number..." type="text"/>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+<button class="flex items-center gap-2 px-4 py-2 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            All
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-label-md text-label-md whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">flight</span>
+                            Aéreo
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-label-md text-label-md whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">directions_boat</span>
+                            Marítimo
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-label-md text-label-md whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+                            Rodoviário
+                        </button>
+</div>
+</div>
+</div>
+<!-- Content Area: Bento Grid Layout for Cards -->
+<div class="p-gutter lg:px-stack-lg pb-32">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest border border-outline-variant p-5 rounded-xl hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-mono-data text-mono-data text-outline mb-1">PRC-2024-0891</h3>
+<p class="font-headline-sm text-headline-sm text-primary">Shenzhen Electronics Ltd.</p>
+</div>
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                On Route
+                            </span>
+</div>
+<div class="grid grid-cols-2 gap-4 my-2">
+<div>
+<span class="font-label-md text-label-md text-outline block">ETD</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">12 Oct 2023</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-outline block">ETA</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">04 Nov 2023</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label-md text-label-md">
+<span class="text-outline">Customs Clearance</span>
+<span class="text-secondary font-bold">75%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-1000" style="width: 75%"></div>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline">flight</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Air Freight • SKU: ELEC-042</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest border border-outline-variant p-5 rounded-xl hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-on-tertiary-container"></div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-mono-data text-mono-data text-outline mb-1">PRC-2024-0902</h3>
+<p class="font-headline-sm text-headline-sm text-primary">Global Textiles Co.</p>
+</div>
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                Pending
+                            </span>
+</div>
+<div class="grid grid-cols-2 gap-4 my-2">
+<div>
+<span class="font-label-md text-label-md text-outline block">ETD</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">18 Oct 2023</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-outline block">ETA</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">22 Dec 2023</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label-md text-label-md">
+<span class="text-outline">Booking</span>
+<span class="text-outline font-bold">10%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-outline h-full rounded-full" style="width: 10%"></div>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline">directions_boat</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sea Freight • SKU: TEX-991</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest border border-outline-variant p-5 rounded-xl hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-mono-data text-mono-data text-outline mb-1">PRC-2024-0744</h3>
+<p class="font-headline-sm text-headline-sm text-primary">Nordic Logistics SA</p>
+</div>
+<span class="px-3 py-1 bg-error-container text-on-error-container rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                                Delayed
+                            </span>
+</div>
+<div class="grid grid-cols-2 gap-4 my-2">
+<div>
+<span class="font-label-md text-label-md text-outline block">ETD</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">05 Oct 2023</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-outline block">ETA</span>
+<span class="font-body-md text-body-md text-error font-bold">TBD</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label-md text-label-md">
+<span class="text-outline">Terminal Exit</span>
+<span class="text-error font-bold">40%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline">local_shipping</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Road Freight • SKU: MCH-102</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest border border-outline-variant p-5 rounded-xl hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-mono-data text-mono-data text-outline mb-1">PRC-2024-0915</h3>
+<p class="font-headline-sm text-headline-sm text-primary">Apex Industrial</p>
+</div>
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                Active
+                            </span>
+</div>
+<div class="grid grid-cols-2 gap-4 my-2">
+<div>
+<span class="font-label-md text-label-md text-outline block">ETD</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">24 Oct 2023</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-on-surface font-bold">02 Nov 2023</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center font-label-md text-label-md">
+<span class="text-outline">Logistics Prep</span>
+<span class="text-secondary font-bold">95%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 95%"></div>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline">flight</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Air Freight • SKU: IND-008</span>
+</div>
+</div>
+<!-- Image Placeholder Card (asymmetric visual break) -->
+<div class="lg:col-span-2 h-full min-h-[200px] rounded-xl overflow-hidden relative group">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" data-alt="A cinematic, high-angle shot of a sprawling modern container port at dusk, with industrial cranes and glowing orange lights reflecting on the water. The aesthetic is clean and corporate, featuring deep blues and professional grays. The mood is efficient and large-scale, symbolizing global trade and logistics precision." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAjSFMEXOBDohVxJt717xeG2mY0tX0okNF5hnY-rUsBj7YmTOJb50SAIpPmr0b7Pmkzj_dewACOryCanrdqKfHwjl8pKjoIaRhZf-hZYmTP1MurHxShEY-TnUHtyVvNUGvfxOeMOR6WpDP4XTzA9PhAIhIgbuV0UVqH_JSyttX4vFWXXjAYdG-GZUwTMU-MxVWfu7kwhND7M3xXgc6RLxppyM5TGIzaKwWEt7lwRNTM01CvFIy4BZg0aGk1WGb7qnXzZ9OUVWrSuzw')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6">
+<h4 class="font-headline-md text-headline-md text-white mb-2">Operational Analytics Dashboard</h4>
+<p class="font-body-md text-body-md text-white/80 max-w-md">Real-time throughput metrics and supply chain health indicators are now available in the analytics tab.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Visible on Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe md:hidden bg-surface border-t border-outline-variant shadow-sm z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Processes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md">Suppliers</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for filter buttons
+        const filterButtons = document.querySelectorAll('button[class*="border-outline-variant"]');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-secondary', 'text-on-secondary');
+                    b.classList.add('border-outline-variant', 'text-on-surface-variant');
+                });
+                btn.classList.add('bg-secondary', 'text-on-secondary');
+                btn.classList.remove('border-outline-variant', 'text-on-surface-variant');
+            });
+        });
+
+        // Search bar interaction
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('scale-[1.01]');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('scale-[1.01]');
+        });
+    </script>
+</body></html>

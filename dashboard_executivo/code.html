@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ImportFlow TMS Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fbf9fa;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c4c6cd;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#fbf9fa",
+                      "on-tertiary-container": "#20a571",
+                      "on-secondary-fixed-variant": "#0040a2",
+                      "on-tertiary-fixed": "#002113",
+                      "on-primary-fixed-variant": "#38485a",
+                      "on-secondary": "#ffffff",
+                      "primary": "#041627",
+                      "secondary-fixed-dim": "#b2c5ff",
+                      "on-secondary-fixed": "#001848",
+                      "primary-fixed-dim": "#b7c8de",
+                      "on-surface-variant": "#44474c",
+                      "surface-dim": "#dbd9db",
+                      "background": "#fbf9fa",
+                      "on-primary-container": "#8192a7",
+                      "secondary-fixed": "#dae2ff",
+                      "on-primary-fixed": "#0b1d2d",
+                      "surface-container-high": "#e9e7e9",
+                      "on-tertiary": "#ffffff",
+                      "surface-variant": "#e4e2e3",
+                      "on-background": "#1b1c1d",
+                      "tertiary": "#001a0e",
+                      "surface-container-highest": "#e4e2e3",
+                      "surface": "#fbf9fa",
+                      "primary-container": "#1a2b3c",
+                      "inverse-on-surface": "#f2f0f2",
+                      "outline-variant": "#c4c6cd",
+                      "error": "#ba1a1a",
+                      "primary-fixed": "#d2e4fb",
+                      "on-tertiary-fixed-variant": "#005235",
+                      "on-secondary-container": "#fefcff",
+                      "on-error": "#ffffff",
+                      "surface-tint": "#4f6073",
+                      "inverse-primary": "#b7c8de",
+                      "tertiary-fixed-dim": "#65dca4",
+                      "surface-container": "#efedef",
+                      "error-container": "#ffdad6",
+                      "secondary": "#0453cd",
+                      "inverse-surface": "#303032",
+                      "tertiary-container": "#00311e",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#82f9be",
+                      "secondary-container": "#356ee7",
+                      "on-surface": "#1b1c1d",
+                      "outline": "#74777d",
+                      "surface-container-low": "#f5f3f4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "stack-md": "16px",
+                      "stack-lg": "32px",
+                      "unit": "4px",
+                      "gutter": "16px",
+                      "stack-sm": "8px",
+                      "container-padding": "24px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "mono-data": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "mono-data": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-container border-b border-outline-variant dark:border-outline w-full top-0 sticky z-50">
+<div class="flex justify-between items-center px-gutter h-16 w-full max-w-[1440px] mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">menu</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">ImportFlow</h1>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+<nav class="flex gap-6">
+<a class="text-secondary dark:text-secondary-fixed font-bold font-label-md text-label-md" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high transition-colors px-2 py-1 rounded" href="#">Processes</a>
+<a class="text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high transition-colors px-2 py-1 rounded" href="#">Suppliers</a>
+<a class="text-on-surface-variant dark:text-outline font-label-md text-label-md hover:bg-surface-container-high transition-colors px-2 py-1 rounded" href="#">Settings</a>
+</nav>
+<div class="h-6 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">search</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer relative">
+                        notifications
+                        <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-label-md">LM</div>
+</div>
+</div>
+<div class="md:hidden flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-gutter py-stack-lg pb-32">
+<div class="flex flex-col gap-stack-lg">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-display-lg text-primary">Executive Dashboard</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Global Logistics Operations Overview — Oct 24, 2023</p>
+</div>
+<div class="flex gap-stack-sm">
+<button class="flex items-center gap-2 border border-outline px-4 py-2 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        Last 30 Days
+                    </button>
+<button class="flex items-center gap-2 bg-secondary text-on-secondary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1: Active Processes -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl shadow-sm hover:border-secondary transition-colors group cursor-default">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-fixed rounded-lg text-primary">
+<span class="material-symbols-outlined">sync</span>
+</div>
+<span class="text-on-tertiary-container font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                            +12%
+                        </span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Processos Ativos</h3>
+<div class="font-display-lg text-display-lg text-primary mt-1">42</div>
+<div class="w-full bg-surface-container-high h-1.5 mt-4 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-1000" style="width: 65%"></div>
+</div>
+</div>
+<!-- KPI 2: In Transit -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl shadow-sm hover:border-secondary transition-colors group cursor-default">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-fixed rounded-lg text-secondary">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<span class="text-on-surface-variant font-label-md text-label-md flex items-center gap-1">
+                            Stable
+                        </span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Em Trânsito</h3>
+<div class="font-display-lg text-display-lg text-primary mt-1">18</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-4">8 arriving in the next 48h</p>
+</div>
+<!-- KPI 3: Total Imported -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl shadow-sm hover:border-secondary transition-colors group cursor-default">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-tertiary-fixed rounded-lg text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-on-tertiary-container font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                            +5.4%
+                        </span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Valor Total Importado</h3>
+<div class="font-display-lg text-display-lg text-primary mt-1">$2.4M</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-4">YTD: $18.2M total volume</p>
+</div>
+<!-- KPI 4: Delayed Processes (Highlighted) -->
+<div class="bg-error-container/20 border border-error p-6 rounded-xl shadow-sm hover:bg-error-container/30 transition-colors group cursor-default relative overflow-hidden">
+<div class="absolute top-0 right-0 p-1 bg-error text-on-error font-label-md text-[10px] rounded-bl-lg">CRITICAL</div>
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-error-container rounded-lg text-error">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<span class="text-error font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                            +2
+                        </span>
+</div>
+<h3 class="font-label-md text-label-md text-error uppercase tracking-wider font-bold">Processos Atrasados</h3>
+<div class="font-display-lg text-display-lg text-error mt-1">07</div>
+<button class="mt-4 font-label-md text-label-md text-error flex items-center gap-1 underline underline-offset-4 group-hover:gap-2 transition-all">
+                        View Details <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Chart Widget -->
+<div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden h-full">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-primary">Import Volume Trends</h3>
+<div class="flex gap-2">
+<span class="flex items-center gap-1 text-label-md text-on-surface-variant">
+<span class="w-3 h-3 rounded-full bg-secondary"></span> Air
+                            </span>
+<span class="flex items-center gap-1 text-label-md text-on-surface-variant">
+<span class="w-3 h-3 rounded-full bg-primary-container"></span> Sea
+                            </span>
+</div>
+</div>
+<div class="p-8 h-[360px] relative flex items-end justify-between gap-4">
+<!-- Simplified Visual Chart using Divs -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 40%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 60%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">MAY</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 35%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 75%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">JUN</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 50%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 45%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">JUL</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 65%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 85%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">AUG</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 55%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 90%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">SEP</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full flex gap-1 items-end justify-center h-full">
+<div class="bg-primary-container w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 70%"></div>
+<div class="bg-secondary w-4 rounded-t-sm transition-all group-hover:scale-y-110 origin-bottom" style="height: 80%"></div>
+</div>
+<span class="mt-4 font-body-sm text-body-sm text-on-surface-variant">OCT</span>
+</div>
+<!-- Chart Grid Lines -->
+<div class="absolute inset-x-8 bottom-[104px] border-b border-outline-variant/30 w-[calc(100%-64px)]"></div>
+<div class="absolute inset-x-8 bottom-[176px] border-b border-outline-variant/30 w-[calc(100%-64px)]"></div>
+<div class="absolute inset-x-8 bottom-[248px] border-b border-outline-variant/30 w-[calc(100%-64px)]"></div>
+</div>
+</div>
+<!-- Recent Exceptions / Activity Side Panel -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-sm text-headline-sm text-primary">Priority Alerts</h3>
+<span class="font-label-md text-label-md bg-error-container text-on-error-container px-2 py-0.5 rounded">Action Required</span>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Alert Item -->
+<div class="flex gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<div class="w-10 h-10 shrink-0 bg-error-container flex items-center justify-center text-error rounded-full">
+<span class="material-symbols-outlined text-[20px]">anchor</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-primary">Port Congestion: Shanghai</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">4 shipments delayed by approx 72h due to weather alerts.</p>
+<p class="font-body-sm text-body-sm text-secondary font-medium mt-2 cursor-pointer">Re-route options</p>
+</div>
+</div>
+<!-- Alert Item -->
+<div class="flex gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<div class="w-10 h-10 shrink-0 bg-secondary-fixed flex items-center justify-center text-secondary rounded-full">
+<span class="material-symbols-outlined text-[20px]">description</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-primary">Missing Customs Doc</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Invoice #IF-9928 required for process release.</p>
+<p class="font-body-sm text-body-sm text-secondary font-medium mt-2 cursor-pointer">Notify Supplier</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-outline rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container transition-all">
+                            View All Alerts (14)
+                        </button>
+</div>
+<!-- Supply Map Mini-Teaser -->
+<div class="bg-primary-container text-on-primary rounded-xl overflow-hidden shadow-sm relative h-48 group cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay group-hover:scale-110 transition-transform duration-700" data-alt="A stylized global logistics map with illuminated supply chain paths and dots representing major world ports. The aesthetic is professional, corporate, and digital, featuring dark blues and cyan accents. The scene is clean with data-driven overlays including shipping routes and coordinates." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD5pJFYnwtLAuCvkt18U_DnI678vMbQfPbiacdNoq6QlkwZhCAZt8gXJNlPsqSsUOwMkiK9xSSl_GCMLxGZom4nZzcP-2Wnl5Umyby-QO_ba_Tf5OVIsQvoo1aw2PlcN3FlM7lIdkEb706q6RoLTwMZZ9-Hfkt70QqG_d8dvMqO7az7xTwLpWcTmVd9Wv-U7t7wY7ZAVl0F3MY7lMY3VetKDexTFfVf9_NOYfBMZ-eh-XrSPN9n_aoO1rrW6PHKsgUVxlTakfFONKY')">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+<div class="relative h-full p-6 flex flex-col justify-end">
+<h3 class="font-headline-sm text-headline-sm text-white">Live Operations Map</h3>
+<p class="font-body-sm text-body-sm text-on-primary-container">Track real-time ocean and air freight</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Processes Table Section -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
+<h3 class="font-headline-sm text-headline-sm text-primary">Active Import Processes</h3>
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="pl-10 pr-4 py-1.5 border border-outline-variant rounded-lg text-body-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none w-64 bg-surface" placeholder="Search by HAWB, Supplier..." type="text"/>
+</div>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low font-label-md text-label-md text-on-surface-variant">
+<tr>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">Reference ID</th>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">Supplier</th>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">Origin / Dest</th>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">ETA</th>
+<th class="px-6 py-4 font-semibold uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-mono-data text-mono-data font-bold">#IMP-2023-8842</td>
+<td class="px-6 py-4 font-body-md text-body-md">Global Tech Corp</td>
+<td class="px-6 py-4 font-body-md text-body-md">SHA → GRU</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-[12px] font-bold">IN TRANSIT</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">Oct 28, 2023</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-mono-data text-mono-data font-bold">#IMP-2023-8845</td>
+<td class="px-6 py-4 font-body-md text-body-md">Precision Mfg Ltd</td>
+<td class="px-6 py-4 font-body-md text-body-md">HAM → VCP</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-error-container text-error rounded-full text-[12px] font-bold">DELAYED</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">Nov 02, 2023</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-mono-data text-mono-data font-bold">#IMP-2023-8850</td>
+<td class="px-6 py-4 font-body-md text-body-md">Nordic Systems</td>
+<td class="px-6 py-4 font-body-md text-body-md">OSL → GIG</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full text-[12px] font-bold">CUSTOMS CLEARANCE</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">Oct 25, 2023</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary">more_vert</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline shadow-sm md:hidden z-[60]">
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed active:scale-95 transition-transform">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Processes</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed active:scale-95 transition-transform">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md">Suppliers</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed active:scale-95 transition-transform">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</button>
+</nav>
+<!-- Contextual FAB (Only on relevant screens) -->
+<button class="fixed bottom-24 right-6 md:bottom-8 md:right-8 w-14 h-14 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-40 group">
+<span class="material-symbols-outlined">add</span>
+<span class="absolute right-full mr-4 bg-primary text-white px-3 py-1 rounded text-label-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">New Import</span>
+</button>
+<script>
+        // Simple Micro-interaction for Dashboard Refresh Simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('ImportFlow TMS Dashboard Initialized');
+            
+            // Add a subtle animation to bars on load
+            const bars = document.querySelectorAll('.origin-bottom');
+            bars.forEach((bar, index) => {
+                const finalHeight = bar.style.height;
+                bar.style.height = '0';
+                setTimeout(() => {
+                    bar.style.transition = 'height 1s cubic-bezier(0.16, 1, 0.3, 1)';
+                    bar.style.height = finalHeight;
+                }, 100 + (index * 100));
+            });
+        });
+    </script>
+</body></html>

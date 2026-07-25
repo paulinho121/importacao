@@ -1,0 +1,1844 @@
+[
+  {
+    "processNumber": "PRC-2026-001",
+    "blockStartRow": 5,
+    "estoqueDate": "2026-07-02",
+    "fornecedorRaw": "ASTERA",
+    "processoRaw": "IMP 28/26",
+    "currentStep": 7,
+    "modalRaw": "AIR",
+    "modal": "AIR",
+    "invoiceRaw": "DII8945",
+    "etd": "2026-07-01",
+    "etaEstimated": "2026-07-12",
+    "agent": "NSL",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "CONCLUIDO",
+    "notes": "Reserva/Obs: Em desembaraço",
+    "items": [
+      {
+        "sku": null,
+        "description": "KIT 8 TITAN TUBE",
+        "quantity": 7.0,
+        "reservedTo": "1 Joao Sousa / 1 Felipe"
+      },
+      {
+        "sku": null,
+        "description": "KIT 8 SOLABULB",
+        "quantity": 2.0,
+        "reservedTo": "1 Vini"
+      },
+      {
+        "sku": null,
+        "description": "KIT 8 HELIOS TUBE",
+        "quantity": 2.0,
+        "reservedTo": "1 Joao Sousa / 1 John"
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-002",
+    "blockStartRow": 11,
+    "estoqueDate": "2026-07-02",
+    "fornecedorRaw": "APUTURE (SPARE PARTS)",
+    "processoRaw": "IMP 34/26",
+    "currentStep": 7,
+    "modalRaw": "AIR",
+    "modal": "AIR",
+    "invoiceRaw": "SOHK276369",
+    "etd": "2026-07-01",
+    "etaEstimated": "2026-07-12",
+    "agent": "NSL",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "CONCLUIDO",
+    "notes": "Reserva/Obs: Em desembaraço",
+    "items": [
+      {
+        "sku": "SE0000001G",
+        "description": "Power Adapter Assembly(LS 600d Pro",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "801100000003",
+        "description": "Power Board",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE00000005",
+        "description": "Power Adapter Assembly(LS C300d II Control",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "HD0560CLA683",
+        "description": "HD0560CLA683",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "7226A0010000",
+        "description": "Spoke (Rod)",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "HD0229PFPFE2",
+        "description": "Crab Clamp",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "515500080000",
+        "description": "Diffusion",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "5220A0020000",
+        "description": "Diffusion",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000001R",
+        "description": "Back Shell Assembly(LS 600d Pro Lamp head)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "EE0123BATARC",
+        "description": "Battery Group",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "EE0123BATCR1",
+        "description": "Battery Group",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000003K",
+        "description": "Cooling Fan Assembly (LS 600c Pro Control",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "612900350000",
+        "description": "LS 300X/LS300D II*",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE25030715",
+        "description": "Power Adapter Assembly (XT52 Control box)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE25030709",
+        "description": "Upper Cover Assembly (XT52 Control box)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "813900000001",
+        "description": "Softbox",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "3101461200M0",
+        "description": "Lithium Battery",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE01000003",
+        "description": "Front Cover Assembly (CS15 Control box)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "714200080000",
+        "description": "Rear Cover",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "614200010000",
+        "description": "Front frame",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "817900000013",
+        "description": "Carrying Bag",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "OLED Screen",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "822900000002",
+        "description": "LED Board PCBA",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0100000V",
+        "description": "Main board Assembly (CS15 Lamp head)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE01000013",
+        "description": "Front shell Assembly (XT26 Control box)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000003U",
+        "description": "RGB Driver Board Assembly (LS 600c Pro Lamp Head)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000003V",
+        "description": "WW (CCT) Driver Board Assembly (LS 600c",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000003T",
+        "description": "Main Board Assembly (LS 600c Pro Lamp Head)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000004L",
+        "description": "Main Board Assembly (LS 600c Pro II Lamp Head)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000004M",
+        "description": "RGB Driver Board Assembly (LS 600c Pro II Lamp Head)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000004N",
+        "description": "WW (CCT) Driver Board Assembly (LS 600c Lamp Head)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0000004S",
+        "description": "COB Light Source Assembly (LS 600c Pro II)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "315P30804000",
+        "description": "OLED Display Module P30804",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "801100000002",
+        "description": "MR-011-L3 Main Board",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "801000000004",
+        "description": "MR-010-L3 Power Board PCBA",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "801000000002",
+        "description": "MR-010-L3 Main Board",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "SE0500000H",
+        "description": "LED Panel Assembly (INFINIBAR PB6)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "HD0590CLA38C",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "T-Handle / Baby Pin Mounting Screw",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT Air Pump Mini",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Driver Board",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure K-Mount w/ TVMP Spigot Curved Arm",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Rear cover Assembly (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Top cover Assembly (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Fan cover Assembly (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Front Cover Assembly (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Heat sink Assembly (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Left side cover (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Right side cover (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Driver board heat sink Assembly (Storm\n 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Driver Board Shielding Cover Assembly\n (Storm 1200x Lamp Head)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Battery station For amaran Tube",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure LP-28 to Type-B 15A Power Input\n AC Cable - 6m (US)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "LED Board PCBA",
+        "quantity": 1.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-003",
+    "blockStartRow": 68,
+    "estoqueDate": "2026-06-30",
+    "fornecedorRaw": "SWIT",
+    "processoRaw": "IMP 32 / 26      NSLIM2238/26",
+    "currentStep": 3,
+    "modalRaw": "SEA",
+    "modal": "SEA_FCL",
+    "invoiceRaw": "26SWIT306",
+    "etd": "2026-07-26",
+    "etaEstimated": "2026-08-28",
+    "agent": "NSL",
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": null,
+        "description": "HB-A290B",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "LB-SF65C",
+        "quantity": 16.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "OMNI-99S",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PB-S146S",
+        "quantity": 12.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CIMO-200S",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PB-M146S",
+        "quantity": 12.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MATRIX-B8",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MATRIX-S8",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PC-P461S",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PC-P461B",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CREW-V",
+        "quantity": 2.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-004",
+    "blockStartRow": 82,
+    "estoqueDate": "2026-06-30",
+    "fornecedorRaw": "SWIT",
+    "processoRaw": "MCI.FIRST04-26        IA0702-26",
+    "currentStep": 3,
+    "modalRaw": "AIR",
+    "modal": "AIR",
+    "invoiceRaw": "26SWIT376",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": "ROCKET",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": "ETD (planilha): Frete fechado 21/07",
+    "items": [
+      {
+        "sku": null,
+        "description": "HB-A290B",
+        "quantity": 12.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "OMNI 99S",
+        "quantity": 46.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CIMO 160S",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "S-8972",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PC P461B",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "KA-S30S",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "KA-S30B",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "HB-A290B",
+        "quantity": 6.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-005",
+    "blockStartRow": 93,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "APUTURE + DEARKOL",
+    "processoRaw": "MCI.FIRST06-26",
+    "currentStep": 3,
+    "modalRaw": "SEA FCL 20\"",
+    "modal": "SEA_FCL",
+    "invoiceRaw": "SOHK284300",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": null,
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": "ETD (planilha): 69CTNS, 1036KG, 8.9CBM",
+    "items": [
+      {
+        "sku": "AP20334A20",
+        "description": "STORM 1200X",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "5220A0020000",
+        "description": "AP-220 灯笼布 格子本白布\n (AP-220 White Diffusion Cloth)",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "824910000010",
+        "description": "PR-249-L1 灯体驱动板PCBA\n(PR-249-L1 Lamp Head Driver PCBA)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AP0700017R",
+        "description": "STORM 700X",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AA0706039T",
+        "description": "CF10 Fresnel e Barndoor kit",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AG07060003",
+        "description": "STORM XT52",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AP40012A12",
+        "description": "Amaran PT4c",
+        "quantity": 12.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "APB0241A39",
+        "description": "45º degree grid for amaran t4c/PT4c",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "APL0241A14",
+        "description": "Amaran T4c(US)",
+        "quantity": 8.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "APA0229A11",
+        "description": "MC Pro 8Light Kit",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MP00000197",
+        "description": "Amaran Ray 660C",
+        "quantity": 25.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MA0006014L",
+        "description": "Amaran Light Dome 60",
+        "quantity": 24.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MA0006014M",
+        "description": "Amaran Light Dome 90",
+        "quantity": 24.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "APJ0155A3E",
+        "description": "Lantern - AP50155A3E",
+        "quantity": 24.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MA0006014U",
+        "description": "Amaran Lantern 65",
+        "quantity": 40.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "APA0220A30",
+        "description": "Aputure Lantern 90",
+        "quantity": 18.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT 2x4 V-Mount Kit (US)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT 4x4 V-Mount Kit (US)",
+        "quantity": 2.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-006",
+    "blockStartRow": 114,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "SECCED",
+    "processoRaw": "MCI.FIRST05-26           IM2968-26",
+    "currentStep": 5,
+    "modalRaw": "SEA LCL",
+    "modal": "SEA_LCL",
+    "invoiceRaw": "SC260615-1B",
+    "etd": "2026-07-25",
+    "etaEstimated": "2026-09-15",
+    "agent": "ROCKET",
+    "destination": "SANTA CATARINA",
+    "weightKg": "116.72",
+    "volumeM3": null,
+    "status": "EM_TRANSITO",
+    "notes": "Status (planilha): 0,65m3",
+    "items": [
+      {
+        "sku": null,
+        "description": "Reach Plus 3 (CF)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Reach Plus 2 (CF)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Reach Plus 1 (CF)",
+        "quantity": 6.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-007",
+    "blockStartRow": 120,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "SECCED",
+    "processoRaw": "MCI.FIRST11-26",
+    "currentStep": 5,
+    "modalRaw": "COURIER",
+    "modal": "COURIER",
+    "invoiceRaw": "No:SE260611-1B / IA0673-26",
+    "etd": null,
+    "etaEstimated": "2026-06-20",
+    "agent": "FEDEX",
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "ATRASADO",
+    "notes": "ETD (planilha): tracking: 874073361926 | Status (planilha): Coleta da carga confirmada em 20/07/2026",
+    "items": [
+      {
+        "sku": null,
+        "description": "Reach Plus 2 (CF)",
+        "quantity": 4.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-008",
+    "blockStartRow": 124,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "APUTURE + DEARKOL",
+    "processoRaw": "IMP 21/26\n  IM2797-26",
+    "currentStep": 5,
+    "modalRaw": "SEA FCL",
+    "modal": "SEA_FCL",
+    "invoiceRaw": "MK2026528    SOHK264032",
+    "etd": "2026-07-17",
+    "etaEstimated": "2026-08-19",
+    "agent": "ROCKET",
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "EM_TRANSITO",
+    "notes": "Reserva/Obs: Ajuste INV, PL e HAWB (11/07/26) enviei email 20:26",
+    "items": [
+      {
+        "sku": null,
+        "description": "MFD-4000",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DK-019 with peumatic wheels",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DL-1123",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFC-3950D",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MB-24",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MZ-3000S",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "H-2816",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M13-2821",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-102",
+        "quantity": 22.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MB-39",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "X-30''",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M13-2501",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CUP-01",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Tennis",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "T-shirt",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Earpod pouch",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Catalog",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Catalog",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Spare parts",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Baby pin set",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DL-1023",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-102",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MZ-3000S",
+        "quantity": 24.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DMZ-3800P",
+        "quantity": 89.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "L-2516A",
+        "quantity": 7.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DL-1123",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-1",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "X-30\"",
+        "quantity": 16.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFD-1700",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFD-3000",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFD-4000",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFD-6000",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MYC-1020",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MYB-1017B",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MYC-1011",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M11-034",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M11-033",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFA-1700F",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MFA-1700F",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "H-005A",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "H-12100A",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "TUTU-3528S",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M13-2501",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M11-036B",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DK-018",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DK-018",
+        "quantity": 7.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DK-019",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MYC-1035",
+        "quantity": 14.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DMF-3400F",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M-6",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-1-20''",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DMF-3400F",
+        "quantity": 52.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DMZ-3800P",
+        "quantity": 55.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "M-6",
+        "quantity": 14.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "MYB-1017B",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-1",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DC-1-20''",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "WH-9325L",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "WH-9325R",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "G-3",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Halo 200x (US)",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Halo 300x (US)",
+        "quantity": 60.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "STORM 1000c（US）",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 2x1 Softbox",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 2x1 Dome Diffuser (Heavy Frost)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CF12 Fresnel",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "CF12 Barn Doors",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT & Softbox Pack 8x8 (US)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT Control Box 1600W Pack (US)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT Control Grid 8x8",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Amaran F21x(V-mount)(US)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Motorized CF16 Fresnel Flight Case Kit",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 2x1 Flat Diffuser",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Motorized F14 Fresnel Flight Case Kit",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Desk Stand-Silver",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Quick Dome 60",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Go-Charcoal (Global)",
+        "quantity": 80.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Go-White (Global)",
+        "quantity": 80.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Go-Blue (Global)",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Quick Dome 90",
+        "quantity": 50.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Quick Dome 40",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Lantern 90",
+        "quantity": 40.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Amaran F22x(V-mount)(US)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Lantern For F21",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Storm 1000c/1200x Reflector Kit",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 9° 2x1 (No Case) (US)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Verge-White(US)",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Ray 360c (US)",
+        "quantity": 16.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Halo 600x (US)",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Ace E-Lock Adapter (1/4” & 3/8” Screw Compatible)",
+        "quantity": 30.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Lantern 65",
+        "quantity": 40.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Amaran F22c(V-mount)(US)",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 1x1 Softbox",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 1x1 Dome Diffuser (Heavy Frost)",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 2x1 Fabric Control Grid",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Ray 360c (US)",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "amaran Light Dome 90",
+        "quantity": 40.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Lantern For F22",
+        "quantity": 14.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "NOVA 1x1 Fabric Control Grid",
+        "quantity": 6.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-009",
+    "blockStartRow": 228,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "APUTURE",
+    "processoRaw": "MCI.FIRST07-26  IA0672-26",
+    "currentStep": 5,
+    "modalRaw": "AIR",
+    "modal": "AIR",
+    "invoiceRaw": "SOHK264032",
+    "etd": "2026-07-11",
+    "etaEstimated": "2026-07-16",
+    "agent": "ROCKET",
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "ATRASADO",
+    "notes": "Reserva/Obs: DTA PARA ITAJAI",
+    "items": [
+      {
+        "sku": "MP00000191",
+        "description": "Amaran Ray 360C",
+        "quantity": 20.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-010",
+    "blockStartRow": 233,
+    "estoqueDate": "2026-07-01",
+    "fornecedorRaw": "APUTURE",
+    "processoRaw": "MCI.FIRST08-26 / IM3012-26",
+    "currentStep": 3,
+    "modalRaw": "SEA LCL                 (nao coube no FCL)",
+    "modal": "SEA_FCL",
+    "invoiceRaw": null,
+    "etd": null,
+    "etaEstimated": null,
+    "agent": "ROCKET",
+    "destination": "SANTA CATARINA",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": "AA0406031Y",
+        "description": "NOVA 2x1 Softbox",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AA0706003E",
+        "description": "CF12 Barn Doors",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AA07060384",
+        "description": "Quick Dome 40",
+        "quantity": 8.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AA00060000",
+        "description": "STORM 1200x/1000c Reflector Kit",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MS01060115",
+        "description": "amaran Desk Stand-silver",
+        "quantity": 6.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MP00000191",
+        "description": "amaran Ray 360c (US)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "AP0400031F",
+        "description": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": "MP0000043X",
+        "description": "amaran Halo 600x (US)",
+        "quantity": 16.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-011",
+    "blockStartRow": 244,
+    "estoqueDate": null,
+    "fornecedorRaw": "APUTURE",
+    "processoRaw": "MCI.FIRST09/26 I",
+    "currentStep": 3,
+    "modalRaw": "AIR DDP",
+    "modal": "AIR",
+    "invoiceRaw": "SOAP260622505820",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": "APUTURE",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": null,
+        "description": "Battery for PT2C",
+        "quantity": 2.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-012",
+    "blockStartRow": 248,
+    "estoqueDate": null,
+    "fornecedorRaw": "APUTURE",
+    "processoRaw": "MCI.FIRST09/26 II",
+    "currentStep": 3,
+    "modalRaw": "AIR DDP",
+    "modal": "AIR",
+    "invoiceRaw": "SOAP260622505822/SOAP260622505821",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": "APUTURE",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": null,
+        "description": "Cooling fan Assembly (LS 1200d Pro control box）",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Front Shell Assembly (Storm 1200x Control Box）",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "LED Panel Assembly (INFINIBAR PB6)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Maini board Assembly (INFINIBAR PB6)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Driver Board Assembly For Storm 80c",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Upper Cover Assembly (XT52 Control box)",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Aputure INFINIMAT Air Pump Mini",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "8-Pin Weatherproof Head Cable (7.5m)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Sidus Four 18W（9V) Power Adapter",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "valve & lock",
+        "quantity": 20.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-013",
+    "blockStartRow": 261,
+    "estoqueDate": null,
+    "fornecedorRaw": "APUTURE",
+    "processoRaw": "MCI.FIRST09/26 III",
+    "currentStep": 3,
+    "modalRaw": "AIR DDP",
+    "modal": "AIR",
+    "invoiceRaw": "SOAP260624506181",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": "APUTURE",
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": null,
+        "description": "50ml silicion grease for COB(XT52/XT26);",
+        "quantity": null,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "coolant(XT52)",
+        "quantity": null,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-014",
+    "blockStartRow": 266,
+    "estoqueDate": null,
+    "fornecedorRaw": "DZOFILM",
+    "processoRaw": "MCI.FIRST10/26",
+    "currentStep": 3,
+    "modalRaw": "COURIER",
+    "modal": "COURIER",
+    "invoiceRaw": "DZA6YYS26040903    DZA6XY26062401    DZA6XY26062404",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": null,
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": "ETD (planilha): Frete por conta do exportador",
+    "items": [
+      {
+        "sku": null,
+        "description": "Arcana 32/45/75mm T2.1 Full-frame 1.5X Hybrid Anamorphic Prime 3-Lens Set (PL mount,meter)",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Arcana 45mm T2.1 Full-frame 1.5X Hybrid Anamorphic Prime Lens (PL mount,meter)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Arcana 75mm T2.1 Full-frame 1.5X Hybrid Anamorphic Prime Lens (PL mount,meter)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Octopus Adapter for PL lens to E mount camera (Black)",
+        "quantity": 4.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Octopus Adapter PL lens to RF mount camera (Black)",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DZOFILM Arles Prime 18/25/35/50/75/100mm(PL_Black_Case_6pcs_Metric)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Vespid FF 50mm T2.1 PL mount",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DZOFILM_Mount kit_EF mount_Black_A Set",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DZOFILM Catta Ace 70-135mm(PL_Black_Carton_1pcs)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DZOFILM Pictor Zoom 14-30mm(PL_Black_Carton_1pcs)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "DZOFILM Pictor Zoom 50-125mm(PL_Black_Carton_1pcs)",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Dzofilm culture T-shirts",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "Dzofilm culture bags",
+        "quantity": 20.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-015",
+    "blockStartRow": 282,
+    "estoqueDate": null,
+    "fornecedorRaw": "ASTERA - Sparte parts",
+    "processoRaw": "MCI.FIRST12/26",
+    "currentStep": 3,
+    "modalRaw": "AIR DG",
+    "modal": "AIR",
+    "invoiceRaw": "DISO7674",
+    "etd": null,
+    "etaEstimated": null,
+    "agent": null,
+    "destination": "SAO PAULO",
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": "ETD (planilha): Doc DG + MSDS solicitado via email 14/07/26",
+    "items": [
+      {
+        "sku": null,
+        "description": "FP1-HOU-TUBE",
+        "quantity": 20.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP2-HOU-TUBE",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP1-BAT",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP2-BAT",
+        "quantity": 10.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "ART7-WIFI-HOU-TC",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "ART7-WIFI-CB-HOU",
+        "quantity": 5.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP1-CB",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP2-CB",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "AX1-BAT-MKII",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "AX1-BAT-CMP-MKII",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PB15-HOU-BC",
+        "quantity": 3.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PB15-BAT",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "PB15-CB",
+        "quantity": 2.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP6-BC",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP6-BAT",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP6-MB",
+        "quantity": 1.0,
+        "reservedTo": null
+      },
+      {
+        "sku": null,
+        "description": "FP7-DM",
+        "quantity": 10.0,
+        "reservedTo": null
+      }
+    ]
+  },
+  {
+    "processNumber": "PRC-2026-016",
+    "blockStartRow": 311,
+    "estoqueDate": null,
+    "fornecedorRaw": "7Artisans",
+    "processoRaw": "IMP 24/26",
+    "currentStep": 3,
+    "modalRaw": null,
+    "modal": null,
+    "invoiceRaw": null,
+    "etd": null,
+    "etaEstimated": null,
+    "agent": null,
+    "destination": null,
+    "weightKg": null,
+    "volumeM3": null,
+    "status": "AGUARDANDO_EMBARQUE",
+    "notes": null,
+    "items": [
+      {
+        "sku": null,
+        "description": "keychains and brochures",
+        "quantity": null,
+        "reservedTo": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Logistics Core - Process Detail #BR-HK-99283</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c4c6cd;
+            border-radius: 10px;
+        }
+        .step-active {
+            box-shadow: 0 0 0 4px rgba(4, 83, 205, 0.1);
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#0453cd",
+                        "surface": "#fbf9fa",
+                        "primary-container": "#1a2b3c",
+                        "surface-dim": "#dbd9db",
+                        "on-tertiary-container": "#20a571",
+                        "secondary-fixed-dim": "#b2c5ff",
+                        "on-surface": "#1b1c1d",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary-fixed-variant": "#38485a",
+                        "primary-fixed-dim": "#b7c8de",
+                        "inverse-surface": "#303032",
+                        "surface-container": "#efedef",
+                        "on-secondary-fixed-variant": "#0040a2",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#8192a7",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c4c6cd",
+                        "background": "#fbf9fa",
+                        "tertiary-container": "#00311e",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-background": "#1b1c1d",
+                        "surface-container-high": "#e9e7e9",
+                        "on-tertiary-fixed": "#002113",
+                        "on-surface-variant": "#44474c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#005235",
+                        "primary-fixed": "#d2e4fb",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fbf9fa",
+                        "tertiary": "#001a0e",
+                        "on-primary-fixed": "#0b1d2d",
+                        "on-secondary-fixed": "#001848",
+                        "tertiary-fixed": "#82f9be",
+                        "secondary-container": "#356ee7",
+                        "surface-container-highest": "#e4e2e3",
+                        "outline": "#74777d",
+                        "surface-tint": "#4f6073",
+                        "secondary-fixed": "#dae2ff",
+                        "surface-variant": "#e4e2e3",
+                        "surface-container-low": "#f5f3f4",
+                        "primary": "#041627",
+                        "tertiary-fixed-dim": "#65dca4",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#b7c8de"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "mono-data": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "mono-data": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden">
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-full w-60 border-r border-outline-variant bg-surface flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-2">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Logistics Core</h1>
+<p class="text-body-sm text-on-surface-variant">Import Management</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-secondary font-bold bg-secondary-container/10 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-body-md">Shipments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md">Documents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1 border-t border-outline-variant pt-4">
+<button class="w-full flex items-center justify-center gap-2 bg-secondary text-white py-2 mb-4 font-label-md">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>New Shipment</span>
+</button>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-60 h-16 bg-surface-bright border-b border-outline-variant flex justify-between items-center px-container-padding z-40">
+<div class="flex items-center gap-4 w-1/3">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container border-none focus:ring-2 focus:ring-secondary pl-10 pr-4 py-1.5 text-body-md" placeholder="Search shipments, containers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container rounded-full transition-all active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-all active:opacity-80">
+<span class="material-symbols-outlined">apps</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="font-label-md text-on-surface">Alex Thompson</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Logistics Manager</p>
+</div>
+<img class="w-8 h-8 rounded-full border border-outline" data-alt="Professional headshot of a corporate logistics manager in a modern office environment, high-end professional photography style, soft natural lighting, neutral colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf99pZOoUJgL0mLSqCpJOIXI8D4ESTnCT6kbDdJ8Upr8dzxR0LelMq-v2x4dvEX4l3JC5dW0zWJMTNkR7Psd3MBI9-snY_WkRUGK5OnxbLYyUjE2Jf0qYUxBMrx50TekkYpc1ri468z3KNyFq3-SGz8Uz40lqk_vZiyvMe1gwcF4r1ld13WD8BVImXaU_VNRZi-27gF4sHuzkuN-RDgacscKXzUUdZqbq1ZEpmM2DPYoVnSjjQLefjDGGtac8-fjxRXZQ36oIXuxk"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-60 mt-16 p-container-padding h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar bg-surface-container-low">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<nav class="flex items-center gap-2 text-body-sm text-on-surface-variant mb-2">
+<span>Shipments</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-secondary font-medium">#BR-HK-99283</span>
+</nav>
+<div class="flex items-center gap-4">
+<h2 class="font-display-lg text-display-lg text-primary">#BR-HK-99283</h2>
+<span class="bg-secondary-container/20 text-secondary border border-secondary px-3 py-0.5 font-label-md flex items-center gap-1.5">
+<span class="w-2 h-2 bg-secondary rounded-full animate-pulse-soft"></span>
+                        IN TRANSIT
+                    </span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline text-on-surface font-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                    Edit
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                    Export PDF
+                </button>
+</div>
+</section>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- LEFT COLUMN (8 Columns) -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<!-- Detailed Workflow Stepper Card -->
+<div class="bg-white border border-outline-variant p-6 shadow-sm">
+<h3 class="font-headline-sm text-on-surface mb-8">Shipment Progress</h3>
+<div class="relative flex justify-between items-start">
+<!-- Progress Line -->
+<div class="absolute top-[18px] left-[5%] right-[5%] h-0.5 bg-outline-variant">
+<div class="h-full bg-secondary w-[42%] transition-all duration-1000"></div>
+</div>
+<!-- Steps -->
+<div class="relative flex flex-col items-center group w-24">
+<div class="w-9 h-9 rounded-full bg-on-tertiary-container text-white flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface text-center">Booking</span>
+<span class="text-[10px] text-on-surface-variant">Jun 12, 14:00</span>
+</div>
+<div class="relative flex flex-col items-center group w-24">
+<div class="w-9 h-9 rounded-full bg-on-tertiary-container text-white flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface text-center">Pick-up</span>
+<span class="text-[10px] text-on-surface-variant">Jun 14, 09:30</span>
+</div>
+<div class="relative flex flex-col items-center group w-24">
+<div class="w-9 h-9 rounded-full bg-on-tertiary-container text-white flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface text-center">Port Exit</span>
+<span class="text-[10px] text-on-surface-variant">Jun 15, 21:00</span>
+</div>
+<div class="relative flex flex-col items-center group w-24">
+<div class="w-9 h-9 rounded-full bg-white border-4 border-secondary text-secondary flex items-center justify-center z-10 step-active">
+<span class="font-bold text-[14px]">04</span>
+</div>
+<span class="mt-3 font-label-md text-secondary text-center">In Transit</span>
+<span class="text-[10px] text-secondary font-semibold">Live Vessel</span>
+</div>
+<div class="relative flex flex-col items-center group w-24 opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border-2 border-outline-variant text-on-surface-variant flex items-center justify-center z-10">
+<span class="font-bold text-[14px]">05</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface-variant text-center">Arrival</span>
+<span class="text-[10px]">Est. Jun 28</span>
+</div>
+<div class="relative flex flex-col items-center group w-24 opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border-2 border-outline-variant text-on-surface-variant flex items-center justify-center z-10">
+<span class="font-bold text-[14px]">06</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface-variant text-center">Customs</span>
+<span class="text-[10px]">Pending</span>
+</div>
+<div class="relative flex flex-col items-center group w-24 opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border-2 border-outline-variant text-on-surface-variant flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</div>
+<span class="mt-3 font-label-md text-on-surface-variant text-center">Delivery</span>
+<span class="text-[10px]">Pending</span>
+</div>
+</div>
+</div>
+<!-- Active Alerts Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-error-container/20 border-l-4 border-error p-4 flex gap-4 items-start">
+<span class="material-symbols-outlined text-error mt-0.5">warning</span>
+<div>
+<h4 class="font-label-md text-on-error-container">Delayed Departure</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">Vessel departed 4 hours behind schedule due to terminal congestion in Hong Kong.</p>
+</div>
+</div>
+<div class="bg-secondary-container/10 border-l-4 border-secondary p-4 flex gap-4 items-start">
+<span class="material-symbols-outlined text-secondary mt-0.5">info</span>
+<div>
+<h4 class="font-label-md text-on-secondary-fixed-variant">Route Optimization</h4>
+<p class="text-body-sm text-on-surface-variant mt-1">Minor route adjustment detected to avoid adverse weather conditions. ETA unchanged.</p>
+</div>
+</div>
+</div>
+<!-- Live Map Card -->
+<div class="bg-white border border-outline-variant overflow-hidden shadow-sm">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">sailing</span>
+<h3 class="font-label-md text-primary uppercase tracking-wider">Vessel Tracking: M/V OCEAN STAR</h3>
+</div>
+<div class="flex items-center gap-4 text-body-sm">
+<span class="flex items-center gap-1 text-on-surface-variant"><span class="w-2 h-2 bg-on-tertiary-container rounded-full"></span> AIS Signal Active</span>
+<span class="text-on-surface-variant">Lat: 22.396° N | Lon: 114.109° E</span>
+</div>
+</div>
+<div class="h-[400px] bg-surface-container-high relative">
+<div class="absolute inset-0 z-0 bg-cover bg-center grayscale-[0.2]" data-alt="A professional high-fidelity satellite map view of the South China Sea coastline, showing intricate nautical navigation routes and sea lanes. The map aesthetic is corporate and clean with Professional Blue and Neutral Grey tones. Data overlays show ship icons and GPS coordinate markers." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAVwZDtr5VNm5IdfmAqlJj9PRncA1nCoMYIG4tt-mIcEII_QlWp4gtSNm3JaRUnOunQxhaqvsQ6ODWcvEK4B95X1xIC5Cd0ZrUDj8qURZs8r9Bhe6Ny8x8kBBa4tNSUu7ZfatySdFAeqARB2GJSyUGhBBs2RPe_WMilmHVgmyZvVFAGzX9MK1e7CbhOwgRPHT6hUORXsU2k9Lkk858Lv4F6YCvYwRzVojjZWO5cUwsBlT1oVcmjeVFHHbldimuLX4vnl1y0SQh8MY0')"></div>
+<!-- Map Overlay UI -->
+<div class="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm p-4 border border-outline-variant shadow-lg max-w-xs z-10">
+<div class="flex justify-between items-center mb-3">
+<span class="font-bold text-secondary text-body-md">Current Voyage</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-secondary text-white font-bold uppercase">Moving</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Speed:</span>
+<span class="font-mono-data text-on-surface">18.4 knots</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Heading:</span>
+<span class="font-mono-data text-on-surface">192° SSW</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Next Port:</span>
+<span class="font-mono-data text-on-surface">Singapore (PSA)</span>
+</div>
+<div class="pt-2 border-t border-outline-variant mt-2">
+<div class="flex justify-between text-[11px] font-bold text-on-surface mb-1">
+<span>Voyage Completion</span>
+<span>42%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[42%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pulse Marker (Simulated Vessel) -->
+<div class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 z-20">
+<div class="relative">
+<div class="absolute -inset-4 bg-secondary/30 rounded-full animate-ping"></div>
+<div class="relative w-8 h-8 bg-secondary rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+<span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings: 'FILL' 1;">sailing</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (4 Columns) -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Document Management Card -->
+<div class="bg-white border border-outline-variant shadow-sm flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-primary">Documents</h3>
+<button class="text-secondary text-body-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+                            Add New
+                        </button>
+</div>
+<div class="p-4 space-y-3">
+<!-- File Card: Commercial Invoice -->
+<div class="group flex items-center p-3 border border-outline-variant hover:border-secondary hover:bg-surface-container transition-all cursor-pointer">
+<div class="w-10 h-10 bg-secondary-container/10 text-secondary flex items-center justify-center rounded">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="ml-3 flex-1">
+<p class="text-body-md font-bold text-on-surface truncate">Commercial Invoice</p>
+<p class="text-[11px] text-on-surface-variant uppercase">INV-2023-9921 • 2.4 MB</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="bg-tertiary-container/10 text-on-tertiary-container text-[10px] font-bold px-1.5 py-0.5 border border-on-tertiary-container/30">VERIFIED</span>
+<button class="p-1 text-on-surface-variant hover:text-secondary">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+<!-- File Card: Bill of Lading -->
+<div class="group flex items-center p-3 border border-outline-variant hover:border-secondary hover:bg-surface-container transition-all cursor-pointer">
+<div class="w-10 h-10 bg-secondary-container/10 text-secondary flex items-center justify-center rounded">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div class="ml-3 flex-1">
+<p class="text-body-md font-bold text-on-surface truncate">Bill of Lading (B/L)</p>
+<p class="text-[11px] text-on-surface-variant uppercase">BOL-HK-STAR-28 • 1.1 MB</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="bg-tertiary-container/10 text-on-tertiary-container text-[10px] font-bold px-1.5 py-0.5 border border-on-tertiary-container/30">VERIFIED</span>
+<button class="p-1 text-on-surface-variant hover:text-secondary">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+<!-- File Card: Packing List -->
+<div class="group flex items-center p-3 border border-outline-variant hover:border-secondary hover:bg-surface-container transition-all cursor-pointer">
+<div class="w-10 h-10 bg-secondary-container/10 text-secondary flex items-center justify-center rounded">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+<div class="ml-3 flex-1">
+<p class="text-body-md font-bold text-on-surface truncate">Packing List</p>
+<p class="text-[11px] text-on-surface-variant uppercase">PL-99283-A • 840 KB</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="bg-secondary-container/10 text-secondary text-[10px] font-bold px-1.5 py-0.5 border border-secondary/30">PENDING</span>
+<button class="p-1 text-on-surface-variant hover:text-secondary">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Event History Card -->
+<div class="bg-white border border-outline-variant shadow-sm overflow-hidden">
+<div class="p-4 border-b border-outline-variant">
+<h3 class="font-headline-sm text-primary">Event History</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="px-4 py-3 font-label-md text-on-surface-variant uppercase text-[10px] tracking-widest">Timestamp</th>
+<th class="px-4 py-3 font-label-md text-on-surface-variant uppercase text-[10px] tracking-widest">Event</th>
+<th class="px-4 py-3 font-label-md text-on-surface-variant uppercase text-[10px] tracking-widest">User</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-3 font-mono-data text-[12px] text-on-surface-variant">Jun 16, 04:12</td>
+<td class="px-4 py-3 text-body-sm font-medium text-on-surface">Vessel Departure Confirmed</td>
+<td class="px-4 py-3 text-body-sm text-on-surface-variant">System</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-3 font-mono-data text-[12px] text-on-surface-variant">Jun 15, 18:30</td>
+<td class="px-4 py-3 text-body-sm font-medium text-on-surface">Customs Clearance Issued</td>
+<td class="px-4 py-3 text-body-sm text-on-surface-variant">H. Zhang</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-3 font-mono-data text-[12px] text-on-surface-variant">Jun 15, 12:00</td>
+<td class="px-4 py-3 text-body-sm font-medium text-on-surface">Container Loaded</td>
+<td class="px-4 py-3 text-body-sm text-on-surface-variant">System</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-3 font-mono-data text-[12px] text-on-surface-variant">Jun 14, 09:45</td>
+<td class="px-4 py-3 text-body-sm font-medium text-on-surface">Gate-in At Terminal</td>
+<td class="px-4 py-3 text-body-sm text-on-surface-variant">Driver #401</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-3 font-mono-data text-[12px] text-on-surface-variant">Jun 12, 14:15</td>
+<td class="px-4 py-3 text-body-sm font-medium text-on-surface">Shipment Created</td>
+<td class="px-4 py-3 text-body-sm text-on-surface-variant">A. Thompson</td>
+</tr>
+</tbody>
+</table>
+</div>
+<button class="w-full py-3 text-center text-body-sm font-bold text-secondary bg-surface-container hover:bg-surface-container-high transition-colors">
+                        View Full Audit Log
+                    </button>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Summary for Mobile/Responsive feel -->
+<footer class="mt-8 flex justify-between items-center bg-primary text-white p-4 shadow-xl border-t-4 border-secondary">
+<div class="flex items-center gap-8">
+<div>
+<p class="text-[10px] text-primary-fixed opacity-70 uppercase tracking-widest">Container</p>
+<p class="font-mono-data font-bold">MSKU-998273-0</p>
+</div>
+<div>
+<p class="text-[10px] text-primary-fixed opacity-70 uppercase tracking-widest">Weight</p>
+<p class="font-mono-data font-bold">24,400 KG</p>
+</div>
+<div>
+<p class="text-[10px] text-primary-fixed opacity-70 uppercase tracking-widest">Origin / Dest</p>
+<p class="font-mono-data font-bold">HKHKG → USLAX</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<p class="text-[10px] text-primary-fixed opacity-70 uppercase tracking-widest">Final ETA</p>
+<p class="font-headline-sm">Jun 30, 2023</p>
+</div>
+<div class="h-10 w-10 rounded-full border-4 border-secondary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-white">event</span>
+</div>
+</div>
+</footer>
+</main>
+<!-- Micro-interaction Script for Live Effects -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulated vessel position drifting (very subtle)
+            const vesselMarker = document.querySelector('.animate-ping').parentElement;
+            if (vesselMarker) {
+                let deg = 0;
+                setInterval(() => {
+                    deg += 0.05;
+                    const offsetX = Math.sin(deg) * 2;
+                    const offsetY = Math.cos(deg) * 2;
+                    vesselMarker.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                }, 100);
+            }
+
+            // Tabs interaction placeholder
+            const navLinks = document.querySelectorAll('aside nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    navLinks.forEach(l => {
+                        l.classList.remove('text-secondary', 'font-bold', 'bg-secondary-container/10');
+                        l.classList.add('text-on-surface-variant');
+                    });
+                    link.classList.add('text-secondary', 'font-bold', 'bg-secondary-container/10');
+                    link.classList.remove('text-on-surface-variant');
+                });
+            });
+        });
+    </script>
+</body></html>
