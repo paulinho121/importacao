@@ -1,4 +1,5 @@
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { eq } from "drizzle-orm";

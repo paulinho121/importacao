@@ -39,7 +39,11 @@ export default async function DashboardPage() {
   const maxModalCount = Math.max(1, ...Object.values(modalCounts));
 
   const alertas = rows
-    .filter((p) => p.status === "ATRASADO" || (diasRestantes(p.etaEstimated) ?? 99) <= 3)
+    .filter(
+      (p) =>
+        p.status !== "CONCLUIDO" &&
+        (p.status === "ATRASADO" || (diasRestantes(p.etaEstimated) ?? 99) <= 3),
+    )
     .slice(0, 5);
 
   return (

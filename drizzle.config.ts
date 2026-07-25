@@ -1,5 +1,6 @@
 import { defineConfig } from "drizzle-kit";
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
 // Sem eager-throw: "drizzle-kit generate" não precisa conectar no banco
 // (só diffa contra schema.ts), então não deve exigir DATABASE_URL. Só

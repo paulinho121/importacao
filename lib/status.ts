@@ -43,17 +43,26 @@ export const WORKFLOW_STEPS = [
   "Entregue",
 ] as const;
 
+// Datas de processo (etd/eta) são valores de calendário puros (sem hora),
+// vindos de uma coluna `date` do Postgres. new Date("YYYY-MM-DD") interpreta
+// isso como meia-noite UTC — se formatarmos/comparamos em horário local
+// (ex: UTC-3), o dia exibido fica um dia atrás do valor real no banco.
+// Por isso todo o cálculo abaixo é feito em UTC, do início ao fim.
 export function diasRestantes(etaEstimated: string | null): number | null {
   if (!etaEstimated) return null;
-  const eta = new Date(etaEstimated);
-  const today = new Date();
-  eta.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-  return Math.round((eta.getTime() - today.getTime()) / 86_400_000);
+  const eta = new Date(`${etaEstimated}T00:00:00Z`).getTime();
+  const now = new Date();
+  const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.round((eta - todayUtc) / 86_400_000);
 }
 
 export function formatDate(value: string | null): string {
   if (!value) return "—";
-  const d = new Date(value);
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  const d = new Date(`${value}T00:00:00Z`);
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
