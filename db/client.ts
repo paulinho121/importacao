@@ -1,5 +1,5 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 
 type Db = ReturnType<typeof drizzle<typeof schema>>;
@@ -13,8 +13,11 @@ function getDb(): Db {
       "DATABASE_URL não definida. Copie .env.example para .env.local (localmente) ou defina em Project Settings > Environment Variables (Vercel).",
     );
   }
-  const sql = neon(process.env.DATABASE_URL);
-  cached = drizzle(sql, { schema });
+  // prepare: false é necessário quando a connection string aponta para o
+  // pooler do Supabase (pgbouncer, modo transaction) — que não suporta
+  // prepared statements. Funciona também com conexão direta.
+  const client = postgres(process.env.DATABASE_URL, { prepare: false });
+  cached = drizzle(client, { schema });
   return cached;
 }
 
