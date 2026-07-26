@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import AppShell from "@/components/AppShell";
-import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import { processes, suppliers, processItems } from "@/db/schema";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
@@ -143,12 +143,20 @@ export default async function ProcessosPage({
                     <h3 className="font-mono-data text-mono-data text-outline mb-1">
                       {p.processNumber}
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={24} />
+                    {p.supplierLogoUrl ? (
+                      <Image
+                        src={p.supplierLogoUrl}
+                        alt={p.supplierName}
+                        width={160}
+                        height={40}
+                        unoptimized
+                        className="h-10 w-auto max-w-[180px] object-contain object-left mt-1"
+                      />
+                    ) : (
                       <p className="font-headline-sm text-headline-sm text-primary">
                         {p.supplierName}
                       </p>
-                    </div>
+                    )}
                   </div>
                   <span className={`px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1 ${badgeClass}`}>
                     <span className="material-symbols-outlined text-[14px]">
