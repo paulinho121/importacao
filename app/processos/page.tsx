@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import { processes, suppliers, processItems } from "@/db/schema";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
@@ -61,6 +62,7 @@ export default async function ProcessosPage({
       etaEstimated: processes.etaEstimated,
       currentStep: processes.currentStep,
       supplierName: suppliers.name,
+      supplierLogoUrl: suppliers.logoUrl,
       itemCount: sql<number>`count(${processItems.id})`.mapWith(Number),
       firstSku: sql<string | null>`min(${processItems.sku})`,
     })
@@ -68,7 +70,7 @@ export default async function ProcessosPage({
     .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
     .leftJoin(processItems, eq(processItems.processId, processes.id))
     .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(processes.id, suppliers.name)
+    .groupBy(processes.id, suppliers.name, suppliers.logoUrl)
     .orderBy(desc(processes.createdAt));
 
   return (
@@ -141,9 +143,12 @@ export default async function ProcessosPage({
                     <h3 className="font-mono-data text-mono-data text-outline mb-1">
                       {p.processNumber}
                     </h3>
-                    <p className="font-headline-sm text-headline-sm text-primary">
-                      {p.supplierName}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={24} />
+                      <p className="font-headline-sm text-headline-sm text-primary">
+                        {p.supplierName}
+                      </p>
+                    </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1 ${badgeClass}`}>
                     <span className="material-symbols-outlined text-[14px]">

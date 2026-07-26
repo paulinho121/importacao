@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import { processes, suppliers } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
       modal: processes.modal,
       etaEstimated: processes.etaEstimated,
       supplierName: suppliers.name,
+      supplierLogoUrl: suppliers.logoUrl,
     })
     .from(processes)
     .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
@@ -170,7 +172,12 @@ export default async function DashboardPage() {
                         {p.processNumber}
                       </Link>
                     </td>
-                    <td className="px-6 py-3 font-medium">{p.supplierName}</td>
+                    <td className="px-6 py-3 font-medium">
+                      <div className="flex items-center gap-2">
+                        <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={20} />
+                        {p.supplierName}
+                      </div>
+                    </td>
                     <td className="px-6 py-3">{p.modal ?? "—"}</td>
                     <td className="px-6 py-3 font-mono-data">{formatDate(p.etaEstimated)}</td>
                     <td className="px-6 py-3">

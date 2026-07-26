@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import AddItemForm from "@/components/AddItemForm";
 import VesselTracker from "@/components/VesselTracker";
+import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import {
   processes,
@@ -72,6 +73,7 @@ export default async function ProcessDetailPage({
       vesselPositionUpdatedAt: processes.vesselPositionUpdatedAt,
       supplierName: suppliers.name,
       supplierId: suppliers.id,
+      supplierLogoUrl: suppliers.logoUrl,
     })
     .from(processes)
     .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
@@ -141,7 +143,12 @@ export default async function ProcessDetailPage({
                 {STATUS_LABEL[process.status as ProcessStatus]}
               </span>
             </div>
-            <p className="text-on-surface-variant font-body-md text-body-md max-w-2xl">
+            <p className="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md max-w-2xl">
+              <SupplierLogo
+                logoUrl={process.supplierLogoUrl}
+                name={process.supplierName}
+                size={20}
+              />
               Fornecedor: {process.supplierName}
               {process.externalReference ? ` · Ref: ${process.externalReference}` : ""}
               {process.destination ? ` · Destino: ${process.destination}` : ""}

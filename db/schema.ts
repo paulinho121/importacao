@@ -49,6 +49,11 @@ export const suppliers = pgTable("suppliers", {
   email: text("email"),
   phone: text("phone"),
   notes: text("notes"),
+  // URL pública no bucket "supplier-logos" do Supabase Storage. Bucket
+  // público (não assinado) porque o logo aparece em várias listagens ao
+  // mesmo tempo — gerar signed URL por item em cada render seria caro à
+  // toa para um asset que não é sensível.
+  logoUrl: text("logo_url"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

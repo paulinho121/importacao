@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import { suppliers, processes } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -11,6 +12,7 @@ export default async function FornecedoresPage() {
     .select({
       id: suppliers.id,
       name: suppliers.name,
+      logoUrl: suppliers.logoUrl,
       country: suppliers.country,
       defaultIncoterm: suppliers.defaultIncoterm,
       contactName: suppliers.contactName,
@@ -65,7 +67,11 @@ export default async function FornecedoresPage() {
                 {rows.map((s) => (
                   <tr key={s.id} className="hover:bg-surface-container-high transition-colors">
                     <td className="px-6 py-3 font-medium">
-                      <Link href={`/fornecedores/${s.id}`} className="text-secondary hover:underline">
+                      <Link
+                        href={`/fornecedores/${s.id}`}
+                        className="flex items-center gap-3 text-secondary hover:underline"
+                      >
+                        <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={28} />
                         {s.name}
                       </Link>
                     </td>

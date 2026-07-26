@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const DOCUMENTS_BUCKET = "process-documents";
+export const LOGOS_BUCKET = "supplier-logos";
 
 let cached: SupabaseClient | null = null;
 
