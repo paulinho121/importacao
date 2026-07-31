@@ -1,56 +1,141 @@
 @import "tailwindcss";
 
+/*
+ * Redesign SaaS premium (Stripe/Linear/Vercel/Ramp) — Fase 1.
+ *
+ * Os tokens ANTIGOS (surface-*, on-surface-*, primary, secondary,
+ * secondary-fixed-*, tertiary-*, error*, etc.) continuam definidos, com os
+ * VALORES atualizados pra nova paleta — isso mantém toda página ainda não
+ * redesenhada estruturalmente (Processos, Produtos, Fornecedores, Agentes,
+ * forms) funcionando sem nenhuma edição de JSX, só herdando as cores novas.
+ * Convenientemente `primary` já era usado pro navy estrutural (texto/
+ * títulos) e `secondary` já era o azul de ação — exatamente os papéis que
+ * "foreground" e "primary" teriam num sistema shadcn puro — então os
+ * componentes novos (Sidebar, Header, components/ui/*, dashboard/*) reusam
+ * esses dois em vez de duplicar em nomes novos que colidiriam.
+ *
+ * Só ADICIONO tokens que não existem no sistema antigo: card, popover,
+ * foreground, muted, accent, destructive, success, warning (a paleta
+ * antiga não tinha "warning" — âmbar — em lugar nenhum), border, input,
+ * ring, sidebar-* (paleta escura dedicada) e chart-* (séries do Recharts).
+ */
+
 :root {
+  /* ---- Tokens antigos (valores atualizados pra nova paleta) ---- */
   --color-on-primary: #ffffff;
-  --color-surface-bright: #fbf9fa;
-  --color-on-tertiary-container: #20a571;
-  --color-on-secondary-fixed-variant: #0040a2;
-  --color-on-tertiary-fixed: #002113;
-  --color-on-primary-fixed-variant: #38485a;
+  --color-surface-bright: #ffffff;
+  --color-on-tertiary-container: #059669;
+  --color-on-secondary-fixed-variant: #1d4ed8;
+  --color-on-tertiary-fixed: #065f46;
+  --color-on-primary-fixed-variant: #334155;
   --color-on-secondary: #ffffff;
-  --color-primary: #041627;
-  --color-secondary-fixed-dim: #b2c5ff;
-  --color-on-secondary-fixed: #001848;
-  --color-primary-fixed-dim: #b7c8de;
-  --color-on-surface-variant: #44474c;
-  --color-surface-dim: #dbd9db;
-  --color-background: #fbf9fa;
-  --color-on-primary-container: #8192a7;
-  --color-secondary-fixed: #dae2ff;
-  --color-on-primary-fixed: #0b1d2d;
-  --color-surface-container-high: #e9e7e9;
+  --color-primary: #0f172a;
+  --color-secondary-fixed-dim: #93c5fd;
+  --color-on-secondary-fixed: #1e3a8a;
+  --color-primary-fixed-dim: #cbd5e1;
+  --color-on-surface-variant: #64748b;
+  --color-surface-dim: #e2e8f0;
+  --color-background: #f8fafc;
+  --color-on-primary-container: #94a3b8;
+  --color-secondary-fixed: #dbeafe;
+  --color-on-primary-fixed: #0f172a;
+  --color-surface-container-high: #eef2f6;
   --color-on-tertiary: #ffffff;
-  --color-surface-variant: #e4e2e3;
-  --color-on-background: #1b1c1d;
-  --color-tertiary: #001a0e;
-  --color-surface-container-highest: #e4e2e3;
-  --color-surface: #fbf9fa;
-  --color-primary-container: #1a2b3c;
-  --color-inverse-on-surface: #f2f0f2;
-  --color-outline-variant: #c4c6cd;
-  --color-error: #ba1a1a;
-  --color-primary-fixed: #d2e4fb;
-  --color-on-tertiary-fixed-variant: #005235;
-  --color-on-secondary-container: #fefcff;
+  --color-surface-variant: #e2e8f0;
+  --color-on-background: #0f172a;
+  --color-tertiary: #10b981;
+  --color-surface-container-highest: #e2e8f0;
+  --color-surface: #f8fafc;
+  --color-primary-container: #0f172a;
+  --color-inverse-on-surface: #f1f5f9;
+  --color-outline-variant: #e2e8f0;
+  --color-error: #ef4444;
+  --color-primary-fixed: #dbeafe;
+  --color-on-tertiary-fixed-variant: #065f46;
+  --color-on-secondary-container: #ffffff;
   --color-on-error: #ffffff;
-  --color-surface-tint: #4f6073;
-  --color-inverse-primary: #b7c8de;
-  --color-tertiary-fixed-dim: #65dca4;
-  --color-surface-container: #efedef;
-  --color-error-container: #ffdad6;
-  --color-secondary: #0453cd;
-  --color-inverse-surface: #303032;
-  --color-tertiary-container: #00311e;
+  --color-surface-tint: #2563eb;
+  --color-inverse-primary: #93c5fd;
+  --color-tertiary-fixed-dim: #34d399;
+  --color-surface-container: #f1f5f9;
+  --color-error-container: #fee2e2;
+  --color-secondary: #2563eb;
+  --color-inverse-surface: #1e293b;
+  --color-tertiary-container: #d1fae5;
   --color-surface-container-lowest: #ffffff;
-  --color-on-error-container: #93000a;
-  --color-tertiary-fixed: #82f9be;
-  --color-secondary-container: #356ee7;
-  --color-on-surface: #1b1c1d;
-  --color-outline: #74777d;
-  --color-surface-container-low: #f5f3f4;
+  --color-on-error-container: #991b1b;
+  --color-tertiary-fixed: #d1fae5;
+  --color-secondary-container: #2563eb;
+  --color-on-surface: #0f172a;
+  --color-outline: #94a3b8;
+  --color-surface-container-low: #f8fafc;
+
+  /* ---- Tokens novos (só o que não existia antes) ---- */
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eff6ff;
+  --accent-foreground: #2563eb;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #0f172a;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --radius: 0.75rem;
+
+  /* Sidebar — sempre escura, independente do tema claro/escuro do app */
+  --sidebar-background: #0f172a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-muted-foreground: #94a3b8;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1e293b;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+
+  /* Recharts */
+  --chart-1: #2563eb;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #ef4444;
+}
+
+/* Dark mode: só os tokens novos ganham variante escura nesta fase — as
+   páginas ainda não redesenhadas (tokens antigos) não foram pensadas pra
+   tema escuro, então não sobrescrevo os antigos aqui de propósito. */
+.dark {
+  --background: #0b1220;
+  --foreground: #f1f5f9;
+  --card: #111827;
+  --card-foreground: #f1f5f9;
+  --popover: #111827;
+  --popover-foreground: #f1f5f9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #93c5fd;
+  --destructive: #f87171;
+  --destructive-foreground: #0b1220;
+  --success: #34d399;
+  --success-foreground: #0b1220;
+  --warning: #fbbf24;
+  --warning-foreground: #0b1220;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3b82f6;
 }
 
 @theme inline {
+  /* ---- mapeamento dos tokens antigos (mantidos por compatibilidade) ---- */
   --color-on-primary: var(--color-on-primary);
   --color-surface-bright: var(--color-surface-bright);
   --color-on-tertiary-container: var(--color-on-tertiary-container);
@@ -147,6 +232,45 @@
   --radius-lg: 0.25rem;
   --radius-xl: 0.5rem;
   --radius-full: 0.75rem;
+
+  /* ---- mapeamento dos tokens novos ---- */
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-card: 1rem;
 }
 
 body {

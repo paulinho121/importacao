@@ -39,13 +39,16 @@ const MODAL_ICON: Record<string, string> = {
 export default async function ProcessosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; modal?: string }>;
+  searchParams: Promise<{ q?: string; modal?: string; status?: string }>;
 }) {
-  const { q = "", modal = "" } = await searchParams;
+  const { q = "", modal = "", status = "" } = await searchParams;
 
   const conditions = [];
   if (modal) {
     conditions.push(eq(processes.modal, modal as (typeof processes.modal.enumValues)[number]));
+  }
+  if (status) {
+    conditions.push(eq(processes.status, status as ProcessStatus));
   }
   if (q) {
     conditions.push(
