@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Fragment } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import SupplierLogo from "@/components/SupplierLogo";
@@ -18,6 +19,22 @@ import {
 } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
+
+// Ordem de exibição dos grupos por status quando a lista não está filtrada
+// por um único status — atrasados primeiro (precisam de atenção), depois a
+// ordem natural do fluxo, finalizados por último.
+const STATUS_GROUP_ORDER: ProcessStatus[] = [
+  "ATRASADO",
+  "AGUARDANDO_EMBARQUE",
+  "PEDIDO",
+  "PRODUCAO",
+  "EMBARCADO",
+  "EM_TRANSITO",
+  "EM_DESEMBARACO",
+  "TRANSPORTE_NACIONAL",
+  "RECEBIDO",
+  "CONCLUIDO",
+];
 
 const MODAL_FILTERS = [
   { value: "", label: "Todos", icon: "filter_list" },
@@ -45,7 +62,7 @@ export default async function ProcessosPage({
 }: {
   searchParams: Promise<{ q?: string; modal?: string; status?: string; view?: string }>;
 }) {
-  const { q = "", modal = "", status = "", view = "grid" } = await searchParams;
+  const { q = "", modal = "", status = "", view = "list" } = await searchParams;
 
   const conditions = [];
   if (modal) {
@@ -94,6 +111,22 @@ export default async function ProcessosPage({
     .groupBy(processes.id, suppliers.name, suppliers.logoUrl)
     .orderBy(desc(processes.createdAt));
 
+  // Só agrupa por status quando a lista não já está filtrada por um único
+  // status (sub-links da sidebar) — nesse caso todo mundo tem o mesmo
+  // status e o agrupamento seria redundante.
+  const rowsByStatus = new Map<ProcessStatus, typeof rows>();
+  for (const row of rows) {
+    const list = rowsByStatus.get(row.status as ProcessStatus) ?? [];
+    list.push(row);
+    rowsByStatus.set(row.status as ProcessStatus, list);
+  }
+  const groupedRows = status
+    ? [{ status: status as ProcessStatus, items: rows }]
+    : STATUS_GROUP_ORDER.filter((s) => rowsByStatus.has(s)).map((s) => ({
+        status: s,
+        items: rowsByStatus.get(s)!,
+      }));
+
   return (
     <AppShell title="Processos de Importação">
       <div className="p-gutter lg:px-stack-lg lg:pt-stack-lg flex justify-end">
@@ -109,7 +142,7 @@ export default async function ProcessosPage({
         <form className="flex flex-col md:flex-row gap-4 items-end md:items-center" action="/processos">
           {status && <input type="hidden" name="status" value={status} />}
           {modal && <input type="hidden" name="modal" value={modal} />}
-          {view !== "grid" && <input type="hidden" name="view" value={view} />}
+          {view !== "list" && <input type="hidden" name="view" value={view} />}
           <div className="relative flex-1 w-full">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
               search
@@ -132,7 +165,7 @@ export default async function ProcessosPage({
                     ...(q ? { q } : {}),
                     ...(status ? { status } : {}),
                     ...(f.value ? { modal: f.value } : {}),
-                    ...(view !== "grid" ? { view } : {}),
+                    ...(view !== "list" ? { view } : {}),
                   },
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-label-md text-label-md whitespace-nowrap transition-colors ${
@@ -151,7 +184,7 @@ export default async function ProcessosPage({
             <Link
               href={{
                 pathname: "/processos",
-                query: { ...(q ? { q } : {}), ...(status ? { status } : {}), ...(modal ? { modal } : {}) },
+                query: { ...(q ? { q } : {}), ...(status ? { status } : {}), ...(modal ? { modal } : {}), view: "grid" },
               }}
               className={`flex items-center justify-center h-9 w-9 rounded-md transition-colors ${
                 view === "grid" ? "bg-secondary text-on-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
@@ -197,50 +230,77 @@ export default async function ProcessosPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((p) => {
-                  const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
-                  return (
-                    <TableRow key={p.id} className="cursor-pointer">
-                      <TableCell className="p-0">
-                        <Link href={`/processos/${p.id}`} className="block px-4 py-3 font-mono text-sm text-secondary hover:underline">
-                          {p.processNumber}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/processos/${p.id}`} className="flex items-center gap-2">
-                          <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={22} />
-                          <span className="text-sm">{p.supplierName}</span>
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.modal ?? "—"}</TableCell>
-                      <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
-                      <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-                            <div className="h-full rounded-full bg-secondary" style={{ width: `${progress}%` }} />
+                {groupedRows.map((group) => (
+                  <Fragment key={group.status}>
+                    {!status && (
+                      <TableRow className="hover:bg-transparent border-b-0">
+                        <TableCell colSpan={8} className="bg-muted/50 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <StatusBadge status={group.status} />
+                            <span className="text-xs text-muted-foreground">
+                              {group.items.length} {group.items.length === 1 ? "processo" : "processos"}
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{progress}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={p.status as ProcessStatus} />
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {p.itemCount} {p.itemCount === 1 ? "item" : "itens"}
-                        {p.firstSku ? ` · SKU: ${p.firstSku}` : ""}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {group.items.map((p) => {
+                      const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
+                      return (
+                        <TableRow key={p.id} className="cursor-pointer">
+                          <TableCell className="p-0">
+                            <Link href={`/processos/${p.id}`} className="block px-4 py-3 font-mono text-sm text-secondary hover:underline">
+                              {p.processNumber}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <Link href={`/processos/${p.id}`} className="flex items-center gap-2">
+                              <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={22} />
+                              <span className="text-sm">{p.supplierName}</span>
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{p.modal ?? "—"}</TableCell>
+                          <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
+                          <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-secondary" style={{ width: `${progress}%` }} />
+                              </div>
+                              <span className="text-xs text-muted-foreground">{progress}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={p.status as ProcessStatus} />
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {p.itemCount} {p.itemCount === 1 ? "item" : "itens"}
+                            {p.firstSku ? ` · SKU: ${p.firstSku}` : ""}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </Fragment>
+                ))}
               </TableBody>
             </Table>
           </div>
         )}
 
         {rows.length > 0 && view !== "list" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rows.map((p) => {
+        <div className="space-y-8">
+          {groupedRows.map((group) => (
+            <div key={group.status}>
+              {!status && (
+                <div className="mb-3 flex items-center gap-2">
+                  <StatusBadge status={group.status} />
+                  <span className="text-xs text-muted-foreground">
+                    {group.items.length} {group.items.length === 1 ? "processo" : "processos"}
+                  </span>
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {group.items.map((p) => {
             const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
             const badgeClass = STATUS_BADGE_CLASS[p.status as ProcessStatus];
             return (
@@ -320,6 +380,9 @@ export default async function ProcessosPage({
               </Link>
             );
           })}
+              </div>
+            </div>
+          ))}
         </div>
         )}
       </div>
