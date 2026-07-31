@@ -18,9 +18,17 @@ import {
   FileWarning,
   Boxes,
   ShieldCheck,
+  DollarSign,
+  Wallet,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const brlFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  maximumFractionDigits: 0,
+});
 
 export default async function DashboardPage() {
   const metrics = await getDashboardMetrics();
@@ -78,6 +86,22 @@ export default async function DashboardPage() {
             trend={metrics.kpis.itensEmProcesso.trend}
             sparklineData={metrics.kpis.itensEmProcesso.sparkline}
             accent="var(--chart-4)"
+          />
+          <KpiCard
+            icon={<DollarSign className="h-[18px] w-[18px]" />}
+            label="Valor FOB Total"
+            value={brlFormatter.format(metrics.kpis.valorFobTotal.value)}
+            trend={metrics.kpis.valorFobTotal.trend}
+            sparklineData={metrics.kpis.valorFobTotal.sparkline}
+            accent="var(--chart-2)"
+          />
+          <KpiCard
+            icon={<Wallet className="h-[18px] w-[18px]" />}
+            label="Valor CIF Total"
+            value={brlFormatter.format(metrics.kpis.valorCifTotal.value)}
+            trend={metrics.kpis.valorCifTotal.trend}
+            sparklineData={metrics.kpis.valorCifTotal.sparkline}
+            accent="var(--chart-3)"
           />
         </div>
 

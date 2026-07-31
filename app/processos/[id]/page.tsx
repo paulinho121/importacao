@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import AddItemForm from "@/components/AddItemForm";
 import VesselTracker from "@/components/VesselTracker";
+import ProcessFinancials from "@/components/ProcessFinancials";
 import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import {
@@ -71,6 +72,12 @@ export default async function ProcessDetailPage({
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,
       notes: processes.notes,
+      currency: processes.currency,
+      incoterm: processes.incoterm,
+      internationalFreightValue: processes.internationalFreightValue,
+      insuranceValue: processes.insuranceValue,
+      exchangeRate: processes.exchangeRate,
+      exchangeRateDate: processes.exchangeRateDate,
       vesselName: processes.vesselName,
       vesselImo: processes.vesselImo,
       vesselMmsi: processes.vesselMmsi,
@@ -442,6 +449,24 @@ export default async function ProcessDetailPage({
                 <AddItemForm action={boundAddItem} products={productRows} />
               </section>
             </div>
+
+            <ProcessFinancials
+              processId={id}
+              etaEstimated={process.etaEstimated}
+              financials={{
+                currency: process.currency,
+                incoterm: process.incoterm,
+                internationalFreightValue: process.internationalFreightValue,
+                insuranceValue: process.insuranceValue,
+                exchangeRate: process.exchangeRate,
+                exchangeRateDate: process.exchangeRateDate,
+              }}
+              invoices={invoices.map((inv) => ({
+                id: inv.id,
+                invoiceNumber: inv.invoiceNumber,
+                value: inv.value,
+              }))}
+            />
 
             {(process.modal === "SEA_FCL" || process.modal === "SEA_LCL") && (
               <VesselTracker

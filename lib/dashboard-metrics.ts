@@ -6,6 +6,7 @@ import {
   processItems,
   processDocuments,
   processEvents,
+  processInvoices,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { STATUS_BY_STEP, WORKFLOW_STEPS, diasRestantes, type ProcessStatus } from "@/lib/status";
@@ -51,7 +52,7 @@ function buildTrend(dates: Date[], { invert = false }: { invert?: boolean } = {}
 }
 
 export async function getDashboardMetrics() {
-  const [processRows, itemRows, docRows, eventRows] = await Promise.all([
+  const [processRows, itemRows, docRows, eventRows, invoiceRows] = await Promise.all([
     db
       .select({
         id: processes.id,
@@ -68,6 +69,9 @@ export async function getDashboardMetrics() {
         supplierName: suppliers.name,
         supplierLogoUrl: suppliers.logoUrl,
         agentName: freightAgents.name,
+        internationalFreightValue: processes.internationalFreightValue,
+        insuranceValue: processes.insuranceValue,
+        exchangeRate: processes.exchangeRate,
       })
       .from(processes)
       .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
@@ -94,6 +98,12 @@ export async function getDashboardMetrics() {
       })
       .from(processEvents)
       .orderBy(processEvents.eventDate),
+    db
+      .select({
+        processId: processInvoices.processId,
+        value: processInvoices.value,
+      })
+      .from(processInvoices),
   ]);
 
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO");
@@ -115,6 +125,28 @@ export async function getDashboardMetrics() {
     const uploaded = uploadedByProcess.get(p.id) ?? 0;
     return sum + Math.max(0, DOC_TYPES_PER_PROCESS - uploaded);
   }, 0);
+
+  // --- Valor FOB/CIF (só processos com câmbio + ao menos 1 invoice com
+  // valor preenchidos — a maioria dos processos existentes não tem esse
+  // dado ainda, e são simplesmente omitidos da soma em vez de contar como 0) ---
+  const invoiceValueByProcess = new Map<string, number>();
+  for (const inv of invoiceRows) {
+    if (inv.value === null) continue;
+    invoiceValueByProcess.set(inv.processId, (invoiceValueByProcess.get(inv.processId) ?? 0) + Number(inv.value));
+  }
+  let fobTotalBRL = 0;
+  let cifTotalBRL = 0;
+  const financialCompleteDates: Date[] = [];
+  for (const p of ativos) {
+    const invoicesSum = invoiceValueByProcess.get(p.id);
+    const rate = p.exchangeRate ? Number(p.exchangeRate) : null;
+    if (invoicesSum === undefined || rate === null) continue;
+    const freight = p.internationalFreightValue ? Number(p.internationalFreightValue) : 0;
+    const insurance = p.insuranceValue ? Number(p.insuranceValue) : 0;
+    fobTotalBRL += invoicesSum * rate;
+    cifTotalBRL += (invoicesSum + freight + insurance) * rate;
+    financialCompleteDates.push(new Date(p.createdAt));
+  }
 
   // --- KPIs (número + trend + sparkline, tudo derivado de timestamps reais) ---
   const createdDates = processRows.map((p) => new Date(p.createdAt));
@@ -154,6 +186,16 @@ export async function getDashboardMetrics() {
       value: totalItensAtivos,
       trend: buildTrend(itemDates),
       sparkline: dailySeries(itemDates, 14),
+    },
+    valorFobTotal: {
+      value: fobTotalBRL,
+      trend: buildTrend(financialCompleteDates),
+      sparkline: dailySeries(financialCompleteDates, 14),
+    },
+    valorCifTotal: {
+      value: cifTotalBRL,
+      trend: buildTrend(financialCompleteDates),
+      sparkline: dailySeries(financialCompleteDates, 14),
     },
   };
 

@@ -16,6 +16,7 @@ import { revalidatePath } from "next/cache";
 import { STATUS_BY_STEP, WORKFLOW_STEPS, type ProcessStatus } from "@/lib/status";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 import { fetchVesselPosition } from "@/lib/datalastic";
+import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -106,6 +107,71 @@ export async function addProcessInvoice(processId: string, formData: FormData) {
 
   await db.insert(processInvoices).values({ processId, invoiceNumber });
   revalidatePath(`/processos/${processId}`);
+}
+
+export async function updateProcessInvoiceValue(
+  invoiceId: string,
+  processId: string,
+  formData: FormData,
+) {
+  await db
+    .update(processInvoices)
+    .set({ value: optionalNumber(formData, "value") })
+    .where(eq(processInvoices.id, invoiceId));
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export async function updateProcessFinancials(processId: string, formData: FormData) {
+  await db
+    .update(processes)
+    .set({
+      currency: (optionalText(formData, "currency") as (typeof processes.$inferInsert)["currency"]) ?? null,
+      incoterm: optionalText(formData, "incoterm"),
+      internationalFreightValue: optionalNumber(formData, "internationalFreightValue"),
+      insuranceValue: optionalNumber(formData, "insuranceValue"),
+      exchangeRateDate: optionalDate(formData, "exchangeRateDate"),
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export type FetchExchangeRateState = { error: string } | null;
+
+// Assinatura (state, formData) para useActionState no client component —
+// mesmo padrão de refreshVesselPosition: a cotação vem de uma API externa
+// (Bacen) que pode não ter dado publicado pra data pedida, e isso precisa
+// virar mensagem de erro na UI em vez de derrubar a página.
+export async function fetchExchangeRateAction(
+  processId: string,
+  _prevState: FetchExchangeRateState,
+  formData: FormData,
+): Promise<FetchExchangeRateState> {
+  const currency = optionalText(formData, "currency");
+  const date = optionalText(formData, "exchangeRateDate");
+  if (!currency || currency === "OTHER") {
+    return { error: "Selecione uma moeda com câmbio automático (moeda \"Outra\" exige valor manual)." };
+  }
+  if (!date) {
+    return { error: "Informe a data de referência do câmbio." };
+  }
+
+  const result = await fetchPtaxRate({ currency: currency as PtaxCurrency, date });
+  if (!result.ok) return { error: result.error };
+
+  await db
+    .update(processes)
+    .set({
+      exchangeRate: String(result.data.rate),
+      exchangeRateDate: result.data.date,
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+  return null;
 }
 
 export async function advanceProcessStep(processId: string, _formData: FormData) {

@@ -73,6 +73,18 @@ export const documentStatusEnum = pgEnum("document_status", [
   "UPLOADED",
 ]);
 
+// Moeda da operação — usada para converter os valores declarados
+// (invoices, frete, seguro) em Valor Aduaneiro estimado via câmbio PTAX.
+// OTHER cobre moedas fora da lista, sem busca automática de câmbio.
+export const currencyEnum = pgEnum("currency", [
+  "USD",
+  "EUR",
+  "CNY",
+  "GBP",
+  "JPY",
+  "OTHER",
+]);
+
 // Fornecedores. Processos referenciam por FK, nunca por texto livre —
 // resolve a duplicidade tipo "APUTURE" vs "APUTURE + DEARKOL" vista na planilha.
 export const suppliers = pgTable("suppliers", {
@@ -160,6 +172,20 @@ export const processes = pgTable("processes", {
   vesselHeading: integer("vessel_heading"),
   vesselDestination: text("vessel_destination"),
   vesselPositionUpdatedAt: timestamp("vessel_position_updated_at", { withTimezone: true }),
+  // Dados financeiros — base para Valor Aduaneiro estimado (soma das
+  // invoices + frete + seguro, convertido pelo câmbio). Tudo opcional e
+  // preenchido manualmente depois da criação do processo, quando os
+  // valores comerciais/frete já são conhecidos. Assume uma única moeda
+  // por processo (caso comum na prática — ver lib/dashboard-metrics.ts).
+  currency: currencyEnum("currency"),
+  incoterm: text("incoterm"),
+  internationalFreightValue: numeric("international_freight_value", { precision: 12, scale: 2 }),
+  insuranceValue: numeric("insurance_value", { precision: 12, scale: 2 }),
+  // Câmbio de venda PTAX (Bacen) usado para converter os valores acima
+  // para BRL — ver lib/ptax.ts. exchangeRateDate é a data efetivamente
+  // usada na cotação (pode diferir da data pedida em fins de semana/feriado).
+  exchangeRate: numeric("exchange_rate", { precision: 10, scale: 6 }),
+  exchangeRateDate: date("exchange_rate_date"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -177,6 +203,8 @@ export const processInvoices = pgTable("process_invoices", {
     .notNull()
     .references(() => processes.id, { onDelete: "cascade" }),
   invoiceNumber: text("invoice_number").notNull(),
+  // Valor FOB declarado desta invoice, na moeda de processes.currency.
+  value: numeric("value", { precision: 12, scale: 2 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

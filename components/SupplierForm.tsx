@@ -1,11 +1,4 @@
-const INCOTERMS = [
-  "EXW - Ex Works",
-  "FOB - Free on Board",
-  "CIF - Cost, Insurance and Freight",
-  "CFR - Cost and Freight",
-  "DAP - Delivered at Place",
-  "DDP - Delivered Duty Paid",
-];
+import { INCOTERMS } from "@/lib/incoterms";
 
 export type SupplierFormValues = {
   name?: string | null;
