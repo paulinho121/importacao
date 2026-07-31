@@ -2,12 +2,18 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { db } from "@/db/client";
 import { products, suppliers, processItems } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, ilike, or, sql } from "drizzle-orm";
 import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProdutosPage() {
+export default async function ProdutosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q = "" } = await searchParams;
+
   const rows = await db
     .select({
       id: products.id,
@@ -22,6 +28,16 @@ export default async function ProdutosPage() {
     .from(products)
     .leftJoin(suppliers, eq(products.defaultSupplierId, suppliers.id))
     .leftJoin(processItems, eq(processItems.productId, products.id))
+    .where(
+      q
+        ? or(
+            ilike(products.sku, `%${q}%`),
+            ilike(products.manufacturerSku, `%${q}%`),
+            ilike(products.description, `%${q}%`),
+            ilike(products.ncm, `%${q}%`),
+          )
+        : undefined,
+    )
     .groupBy(products.id, suppliers.name)
     .orderBy(products.sku);
 
@@ -45,6 +61,19 @@ export default async function ProdutosPage() {
           </Link>
         </div>
 
+        <form action="/produtos" className="relative max-w-md">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+            search
+          </span>
+          <input
+            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:border-secondary transition-colors font-body-md text-body-md"
+            placeholder="Buscar por SKU interno, SKU fabricante, descrição ou NCM..."
+            type="text"
+            name="q"
+            defaultValue={q}
+          />
+        </form>
+
         <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -57,13 +86,14 @@ export default async function ProdutosPage() {
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-6 text-on-surface-variant text-center">
-                      Nenhum produto cadastrado ainda.
+                    <td colSpan={8} className="px-6 py-6 text-on-surface-variant text-center">
+                      {q ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado ainda."}
                     </td>
                   </tr>
                 )}
@@ -90,6 +120,15 @@ export default async function ProdutosPage() {
                       )}
                     </td>
                     <td className="px-6 py-3 font-mono-data">{p.usageCount}</td>
+                    <td className="px-6 py-3 text-right">
+                      <Link
+                        href={`/produtos/${p.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-secondary hover:bg-secondary/10 transition-colors font-label-md text-label-md"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        Editar
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>
