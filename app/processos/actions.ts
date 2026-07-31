@@ -1,7 +1,15 @@
 "use server";
 
 import { db } from "@/db/client";
-import { processes, processItems, processEvents, products, processDocuments } from "@/db/schema";
+import {
+  processes,
+  processItems,
+  processEvents,
+  products,
+  processDocuments,
+  processInvoices,
+  itemReservations,
+} from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -29,6 +37,23 @@ export async function createProcess(formData: FormData) {
   if (!supplierId) throw new Error("Fornecedor é obrigatório.");
 
   const modal = optionalText(formData, "modal");
+  const agentId = optionalText(formData, "agentId");
+
+  // Destino: o <select> manda "CODE|Cidade|UF" quando escolhido da lista
+  // conhecida (lib/locations.ts) — um único campo, já que um <select> só
+  // consegue submeter um valor por name sem JS de cliente. Se vazio/"OUTRO",
+  // usa o texto livre do campo "destination" como fallback.
+  const locationChoice = optionalText(formData, "locationChoice");
+  let destinationCode: string | null = null;
+  let destinationCity: string | null = null;
+  let destinationState: string | null = null;
+  if (locationChoice && locationChoice !== "OUTRO") {
+    const [code, city, state] = locationChoice.split("|");
+    destinationCode = code ?? null;
+    destinationCity = city ?? null;
+    destinationState = state ?? null;
+  }
+  const destinationFreeText = optionalText(formData, "destination");
 
   const [created] = await db
     .insert(processes)
@@ -37,11 +62,13 @@ export async function createProcess(formData: FormData) {
       supplierId,
       externalReference: optionalText(formData, "externalReference"),
       modal: modal as (typeof processes.$inferInsert)["modal"],
-      invoiceNumber: optionalText(formData, "invoiceNumber"),
       etd: optionalDate(formData, "etd"),
       etaEstimated: optionalDate(formData, "etaEstimated"),
-      agent: optionalText(formData, "agent"),
-      destination: optionalText(formData, "destination"),
+      agentId,
+      destination: destinationFreeText,
+      destinationCode,
+      destinationCity,
+      destinationState,
       weightKg: optionalNumber(formData, "weightKg"),
       volumeM3: optionalNumber(formData, "volumeM3"),
       notes: optionalText(formData, "notes"),
@@ -49,6 +76,17 @@ export async function createProcess(formData: FormData) {
       currentStep: 1,
     })
     .returning({ id: processes.id });
+
+  // Até 4 invoices no form de criação (como na planilha), sem limite na
+  // tabela — mais invoices podem ser adicionados depois na tela de detalhe.
+  const invoiceNumbers = ["invoice1", "invoice2", "invoice3", "invoice4"]
+    .map((key) => optionalText(formData, key))
+    .filter((v): v is string => Boolean(v));
+  if (invoiceNumbers.length > 0) {
+    await db
+      .insert(processInvoices)
+      .values(invoiceNumbers.map((invoiceNumber) => ({ processId: created.id, invoiceNumber })));
+  }
 
   await db.insert(processEvents).values({
     processId: created.id,
@@ -60,6 +98,14 @@ export async function createProcess(formData: FormData) {
   revalidatePath("/processos");
   revalidatePath("/");
   redirect(`/processos/${created.id}`);
+}
+
+export async function addProcessInvoice(processId: string, formData: FormData) {
+  const invoiceNumber = optionalText(formData, "invoiceNumber");
+  if (!invoiceNumber) throw new Error("Número da invoice é obrigatório.");
+
+  await db.insert(processInvoices).values({ processId, invoiceNumber });
+  revalidatePath(`/processos/${processId}`);
 }
 
 export async function advanceProcessStep(processId: string, _formData: FormData) {
@@ -137,6 +183,22 @@ export async function addProcessItem(processId: string, formData: FormData) {
       reservedTo,
     });
   }
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export async function addItemReservation(processId: string, itemId: string, formData: FormData) {
+  const personName = optionalText(formData, "personName");
+  const quantity = optionalNumber(formData, "quantity");
+  if (!personName) throw new Error("Nome da pessoa é obrigatório.");
+  if (!quantity) throw new Error("Quantidade é obrigatória.");
+
+  await db.insert(itemReservations).values({
+    itemId,
+    personName,
+    quantity,
+    observation: optionalText(formData, "observation"),
+  });
 
   revalidatePath(`/processos/${processId}`);
 }

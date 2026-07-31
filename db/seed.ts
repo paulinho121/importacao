@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "./client";
-import { suppliers, processes, processItems } from "./schema";
+import { suppliers, processes, processItems, processInvoices, freightAgents } from "./schema";
 
 type RawProcess = {
   processNumber: string;
@@ -70,6 +70,24 @@ async function main() {
     supplierIdByName.set(canonical, created.id);
   }
 
+  const agentIdByName = new Map<string, string>();
+  for (const p of raw) {
+    if (!p.agent || agentIdByName.has(p.agent)) continue;
+    const [existing] = await db
+      .select({ id: freightAgents.id })
+      .from(freightAgents)
+      .where(eq(freightAgents.name, p.agent));
+    if (existing) {
+      agentIdByName.set(p.agent, existing.id);
+      continue;
+    }
+    const [created] = await db
+      .insert(freightAgents)
+      .values({ name: p.agent })
+      .returning({ id: freightAgents.id });
+    agentIdByName.set(p.agent, created.id);
+  }
+
   let processCount = 0;
   let itemCount = 0;
 
@@ -90,10 +108,9 @@ async function main() {
         externalReference: p.processoRaw?.replace(/\s+/g, " ").trim() ?? null,
         supplierId,
         modal: (p.modal as (typeof processes.$inferInsert)["modal"]) ?? null,
-        invoiceNumber: p.invoiceRaw,
         etd: p.etd,
         etaEstimated: p.etaEstimated,
-        agent: p.agent,
+        agentId: p.agent ? agentIdByName.get(p.agent) : null,
         destination: p.destination,
         status: p.status as (typeof processes.$inferInsert)["status"],
         currentStep: p.currentStep,
@@ -103,6 +120,10 @@ async function main() {
       })
       .returning({ id: processes.id });
     processCount++;
+
+    if (p.invoiceRaw) {
+      await db.insert(processInvoices).values({ processId: createdProcess.id, invoiceNumber: p.invoiceRaw });
+    }
 
     if (p.items.length > 0) {
       await db.insert(processItems).values(

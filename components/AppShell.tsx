@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/processos", label: "Processos", icon: "receipt_long" },
   { href: "/produtos", label: "Produtos", icon: "inventory_2" },
   { href: "/fornecedores", label: "Fornecedores", icon: "factory" },
+  { href: "/agentes", label: "Agentes de Carga", icon: "local_shipping" },
 ] as const;
 
 function isActive(pathname: string, href: string) {

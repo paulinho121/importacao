@@ -12,20 +12,27 @@ import {
   processEvents,
   processDocuments,
   products,
+  processInvoices,
+  freightAgents,
+  itemReservations,
 } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
   STATUS_LABEL,
   WORKFLOW_STEPS,
   diasRestantes,
   formatDate,
+  stockStatus,
   type ProcessStatus,
 } from "@/lib/status";
+import { locationLabel } from "@/lib/locations";
 import {
   advanceProcessStep,
   updateProcessStatus,
   addProcessItem,
+  addProcessInvoice,
+  addItemReservation,
   uploadProcessDocument,
 } from "@/app/processos/actions";
 import { getSignedDocumentUrl } from "@/lib/supabase-admin";
@@ -52,12 +59,14 @@ export default async function ProcessDetailPage({
       externalReference: processes.externalReference,
       status: processes.status,
       modal: processes.modal,
-      invoiceNumber: processes.invoiceNumber,
       etd: processes.etd,
       etaEstimated: processes.etaEstimated,
       etaActual: processes.etaActual,
-      agent: processes.agent,
+      agentName: freightAgents.name,
       destination: processes.destination,
+      destinationCode: processes.destinationCode,
+      destinationCity: processes.destinationCity,
+      destinationState: processes.destinationState,
       currentStep: processes.currentStep,
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,
@@ -77,11 +86,12 @@ export default async function ProcessDetailPage({
     })
     .from(processes)
     .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
+    .leftJoin(freightAgents, eq(processes.agentId, freightAgents.id))
     .where(eq(processes.id, id));
 
   if (!process) notFound();
 
-  const [items, events, documents, productRows] = await Promise.all([
+  const [items, events, documents, productRows, invoices] = await Promise.all([
     db.select().from(processItems).where(eq(processItems.processId, id)),
     db
       .select()
@@ -93,12 +103,28 @@ export default async function ProcessDetailPage({
       .select({ id: products.id, sku: products.sku, description: products.description })
       .from(products)
       .orderBy(products.sku),
+    db.select().from(processInvoices).where(eq(processInvoices.processId, id)),
   ]);
+
+  const itemIds = items.map((item) => item.id);
+  const reservations = itemIds.length
+    ? await db.select().from(itemReservations).where(inArray(itemReservations.itemId, itemIds))
+    : [];
+  const reservationsByItemId = new Map<string, typeof reservations>();
+  for (const r of reservations) {
+    const list = reservationsByItemId.get(r.itemId) ?? [];
+    list.push(r);
+    reservationsByItemId.set(r.itemId, list);
+  }
 
   const dias = diasRestantes(process.etaEstimated);
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
   const boundUpdateStatus = updateProcessStatus.bind(null, id);
   const boundAddItem = addProcessItem.bind(null, id);
+  const boundAddInvoice = addProcessInvoice.bind(null, id);
+  const destinationLabel = process.destinationCode
+    ? locationLabel(process.destinationCode, process.destinationCity ?? "", process.destinationState ?? "")
+    : process.destination;
   const nextStepLabel =
     process.currentStep < WORKFLOW_STEPS.length ? WORKFLOW_STEPS[process.currentStep] : null;
 
@@ -151,7 +177,7 @@ export default async function ProcessDetailPage({
               />
               Fornecedor: {process.supplierName}
               {process.externalReference ? ` · Ref: ${process.externalReference}` : ""}
-              {process.destination ? ` · Destino: ${process.destination}` : ""}
+              {destinationLabel ? ` · Destino: ${destinationLabel}` : ""}
             </p>
           </div>
           <div className="lg:col-span-4 flex items-center lg:justify-end">
@@ -255,7 +281,6 @@ export default async function ProcessDetailPage({
                 </h3>
                 <dl className="grid grid-cols-1 gap-3 font-body-sm text-body-sm">
                   <Field label="Modal" value={process.modal ?? "—"} />
-                  <Field label="Invoice" value={process.invoiceNumber ?? "—"} />
                   <Field label="ETD" value={formatDate(process.etd)} />
                   <Field
                     label="ETA Estimado"
@@ -266,10 +291,47 @@ export default async function ProcessDetailPage({
                     }
                   />
                   <Field label="ETA Real" value={formatDate(process.etaActual)} />
-                  <Field label="Agente" value={process.agent ?? "—"} />
+                  <Field label="Agente" value={process.agentName ?? "—"} />
                   <Field label="Peso" value={process.weightKg ? `${process.weightKg} kg` : "—"} />
                   <Field label="Volume" value={process.volumeM3 ? `${process.volumeM3} m³` : "—"} />
                 </dl>
+
+                <div className="mt-4 pt-4 border-t border-outline-variant">
+                  <span className="font-label-md text-label-md text-outline block mb-2">
+                    Invoices
+                  </span>
+                  {invoices.length === 0 ? (
+                    <p className="text-on-surface-variant font-body-sm text-body-sm mb-2">
+                      Nenhuma invoice registrada.
+                    </p>
+                  ) : (
+                    <ul className="flex flex-wrap gap-2 mb-3">
+                      {invoices.map((inv) => (
+                        <li
+                          key={inv.id}
+                          className="px-2 py-1 rounded bg-surface-container-low font-mono-data text-xs"
+                        >
+                          {inv.invoiceNumber}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form action={boundAddInvoice} className="flex gap-2">
+                    <input
+                      className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm font-mono-data focus:outline-none focus:border-secondary transition-all"
+                      placeholder="Nova invoice"
+                      type="text"
+                      name="invoiceNumber"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="px-3 py-2 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
+                    >
+                      Adicionar
+                    </button>
+                  </form>
+                </div>
                 {process.notes && (
                   <div className="mt-4 pt-4 border-t border-outline-variant">
                     <span className="font-label-md text-label-md text-outline block mb-1">
@@ -291,26 +353,90 @@ export default async function ProcessDetailPage({
                     Nenhum item registrado.
                   </p>
                 ) : (
-                  <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {items.map((item) => (
-                      <li
-                        key={item.id}
-                        className="flex justify-between items-start gap-2 text-body-sm font-body-sm border-b border-outline-variant/50 pb-2"
-                      >
-                        <div>
-                          <p className="font-medium text-primary">{item.description}</p>
-                          {item.sku && (
-                            <p className="text-xs text-outline font-mono-data">SKU: {item.sku}</p>
+                  <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                    {items.map((item) => {
+                      const itemReservationsList = reservationsByItemId.get(item.id) ?? [];
+                      const total = item.quantity ? Number(item.quantity) : 0;
+                      const reserved = itemReservationsList.reduce(
+                        (sum, r) => sum + Number(r.quantity),
+                        0,
+                      );
+                      const available = total - reserved;
+                      const badge = stockStatus(available, total);
+                      const boundReserve = addItemReservation.bind(null, id, item.id);
+                      return (
+                        <li
+                          key={item.id}
+                          className="text-body-sm font-body-sm border-b border-outline-variant/50 pb-3"
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <div>
+                              <p className="font-medium text-primary">{item.description}</p>
+                              {item.sku && (
+                                <p className="text-xs text-outline font-mono-data">SKU: {item.sku}</p>
+                              )}
+                              {item.reservedTo && (
+                                <p className="text-xs text-on-surface-variant">
+                                  Reserva (planilha): {item.reservedTo}
+                                </p>
+                              )}
+                            </div>
+                            <span className="font-bold text-primary shrink-0">{total || "—"}</span>
+                          </div>
+                          {total > 0 && (
+                            <>
+                              <div className="flex items-center gap-3 mt-2 text-xs">
+                                <span className={`px-2 py-0.5 rounded-full ${badge.className}`}>
+                                  {badge.label}
+                                </span>
+                                <span className="text-on-surface-variant">
+                                  Pedido: {total} · Reservado: {reserved} · Disponível: {available}
+                                </span>
+                              </div>
+                              {itemReservationsList.length > 0 && (
+                                <ul className="mt-2 space-y-1">
+                                  {itemReservationsList.map((r) => (
+                                    <li key={r.id} className="text-xs text-on-surface-variant">
+                                      {r.personName} — {r.quantity}
+                                      {r.observation ? ` (${r.observation})` : ""}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                              <form action={boundReserve} className="flex gap-1.5 mt-2">
+                                <input
+                                  className="w-24 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                                  placeholder="Nome"
+                                  type="text"
+                                  name="personName"
+                                  required
+                                />
+                                <input
+                                  className="w-16 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                                  placeholder="Qtd"
+                                  type="number"
+                                  step="0.01"
+                                  name="quantity"
+                                  required
+                                />
+                                <input
+                                  className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                                  placeholder="Obs. (opcional)"
+                                  type="text"
+                                  name="observation"
+                                />
+                                <button
+                                  type="submit"
+                                  className="px-2 py-1 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all whitespace-nowrap"
+                                >
+                                  Reservar
+                                </button>
+                              </form>
+                            </>
                           )}
-                          {item.reservedTo && (
-                            <p className="text-xs text-on-surface-variant">Reserva: {item.reservedTo}</p>
-                          )}
-                        </div>
-                        <span className="font-bold text-primary shrink-0">
-                          {item.quantity ?? "—"}
-                        </span>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
                 <AddItemForm action={boundAddItem} products={productRows} />

@@ -1,8 +1,9 @@
 import AppShell from "@/components/AppShell";
 import { createProcess } from "@/app/processos/actions";
 import { db } from "@/db/client";
-import { suppliers, processes } from "@/db/schema";
+import { suppliers, processes, freightAgents } from "@/db/schema";
 import { sql } from "drizzle-orm";
+import { LOCATIONS, locationLabel } from "@/lib/locations";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,8 @@ const MODAIS = [
   { value: "AIR", label: "Aéreo" },
   { value: "SEA_FCL", label: "Marítimo FCL" },
   { value: "SEA_LCL", label: "Marítimo LCL" },
+  { value: "SEA_BREAK_BULK", label: "Marítimo Break Bulk" },
+  { value: "SEA_RORO", label: "Marítimo RORO" },
   { value: "COURIER", label: "Courier" },
   { value: "ROAD", label: "Rodoviário" },
 ];
@@ -24,8 +27,9 @@ async function suggestProcessNumber(): Promise<string> {
 }
 
 export default async function NovoProcessoPage() {
-  const [supplierRows, suggestedNumber] = await Promise.all([
+  const [supplierRows, agentRows, suggestedNumber] = await Promise.all([
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
+    db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
     suggestProcessNumber(),
   ]);
 
@@ -108,14 +112,39 @@ export default async function NovoProcessoPage() {
               </div>
               <div>
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                  Invoice
+                  Agente de Carga
                 </label>
-                <input
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
-                  type="text"
-                  name="invoiceNumber"
-                />
+                <select
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+                  name="agentId"
+                  defaultValue=""
+                >
+                  <option value="">Nenhum</option>
+                  {agentRows.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              <div className="sm:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="col-span-2 sm:col-span-4">
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                    Invoices
+                  </label>
+                </div>
+                {[1, 2, 3, 4].map((n) => (
+                  <input
+                    key={n}
+                    className="bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+                    placeholder={`Invoice ${n}`}
+                    type="text"
+                    name={`invoice${n}`}
+                  />
+                ))}
+              </div>
+
               <div>
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                   ETD (saída estimada)
@@ -138,20 +167,29 @@ export default async function NovoProcessoPage() {
               </div>
               <div>
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                  Agente
+                  Destino (porto/aeroporto conhecido)
                 </label>
-                <input
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
-                  type="text"
-                  name="agent"
-                />
+                <select
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+                  name="locationChoice"
+                  defaultValue=""
+                >
+                  <option value="">Selecione (opcional)</option>
+                  {LOCATIONS.map((loc) => (
+                    <option key={loc.code} value={`${loc.code}|${loc.city}|${loc.state}`}>
+                      {locationLabel(loc.code, loc.city, loc.state)}
+                    </option>
+                  ))}
+                  <option value="OUTRO">Outro (descrever ao lado)</option>
+                </select>
               </div>
               <div>
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                  Destino
+                  Destino (se não estiver na lista)
                 </label>
                 <input
                   className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
+                  placeholder="ex: cidade/porto não listado"
                   type="text"
                   name="destination"
                 />

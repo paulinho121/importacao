@@ -7,23 +7,53 @@ import {
   numeric,
   date,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 
+// SEA_BREAK_BULK/SEA_RORO adicionados para cobrir os tipos de embarque
+// marítimo vistos na planilha "FLUXOGRAMA DE IMPORTAÇÃO" (aba "Tipo de
+// Embarques"). Não separamos Modalidade x Tipo de Embarque em dois campos
+// (como a planilha faz) para não reescrever todos os filtros/ícones já
+// construídos em cima deste enum único.
 export const modalEnum = pgEnum("modal", [
   "AIR",
   "SEA_FCL",
   "SEA_LCL",
+  "SEA_BREAK_BULK",
+  "SEA_RORO",
   "COURIER",
   "ROAD",
 ]);
 
+// PEDIDO/PRODUCAO/TRANSPORTE_NACIONAL/RECEBIDO adicionados a partir do
+// pipeline de 8 estados visto na planilha (a aba TABELA AUXILIAR lista:
+// Pedido, Produção, Embarque, Em Trânsito, Desembaraço, Transporte,
+// Recebido, + Finalizado). Só ADICIONAMOS valores ao enum — não dá pra
+// remover/renomear valor de enum Postgres com segurança tendo processos
+// já gravados com os valores antigos. EMBARCADO/CONCLUIDO continuam
+// existindo; o rótulo de exibição ("Embarque"/"Finalizado") é feito via
+// STATUS_LABEL em lib/status.ts, sem precisar tocar no enum.
 export const processStatusEnum = pgEnum("process_status", [
   "AGUARDANDO_EMBARQUE",
+  "PEDIDO",
+  "PRODUCAO",
   "EMBARCADO",
   "EM_TRANSITO",
   "EM_DESEMBARACO",
+  "TRANSPORTE_NACIONAL",
+  "RECEBIDO",
   "ATRASADO",
   "CONCLUIDO",
+]);
+
+// Status do licenciamento de importação ("Inciso V") de um produto —
+// visto na aba "BD Itens Amparados Inciso V" da planilha.
+export const licenseStatusEnum = pgEnum("license_status", [
+  "A_REGISTRAR",
+  "PARA_ANALISE",
+  "EM_CONSULTA_PUBLICA",
+  "DEFERIDA",
+  "CANCELADA_INDEFERIDA",
 ]);
 
 export const documentTypeEnum = pgEnum("document_type", [
@@ -62,6 +92,26 @@ export const suppliers = pgTable("suppliers", {
     .defaultNow(),
 });
 
+// Agentes de carga (freight forwarders). Mesmo papel que suppliers: processos
+// referenciam por FK em vez de texto livre — antes "agent" era texto solto
+// em processes, com o mesmo risco de duplicidade/erro de digitação que
+// resolvemos para fornecedor (ex: FIRST, NSL, CODELI, CRONOS, NEXT, ROCKET,
+// FEDEX, confirmados na aba TABELA AUXILIAR da planilha).
+export const freightAgents = pgTable("freight_agents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  contactName: text("contact_name"),
+  email: text("email"),
+  phone: text("phone"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Processos de importação. status e datas são campos estruturados únicos —
 // nunca texto livre misturado (ex: "Frete fechado 21/07" vira `notes`, não `etaEstimated`).
 export const processes = pgTable("processes", {
@@ -72,12 +122,19 @@ export const processes = pgTable("processes", {
     .notNull()
     .references(() => suppliers.id),
   modal: modalEnum("modal"),
-  invoiceNumber: text("invoice_number"),
   etd: date("etd"),
   etaEstimated: date("eta_estimated"),
   etaActual: date("eta_actual"),
-  agent: text("agent"),
+  // Substituiu o antigo campo "agent" (texto livre) — ver freightAgents.
+  agentId: uuid("agent_id").references(() => freightAgents.id),
   destination: text("destination"),
+  // Destino estruturado (código + cidade + UF, ex: "GRU" / "Guarulhos" /
+  // "SP") — visto na planilha como "GRU - ✈️ Guarulhos (SP)". Lista de
+  // opções conhecidas em lib/locations.ts. Os processos antigos mantêm só
+  // `destination` (texto livre) — não tentamos parsear retroativamente.
+  destinationCode: text("destination_code"),
+  destinationCity: text("destination_city"),
+  destinationState: text("destination_state"),
   status: processStatusEnum("status").notNull().default("AGUARDANDO_EMBARQUE"),
   currentStep: integer("current_step").notNull().default(1),
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
@@ -106,6 +163,20 @@ export const processes = pgTable("processes", {
     .defaultNow(),
 });
 
+// Invoices de um processo — normalizado a partir do campo único que existia
+// antes. A planilha tinha até 4 colunas fixas (Invoice 1-4); aqui não há
+// limite, evitando reproduzir essa restrição artificial.
+export const processInvoices = pgTable("process_invoices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  processId: uuid("process_id")
+    .notNull()
+    .references(() => processes.id, { onDelete: "cascade" }),
+  invoiceNumber: text("invoice_number").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Catálogo mestre de produtos. Itens de processo podem referenciar um
 // produto daqui (FK opcional) em vez de digitar SKU/descrição soltos —
 // garante NCM correto (obrigatório para desembaraço) e evita duplicidade.
@@ -114,6 +185,19 @@ export const products = pgTable("products", {
   sku: text("sku").notNull().unique(),
   manufacturerSku: text("manufacturer_sku"),
   ncm: text("ncm"),
+  // Licenciamento de importação ("Inciso V") — visto na aba "BD Itens
+  // Amparados Inciso V" da planilha. Todos opcionais: nem todo produto
+  // exige licença de importação.
+  ncmAnterior: text("ncm_anterior"),
+  manufacturerName: text("manufacturer_name"),
+  exporterName: text("exporter_name"),
+  licenseNumber: text("license_number"),
+  licenseRegisteredAt: date("license_registered_at"),
+  licenseStatus: licenseStatusEnum("license_status"),
+  publicConsultationRef: text("public_consultation_ref"),
+  licenseApprovedAt: date("license_approved_at"),
+  customsBrokerRef: text("customs_broker_ref"),
+  active: boolean("active").notNull().default(true),
   description: text("description").notNull(),
   defaultSupplierId: uuid("default_supplier_id").references(() => suppliers.id),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -137,7 +221,28 @@ export const processItems = pgTable("process_items", {
   sku: text("sku"),
   description: text("description").notNull(),
   quantity: numeric("quantity", { precision: 10, scale: 2 }),
+  // reservedTo (legado, texto livre tipo "1 Joao Sousa / 1 Felipe"): mantido
+  // por compatibilidade com os itens já seedados da planilha original.
+  // Reservas novas usam itemReservations abaixo (permite múltiplas pessoas
+  // reservando quantidades parciais do mesmo item, com disponível calculado).
   reservedTo: text("reserved_to"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Reservas de estoque por item — várias pessoas podem reservar parte da
+// quantidade de um mesmo item (visto nas abas "IMP 3426"/"Modelo" da
+// planilha: Qtd Pedido, Qtd Reserva, Disponível calculado). Disponível não
+// é armazenado, é calculado na leitura (quantity do item − soma das reservas).
+export const itemReservations = pgTable("item_reservations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  itemId: uuid("item_id")
+    .notNull()
+    .references(() => processItems.id, { onDelete: "cascade" }),
+  personName: text("person_name").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
+  observation: text("observation"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

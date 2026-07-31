@@ -6,6 +6,10 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+function optionalText(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "").trim() || null;
+}
+
 function readProductForm(formData: FormData) {
   const sku = String(formData.get("sku") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -14,9 +18,22 @@ function readProductForm(formData: FormData) {
   return {
     sku,
     description,
-    manufacturerSku: String(formData.get("manufacturerSku") ?? "").trim() || null,
-    ncm: String(formData.get("ncm") ?? "").trim() || null,
-    defaultSupplierId: String(formData.get("defaultSupplierId") ?? "").trim() || null,
+    manufacturerSku: optionalText(formData, "manufacturerSku"),
+    ncm: optionalText(formData, "ncm"),
+    defaultSupplierId: optionalText(formData, "defaultSupplierId"),
+    // Licenciamento de importação ("Inciso V") — todos opcionais.
+    ncmAnterior: optionalText(formData, "ncmAnterior"),
+    manufacturerName: optionalText(formData, "manufacturerName"),
+    exporterName: optionalText(formData, "exporterName"),
+    licenseNumber: optionalText(formData, "licenseNumber"),
+    licenseRegisteredAt: optionalText(formData, "licenseRegisteredAt"),
+    licenseStatus: optionalText(formData, "licenseStatus") as
+      | (typeof products.$inferInsert)["licenseStatus"]
+      | null,
+    publicConsultationRef: optionalText(formData, "publicConsultationRef"),
+    licenseApprovedAt: optionalText(formData, "licenseApprovedAt"),
+    customsBrokerRef: optionalText(formData, "customsBrokerRef"),
+    active: formData.get("active") === "on",
   };
 }
 

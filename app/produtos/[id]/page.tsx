@@ -43,6 +43,16 @@ export default async function EditProdutoPage({
               ncm: product.ncm,
               description: product.description,
               defaultSupplierId: product.defaultSupplierId,
+              ncmAnterior: product.ncmAnterior,
+              manufacturerName: product.manufacturerName,
+              exporterName: product.exporterName,
+              licenseNumber: product.licenseNumber,
+              licenseRegisteredAt: product.licenseRegisteredAt,
+              licenseStatus: product.licenseStatus,
+              publicConsultationRef: product.publicConsultationRef,
+              licenseApprovedAt: product.licenseApprovedAt,
+              customsBrokerRef: product.customsBrokerRef,
+              active: product.active,
             }}
             submitLabel="Salvar Alterações"
             suppliers={supplierRows}

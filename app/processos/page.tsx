@@ -2,12 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import AppShell from "@/components/AppShell";
 import { db } from "@/db/client";
-import { processes, suppliers, processItems } from "@/db/schema";
+import { processes, suppliers, processItems, processInvoices } from "@/db/schema";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
   STATUS_ICON,
   STATUS_LABEL,
+  WORKFLOW_STEPS,
   formatDate,
   type ProcessStatus,
 } from "@/lib/status";
@@ -19,6 +20,8 @@ const MODAL_FILTERS = [
   { value: "AIR", label: "Aéreo", icon: "flight" },
   { value: "SEA_FCL", label: "Marítimo FCL", icon: "directions_boat" },
   { value: "SEA_LCL", label: "Marítimo LCL", icon: "directions_boat" },
+  { value: "SEA_BREAK_BULK", label: "Break Bulk", icon: "directions_boat" },
+  { value: "SEA_RORO", label: "RORO", icon: "directions_boat" },
   { value: "COURIER", label: "Courier", icon: "local_shipping" },
   { value: "ROAD", label: "Rodoviário", icon: "local_shipping" },
 ] as const;
@@ -27,6 +30,8 @@ const MODAL_ICON: Record<string, string> = {
   AIR: "flight",
   SEA_FCL: "directions_boat",
   SEA_LCL: "directions_boat",
+  SEA_BREAK_BULK: "directions_boat",
+  SEA_RORO: "directions_boat",
   COURIER: "local_shipping",
   ROAD: "local_shipping",
 };
@@ -46,8 +51,12 @@ export default async function ProcessosPage({
     conditions.push(
       or(
         ilike(processes.processNumber, `%${q}%`),
-        ilike(processes.invoiceNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
+        sql`exists (
+          select 1 from ${processInvoices}
+          where ${processInvoices.processId} = ${processes.id}
+          and ${processInvoices.invoiceNumber} ilike ${`%${q}%`}
+        )`,
       ),
     );
   }
@@ -125,7 +134,7 @@ export default async function ProcessosPage({
             </p>
           )}
           {rows.map((p) => {
-            const progress = Math.round((p.currentStep / 7) * 100);
+            const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
             const badgeClass = STATUS_BADGE_CLASS[p.status as ProcessStatus];
             return (
               <Link

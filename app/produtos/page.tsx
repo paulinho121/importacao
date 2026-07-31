@@ -3,6 +3,7 @@ import AppShell from "@/components/AppShell";
 import { db } from "@/db/client";
 import { products, suppliers, processItems } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function ProdutosPage() {
       manufacturerSku: products.manufacturerSku,
       ncm: products.ncm,
       description: products.description,
+      licenseStatus: products.licenseStatus,
       supplierName: suppliers.name,
       usageCount: sql<number>`count(${processItems.id})`.mapWith(Number),
     })
@@ -53,6 +55,7 @@ export default async function ProdutosPage() {
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NCM</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DESCRIÇÃO</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
                 </tr>
               </thead>
@@ -75,6 +78,17 @@ export default async function ProdutosPage() {
                     <td className="px-6 py-3 font-mono-data">{p.ncm ?? "—"}</td>
                     <td className="px-6 py-3 font-medium">{p.description}</td>
                     <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
+                    <td className="px-6 py-3">
+                      {p.licenseStatus ? (
+                        <span
+                          className={`px-2 py-1 rounded-full font-label-md text-label-md ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
+                        >
+                          {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td className="px-6 py-3 font-mono-data">{p.usageCount}</td>
                   </tr>
                 ))}
