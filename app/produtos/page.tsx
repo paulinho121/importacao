@@ -22,6 +22,9 @@ export default async function ProdutosPage({
       ncm: products.ncm,
       description: products.description,
       licenseStatus: products.licenseStatus,
+      costPrice: products.costPrice,
+      costCurrency: products.costCurrency,
+      markupPercent: products.markupPercent,
       supplierName: suppliers.name,
       usageCount: sql<number>`count(${processItems.id})`.mapWith(Number),
     })
@@ -85,6 +88,8 @@ export default async function ProdutosPage({
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DESCRIÇÃO</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PREÇO SUGERIDO</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">AÇÕES</th>
                 </tr>
@@ -92,7 +97,7 @@ export default async function ProdutosPage({
               <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-6 py-6 text-on-surface-variant text-center">
+                    <td colSpan={10} className="px-6 py-6 text-on-surface-variant text-center">
                       {q ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado ainda."}
                     </td>
                   </tr>
@@ -118,6 +123,14 @@ export default async function ProdutosPage({
                       ) : (
                         "—"
                       )}
+                    </td>
+                    <td className="px-6 py-3 font-mono-data">
+                      {p.costPrice ? `${Number(p.costPrice).toFixed(2)} ${p.costCurrency ?? ""}` : "—"}
+                    </td>
+                    <td className="px-6 py-3 font-mono-data">
+                      {p.costPrice && p.markupPercent
+                        ? `${(Number(p.costPrice) * (1 + Number(p.markupPercent) / 100)).toFixed(2)} ${p.costCurrency ?? ""}`
+                        : "—"}
                     </td>
                     <td className="px-6 py-3 font-mono-data">{p.usageCount}</td>
                     <td className="px-6 py-3 text-right">

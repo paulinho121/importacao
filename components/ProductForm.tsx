@@ -1,3 +1,5 @@
+import { CURRENCIES } from "@/lib/currencies";
+
 const LICENSE_STATUS_OPTIONS = [
   { value: "", label: "Sem licença / não se aplica" },
   { value: "A_REGISTRAR", label: "A Registrar" },
@@ -14,6 +16,9 @@ export type ProductFormValues = {
   ncm?: string | null;
   description?: string | null;
   defaultSupplierId?: string | null;
+  costPrice?: string | null;
+  costCurrency?: string | null;
+  markupPercent?: string | null;
   ncmAnterior?: string | null;
   manufacturerName?: string | null;
   exporterName?: string | null;
@@ -108,6 +113,71 @@ export default function ProductForm({
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="pt-6 border-t border-outline-variant">
+        <h3 className="font-headline-sm text-headline-sm text-primary mb-1">
+          Preço de Compra e Markup
+        </h3>
+        <p className="text-xs text-on-surface-variant mb-4">
+          O preço de compra é o custo de aquisição (ex: preço de tabela do fornecedor). O
+          preço de venda sugerido é calculado a partir do markup, nunca gravado diretamente.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Preço de Compra
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="costPrice"
+              defaultValue={defaultValues?.costPrice ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Moeda
+            </label>
+            <select
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+              name="costCurrency"
+              defaultValue={defaultValues?.costCurrency ?? ""}
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Markup (%)
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="markupPercent"
+              defaultValue={defaultValues?.markupPercent ?? ""}
+            />
+          </div>
+        </div>
+        {defaultValues?.costPrice && defaultValues?.markupPercent && (
+          <p className="mt-3 text-body-sm font-body-sm text-on-surface-variant">
+            Preço de venda sugerido:{" "}
+            <span className="font-bold text-primary font-mono-data">
+              {(
+                Number(defaultValues.costPrice) *
+                (1 + Number(defaultValues.markupPercent) / 100)
+              ).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+              {defaultValues.costCurrency ?? ""}
+            </span>{" "}
+            <span className="text-xs">(recalculado após salvar)</span>
+          </p>
+        )}
       </div>
 
       <div className="pt-6 border-t border-outline-variant">

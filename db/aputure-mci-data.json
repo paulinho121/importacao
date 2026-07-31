@@ -1,0 +1,2762 @@
+[
+  {
+    "model": "Fresnel F10",
+    "description": "Fresnel F10",
+    "manufacturerSku": "APA0172A30",
+    "distPrice": 120.0,
+    "mapPrice": 219.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "Barndoor F10",
+    "description": "Barndoor F10",
+    "manufacturerSku": "APA0191A30",
+    "distPrice": 68.0,
+    "mapPrice": 139.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "LSC300DIIVKIT",
+    "description": "LSC300d II Daylight LED Light (V-mount)",
+    "manufacturerSku": "APV0129A2F",
+    "distPrice": 451.0,
+    "mapPrice": 807.0,
+    "family": "LIGHT STORM"
+  },
+  {
+    "model": "LIGHTDOME150",
+    "description": "Light Dome 150",
+    "manufacturerSku": "APA0227A30",
+    "distPrice": 145.0,
+    "mapPrice": 269.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "Lightbox 6090",
+    "description": "Lightbox 6090",
+    "manufacturerSku": "APA0222A30",
+    "distPrice": 38.0,
+    "mapPrice": 66.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "LANTERN",
+    "description": "Lantern",
+    "manufacturerSku": "APJ0155A3E",
+    "distPrice": 48.0,
+    "mapPrice": 89.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "AMOLANTERN90",
+    "description": "Lantern 90",
+    "manufacturerSku": "APA0220A30",
+    "distPrice": 72.0,
+    "mapPrice": 139.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "SPACELIGHT",
+    "description": "Space Light",
+    "manufacturerSku": "APB047DD6J",
+    "distPrice": 30.0,
+    "mapPrice": 50.0,
+    "family": "LS MODIFIERS"
+  },
+  {
+    "model": "LTCLAMP",
+    "description": "Lighting Clamp",
+    "manufacturerSku": "APQ0148A30",
+    "distPrice": 38.0,
+    "mapPrice": 68.0,
+    "family": "LS / NOVA MODIFIERS"
+  },
+  {
+    "model": "NOVAP300C",
+    "description": "NOVA P300C",
+    "manufacturerSku": "APC0107A2B",
+    "distPrice": 810.0,
+    "mapPrice": 1000.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "NOVAP300CKIT",
+    "description": "Nova P300c Kit",
+    "manufacturerSku": "APD0107A2B",
+    "distPrice": 910.0,
+    "mapPrice": 1200.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "P300SOFTBOX",
+    "description": "NOVA P300c Softbox",
+    "manufacturerSku": "APD0157A3C",
+    "distPrice": 73.0,
+    "mapPrice": 149.0,
+    "family": "NOVA MODIFIERS"
+  },
+  {
+    "model": "P300BARNDOOR",
+    "description": "Barndoor for Nova P300c",
+    "manufacturerSku": "APA0219A30",
+    "distPrice": 80.0,
+    "mapPrice": 169.0,
+    "family": "NOVA MODIFIERS"
+  },
+  {
+    "model": "P600CBARNDOOR",
+    "description": "Nova P600C Barn Doors",
+    "manufacturerSku": "APB0179A30",
+    "distPrice": 99.0,
+    "mapPrice": 199.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "Nova P600C Space Light",
+    "description": "Nova P600C Space Light",
+    "manufacturerSku": "APS1179A30",
+    "distPrice": 100.0,
+    "mapPrice": 199.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "Nova P600C Case",
+    "description": "Nova P600C Case",
+    "manufacturerSku": "APC0179A30",
+    "distPrice": 190.0,
+    "mapPrice": 369.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "Nova P600C Dual Head Yoke",
+    "description": "Nova P600C Dual Head Yoke",
+    "manufacturerSku": "APM5179A30",
+    "distPrice": 170.0,
+    "mapPrice": 349.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "Nova P600C Pole Operated Yoke",
+    "description": "Nova P600C Pole Operated Yoke",
+    "manufacturerSku": "APM1179A30",
+    "distPrice": 170.0,
+    "mapPrice": 349.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "Nova P600C Rain Shield",
+    "description": "Nova P600C Rain Shield",
+    "manufacturerSku": "APW0179A30",
+    "distPrice": 75.0,
+    "mapPrice": 149.0,
+    "family": "NOVA"
+  },
+  {
+    "model": "MC",
+    "description": "MC RGBWW Mini LED Light",
+    "manufacturerSku": "APA0142A10",
+    "distPrice": 66.0,
+    "mapPrice": 90.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "MC4KIT",
+    "description": "MC 4 Light Travel Kit",
+    "manufacturerSku": "APA0152A10",
+    "distPrice": 350.0,
+    "mapPrice": 499.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "MC12KIT",
+    "description": "MC 12 Light Production Kit",
+    "manufacturerSku": "APA0147A10",
+    "distPrice": 950.0,
+    "mapPrice": 1499.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "AACB7C",
+    "description": "Accent B7C RGBWW Bulb",
+    "manufacturerSku": "APC0146A7B",
+    "distPrice": 40.0,
+    "mapPrice": 56.0,
+    "family": "ACCENT"
+  },
+  {
+    "model": "AACB7C8KITUS",
+    "description": "Accent B7c 8 Light Kit w\\ Charging Case",
+    "manufacturerSku": "APC0213A7B",
+    "distPrice": 500.0,
+    "mapPrice": 799.0,
+    "family": "ACCENT"
+  },
+  {
+    "model": "Accent B7c 8-Light Case",
+    "description": "Accent B7c 8-Light Case",
+    "manufacturerSku": "APC0213A3B",
+    "distPrice": 169.0,
+    "mapPrice": 299.0,
+    "family": "ACCENT"
+  },
+  {
+    "model": "Ligth Octadome 120",
+    "description": "Ligth Octadome 120",
+    "manufacturerSku": "APA0226A30",
+    "distPrice": 59.0,
+    "mapPrice": 129.0,
+    "family": "LIGHT STORM"
+  },
+  {
+    "model": "AMARAN T2c",
+    "description": "Amaran T2c",
+    "manufacturerSku": "APM0241A14",
+    "distPrice": 110.0,
+    "mapPrice": 199.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "AMARAN T4c",
+    "description": "Amaran T4c",
+    "manufacturerSku": "APL0241A14",
+    "distPrice": 170.0,
+    "mapPrice": 329.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "Amaran F21c",
+    "description": "Amaran F21c",
+    "manufacturerSku": "AP30232A14",
+    "distPrice": 330.0,
+    "mapPrice": 599.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "Amaran F21x",
+    "description": "Amaran F21x",
+    "manufacturerSku": "AP20232A14",
+    "distPrice": 225.0,
+    "mapPrice": 399.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "Amaran F22c",
+    "description": "Amaran F22c",
+    "manufacturerSku": "AP30235A14",
+    "distPrice": 490.0,
+    "mapPrice": 899.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "Amaran F22x",
+    "description": "Amaran F22x",
+    "manufacturerSku": "AP20235A14",
+    "distPrice": 390.0,
+    "mapPrice": 699.0,
+    "family": "AMARAN"
+  },
+  {
+    "model": "LS 600c Pro II(V-mount)（US）",
+    "description": "LS 600c Pro II(V-mount)（US）",
+    "manufacturerSku": "AP30332A20",
+    "distPrice": 950.0,
+    "mapPrice": 1450.0,
+    "family": "LIGHT STORM"
+  },
+  {
+    "model": "Aputure MT Pro-1 light Kit lumenradio",
+    "description": "Aputure MT Pro-1 light Kit lumenradio",
+    "manufacturerSku": "APA0202A10",
+    "distPrice": 125.0,
+    "mapPrice": 199.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "Handheld Bracket for the COB 60",
+    "description": "Handheld Bracket for the COB 60",
+    "manufacturerSku": "APA0209PJ2",
+    "distPrice": 22.0,
+    "mapPrice": 40.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Amaran SM5c",
+    "description": "Amaran SM5c",
+    "manufacturerSku": "APA0008A11",
+    "distPrice": 48.0,
+    "mapPrice": 89.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "amaran SM5c Extension 5 meters",
+    "description": "amaran SM5c Extension 5 meters",
+    "manufacturerSku": "APA0008A16",
+    "distPrice": 20.0,
+    "mapPrice": 39.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "45 Degree Grid For amaran T2c",
+    "description": "45 Degree Grid For amaran T2c",
+    "manufacturerSku": "APB0241A38",
+    "distPrice": 24.0,
+    "mapPrice": 45.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "45 Degree Grid For amaran T4c",
+    "description": "45 Degree Grid For amaran T4c",
+    "manufacturerSku": "APB0241A39",
+    "distPrice": 40.0,
+    "mapPrice": 69.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Battery station For amaran Tube",
+    "description": "Battery station For amaran Tube",
+    "manufacturerSku": "APB0241A3A",
+    "distPrice": 45.0,
+    "mapPrice": 85.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Amaran PT2c",
+    "description": "Amaran PT2c",
+    "manufacturerSku": "AP20012A10",
+    "distPrice": 90.0,
+    "mapPrice": 149.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Amaran PT4c",
+    "description": "Amaran PT4c",
+    "manufacturerSku": "AP40012A10",
+    "distPrice": 138.0,
+    "mapPrice": 214.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "INFINIBAR PB3",
+    "description": "INFINIBAR PB3",
+    "manufacturerSku": "APS0300A1G",
+    "distPrice": 108.0,
+    "mapPrice": 299.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB3 Softbox",
+    "description": "InfiniBar PB3 Softbox",
+    "manufacturerSku": "APS0300A31",
+    "distPrice": 26.0,
+    "mapPrice": 69.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB3 Light Control Grid(45°）",
+    "description": "InfiniBar PB3 Light Control Grid(45°）",
+    "manufacturerSku": "APS0300A32",
+    "distPrice": 20.0,
+    "mapPrice": 59.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR PB6",
+    "description": "INFINIBAR PB6",
+    "manufacturerSku": "APM0300A1G",
+    "distPrice": 180.0,
+    "mapPrice": 479.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB6 Softbox",
+    "description": "InfiniBar PB6 Softbox",
+    "manufacturerSku": "APM0300A31",
+    "distPrice": 32.0,
+    "mapPrice": 89.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB6 Light Control Grid(45°)",
+    "description": "InfiniBar PB6 Light Control Grid(45°)",
+    "manufacturerSku": "APM0300A32",
+    "distPrice": 26.0,
+    "mapPrice": 79.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR PB6 8-Light Kit（US)",
+    "description": "INFINIBAR PB6 8-Light Kit（US)",
+    "manufacturerSku": "APM0300AX1",
+    "distPrice": 1820.0,
+    "mapPrice": 3700.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR PB12",
+    "description": "INFINIBAR PB12",
+    "manufacturerSku": "APL0300A1G",
+    "distPrice": 240.0,
+    "mapPrice": 639.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB12 Softbox",
+    "description": "InfiniBar PB12 Softbox",
+    "manufacturerSku": "APL0300A31",
+    "distPrice": 38.0,
+    "mapPrice": 109.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "InfiniBar PB12 Light Control Grid(45°)",
+    "description": "InfiniBar PB12 Light Control Grid(45°)",
+    "manufacturerSku": "APL0300A32",
+    "distPrice": 32.0,
+    "mapPrice": 99.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR PB12 8-Light Kit",
+    "description": "INFINIBAR PB12 8-Light Kit",
+    "manufacturerSku": "APL0300AX1",
+    "distPrice": 2380.0,
+    "mapPrice": 6350.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "Aputure InfiniBar Multi-Light Shaping Kit",
+    "description": "Aputure InfiniBar Multi-Light Shaping Kit",
+    "manufacturerSku": "APD0300A30",
+    "distPrice": 500.0,
+    "mapPrice": 1390.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 48W（24V) Power Adapter Kit",
+    "description": "INFINIBAR 48W（24V) Power Adapter Kit",
+    "manufacturerSku": "APD0300A3A",
+    "distPrice": 20.0,
+    "mapPrice": 59.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 168W（24V) Power Adapter Kit",
+    "description": "INFINIBAR 168W（24V) Power Adapter Kit",
+    "manufacturerSku": "APD0300A3B",
+    "distPrice": 34.0,
+    "mapPrice": 99.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 250W（24V) Power Adapter Kit",
+    "description": "INFINIBAR 250W（24V) Power Adapter Kit",
+    "manufacturerSku": "APD0300A3C",
+    "distPrice": 44.0,
+    "mapPrice": 129.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 4-Way Power Splitter Cable",
+    "description": "INFINIBAR 4-Way Power Splitter Cable",
+    "manufacturerSku": "APX0300AX0",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Clamp",
+    "description": "INFINIBAR Clamp",
+    "manufacturerSku": "APD0300A3D",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Straight Connector",
+    "description": "INFINIBAR Straight Connector",
+    "manufacturerSku": "APD0300A3E",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 3-Way Flat Connector",
+    "description": "INFINIBAR 3-Way Flat Connector",
+    "manufacturerSku": "APD0300A35",
+    "distPrice": 28.0,
+    "mapPrice": 79.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 4-Way Flat Connector",
+    "description": "INFINIBAR 4-Way Flat Connector",
+    "manufacturerSku": "APD0300A36",
+    "distPrice": 28.0,
+    "mapPrice": 79.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR 6-Way Flat Connector",
+    "description": "INFINIBAR 6-Way Flat Connector",
+    "manufacturerSku": "APD0300A37",
+    "distPrice": 28.0,
+    "mapPrice": 79.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Triangle Flat Connector",
+    "description": "INFINIBAR Triangle Flat Connector",
+    "manufacturerSku": "APD0300A31",
+    "distPrice": 32.0,
+    "mapPrice": 89.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Triangle 3D Connector",
+    "description": "INFINIBAR Triangle 3D Connector",
+    "manufacturerSku": "APD0300A32",
+    "distPrice": 32.0,
+    "mapPrice": 89.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Hexagon Flat Connector",
+    "description": "INFINIBAR Hexagon Flat Connector",
+    "manufacturerSku": "APD0300A33",
+    "distPrice": 50.0,
+    "mapPrice": 139.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Hexagon 3D Connector",
+    "description": "INFINIBAR Hexagon 3D Connector",
+    "manufacturerSku": "APD0300A34",
+    "distPrice": 50.0,
+    "mapPrice": 139.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Square Flat Connector",
+    "description": "INFINIBAR Square Flat Connector",
+    "manufacturerSku": "APD0300A38",
+    "distPrice": 38.0,
+    "mapPrice": 109.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "INFINIBAR Square 3D Connector",
+    "description": "INFINIBAR Square 3D Connector",
+    "manufacturerSku": "APD0300A39",
+    "distPrice": 36.0,
+    "mapPrice": 99.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "LS 600 Series 5-Pin Weatherproof Head Cable (7.5m)",
+    "description": "LS 600 Series 5-Pin Weatherproof Head Cable (7.5m)",
+    "manufacturerSku": "APP0126A31",
+    "distPrice": 39.0,
+    "mapPrice": 78.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "D-Tap Power Cable (2-Pin)",
+    "description": "D-Tap Power Cable (2-Pin)",
+    "manufacturerSku": "APB0152A30",
+    "distPrice": 7.0,
+    "mapPrice": 15.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Type-C to DMX adapter",
+    "description": "Type-C to DMX adapter",
+    "manufacturerSku": "APX0012A10",
+    "distPrice": 13.0,
+    "mapPrice": 29.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "D-Tap to 5.5mm DC Barrel Power Cable",
+    "description": "D-Tap to 5.5mm DC Barrel Power Cable",
+    "manufacturerSku": "APA0209PJ4",
+    "distPrice": 5.0,
+    "mapPrice": 10.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "MC Single Accessory Pack",
+    "description": "MC Single Accessory Pack",
+    "manufacturerSku": "APB0152A31",
+    "distPrice": 9.0,
+    "mapPrice": 18.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "MC 8-Light Accessory Kit",
+    "description": "MC 8-Light Accessory Kit",
+    "manufacturerSku": "APB0147A30",
+    "distPrice": 60.0,
+    "mapPrice": 119.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "Waterproof Pouch for MT pro",
+    "description": "Waterproof Pouch for MT pro",
+    "manufacturerSku": "APA0202PJ1",
+    "distPrice": 6.0,
+    "mapPrice": 15.9,
+    "family": "Aputure"
+  },
+  {
+    "model": "Baby Pin Adapter to Back Clamp for MT pro",
+    "description": "Baby Pin Adapter to Back Clamp for MT pro",
+    "manufacturerSku": "APA0202PJ2",
+    "distPrice": 11.0,
+    "mapPrice": 25.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "1/4 Screw Adapter Adsorption Parts for MT pro",
+    "description": "1/4 Screw Adapter Adsorption Parts for MT pro",
+    "manufacturerSku": "APA0202PJ3",
+    "distPrice": 11.0,
+    "mapPrice": 25.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "Lantern for amaran F21",
+    "description": "Lantern for amaran F21",
+    "manufacturerSku": "APB0232A31",
+    "distPrice": 42.0,
+    "mapPrice": 75.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Lantern for amaran F22",
+    "description": "Lantern for amaran F22",
+    "manufacturerSku": "APB0235A31",
+    "distPrice": 53.0,
+    "mapPrice": 95.0,
+    "family": "Amaran"
+  },
+  {
+    "model": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter",
+    "description": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter",
+    "manufacturerSku": "APT0011A31",
+    "distPrice": 16.0,
+    "mapPrice": 35.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter Kit",
+    "description": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter Kit",
+    "manufacturerSku": "APT0011A30",
+    "distPrice": 36.0,
+    "mapPrice": 69.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "45 Degree Grid For amaran PT1c",
+    "description": "45 Degree Grid For amaran PT1c",
+    "manufacturerSku": "APG0012A31",
+    "distPrice": 10.0,
+    "mapPrice": 19.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Aputure MC 4-Light Wireless Charging Case",
+    "description": "Aputure MC 4-Light Wireless Charging Case",
+    "manufacturerSku": "APA0152A11",
+    "distPrice": 99.0,
+    "mapPrice": 159.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "Aputure MC 12-Light Wireless Charging Case",
+    "description": "Aputure MC 12-Light Wireless Charging Case",
+    "manufacturerSku": "APA0147A11",
+    "distPrice": 270.0,
+    "mapPrice": 499.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "LS 1200 Four-Lights Bracket",
+    "description": "LS 1200 Four-Lights Bracket",
+    "manufacturerSku": "APB0249A35",
+    "distPrice": 1200.0,
+    "mapPrice": 2400.0,
+    "family": "Aputure"
+  },
+  {
+    "model": "MC Pro",
+    "description": "MC Pro",
+    "manufacturerSku": "APA0229A10",
+    "distPrice": 100.0,
+    "mapPrice": 165.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "MC Pro 8-Light Kit",
+    "description": "MC Pro 8-Light Kit",
+    "manufacturerSku": "APA0229A11",
+    "distPrice": 920.0,
+    "mapPrice": 1590.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "Spotlight SE（19°lens kit）",
+    "description": "Spotlight SE（19°lens kit）",
+    "manufacturerSku": "APF0046A31",
+    "distPrice": 170.0,
+    "mapPrice": 305.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight SE（36°lens kit）",
+    "description": "Spotlight SE（36°lens kit）",
+    "manufacturerSku": "APF0046A32",
+    "distPrice": 170.0,
+    "mapPrice": 305.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight SE 19°lens",
+    "description": "Spotlight SE 19°lens",
+    "manufacturerSku": "APF0046A33",
+    "distPrice": 85.0,
+    "mapPrice": 139.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight SE 36°lens",
+    "description": "Spotlight SE 36°lens",
+    "manufacturerSku": "APF0046A34",
+    "distPrice": 75.0,
+    "mapPrice": 129.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight SE IRIS",
+    "description": "Spotlight SE IRIS",
+    "manufacturerSku": "APF0046A35",
+    "distPrice": 23.0,
+    "mapPrice": 40.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight SE Carrying Case",
+    "description": "Spotlight SE Carrying Case",
+    "manufacturerSku": "APF0046A36",
+    "distPrice": 30.0,
+    "mapPrice": 50.0,
+    "family": "amaran"
+  },
+  {
+    "model": "MC Pro Bubble Diffuser",
+    "description": "MC Pro Bubble Diffuser",
+    "manufacturerSku": "APA0229A31",
+    "distPrice": 12.0,
+    "mapPrice": 22.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "Metal Grid for MC Pro",
+    "description": "Metal Grid for MC Pro",
+    "manufacturerSku": "APA0229A32",
+    "distPrice": 9.0,
+    "mapPrice": 16.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "MC Pro 8-Light Charging Case（US）",
+    "description": "MC Pro 8-Light Charging Case（US）",
+    "manufacturerSku": "APA0229A33",
+    "distPrice": 175.0,
+    "mapPrice": 305.0,
+    "family": "M-SERIES"
+  },
+  {
+    "model": "amaran Floor Stand with 3/8-16in Screw for amaran PT",
+    "description": "amaran Floor Stand with 3/8-16in Screw for amaran PT",
+    "manufacturerSku": "OEX0012A11",
+    "distPrice": 8.0,
+    "mapPrice": 15.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Magnetic T12 Bracket for amaran PT",
+    "description": "Magnetic T12 Bracket for amaran PT",
+    "manufacturerSku": "OEX0012A12",
+    "distPrice": 8.0,
+    "mapPrice": 15.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Amaran Light Dome Mini SE Light Control Grid",
+    "description": "Amaran Light Dome Mini SE Light Control Grid",
+    "manufacturerSku": "AP40010A71",
+    "distPrice": 8.0,
+    "mapPrice": 15.0,
+    "family": "amaran"
+  },
+  {
+    "model": "Spotlight Max ETC Lens Adapte",
+    "description": "Spotlight Max ETC Lens Adapte",
+    "manufacturerSku": "APXF043A37",
+    "distPrice": 40.0,
+    "mapPrice": 65.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 19º Kit",
+    "description": "Spotlight Max 19º Kit",
+    "manufacturerSku": "APXF043A30",
+    "distPrice": 750.0,
+    "mapPrice": 1190.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 36º Kit",
+    "description": "Spotlight Max 36º Kit",
+    "manufacturerSku": "APXF043A31",
+    "distPrice": 750.0,
+    "mapPrice": 1190.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 50º Kit",
+    "description": "Spotlight Max 50º Kit",
+    "manufacturerSku": "APXF043A32",
+    "distPrice": 750.0,
+    "mapPrice": 1190.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 19º Lens",
+    "description": "Spotlight Max 19º Lens",
+    "manufacturerSku": "APXF043A33",
+    "distPrice": 350.0,
+    "mapPrice": 590.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 36º Lens",
+    "description": "Spotlight Max 36º Lens",
+    "manufacturerSku": "APXF043A34",
+    "distPrice": 350.0,
+    "mapPrice": 590.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max 50º Lens",
+    "description": "Spotlight Max 50º Lens",
+    "manufacturerSku": "APXF043A35",
+    "distPrice": 350.0,
+    "mapPrice": 590.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Spotlight Max Iris",
+    "description": "Spotlight Max Iris",
+    "manufacturerSku": "APXF043A36",
+    "distPrice": 80.0,
+    "mapPrice": 139.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "10-Piece GOBO Kit (A-size)",
+    "description": "10-Piece GOBO Kit (A-size)",
+    "manufacturerSku": "APXF043A38",
+    "distPrice": 45.0,
+    "mapPrice": 75.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Electro CS15（US）",
+    "description": "Electro CS15（US）",
+    "manufacturerSku": "APP0307A91",
+    "distPrice": 4000.0,
+    "mapPrice": 6190.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Electro CS15（No plug）",
+    "description": "Electro CS15（No plug）",
+    "manufacturerSku": "APN0307A92",
+    "distPrice": 4000.0,
+    "mapPrice": 6190.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Electro CS15 Flight Case Version",
+    "description": "Electro CS15 Flight Case Version",
+    "manufacturerSku": "APF0307A91",
+    "distPrice": 4600.0,
+    "mapPrice": 7490.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Electro XT26（No plug）",
+    "description": "Electro XT26（No plug）",
+    "manufacturerSku": "APN0308A92",
+    "distPrice": 4500.0,
+    "mapPrice": 7190.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "F14 Fresnel",
+    "description": "F14 Fresnel",
+    "manufacturerSku": "APP3738A92",
+    "distPrice": 1100.0,
+    "mapPrice": 2190.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Motorized Yoke",
+    "description": "Motorized Yoke",
+    "manufacturerSku": "APP3738A91",
+    "distPrice": 1100.0,
+    "mapPrice": 2190.0,
+    "family": "Modifier"
+  },
+  {
+    "model": "Narrow-angle Reflector-AM6820",
+    "description": "Narrow-angle Reflector-AM6820",
+    "manufacturerSku": "APP3738A93",
+    "distPrice": 150.0,
+    "mapPrice": 319.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Medium-angle Reflector-AM6835",
+    "description": "Medium-angle Reflector-AM6835",
+    "manufacturerSku": "APP3738A94",
+    "distPrice": 120.0,
+    "mapPrice": 259.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Wide-angle Reflector-AM6850",
+    "description": "Wide-angle Reflector-AM6850",
+    "manufacturerSku": "APP3738A95",
+    "distPrice": 100.0,
+    "mapPrice": 209.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "CS15/XT26 Reflector Kit",
+    "description": "CS15/XT26 Reflector Kit",
+    "manufacturerSku": "APP3738A99",
+    "distPrice": 390.0,
+    "mapPrice": 729.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "CS15/XT26 Flight Case",
+    "description": "CS15/XT26 Flight Case",
+    "manufacturerSku": "APP3738A9C",
+    "distPrice": 1000.0,
+    "mapPrice": 1690.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "CS15&XT26 Head Cable (7.5m)",
+    "description": "CS15&XT26 Head Cable (7.5m)",
+    "manufacturerSku": "APP3738A90",
+    "distPrice": 150.0,
+    "mapPrice": 239.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "CS15&XT26 Head Cable (15m)",
+    "description": "CS15&XT26 Head Cable (15m)",
+    "manufacturerSku": "APP3738A9A",
+    "distPrice": 200.0,
+    "mapPrice": 299.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Skid for CS15&XT26",
+    "description": "Skid for CS15&XT26",
+    "manufacturerSku": "APP3738A9H",
+    "distPrice": 80.0,
+    "mapPrice": 129.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Sidus One",
+    "description": "Sidus One",
+    "manufacturerSku": "APR0316A31",
+    "distPrice": 230.0,
+    "mapPrice": 409.0,
+    "family": "Sidus One and Accessories"
+  },
+  {
+    "model": "Sidus One 2-Way Splitter Cable",
+    "description": "Sidus One 2-Way Splitter Cable",
+    "manufacturerSku": "APR0316A34",
+    "distPrice": 24.0,
+    "mapPrice": 38.0,
+    "family": "Sidus One and Accessories"
+  },
+  {
+    "model": "Sidus One Power Cable",
+    "description": "Sidus One Power Cable",
+    "manufacturerSku": "APR0316A35",
+    "distPrice": 5.0,
+    "mapPrice": 8.0,
+    "family": "Sidus One and Accessories"
+  },
+  {
+    "model": "Sidus One Antenna",
+    "description": "Sidus One Antenna",
+    "manufacturerSku": "APR0316A36",
+    "distPrice": 13.0,
+    "mapPrice": 20.0,
+    "family": "Sidus One and Accessories"
+  },
+  {
+    "model": "INFINIBAR PB6 4-Light Kit （US)",
+    "description": "INFINIBAR PB6 4-Light Kit （US)",
+    "manufacturerSku": "APM0300AX6",
+    "distPrice": 1194.0,
+    "mapPrice": 1990.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR PB12 4-Light Kit（US)",
+    "description": "INFINIBAR PB12 4-Light Kit（US)",
+    "manufacturerSku": "APL0300AXR",
+    "distPrice": 1400.0,
+    "mapPrice": 2590.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR PB6 4-Light Rolling Hard Case",
+    "description": "INFINIBAR PB6 4-Light Rolling Hard Case",
+    "manufacturerSku": "APL0300AXP",
+    "distPrice": 130.0,
+    "mapPrice": 210.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR PB12 4-Light Rolling Hard Case",
+    "description": "INFINIBAR PB12 4-Light Rolling Hard Case",
+    "manufacturerSku": "APL0300AXB",
+    "distPrice": 150.0,
+    "mapPrice": 260.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 330W(24V) Power Adapter Kit(US)",
+    "description": "INFINIBAR 330W(24V) Power Adapter Kit(US)",
+    "manufacturerSku": "AP40300AX6",
+    "distPrice": 110.0,
+    "mapPrice": 179.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 330W(24V) Power Adapter Kit and Extension Cables（US）",
+    "description": "INFINIBAR 330W(24V) Power Adapter Kit and Extension Cables（US）",
+    "manufacturerSku": "AP40300AXB",
+    "distPrice": 113.0,
+    "mapPrice": 189.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "3m Locking 5.5mm DC to 5.5mm DC Barrel Extension Cable",
+    "description": "3m Locking 5.5mm DC to 5.5mm DC Barrel Extension Cable",
+    "manufacturerSku": "APE0300AX1",
+    "distPrice": 12.0,
+    "mapPrice": 18.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 8-Way DC Power Splitter",
+    "description": "INFINIBAR 8-Way DC Power Splitter",
+    "manufacturerSku": "APW0300AX2",
+    "distPrice": 12.0,
+    "mapPrice": 18.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "1/4-20in Collapsible Tripod Base for INFINIBAR",
+    "description": "1/4-20in Collapsible Tripod Base for INFINIBAR",
+    "manufacturerSku": "APT0300AXH",
+    "distPrice": 15.0,
+    "mapPrice": 22.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR Tilting Mounting Bracket",
+    "description": "INFINIBAR Tilting Mounting Bracket",
+    "manufacturerSku": "APT0300AXK",
+    "distPrice": 21.0,
+    "mapPrice": 35.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "2Battery Power Station (24V) (V-Mount) for INFINIBAR",
+    "description": "2Battery Power Station (24V) (V-Mount) for INFINIBAR",
+    "manufacturerSku": "APB0300AXA",
+    "distPrice": 65.0,
+    "mapPrice": 125.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "3/8in Screw to lightning Clamp Plate Adapter",
+    "description": "3/8in Screw to lightning Clamp Plate Adapter",
+    "manufacturerSku": "APB0300AXF",
+    "distPrice": 12.0,
+    "mapPrice": 18.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR Straight Connector (Passive)",
+    "description": "INFINIBAR Straight Connector (Passive)",
+    "manufacturerSku": "APC0300AXP",
+    "distPrice": 13.0,
+    "mapPrice": 20.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 3-Way Flat Connector (Passive)",
+    "description": "INFINIBAR 3-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXT",
+    "distPrice": 27.0,
+    "mapPrice": 45.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 4-Way Flat Connector (Passive)",
+    "description": "INFINIBAR 4-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXR",
+    "distPrice": 27.0,
+    "mapPrice": 45.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "INFINIBAR 6-Way Flat Connector (Passive)",
+    "description": "INFINIBAR 6-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXS",
+    "distPrice": 27.0,
+    "mapPrice": 45.0,
+    "family": "INFINIBAR"
+  },
+  {
+    "model": "Aputure Electro Storm CS15 20A AC power Cable - 6m (US)",
+    "description": "Aputure Electro Storm CS15 20A AC power Cable - 6m (US)",
+    "manufacturerSku": "APP0307A97",
+    "distPrice": 30.0,
+    "mapPrice": 59.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Aputure Electro Storm CS15 15A AC Power Cable - 6m (US)",
+    "description": "Aputure Electro Storm CS15 15A AC Power Cable - 6m (US)",
+    "manufacturerSku": "APP0307A9C",
+    "distPrice": 30.0,
+    "mapPrice": 59.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Aputure Electro Storm CS15 20A AC Power Cable -6m (Bare Ends)",
+    "description": "Aputure Electro Storm CS15 20A AC Power Cable -6m (Bare Ends)",
+    "manufacturerSku": "APN0307A93",
+    "distPrice": 30.0,
+    "mapPrice": 59.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Aputure Electro Storm XT26 40A AC Power Cable - 6m (US)",
+    "description": "Aputure Electro Storm XT26 40A AC Power Cable - 6m (US)",
+    "manufacturerSku": "APP0308A95",
+    "distPrice": 150.0,
+    "mapPrice": 290.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Aputure Electro Storm XT26 15A AC Power Cable - 6m (US)",
+    "description": "Aputure Electro Storm XT26 15A AC Power Cable - 6m (US)",
+    "manufacturerSku": "APP0308A99",
+    "distPrice": 30.0,
+    "mapPrice": 59.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Aputure Electro Storm XT26 40A AC Power Cable - 6m (Bare Ends)",
+    "description": "Aputure Electro Storm XT26 40A AC Power Cable - 6m (Bare Ends)",
+    "manufacturerSku": "APN0308A93",
+    "distPrice": 60.0,
+    "mapPrice": 119.0,
+    "family": "Electro Storm"
+  },
+  {
+    "model": "Sidus Four",
+    "description": "Sidus Four",
+    "manufacturerSku": "APR0317A31",
+    "distPrice": 1100.0,
+    "mapPrice": 2190.0,
+    "family": "Sidus Four and Accessories"
+  },
+  {
+    "model": "5-Pin XLR Male to 5-Pin XLR Male Adapter",
+    "description": "5-Pin XLR Male to 5-Pin XLR Male Adapter",
+    "manufacturerSku": "APR0317A35",
+    "distPrice": 6.0,
+    "mapPrice": 14.0,
+    "family": "Sidus Four and Accessories"
+  },
+  {
+    "model": "Sidus Four 18W（9V) Power Adapter",
+    "description": "Sidus Four 18W（9V) Power Adapter",
+    "manufacturerSku": "APR0317A37",
+    "distPrice": 18.0,
+    "mapPrice": 28.0,
+    "family": "Sidus Four and Accessories"
+  },
+  {
+    "model": "Sidus Four antenna",
+    "description": "Sidus Four antenna",
+    "manufacturerSku": "APR0317A38",
+    "distPrice": 12.0,
+    "mapPrice": 19.0,
+    "family": "Sidus Four and Accessories"
+  },
+  {
+    "model": "Storm 1200x（US）",
+    "description": "Storm 1200x（US）",
+    "manufacturerSku": "AP20334A20",
+    "distPrice": 1700.0,
+    "mapPrice": 2790.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Storm 1200x Reflector Kit",
+    "description": "Storm 1200x Reflector Kit",
+    "manufacturerSku": "AA00060000",
+    "distPrice": 105.0,
+    "mapPrice": 179.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "amaran Ace 25x Green",
+    "description": "amaran Ace 25x Green",
+    "manufacturerSku": "MP02060004",
+    "distPrice": 33.0,
+    "mapPrice": 59.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Charcoal",
+    "description": "amaran Ace 25x Charcoal",
+    "manufacturerSku": "MP0206000Q",
+    "distPrice": 33.0,
+    "mapPrice": 59.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x White",
+    "description": "amaran Ace 25x White",
+    "manufacturerSku": "MP02060002",
+    "distPrice": 33.0,
+    "mapPrice": 59.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Pink",
+    "description": "amaran Ace 25x Pink",
+    "manufacturerSku": "MP02060003",
+    "distPrice": 33.0,
+    "mapPrice": 59.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Silver",
+    "description": "amaran Ace 25x Silver",
+    "manufacturerSku": "MP02060001",
+    "distPrice": 33.0,
+    "mapPrice": 59.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Green Kit",
+    "description": "amaran Ace 25x Green Kit",
+    "manufacturerSku": "MP02060008",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Charcoal Kit",
+    "description": "amaran Ace 25x Charcoal Kit",
+    "manufacturerSku": "MP0206000Y",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x White Kit",
+    "description": "amaran Ace 25x White Kit",
+    "manufacturerSku": "MP02060006",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Pink Kit",
+    "description": "amaran Ace 25x Pink Kit",
+    "manufacturerSku": "MP02060007",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25x Silver Kit",
+    "description": "amaran Ace 25x Silver Kit",
+    "manufacturerSku": "MP02060005",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Green",
+    "description": "amaran Ace 25c Green",
+    "manufacturerSku": "MP0206000C",
+    "distPrice": 49.0,
+    "mapPrice": 89.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Charcoal",
+    "description": "amaran Ace 25c Charcoal",
+    "manufacturerSku": "MP0206000U",
+    "distPrice": 49.0,
+    "mapPrice": 89.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c White",
+    "description": "amaran Ace 25c White",
+    "manufacturerSku": "MP0206000A",
+    "distPrice": 49.0,
+    "mapPrice": 89.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Pink",
+    "description": "amaran Ace 25c Pink",
+    "manufacturerSku": "MP0206000B",
+    "distPrice": 49.0,
+    "mapPrice": 89.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Silver",
+    "description": "amaran Ace 25c Silver",
+    "manufacturerSku": "MP02060009",
+    "distPrice": 49.0,
+    "mapPrice": 89.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Green Kit",
+    "description": "amaran Ace 25c Green Kit",
+    "manufacturerSku": "MP0206000G",
+    "distPrice": 60.0,
+    "mapPrice": 115.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Charcoal Kit",
+    "description": "amaran Ace 25c Charcoal Kit",
+    "manufacturerSku": "MP02060013",
+    "distPrice": 60.0,
+    "mapPrice": 115.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c White Kit",
+    "description": "amaran Ace 25c White Kit",
+    "manufacturerSku": "MP0206000E",
+    "distPrice": 60.0,
+    "mapPrice": 115.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Pink Kit",
+    "description": "amaran Ace 25c Pink Kit",
+    "manufacturerSku": "MP0206000F",
+    "distPrice": 60.0,
+    "mapPrice": 115.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace 25c Silver Kit",
+    "description": "amaran Ace 25c Silver Kit",
+    "manufacturerSku": "MP0206000D",
+    "distPrice": 60.0,
+    "mapPrice": 115.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace Light Control Grid",
+    "description": "amaran Ace Light Control Grid",
+    "manufacturerSku": "MA0206000M",
+    "distPrice": 3.5,
+    "mapPrice": 7.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace Lock Mini Tripod",
+    "description": "amaran Ace Lock Mini Tripod",
+    "manufacturerSku": "MA0206000J",
+    "distPrice": 10.0,
+    "mapPrice": 17.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "amaran Ace Lock to Cold Shoe Adapter",
+    "description": "amaran Ace Lock to Cold Shoe Adapter",
+    "manufacturerSku": "MA0206000H",
+    "distPrice": 4.5,
+    "mapPrice": 9.0,
+    "family": "amaran Ace"
+  },
+  {
+    "model": "Aputure INFINIMAT 1x2 V-Mount Kit (US)",
+    "description": "1* INFINIMAT & Softbox Pack 1x2 - APD0039AR0\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP10039AR2",
+    "distPrice": 940.0,
+    "mapPrice": 1350.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT 1x4 V-Mount Kit (US)",
+    "description": "1* INFINIMAT & Softbox Pack 1x4 - APD0039AR1\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP10039AR7",
+    "distPrice": 1128.0,
+    "mapPrice": 1690.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT 2x4 V-Mount Kit (US)",
+    "description": "1* INFINIMAT & Softbox Pack 2x4 - APD0039AR4\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP30039AR7",
+    "distPrice": 1316.0,
+    "mapPrice": 2150.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT 4x4 Kit (US)",
+    "description": "1* INFINIMAT & Softbox Pack 4x4 - APD0039AR6\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8",
+    "manufacturerSku": "AP50039AR7",
+    "distPrice": 2115.0,
+    "mapPrice": 3450.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT 8x8 Kit (US)",
+    "description": "1* INFINIMAT & Softbox Pack 8x8 (US) - APD0039ARA\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n1* INFINIMAT Control Grid 8x8 - APG0039ARB",
+    "manufacturerSku": "AP60039AR7",
+    "distPrice": 7849.0,
+    "mapPrice": 13500.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT 20x20 Kit (US)",
+    "description": "4* INFINIMAT & Softbox Pack 8x8 (US) - APD0039ARA\n4* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n4* INFINIMAT Control Grid 8x8 - APG0039ARB\n1* INFINIMAT Softbox Pack 20x20 - APA0039AR0",
+    "manufacturerSku": "AP80039AR2",
+    "distPrice": 31396.0,
+    "mapPrice": 55000.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "amaran Go-Green (Global)",
+    "description": "amaran Go-Green (Global)",
+    "manufacturerSku": "MP0206014H",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "amaran Go"
+  },
+  {
+    "model": "amaran Go-Charcoal (Global)",
+    "description": "amaran Go-Charcoal (Global)",
+    "manufacturerSku": "MP0206014K",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "amaran Go"
+  },
+  {
+    "model": "amaran Go-White (Global)",
+    "description": "amaran Go-White (Global)",
+    "manufacturerSku": "MP0206014F",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "amaran Go"
+  },
+  {
+    "model": "amaran Go-Pink (Global)",
+    "description": "amaran Go-Pink (Global)",
+    "manufacturerSku": "MP0206014G",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "amaran Go"
+  },
+  {
+    "model": "amaran Go-Blue (Global)",
+    "description": "amaran Go-Blue (Global)",
+    "manufacturerSku": "MP0206014J",
+    "distPrice": 14.0,
+    "mapPrice": 29.0,
+    "family": "amaran Go"
+  },
+  {
+    "model": "amaran Tag (Lightning, Cream White)",
+    "description": "amaran Tag (Lightning, Cream White)",
+    "manufacturerSku": "MP07060018",
+    "distPrice": 58.0,
+    "mapPrice": 89.0,
+    "family": "amaran Tag"
+  },
+  {
+    "model": "amaran Tag (USB-C, Cream White)",
+    "description": "amaran Tag (USB-C, Cream White)",
+    "manufacturerSku": "MP07060017",
+    "distPrice": 53.0,
+    "mapPrice": 79.0,
+    "family": "amaran Tag"
+  },
+  {
+    "model": "amaran Tag (Lightning, Midnight Black)",
+    "description": "amaran Tag (Lightning, Midnight Black)",
+    "manufacturerSku": "MP07060016",
+    "distPrice": 58.0,
+    "mapPrice": 89.0,
+    "family": "amaran Tag"
+  },
+  {
+    "model": "amaran Tag (USB-C, Midnight Black)",
+    "description": "amaran Tag (USB-C, Midnight Black)",
+    "manufacturerSku": "MP07060015",
+    "distPrice": 53.0,
+    "mapPrice": 79.0,
+    "family": "amaran Tag"
+  },
+  {
+    "model": "STORM 80c (US)",
+    "description": "STORM 80c (US)",
+    "manufacturerSku": "AP00336A20",
+    "distPrice": 285.0,
+    "mapPrice": 429.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF4 Fresnel",
+    "description": "CF4 Fresnel",
+    "manufacturerSku": "AP0F056A35",
+    "distPrice": 53.0,
+    "mapPrice": 99.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF4 Barn Doors",
+    "description": "CF4 Barn Doors",
+    "manufacturerSku": "AA07060068",
+    "distPrice": 23.0,
+    "mapPrice": 35.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Baby Pin Adapter to Anti-rotate 3/8in Screw",
+    "description": "Aputure Baby Pin Adapter to Anti-rotate 3/8in Screw",
+    "manufacturerSku": "AS0706012T",
+    "distPrice": 15.0,
+    "mapPrice": 29.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "D-Tap to 5.5mm DC Barrel\nPower Cable",
+    "description": "D-Tap to 5.5mm DC Barrel\nPower Cable",
+    "manufacturerSku": "AS0706013Y",
+    "distPrice": 5.0,
+    "mapPrice": 16.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 80c Handheld Bracket",
+    "description": "STORM 80c Handheld Bracket",
+    "manufacturerSku": "AP0M062A39",
+    "distPrice": 36.0,
+    "mapPrice": 69.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 80c Bowens Mount Adapter",
+    "description": "STORM 80c Bowens Mount Adapter",
+    "manufacturerSku": "AP0T013A3B",
+    "distPrice": 10.0,
+    "mapPrice": 19.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Lantern 30",
+    "description": "Lantern 30",
+    "manufacturerSku": "AA07060022",
+    "distPrice": 35.0,
+    "mapPrice": 55.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 1000c (US)",
+    "description": "STORM 1000c (US)",
+    "manufacturerSku": "AP20337A20",
+    "distPrice": 1870.0,
+    "mapPrice": 2990.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF12 Fresnel",
+    "description": "CF12 Fresnel",
+    "manufacturerSku": "AP20334A30",
+    "distPrice": 400.0,
+    "mapPrice": 759.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF12 Barn Doors",
+    "description": "CF12 Barn Doors",
+    "manufacturerSku": "AA0706003E",
+    "distPrice": 80.0,
+    "mapPrice": 139.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Skid for STORM 1200x/1000c",
+    "description": "Skid for STORM 1200x/1000c",
+    "manufacturerSku": "AA0706003G",
+    "distPrice": 42.0,
+    "mapPrice": 79.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "amaran Light Dome 60",
+    "description": "amaran Light Dome 60",
+    "manufacturerSku": "MA0006014L",
+    "distPrice": 42.0,
+    "mapPrice": 79.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Light Dome 90",
+    "description": "amaran Light Dome 90",
+    "manufacturerSku": "MA0006014M",
+    "distPrice": 52.0,
+    "mapPrice": 99.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Light Box 45x45",
+    "description": "amaran Light Box 45x45",
+    "manufacturerSku": "MA0006014N",
+    "distPrice": 38.0,
+    "mapPrice": 69.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Light Box 30x120",
+    "description": "amaran Light Box 30x120",
+    "manufacturerSku": "MA0006014P",
+    "distPrice": 40.0,
+    "mapPrice": 72.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Light Box 60x90",
+    "description": "amaran Light Box 60x90",
+    "manufacturerSku": "MA0006014Q",
+    "distPrice": 42.0,
+    "mapPrice": 79.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Octa Dome 60",
+    "description": "amaran Octa Dome 60",
+    "manufacturerSku": "MA0006014R",
+    "distPrice": 46.0,
+    "mapPrice": 89.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Octa Dome 90",
+    "description": "amaran Octa Dome 90",
+    "manufacturerSku": "MA0006014S",
+    "distPrice": 52.0,
+    "mapPrice": 99.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Octa Dome 120",
+    "description": "amaran Octa Dome 120",
+    "manufacturerSku": "MA0006014T",
+    "distPrice": 56.0,
+    "mapPrice": 109.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Lantern 65",
+    "description": "amaran Lantern 65",
+    "manufacturerSku": "MA0006014U",
+    "distPrice": 36.0,
+    "mapPrice": 69.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Lantern 90",
+    "description": "amaran Lantern 90",
+    "manufacturerSku": "MA0006014V",
+    "distPrice": 52.0,
+    "mapPrice": 99.0,
+    "family": "amaran Modifiers"
+  },
+  {
+    "model": "amaran Pano 60c Kit-White (US)",
+    "description": "MOQ12pcs",
+    "manufacturerSku": "MP0100008T",
+    "distPrice": 95.0,
+    "mapPrice": 149.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c Kit-Charcoal (US)",
+    "description": "MOQ12pcs",
+    "manufacturerSku": "MP01000090",
+    "distPrice": 95.0,
+    "mapPrice": 149.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c 2-Light Kit-White (US)",
+    "description": "MOQ4pcs",
+    "manufacturerSku": "MP01000096",
+    "distPrice": 200.0,
+    "mapPrice": 299.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c 2-Light Kit-Charcoal (US)",
+    "description": "MOQ4pcs",
+    "manufacturerSku": "MP0100009C",
+    "distPrice": 200.0,
+    "mapPrice": 299.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 120c Kit-White (US)",
+    "description": "MOQ6pcs",
+    "manufacturerSku": "MP0100009L",
+    "distPrice": 170.0,
+    "mapPrice": 259.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 120c Kit-Charcoal (US)",
+    "description": "MOQ6pcs",
+    "manufacturerSku": "MP0100009S",
+    "distPrice": 170.0,
+    "mapPrice": 259.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c Softbox",
+    "description": "amaran Pano 60c Softbox",
+    "manufacturerSku": "MS0106009V",
+    "distPrice": 10.0,
+    "mapPrice": 19.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c Light Control Grid",
+    "description": "amaran Pano 60c Light Control Grid",
+    "manufacturerSku": "MS0106009W",
+    "distPrice": 6.0,
+    "mapPrice": 12.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 120c Softbox",
+    "description": "amaran Pano 120c Softbox",
+    "manufacturerSku": "MS0106009Y",
+    "distPrice": 13.0,
+    "mapPrice": 25.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 120c Light Control Grid",
+    "description": "amaran Pano 120c Light Control Grid",
+    "manufacturerSku": "MS01060100",
+    "distPrice": 6.0,
+    "mapPrice": 12.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran USB-C to USB-C Locking Charging Cable (3m)",
+    "description": "amaran USB-C to USB-C Locking Charging Cable (3m)",
+    "manufacturerSku": "MS01060101",
+    "distPrice": 6.0,
+    "mapPrice": 12.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Light Stand (2m)",
+    "description": "amaran Light Stand (2m)",
+    "manufacturerSku": "MS01060103",
+    "distPrice": 15.0,
+    "mapPrice": 30.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 60c Barndoor",
+    "description": "amaran Pano 60c Barndoor",
+    "manufacturerSku": "MS01060119",
+    "distPrice": 17.0,
+    "mapPrice": 32.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Pano 120c Barndoor",
+    "description": "amaran Pano 120c Barndoor",
+    "manufacturerSku": "MS0106011A",
+    "distPrice": 27.0,
+    "mapPrice": 50.0,
+    "family": "amaran Pano"
+  },
+  {
+    "model": "amaran Verge-White(US)",
+    "description": "MOQ16pcs",
+    "manufacturerSku": "MP0100007R",
+    "distPrice": 47.0,
+    "mapPrice": 72.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge-Charcoal(US)",
+    "description": "MOQ16pcs",
+    "manufacturerSku": "MP0100007Y",
+    "distPrice": 47.0,
+    "mapPrice": 72.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Max Kit-White(US)",
+    "description": "MOQ4pcs",
+    "manufacturerSku": "MP01000085",
+    "distPrice": 150.0,
+    "mapPrice": 249.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Max Kit-Charcoal(US)",
+    "description": "MOQ4pcs",
+    "manufacturerSku": "MP0100008B",
+    "distPrice": 150.0,
+    "mapPrice": 249.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Base Stand-Black",
+    "description": "amaran Base Stand-Black",
+    "manufacturerSku": "MS01060117",
+    "distPrice": 20.0,
+    "mapPrice": 35.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Base Stand-silver",
+    "description": "amaran Base Stand-silver",
+    "manufacturerSku": "MS01060115",
+    "distPrice": 20.0,
+    "mapPrice": 35.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Max Light Control Grid",
+    "description": "amaran Verge Max Light Control Grid",
+    "manufacturerSku": "MS0106008L",
+    "distPrice": 16.0,
+    "mapPrice": 29.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Stand Adapter-Black",
+    "description": "amaran Verge Stand Adapter-Black",
+    "manufacturerSku": "MS0106008K",
+    "distPrice": 14.0,
+    "mapPrice": 25.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Stand Adapter-silver",
+    "description": "amaran Verge Stand Adapter-silver",
+    "manufacturerSku": "MS0106008H",
+    "distPrice": 14.0,
+    "mapPrice": 25.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Desk Clamp Stand-Black",
+    "description": "amaran Verge Desk Clamp Stand-Black",
+    "manufacturerSku": "MS0106008J",
+    "distPrice": 34.0,
+    "mapPrice": 65.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "amaran Verge Desk Clamp Stand-silver",
+    "description": "amaran Verge Desk Clamp Stand-silver",
+    "manufacturerSku": "MS0106008G",
+    "distPrice": 34.0,
+    "mapPrice": 65.0,
+    "family": "amaran Verge"
+  },
+  {
+    "model": "STORM 80c 3-Light Kit（US）",
+    "description": "STORM 80c 3-Light Kit（US）",
+    "manufacturerSku": "AP0700012J",
+    "distPrice": 1300.0,
+    "mapPrice": 1990.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 80c 3-Light Kit Rolling Hard Case",
+    "description": "STORM 80c 3-Light Kit Rolling Hard Case",
+    "manufacturerSku": "AA0706032N",
+    "distPrice": 105.0,
+    "mapPrice": 199.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Super Clamp with Anti-rotate 3/8in Screw",
+    "description": "Aputure Super Clamp with Anti-rotate 3/8in Screw",
+    "manufacturerSku": "AS0706012Q",
+    "distPrice": 12.0,
+    "mapPrice": 22.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Universal Magic Arm with Dual Ball Joint",
+    "description": "Aputure Universal Magic Arm with Dual Ball Joint",
+    "manufacturerSku": "AS0706012R",
+    "distPrice": 13.0,
+    "mapPrice": 24.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52(EU CEE 32A)",
+    "description": "STORM XT52(EU CEE 32A)",
+    "manufacturerSku": "AP070G0155",
+    "distPrice": 4900.0,
+    "mapPrice": 13100.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 (Bare Leads)",
+    "description": "STORM XT52 (Bare Leads)",
+    "manufacturerSku": "AP07060156",
+    "distPrice": 4900.0,
+    "mapPrice": 13100.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Dual Flight Case Kit(EU CEE 32A)",
+    "description": "STORM XT52 Control Box Flight Case Kit(EU CEE 32A) - AP070G015A",
+    "manufacturerSku": "AG07010002",
+    "distPrice": 5400.0,
+    "mapPrice": 13700.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Dual Flight Case Kit（Bare Leads）",
+    "description": "STORM XT52 Control Box Flight Case Kit(Bare Leads) - AP0706015C",
+    "manufacturerSku": "AG07060003",
+    "distPrice": 5400.0,
+    "mapPrice": 13700.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM Parallel Beam 70",
+    "description": "STORM Parallel Beam 70",
+    "manufacturerSku": "AA0706028X",
+    "distPrice": 1200.0,
+    "mapPrice": 2250.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM Parallel Beam 70 Flight Case Kit",
+    "description": "STORM Parallel Beam 70 Flight Case Kit",
+    "manufacturerSku": "AA0706034T",
+    "distPrice": 1600.0,
+    "mapPrice": 2750.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Motorized CF16 Fresnel Rolling Case Kit",
+    "description": "Motorized CF16 Fresnel Rolling Case Kit",
+    "manufacturerSku": "AA07060370",
+    "distPrice": 1490.0,
+    "mapPrice": 2690.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Motorized CF16 Fresnel Flight Case Kit",
+    "description": "Motorized CF16 Fresnel Flight Case Kit",
+    "manufacturerSku": "AA0706028U",
+    "distPrice": 1540.0,
+    "mapPrice": 2780.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF16 Barn Doors Adapter",
+    "description": "CF16 Barn Doors Adapter",
+    "manufacturerSku": "AA0706028Y",
+    "distPrice": 100.0,
+    "mapPrice": 130.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Skid",
+    "description": "STORM XT52 Skid",
+    "manufacturerSku": "AA0706028V",
+    "distPrice": 100.0,
+    "mapPrice": 130.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Reflector Kit",
+    "description": "STORM XT52 Reflector Kit",
+    "manufacturerSku": "AA0706015G",
+    "distPrice": 340.0,
+    "mapPrice": 499.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Wide-angle Reflector",
+    "description": "STORM XT52 Wide-angle Reflector",
+    "manufacturerSku": "AA0706015E",
+    "distPrice": 140.0,
+    "mapPrice": 230.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Narrow-angle Reflector for XT52",
+    "description": "STORM XT52 Narrow-angle Reflector for XT52",
+    "manufacturerSku": "AA0706015F",
+    "distPrice": 250.0,
+    "mapPrice": 450.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "AM Lightdome 150",
+    "description": "AM Lightdome 150",
+    "manufacturerSku": "AA0706015H",
+    "distPrice": 175.0,
+    "mapPrice": 280.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "AM Lantern 120",
+    "description": "AM Lantern 120",
+    "manufacturerSku": "AA0706015J",
+    "distPrice": 150.0,
+    "mapPrice": 239.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Y50X-2011 Male to Female Extendable Head Cable-7.5m",
+    "description": "Aputure Y50X-2011 Male to Female Extendable Head Cable-7.5m",
+    "manufacturerSku": "AA0706015K",
+    "distPrice": 290.0,
+    "mapPrice": 440.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Y50X-2011 Male to Female Extendable Head Cable-15m",
+    "description": "Aputure Y50X-2011 Male to Female Extendable Head Cable-15m",
+    "manufacturerSku": "AA0706036L",
+    "distPrice": 580.0,
+    "mapPrice": 880.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Lamp Head",
+    "description": "STORM XT52 Lamp Head",
+    "manufacturerSku": "AS0706034V",
+    "distPrice": 3600.0,
+    "mapPrice": 8250.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Control Box",
+    "description": "STORM XT52 Control Box",
+    "manufacturerSku": "AS0706034U",
+    "distPrice": 1500.0,
+    "mapPrice": 3290.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure LP-28-T455 to CEE 32A Power Input AC Cable - 1m (CN/EU)",
+    "description": "Aputure LP-28-T455 to CEE 32A Power Input AC Cable - 1m (CN/EU)",
+    "manufacturerSku": "AS070E034W",
+    "distPrice": 60.0,
+    "mapPrice": 130.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure LP-28-T455 to Bare Leads Power Input AC Cable - 1m （No Plug）",
+    "description": "Aputure LP-28-T455 to Bare Leads Power Input AC Cable - 1m （No Plug）",
+    "manufacturerSku": "AS0706034X",
+    "distPrice": 60.0,
+    "mapPrice": 130.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Mount Protection Cover for XT52",
+    "description": "Aputure Mount Protection Cover for XT52",
+    "manufacturerSku": "AS0706034Y",
+    "distPrice": 35.0,
+    "mapPrice": 50.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Medium-angle Reflector for XT52",
+    "description": "Medium-angle Reflector for XT52",
+    "manufacturerSku": "AS07060351",
+    "distPrice": 160.0,
+    "mapPrice": 280.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Removable Yoke for XT52",
+    "description": "Removable Yoke for XT52",
+    "manufacturerSku": "AS07060352",
+    "distPrice": 120.0,
+    "mapPrice": 200.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Control Box Flight Case Kit",
+    "description": "STORM XT52 Control Box Flight Case Kit",
+    "manufacturerSku": "AS010E0375",
+    "distPrice": 400.0,
+    "mapPrice": 580.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM XT52 Lamp Head Flight Case Kit",
+    "description": "STORM XT52 Lamp Head Flight Case Kit",
+    "manufacturerSku": "AS01060376",
+    "distPrice": 300.0,
+    "mapPrice": 430.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "amaran Peak",
+    "description": "amaran Peak",
+    "manufacturerSku": "MP0506013X",
+    "distPrice": 72.0,
+    "mapPrice": 119.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran USB-C to DC (20V Power Adapter Cable)",
+    "description": "amaran USB-C to DC (20V Power Adapter Cable)",
+    "manufacturerSku": "MA0506026M",
+    "distPrice": 7.0,
+    "mapPrice": 15.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran USB-C Charging Cable (150cm)",
+    "description": "amaran USB-C Charging Cable (150cm)",
+    "manufacturerSku": "MA0506026N",
+    "distPrice": 5.0,
+    "mapPrice": 10.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Peak Light Stand Clamp",
+    "description": "amaran Peak Light Stand Clamp",
+    "manufacturerSku": "MA0506026P",
+    "distPrice": 10.0,
+    "mapPrice": 20.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Ace E-Lock Adapter (1/4” & 3/8” Screw Compatible)",
+    "description": "amaran Ace E-Lock Adapter (1/4” & 3/8” Screw Compatible)",
+    "manufacturerSku": "MA0506026Q",
+    "distPrice": 7.0,
+    "mapPrice": 15.0,
+    "family": "amaran"
+  },
+  {
+    "model": "STORM 400x (V-Mount) (US)",
+    "description": "STORM 400x (V-Mount) (US)",
+    "manufacturerSku": "AP00339A20",
+    "distPrice": 610.0,
+    "mapPrice": 929.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 400x 5pin Extension cable（7.5m）",
+    "description": "STORM 400x 5pin Extension cable（7.5m）",
+    "manufacturerSku": "AA0706032P",
+    "distPrice": 70.0,
+    "mapPrice": 115.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF7 Fresnel and Barn Doors Kit",
+    "description": "CF7 Fresnel and Barn Doors Kit",
+    "manufacturerSku": "AP0F055A3A",
+    "distPrice": 120.0,
+    "mapPrice": 169.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Spotlight Mini 19° Lens Kit",
+    "description": "Aputure Spotlight Mini 19° Lens Kit",
+    "manufacturerSku": "AA0706012E",
+    "distPrice": 180.0,
+    "mapPrice": 290.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Spotlight Mini 36° Lens Kit",
+    "description": "Aputure Spotlight Mini 36° Lens Kit",
+    "manufacturerSku": "AA0706012F",
+    "distPrice": 180.0,
+    "mapPrice": 290.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Spotlight Mini 19° lens",
+    "description": "Aputure Spotlight Mini 19° lens",
+    "manufacturerSku": "AA0706012G",
+    "distPrice": 80.0,
+    "mapPrice": 125.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Spotlight Mini 36° lens",
+    "description": "Aputure Spotlight Mini 36° lens",
+    "manufacturerSku": "AA0706012H",
+    "distPrice": 70.0,
+    "mapPrice": 115.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "Aputure Spotlight Iris (M Size)",
+    "description": "Aputure Spotlight Iris (M Size)",
+    "manufacturerSku": "AA0706012U",
+    "distPrice": 25.0,
+    "mapPrice": 35.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "NOVA II 1x2 Hard Rolling Case Kit (US)",
+    "description": "NOVA II 1x2 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP04000318",
+    "distPrice": 1850.0,
+    "mapPrice": 3850.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA II 2x1 (No Case) (US)",
+    "description": "NOVA II 2x1 (No Case) (US)",
+    "manufacturerSku": "AP0400040J",
+    "distPrice": 1700.0,
+    "mapPrice": 3650.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 2x1 Softbox",
+    "description": "NOVA 2x1 Softbox",
+    "manufacturerSku": "AA0406031Y",
+    "distPrice": 100.0,
+    "mapPrice": 169.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 2x1 Dome Diffuser",
+    "description": "NOVA 2x1 Dome Diffuser",
+    "manufacturerSku": "AA04060422",
+    "distPrice": 110.0,
+    "mapPrice": 185.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "Space Light 90",
+    "description": "Space Light 90",
+    "manufacturerSku": "AA04060447",
+    "distPrice": 100.0,
+    "mapPrice": 169.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 2x1 Barn Doors",
+    "description": "NOVA 2x1 Barn Doors",
+    "manufacturerSku": "AA04060321",
+    "distPrice": 100.0,
+    "mapPrice": 169.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 2x1 Rolling Hard Case",
+    "description": "NOVA 2x1 Rolling Hard Case",
+    "manufacturerSku": "AA04060322",
+    "distPrice": 175.0,
+    "mapPrice": 299.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 2x1 Flat Diffuser",
+    "description": "NOVA 2x1 Flat Diffuser",
+    "manufacturerSku": "AA04060421",
+    "distPrice": 85.0,
+    "mapPrice": 129.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 2x1 Fabric Control Grid",
+    "description": "NOVA 2x1 Fabric Control Grid",
+    "manufacturerSku": "AA04060423",
+    "distPrice": 30.0,
+    "mapPrice": 59.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "Dual Quick Release to Truss Clamp Adapter",
+    "description": "Dual Quick Release to Truss Clamp Adapter",
+    "manufacturerSku": "AA0406044C",
+    "distPrice": 50.0,
+    "mapPrice": 99.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 2x1 Removable Yoke with Junior Pin",
+    "description": "NOVA 2x1 Removable Yoke with Junior Pin",
+    "manufacturerSku": "AA0406044D",
+    "distPrice": 110.0,
+    "mapPrice": 159.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 2x1 Removable Yoke with Clamp",
+    "description": "NOVA 2x1 Removable Yoke with Clamp",
+    "manufacturerSku": "AA0406044E",
+    "distPrice": 110.0,
+    "mapPrice": 159.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+    "description": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP0400031F",
+    "distPrice": 1000.0,
+    "mapPrice": 2390.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA II 1x1 (No Case) (US)",
+    "description": "NOVA II 1x1 (No Case) (US)",
+    "manufacturerSku": "AP0400040B",
+    "distPrice": 900.0,
+    "mapPrice": 2290.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA  1x1 Softbox",
+    "description": "NOVA  1x1 Softbox",
+    "manufacturerSku": "AA0406031X",
+    "distPrice": 75.0,
+    "mapPrice": 125.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Barn Doors",
+    "description": "NOVA 1x1 Barn Doors",
+    "manufacturerSku": "AA04060320",
+    "distPrice": 85.0,
+    "mapPrice": 139.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Rolling Hard Case",
+    "description": "NOVA 1x1 Rolling Hard Case",
+    "manufacturerSku": "AA04060323",
+    "distPrice": 130.0,
+    "mapPrice": 219.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Dome Diffuser (Heavy Frost)",
+    "description": "NOVA 1x1 Dome Diffuser (Heavy Frost)",
+    "manufacturerSku": "AA04060448",
+    "distPrice": 85.0,
+    "mapPrice": 135.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Fabric Control Grid",
+    "description": "NOVA 1x1 Fabric Control Grid",
+    "manufacturerSku": "AA04060449",
+    "distPrice": 20.0,
+    "mapPrice": 33.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Removable Yoke with Junior Pin",
+    "description": "NOVA 1x1 Removable Yoke with Junior Pin",
+    "manufacturerSku": "AA0406044A",
+    "distPrice": 75.0,
+    "mapPrice": 109.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 1x1 Flat Diffuser",
+    "description": "NOVA 1x1 Flat Diffuser",
+    "manufacturerSku": "AA0406044F",
+    "distPrice": 65.0,
+    "mapPrice": 95.0,
+    "family": "NOVA II Series"
+  },
+  {
+    "model": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
+    "description": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
+    "manufacturerSku": "AP0400044V",
+    "distPrice": 1850.0,
+    "mapPrice": 3850.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 9° 2x1 (No Case) (US)",
+    "description": "NOVA 9° 2x1 (No Case) (US)",
+    "manufacturerSku": "AP0400044P",
+    "distPrice": 1700.0,
+    "mapPrice": 3650.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 2x1 3-Light Yoke",
+    "description": "NOVA 2x1 3-Light Yoke",
+    "manufacturerSku": "AA04060424",
+    "distPrice": 500.0,
+    "mapPrice": 890.0,
+    "family": "NOVA 9° Series"
+  },
+  {
+    "model": "RCAC3F-X to Bare Ends AC Power Cable (6m) (20A Max)",
+    "description": "RCAC3F-X to Bare Ends AC Power Cable (6m) (20A Max)",
+    "manufacturerSku": "AA04060495",
+    "distPrice": 45.0,
+    "mapPrice": 69.0,
+    "family": "NOVA 9° Series"
+  },
+  {
+    "model": "NOVA 9° 2x1 3-Light Kit (US)",
+    "description": "NOVA 9° 2x1 (No Case) (US) *3\nNOVA 2x1 3-Light Yoke \nRCAC3F-X to Bare Ends AC Power Cable (6m) (20A Max)",
+    "manufacturerSku": "AG0400049A",
+    "distPrice": 5370.0,
+    "mapPrice": 7649.0,
+    "family": "NOVA 9° Series"
+  },
+  {
+    "model": "NOVA 2x1 3-Light Yoke Kit (Bare Ends)",
+    "description": "NOVA 2x1 3-Light Yoke \nRCAC3F-X to Bare Ends AC Power Cable (6m) (20A Max)",
+    "manufacturerSku": "AG0406049C",
+    "distPrice": 545.0,
+    "mapPrice": 949.0,
+    "family": "NOVA 9° Series"
+  },
+  {
+    "model": "amaran Ray 60c (US)",
+    "description": "amaran Ray 60c (US)",
+    "manufacturerSku": "MP0000018A",
+    "distPrice": 115.0,
+    "mapPrice": 189.0,
+    "family": "amaran Ray Series"
+  },
+  {
+    "model": "amaran Ray 120c (US)",
+    "description": "amaran Ray 120c (US)",
+    "manufacturerSku": "MP0000018G",
+    "distPrice": 155.0,
+    "mapPrice": 259.0,
+    "family": "amaran Ray Series"
+  },
+  {
+    "model": "amaran Ray 360c (US)",
+    "description": "amaran Ray 360c (US)",
+    "manufacturerSku": "MP00000191",
+    "distPrice": 250.0,
+    "mapPrice": 429.0,
+    "family": "amaran Ray Series"
+  },
+  {
+    "model": "amaran Ray 660c (US)",
+    "description": "amaran Ray 660c (US)",
+    "manufacturerSku": "MP00000197",
+    "distPrice": 430.0,
+    "mapPrice": 699.0,
+    "family": "amaran Ray Series"
+  },
+  {
+    "model": "Quick Dome 90",
+    "description": "Quick Dome 90",
+    "manufacturerSku": "AA07060382",
+    "distPrice": 134.0,
+    "mapPrice": 219.0,
+    "family": "Aputure Modifiers"
+  },
+  {
+    "model": "Quick Dome 60",
+    "description": "Quick Dome 60",
+    "manufacturerSku": "AA07060383",
+    "distPrice": 74.0,
+    "mapPrice": 129.0,
+    "family": "Aputure Modifiers"
+  },
+  {
+    "model": "Quick Dome 40",
+    "description": "Quick Dome 40",
+    "manufacturerSku": "AA07060384",
+    "distPrice": 55.0,
+    "mapPrice": 89.0,
+    "family": "Aputure Modifiers"
+  },
+  {
+    "model": "amaran USB-C to 5-Pin DMX In & Out Adapter",
+    "description": "amaran USB-C to 5-Pin DMX In & Out Adapter",
+    "manufacturerSku": "MA0006041R",
+    "distPrice": 21.0,
+    "mapPrice": 35.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Peak 75",
+    "description": "amaran Peak 75 (Global)",
+    "manufacturerSku": "MP0506047V",
+    "distPrice": 46.0,
+    "mapPrice": 85.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Mini Reflector",
+    "description": "amaran Mini Reflector",
+    "manufacturerSku": "MA00060401",
+    "distPrice": 6.0,
+    "mapPrice": 15.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Mini Fresnel",
+    "description": "amaran Mini Fresnel",
+    "manufacturerSku": "MA00060403",
+    "distPrice": 32.0,
+    "mapPrice": 59.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Fresnel",
+    "description": "amaran Fresnel",
+    "manufacturerSku": "MA00060404",
+    "distPrice": 70.0,
+    "mapPrice": 129.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Ace Lock to Baby Pin Adapter Grip",
+    "description": "amaran Ace Lock to Baby Pin Adapter Grip",
+    "manufacturerSku": "MA0006039X",
+    "distPrice": 22.0,
+    "mapPrice": 39.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Ace Lock to Baby Pin Adapter",
+    "description": "amaran Ace Lock to Baby Pin Adapter",
+    "manufacturerSku": "MA0006040V",
+    "distPrice": 11.0,
+    "mapPrice": 19.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "STORM 700x(US)",
+    "description": "STORM 700x(US)",
+    "manufacturerSku": "AP0700017R",
+    "distPrice": 800.0,
+    "mapPrice": 1490.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 700x Cine Kit(US)",
+    "description": "STORM 700x(US)\nSTORM 700x Skid\nCF10 Fresnel and Barn Doors Kit",
+    "manufacturerSku": "AG0700047X",
+    "distPrice": 1035.0,
+    "mapPrice": 1860.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 700x Skid",
+    "description": "STORM 700x Skid",
+    "manufacturerSku": "AA07060180",
+    "distPrice": 35.0,
+    "mapPrice": 59.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "CF10 Fresnel and Barn Doors Kit",
+    "description": "CF10 Fresnel and Barn Doors Kit",
+    "manufacturerSku": "AA0706039T",
+    "distPrice": 255.0,
+    "mapPrice": 419.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM 700x 8-pin Lamp Head Cable(15m)",
+    "description": "STORM 700x 8-pin Lamp Head Cable(15m)",
+    "manufacturerSku": "AA0706039U",
+    "distPrice": 130.0,
+    "mapPrice": 220.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "BM6825 25° Reflector",
+    "description": "BM6825 25° Reflector",
+    "manufacturerSku": "AA0706039V",
+    "distPrice": 30.0,
+    "mapPrice": 50.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "amaran Halo 60x (US)",
+    "description": "amaran Halo 60x (US)",
+    "manufacturerSku": "MP00000437",
+    "distPrice": 68.0,
+    "mapPrice": 119.0,
+    "family": "amaran Halo Series"
+  },
+  {
+    "model": "amaran Halo 100x (US)",
+    "description": "amaran Halo 100x (US)",
+    "manufacturerSku": "MP0000043D",
+    "distPrice": 92.0,
+    "mapPrice": 169.0,
+    "family": "amaran Halo Series"
+  },
+  {
+    "model": "amaran Halo 200x (US)",
+    "description": "amaran Halo 200x (US)",
+    "manufacturerSku": "MP0000043K",
+    "distPrice": 140.0,
+    "mapPrice": 249.0,
+    "family": "amaran Halo Series"
+  },
+  {
+    "model": "amaran Halo 300x (US)",
+    "description": "amaran Halo 300x (US)",
+    "manufacturerSku": "MP0000043R",
+    "distPrice": 170.0,
+    "mapPrice": 299.0,
+    "family": "amaran Halo Series"
+  },
+  {
+    "model": "amaran Halo 600x (US)",
+    "description": "amaran Halo 600x (US)",
+    "manufacturerSku": "MP0000043X",
+    "distPrice": 262.0,
+    "mapPrice": 469.0,
+    "family": "amaran Halo Series"
+  },
+  {
+    "model": "Spotlight Mount II 19º Lens Kit",
+    "description": "Spotlight Mount II 19º Lens Kit",
+    "manufacturerSku": "AP0706019R",
+    "distPrice": 330.0,
+    "mapPrice": 499.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 26º Lens Kit",
+    "description": "Spotlight Mount II 26º Lens Kit",
+    "manufacturerSku": "AP0706019S",
+    "distPrice": 330.0,
+    "mapPrice": 499.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 36º Lens Kit",
+    "description": "Spotlight Mount II 36º Lens Kit",
+    "manufacturerSku": "AP0706019T",
+    "distPrice": 330.0,
+    "mapPrice": 499.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 50º Lens Kit",
+    "description": "Spotlight Mount II 50º Lens Kit",
+    "manufacturerSku": "AP0706025L",
+    "distPrice": 330.0,
+    "mapPrice": 499.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 19° lens",
+    "description": "Spotlight Mount II 19° lens",
+    "manufacturerSku": "AP0706019U",
+    "distPrice": 145.0,
+    "mapPrice": 229.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 26° lens",
+    "description": "Spotlight Mount II 26° lens",
+    "manufacturerSku": "AP0706019V",
+    "distPrice": 145.0,
+    "mapPrice": 229.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 36° lens",
+    "description": "Spotlight Mount II 36° lens",
+    "manufacturerSku": "AP0706019W",
+    "distPrice": 145.0,
+    "mapPrice": 229.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 50° lens",
+    "description": "Spotlight Mount II 50° lens",
+    "manufacturerSku": "AA0706025K",
+    "distPrice": 145.0,
+    "mapPrice": 229.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Iris (B-Size)",
+    "description": "Spotlight Iris (B-Size)",
+    "manufacturerSku": "APJ0118A3D",
+    "distPrice": 55.0,
+    "mapPrice": 89.0,
+    "family": "Spotlight Mount II"
+  },
+  {
+    "model": "Spotlight Mount II 3-Lens Hard Case",
+    "description": "Spotlight Mount II 3-Lens Hard Case",
+    "manufacturerSku": "AA0706025N",
+    "distPrice": 55.0,
+    "mapPrice": 89.0,
+    "family": "Spotlight Mount II"
+  }
+]

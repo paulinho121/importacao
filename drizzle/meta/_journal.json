@@ -64,6 +64,13 @@
       "when": 1785530258836,
       "tag": "0008_mighty_killer_shrike",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785532661716,
+      "tag": "0009_crazy_mastermind",
+      "breakpoints": true
     }
   ]
 }

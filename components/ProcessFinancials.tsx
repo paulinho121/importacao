@@ -8,17 +8,8 @@ import {
   type FetchExchangeRateState,
 } from "@/app/processos/actions";
 import { INCOTERMS } from "@/lib/incoterms";
+import { CURRENCIES } from "@/lib/currencies";
 import { formatDate } from "@/lib/status";
-
-const CURRENCIES = [
-  { value: "", label: "Selecione" },
-  { value: "USD", label: "USD - Dólar americano" },
-  { value: "EUR", label: "EUR - Euro" },
-  { value: "CNY", label: "CNY - Yuan chinês" },
-  { value: "GBP", label: "GBP - Libra esterlina" },
-  { value: "JPY", label: "JPY - Iene japonês" },
-  { value: "OTHER", label: "Outra (câmbio manual)" },
-];
 
 export type ProcessFinancialsData = {
   currency: string | null;

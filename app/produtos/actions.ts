@@ -10,6 +10,11 @@ function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
 }
 
+function optionalNumber(formData: FormData, key: string) {
+  const raw = String(formData.get(key) ?? "").trim();
+  return raw ? raw : null;
+}
+
 function readProductForm(formData: FormData) {
   const sku = String(formData.get("sku") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -21,6 +26,11 @@ function readProductForm(formData: FormData) {
     manufacturerSku: optionalText(formData, "manufacturerSku"),
     ncm: optionalText(formData, "ncm"),
     defaultSupplierId: optionalText(formData, "defaultSupplierId"),
+    costPrice: optionalNumber(formData, "costPrice"),
+    costCurrency: optionalText(formData, "costCurrency") as
+      | (typeof products.$inferInsert)["costCurrency"]
+      | null,
+    markupPercent: optionalNumber(formData, "markupPercent"),
     // Licenciamento de importação ("Inciso V") — todos opcionais.
     ncmAnterior: optionalText(formData, "ncmAnterior"),
     manufacturerName: optionalText(formData, "manufacturerName"),

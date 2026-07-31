@@ -289,6 +289,13 @@ export const products = pgTable("products", {
   active: boolean("active").notNull().default(true),
   description: text("description").notNull(),
   defaultSupplierId: uuid("default_supplier_id").references(() => suppliers.id),
+  // Preço de compra (custo) + markup — planilhas de fornecedor trazem o
+  // custo, não o preço de venda. O preço sugerido (custo × (1+markup)) é
+  // calculado na UI, nunca armazenado (evita ficar desatualizado se o
+  // custo ou o markup mudarem depois).
+  costPrice: numeric("cost_price", { precision: 12, scale: 2 }),
+  costCurrency: currencyEnum("cost_currency"),
+  markupPercent: numeric("markup_percent", { precision: 6, scale: 2 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
