@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronsLeft, ChevronsRight, Ship } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,14 +14,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-function isActive(pathname: string, href: string) {
-  const [path] = href.split("?");
-  if (path === "/") return pathname === "/";
-  return pathname === path || pathname.startsWith(`${path}/`);
+// Vários itens de "Operações" apontam todos para /processos, diferenciados
+// só pela query ?status= — comparar apenas o pathname fazia os 4 ficarem
+// destacados ao mesmo tempo. Aqui exigimos que o status da query também bata.
+function isActive(pathname: string, currentStatus: string, href: string) {
+  const [path, query] = href.split("?");
+  const matchesPath = path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
+  if (!matchesPath) return false;
+  const targetStatus = query ? (new URLSearchParams(query).get("status") ?? "") : "";
+  return targetStatus === currentStatus;
 }
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentStatus = searchParams.get("status") ?? "";
   const { collapsed, toggle } = useSidebar();
 
   return (
@@ -49,7 +56,7 @@ export default function Sidebar() {
                 </p>
               )}
               {group.items.map((item) => {
-                const active = isActive(pathname, item.href);
+                const active = isActive(pathname, currentStatus, item.href);
                 const Icon = item.icon;
                 const link = (
                   <Link

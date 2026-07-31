@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { LayoutDashboard, PackageSearch, Boxes, Building2, Users } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
@@ -31,7 +31,9 @@ export default function AppShell({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar />
+      <Suspense fallback={null}>
+        <Sidebar />
+      </Suspense>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
