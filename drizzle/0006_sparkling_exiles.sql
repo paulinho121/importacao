@@ -1,0 +1,1 @@
+ALTER TYPE "public"."license_status" ADD VALUE 'EM_EXIGENCIA' BEFORE 'DEFERIDA';

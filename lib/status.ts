@@ -86,6 +86,7 @@ export type LicenseStatus =
   | "A_REGISTRAR"
   | "PARA_ANALISE"
   | "EM_CONSULTA_PUBLICA"
+  | "EM_EXIGENCIA"
   | "DEFERIDA"
   | "CANCELADA_INDEFERIDA";
 
@@ -93,6 +94,7 @@ export const LICENSE_STATUS_LABEL: Record<LicenseStatus, string> = {
   A_REGISTRAR: "A Registrar",
   PARA_ANALISE: "Para Análise",
   EM_CONSULTA_PUBLICA: "Em Consulta Pública",
+  EM_EXIGENCIA: "Em Exigência",
   DEFERIDA: "Deferida",
   CANCELADA_INDEFERIDA: "Cancelada / Indeferida",
 };
@@ -101,6 +103,7 @@ export const LICENSE_STATUS_BADGE_CLASS: Record<LicenseStatus, string> = {
   A_REGISTRAR: "bg-surface-container-high text-on-surface-variant",
   PARA_ANALISE: "bg-secondary-fixed text-on-secondary-fixed-variant",
   EM_CONSULTA_PUBLICA: "bg-secondary-fixed text-on-secondary-fixed-variant",
+  EM_EXIGENCIA: "bg-error-container text-on-error-container",
   DEFERIDA: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
   CANCELADA_INDEFERIDA: "bg-error-container text-on-error-container",
 };

@@ -47,11 +47,16 @@ export const processStatusEnum = pgEnum("process_status", [
 ]);
 
 // Status do licenciamento de importação ("Inciso V") de um produto —
-// visto na aba "BD Itens Amparados Inciso V" da planilha.
+// visto na aba "BD Itens Amparados Inciso V" da planilha. EM_EXIGENCIA
+// adicionado depois de importar os dados reais dessa aba (404 licenças) —
+// 7 delas estavam em "EM EXIGÊNCIA" (pendência documental exigida pelo
+// órgão licenciador), um estado distinto de "para análise" que não
+// deveria ser colapsado numa categoria genérica.
 export const licenseStatusEnum = pgEnum("license_status", [
   "A_REGISTRAR",
   "PARA_ANALISE",
   "EM_CONSULTA_PUBLICA",
+  "EM_EXIGENCIA",
   "DEFERIDA",
   "CANCELADA_INDEFERIDA",
 ]);

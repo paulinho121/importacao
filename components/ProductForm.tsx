@@ -3,6 +3,7 @@ const LICENSE_STATUS_OPTIONS = [
   { value: "A_REGISTRAR", label: "A Registrar" },
   { value: "PARA_ANALISE", label: "Para Análise" },
   { value: "EM_CONSULTA_PUBLICA", label: "Em Consulta Pública" },
+  { value: "EM_EXIGENCIA", label: "Em Exigência" },
   { value: "DEFERIDA", label: "Deferida" },
   { value: "CANCELADA_INDEFERIDA", label: "Cancelada / Indeferida" },
 ];
