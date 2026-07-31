@@ -108,6 +108,45 @@ export const LICENSE_STATUS_BADGE_CLASS: Record<LicenseStatus, string> = {
   CANCELADA_INDEFERIDA: "bg-error-container text-on-error-container",
 };
 
+// Canal de parametrização da declaração de importação (DUIMP/DI).
+export type CustomsChannel = "VERDE" | "AMARELO" | "VERMELHO" | "CINZA";
+
+export const CUSTOMS_CHANNEL_LABEL: Record<CustomsChannel, string> = {
+  VERDE: "Verde",
+  AMARELO: "Amarelo",
+  VERMELHO: "Vermelho",
+  CINZA: "Cinza",
+};
+
+export const CUSTOMS_CHANNEL_BADGE_CLASS: Record<CustomsChannel, string> = {
+  VERDE: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
+  AMARELO: "bg-warning/10 text-warning",
+  VERMELHO: "bg-error-container text-on-error-container",
+  CINZA: "bg-surface-container-high text-on-surface-variant",
+};
+
+// Órgãos anuentes que exigem LPCO — ver process_lpcos.
+export type LpcoAgency =
+  | "ANVISA"
+  | "MAPA"
+  | "INMETRO"
+  | "IBAMA"
+  | "EXERCITO"
+  | "ANP"
+  | "DECEX"
+  | "OUTRO";
+
+export const LPCO_AGENCY_LABEL: Record<LpcoAgency, string> = {
+  ANVISA: "Anvisa",
+  MAPA: "MAPA",
+  INMETRO: "Inmetro",
+  IBAMA: "Ibama",
+  EXERCITO: "Exército/DFPC",
+  ANP: "ANP",
+  DECEX: "Decex",
+  OUTRO: "Outro",
+};
+
 // Status visual de estoque por item (planilha: 🟢 Disponível / 🟡 Últimas
 // Unidades / 🔴 Esgotado). A planilha não define o limiar exato de
 // "últimas unidades" — assumo <=20% do pedido, documentado aqui.

@@ -7,9 +7,18 @@ import {
   processDocuments,
   processEvents,
   processInvoices,
+  processLpcos,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { STATUS_BY_STEP, WORKFLOW_STEPS, diasRestantes, type ProcessStatus } from "@/lib/status";
+import {
+  STATUS_BY_STEP,
+  WORKFLOW_STEPS,
+  diasRestantes,
+  CUSTOMS_CHANNEL_LABEL,
+  LPCO_AGENCY_LABEL,
+  type ProcessStatus,
+  type CustomsChannel,
+} from "@/lib/status";
 import type { KpiTrend } from "@/components/dashboard/KpiCard";
 import type { AlertLevel } from "@/components/shared/PriorityBadge";
 
@@ -52,7 +61,7 @@ function buildTrend(dates: Date[], { invert = false }: { invert?: boolean } = {}
 }
 
 export async function getDashboardMetrics() {
-  const [processRows, itemRows, docRows, eventRows, invoiceRows] = await Promise.all([
+  const [processRows, itemRows, docRows, eventRows, invoiceRows, lpcoRows] = await Promise.all([
     db
       .select({
         id: processes.id,
@@ -72,6 +81,7 @@ export async function getDashboardMetrics() {
         internationalFreightValue: processes.internationalFreightValue,
         insuranceValue: processes.insuranceValue,
         exchangeRate: processes.exchangeRate,
+        customsChannel: processes.customsChannel,
       })
       .from(processes)
       .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
@@ -104,6 +114,13 @@ export async function getDashboardMetrics() {
         value: processInvoices.value,
       })
       .from(processInvoices),
+    db
+      .select({
+        processId: processLpcos.processId,
+        agency: processLpcos.agency,
+        validUntil: processLpcos.validUntil,
+      })
+      .from(processLpcos),
   ]);
 
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO");
@@ -219,8 +236,8 @@ export async function getDashboardMetrics() {
     return { label, value: count };
   });
 
-  // --- Alertas prioritários (atrasados ou ETA <= 3 dias) ---
-  const alerts = ativos
+  // --- Alertas prioritários (atrasados, ETA <= 3 dias, ou LPCO vencendo/vencida) ---
+  const etaAlertCandidates = ativos
     .map((p) => {
       const dias = diasRestantes(p.etaEstimated);
       const isAtrasado = p.status === "ATRASADO";
@@ -228,13 +245,12 @@ export async function getDashboardMetrics() {
       return { p, dias, isAtrasado, isUrgente };
     })
     .filter((a) => a.isAtrasado || a.isUrgente)
-    .sort((a, b) => (a.dias ?? 0) - (b.dias ?? 0))
-    .slice(0, 6)
     .map(({ p, dias, isAtrasado }) => {
       const level: AlertLevel = isAtrasado ? "critical" : (dias ?? 0) < 0 ? "critical" : "warning";
       return {
         id: p.id,
         level,
+        dias: dias ?? 0,
         title: `${p.processNumber} — ${p.supplierName}`,
         description: dias !== null && dias < 0 ? `ETA vencida` : `ETA em ${dias} dia(s)`,
         responsible: p.agentName ?? undefined,
@@ -242,6 +258,50 @@ export async function getDashboardMetrics() {
         href: `/processos/${p.id}`,
       };
     });
+
+  const processById = new Map(processRows.map((p) => [p.id, p]));
+  const lpcoAlertCandidates = lpcoRows
+    .filter((l) => l.validUntil)
+    .map((l) => {
+      const process = processById.get(l.processId);
+      const dias = diasRestantes(l.validUntil);
+      return { l, process, dias };
+    })
+    .filter(
+      (a): a is typeof a & { process: NonNullable<typeof a.process>; dias: number } =>
+        Boolean(a.process) && a.dias !== null && a.dias <= 15,
+    )
+    .map(({ l, process, dias }) => {
+      const level: AlertLevel = dias < 0 ? "critical" : "warning";
+      const agencyLabel = LPCO_AGENCY_LABEL[l.agency];
+      return {
+        id: `lpco-${l.processId}-${l.agency}-${l.validUntil}`,
+        level,
+        dias,
+        title: `${process.processNumber} — LPCO ${agencyLabel}`,
+        description: dias < 0 ? "LPCO vencida" : `LPCO vence em ${dias} dia(s)`,
+        responsible: process.agentName ?? undefined,
+        daysOverdue: dias < 0 ? Math.abs(dias) : undefined,
+        href: `/processos/${l.processId}`,
+      };
+    });
+
+  const alerts = [...etaAlertCandidates, ...lpcoAlertCandidates]
+    .sort((a, b) => a.dias - b.dias)
+    .slice(0, 6)
+    .map(({ dias: _dias, ...alert }) => alert);
+
+  // --- Distribuição por canal de parametrização (só processos com canal definido) ---
+  const CHANNEL_ORDER: CustomsChannel[] = ["VERDE", "AMARELO", "VERMELHO", "CINZA"];
+  const channelCounts = new Map<CustomsChannel, number>();
+  for (const p of ativos) {
+    if (!p.customsChannel) continue;
+    channelCounts.set(p.customsChannel, (channelCounts.get(p.customsChannel) ?? 0) + 1);
+  }
+  const byCustomsChannel = CHANNEL_ORDER.filter((c) => channelCounts.has(c)).map((c) => ({
+    label: CUSTOMS_CHANNEL_LABEL[c],
+    value: channelCounts.get(c)!,
+  }));
 
   // --- Processos por Destino (substitui o mapa mundial — dado real) ---
   const destinationCounts = new Map<string, number>();
@@ -314,7 +374,7 @@ export async function getDashboardMetrics() {
       agentName: p.agentName,
     }));
 
-  return { kpis, importsByMonth, alerts, byDestination, pipeline, table };
+  return { kpis, importsByMonth, alerts, byDestination, byCustomsChannel, pipeline, table };
 }
 
 export type DashboardMetrics = Awaited<ReturnType<typeof getDashboardMetrics>>;

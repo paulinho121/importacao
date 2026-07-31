@@ -8,12 +8,19 @@ import {
   products,
   processDocuments,
   processInvoices,
+  processLpcos,
   itemReservations,
 } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { STATUS_BY_STEP, WORKFLOW_STEPS, type ProcessStatus } from "@/lib/status";
+import {
+  STATUS_BY_STEP,
+  WORKFLOW_STEPS,
+  CUSTOMS_CHANNEL_LABEL,
+  type ProcessStatus,
+  type CustomsChannel,
+} from "@/lib/status";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 import { fetchVesselPosition } from "@/lib/datalastic";
 import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
@@ -134,6 +141,60 @@ export async function updateProcessFinancials(processId: string, formData: FormD
       updatedAt: new Date(),
     })
     .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export async function updateCustomsChannel(processId: string, formData: FormData) {
+  const channel = optionalText(formData, "customsChannel") as CustomsChannel | null;
+
+  await db
+    .update(processes)
+    .set({ customsChannel: channel, updatedAt: new Date() })
+    .where(eq(processes.id, processId));
+
+  await db.insert(processEvents).values({
+    processId,
+    eventDate: new Date(),
+    eventType: channel
+      ? `Canal de parametrização: ${CUSTOMS_CHANNEL_LABEL[channel]}`
+      : "Canal de parametrização removido",
+  });
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export async function addProcessLpco(processId: string, formData: FormData) {
+  const agency = optionalText(formData, "agency") as (typeof processLpcos.$inferInsert)["agency"] | null;
+  if (!agency) throw new Error("Órgão anuente é obrigatório.");
+
+  await db.insert(processLpcos).values({
+    processId,
+    agency,
+    lpcoNumber: optionalText(formData, "lpcoNumber"),
+    status:
+      (optionalText(formData, "status") as (typeof processLpcos.$inferInsert)["status"]) ?? "A_REGISTRAR",
+    issuedAt: optionalDate(formData, "issuedAt"),
+    validUntil: optionalDate(formData, "validUntil"),
+    notes: optionalText(formData, "notes"),
+  });
+
+  revalidatePath(`/processos/${processId}`);
+}
+
+export async function updateProcessLpco(lpcoId: string, processId: string, formData: FormData) {
+  await db
+    .update(processLpcos)
+    .set({
+      lpcoNumber: optionalText(formData, "lpcoNumber"),
+      status:
+        (optionalText(formData, "status") as (typeof processLpcos.$inferInsert)["status"]) ?? "A_REGISTRAR",
+      issuedAt: optionalDate(formData, "issuedAt"),
+      validUntil: optionalDate(formData, "validUntil"),
+      notes: optionalText(formData, "notes"),
+      updatedAt: new Date(),
+    })
+    .where(eq(processLpcos.id, lpcoId));
 
   revalidatePath(`/processos/${processId}`);
 }

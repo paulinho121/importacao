@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import AddItemForm from "@/components/AddItemForm";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
+import ProcessCompliance from "@/components/ProcessCompliance";
 import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import {
@@ -14,6 +15,7 @@ import {
   processDocuments,
   products,
   processInvoices,
+  processLpcos,
   freightAgents,
   itemReservations,
 } from "@/db/schema";
@@ -78,6 +80,7 @@ export default async function ProcessDetailPage({
       insuranceValue: processes.insuranceValue,
       exchangeRate: processes.exchangeRate,
       exchangeRateDate: processes.exchangeRateDate,
+      customsChannel: processes.customsChannel,
       vesselName: processes.vesselName,
       vesselImo: processes.vesselImo,
       vesselMmsi: processes.vesselMmsi,
@@ -98,7 +101,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, productRows, invoices] = await Promise.all([
+  const [items, events, documents, productRows, invoices, lpcos] = await Promise.all([
     db.select().from(processItems).where(eq(processItems.processId, id)),
     db
       .select()
@@ -111,6 +114,7 @@ export default async function ProcessDetailPage({
       .from(products)
       .orderBy(products.sku),
     db.select().from(processInvoices).where(eq(processInvoices.processId, id)),
+    db.select().from(processLpcos).where(eq(processLpcos.processId, id)),
   ]);
 
   const itemIds = items.map((item) => item.id);
@@ -465,6 +469,20 @@ export default async function ProcessDetailPage({
                 id: inv.id,
                 invoiceNumber: inv.invoiceNumber,
                 value: inv.value,
+              }))}
+            />
+
+            <ProcessCompliance
+              processId={id}
+              customsChannel={process.customsChannel}
+              lpcos={lpcos.map((lpco) => ({
+                id: lpco.id,
+                agency: lpco.agency,
+                lpcoNumber: lpco.lpcoNumber,
+                status: lpco.status,
+                issuedAt: lpco.issuedAt,
+                validUntil: lpco.validUntil,
+                notes: lpco.notes,
               }))}
             />
 

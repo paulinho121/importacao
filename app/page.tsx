@@ -141,6 +141,20 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {metrics.byCustomsChannel.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
+            <div className="lg:col-span-1">
+              <BarChartCard
+                title="Canal de Parametrização"
+                description="Processos ativos por canal (dado manual, pós-registro)"
+                data={metrics.byCustomsChannel}
+                layout="vertical"
+                color="var(--chart-3)"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="px-4 lg:px-6">
           <div className="rounded-card border border-border bg-card p-5">
             <SectionHeader

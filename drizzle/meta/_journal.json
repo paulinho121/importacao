@@ -57,6 +57,13 @@
       "when": 1785529047658,
       "tag": "0007_familiar_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785530258836,
+      "tag": "0008_mighty_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

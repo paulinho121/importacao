@@ -85,6 +85,31 @@ export const currencyEnum = pgEnum("currency", [
   "OTHER",
 ]);
 
+// Canal de parametrização — resultado da análise de risco da declaração
+// de importação (DUIMP/DI). Vermelho/Cinza exigem intervenção manual
+// (verificação documental+física / suspeita de fraude ou valoração);
+// preenchido manualmente por ora (sem integração com o Portal Único).
+export const customsChannelEnum = pgEnum("customs_channel", [
+  "VERDE",
+  "AMARELO",
+  "VERMELHO",
+  "CINZA",
+]);
+
+// Órgãos anuentes mais comuns que exigem LPCO (Licença, Permissão,
+// Certificado e Outros documentos) — nomenclatura do Portal Único que
+// substituiu o antigo "LI" (Licença de Importação).
+export const lpcoAgencyEnum = pgEnum("lpco_agency", [
+  "ANVISA",
+  "MAPA",
+  "INMETRO",
+  "IBAMA",
+  "EXERCITO",
+  "ANP",
+  "DECEX",
+  "OUTRO",
+]);
+
 // Fornecedores. Processos referenciam por FK, nunca por texto livre —
 // resolve a duplicidade tipo "APUTURE" vs "APUTURE + DEARKOL" vista na planilha.
 export const suppliers = pgTable("suppliers", {
@@ -186,6 +211,10 @@ export const processes = pgTable("processes", {
   // usada na cotação (pode diferir da data pedida em fins de semana/feriado).
   exchangeRate: numeric("exchange_rate", { precision: 10, scale: 6 }),
   exchangeRateDate: date("exchange_rate_date"),
+  // Resultado da parametrização (Verde/Amarelo/Vermelho/Cinza) — preenchido
+  // manualmente quando o resultado sai no Portal Único, sem integração
+  // automática por ora.
+  customsChannel: customsChannelEnum("customs_channel"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -206,6 +235,33 @@ export const processInvoices = pgTable("process_invoices", {
   // Valor FOB declarado desta invoice, na moeda de processes.currency.
   value: numeric("value", { precision: 12, scale: 2 }),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// LPCOs (Licença, Permissão, Certificado e Outros documentos) efetivamente
+// abertos/obtidos para um processo específico — um processo pode precisar
+// de LPCOs de vários órgãos anuentes diferentes ao mesmo tempo. Não
+// confundir com products.licenseStatus (Inciso V): aquele descreve se o
+// PRODUTO exige licenciamento (fato de catálogo); esta tabela registra as
+// licenças reais abertas para uma OPERAÇÃO — os dois convivem.
+export const processLpcos = pgTable("process_lpcos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  processId: uuid("process_id")
+    .notNull()
+    .references(() => processes.id, { onDelete: "cascade" }),
+  agency: lpcoAgencyEnum("agency").notNull(),
+  lpcoNumber: text("lpco_number"),
+  // Reaproveita licenseStatusEnum — mesmo ciclo de vida do licenciamento
+  // Inciso V (a registrar/para análise/consulta pública/exigência/deferida/indeferida).
+  status: licenseStatusEnum("status").notNull().default("A_REGISTRAR"),
+  issuedAt: date("issued_at"),
+  validUntil: date("valid_until"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
