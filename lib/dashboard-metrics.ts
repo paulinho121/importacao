@@ -8,6 +8,7 @@ import {
   processEvents,
   processInvoices,
   processLpcos,
+  products,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
@@ -61,7 +62,7 @@ function buildTrend(dates: Date[], { invert = false }: { invert?: boolean } = {}
 }
 
 export async function getDashboardMetrics() {
-  const [processRows, itemRows, docRows, eventRows, invoiceRows, lpcoRows] = await Promise.all([
+  const [processRows, itemRows, docRows, eventRows, invoiceRows, lpcoRows, ncmDivergentRows] = await Promise.all([
     db
       .select({
         id: processes.id,
@@ -121,6 +122,16 @@ export async function getDashboardMetrics() {
         validUntil: processLpcos.validUntil,
       })
       .from(processLpcos),
+    db
+      .select({
+        id: products.id,
+        sku: products.sku,
+        ncm: products.ncm,
+        ncmOfficialSuggested: products.ncmOfficialSuggested,
+      })
+      .from(products)
+      .where(eq(products.ncmDivergent, true))
+      .orderBy(products.sku),
   ]);
 
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO");
@@ -374,7 +385,14 @@ export async function getDashboardMetrics() {
       agentName: p.agentName,
     }));
 
-  return { kpis, importsByMonth, alerts, byDestination, byCustomsChannel, pipeline, table };
+  const ncmDivergences = ncmDivergentRows.map((p) => ({
+    id: p.id,
+    sku: p.sku,
+    ncm: p.ncm,
+    ncmOfficialSuggested: p.ncmOfficialSuggested,
+  }));
+
+  return { kpis, importsByMonth, alerts, ncmDivergences, byDestination, byCustomsChannel, pipeline, table };
 }
 
 export type DashboardMetrics = Awaited<ReturnType<typeof getDashboardMetrics>>;

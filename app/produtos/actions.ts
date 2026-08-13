@@ -64,3 +64,32 @@ export async function updateProduct(id: string, formData: FormData) {
   revalidatePath(`/produtos/${id}`);
   redirect("/produtos");
 }
+
+export async function resolveNcmDivergence(id: string, formData: FormData) {
+  const action = formData.get("action");
+
+  if (action === "accept") {
+    const [product] = await db
+      .select({ ncmOfficialSuggested: products.ncmOfficialSuggested })
+      .from(products)
+      .where(eq(products.id, id));
+    await db
+      .update(products)
+      .set({
+        ncm: product?.ncmOfficialSuggested ?? null,
+        ncmDivergent: false,
+        ncmOfficialSuggested: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, id));
+  } else {
+    await db
+      .update(products)
+      .set({ ncmDivergent: false, updatedAt: new Date() })
+      .where(eq(products.id, id));
+  }
+
+  revalidatePath("/produtos");
+  revalidatePath(`/produtos/${id}`);
+  revalidatePath("/");
+}

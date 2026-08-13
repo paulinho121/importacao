@@ -141,6 +141,28 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {metrics.ncmDivergences.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 px-4 lg:px-6">
+            <div className="rounded-card border border-border bg-card p-5">
+              <SectionHeader
+                title="NCM Divergente do Decex"
+                description="Produtos onde o NCM cadastrado difere da lista oficial de apuração de produção nacional"
+              />
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {metrics.ncmDivergences.map((p) => (
+                  <AlertCard
+                    key={p.id}
+                    level="warning"
+                    title={p.sku}
+                    description={`NCM: ${p.ncm ?? "—"} → sugerido: ${p.ncmOfficialSuggested ?? "—"}`}
+                    href={`/produtos/${p.id}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {metrics.byCustomsChannel.length > 0 && (
           <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
             <div className="lg:col-span-1">

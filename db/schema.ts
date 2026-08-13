@@ -296,6 +296,15 @@ export const products = pgTable("products", {
   costPrice: numeric("cost_price", { precision: 12, scale: 2 }),
   costCurrency: currencyEnum("cost_currency"),
   markupPercent: numeric("markup_percent", { precision: 6, scale: 2 }),
+  // Sinaliza quando o NCM cadastrado diverge do que a lista oficial mais
+  // recente do Decex mostra ("Relação dos resultados das apurações de
+  // produção nacional", art. 42 da Portaria Secex 249/2023 — cruzamento
+  // manual, sem integração automática por ora). ncmOfficialSuggested
+  // guarda o valor da fonte oficial pra comparação lado a lado;
+  // ncmCheckedAt registra quando foi conferido.
+  ncmDivergent: boolean("ncm_divergent").notNull().default(false),
+  ncmOfficialSuggested: text("ncm_official_suggested"),
+  ncmCheckedAt: date("ncm_checked_at"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

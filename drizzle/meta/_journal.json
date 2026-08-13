@@ -71,6 +71,13 @@
       "when": 1785532661716,
       "tag": "0009_crazy_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786628148486,
+      "tag": "0010_regular_eternity",
+      "breakpoints": true
     }
   ]
 }

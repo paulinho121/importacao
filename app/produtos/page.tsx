@@ -20,6 +20,8 @@ export default async function ProdutosPage({
       sku: products.sku,
       manufacturerSku: products.manufacturerSku,
       ncm: products.ncm,
+      ncmDivergent: products.ncmDivergent,
+      ncmOfficialSuggested: products.ncmOfficialSuggested,
       description: products.description,
       licenseStatus: products.licenseStatus,
       costPrice: products.costPrice,
@@ -110,7 +112,19 @@ export default async function ProdutosPage({
                       </Link>
                     </td>
                     <td className="px-6 py-3 font-mono-data">{p.manufacturerSku ?? "—"}</td>
-                    <td className="px-6 py-3 font-mono-data">{p.ncm ?? "—"}</td>
+                    <td className="px-6 py-3 font-mono-data">
+                      <div className="flex items-center gap-1.5">
+                        {p.ncm ?? "—"}
+                        {p.ncmDivergent && (
+                          <span
+                            className="material-symbols-outlined text-[16px] text-warning"
+                            title={`Lista oficial do Decex sugere: ${p.ncmOfficialSuggested ?? "—"}`}
+                          >
+                            warning
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-3 font-medium">{p.description}</td>
                     <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
                     <td className="px-6 py-3">
