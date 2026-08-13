@@ -109,9 +109,15 @@
   --chart-5: #ef4444;
 }
 
-/* Dark mode: só os tokens novos ganham variante escura nesta fase — as
-   páginas ainda não redesenhadas (tokens antigos) não foram pensadas pra
-   tema escuro, então não sobrescrevo os antigos aqui de propósito. */
+/* Dark mode. Cobre tanto os tokens novos (Dashboard, Sidebar, Header,
+   componentes de ui) quanto os antigos (surface, on-surface, outline,
+   primary, background), usados pela maioria das páginas: Processos,
+   Produtos, Fornecedores, Agentes, forms. secondary (azul de ação) e
+   on-surface/on-primary fixos em branco não precisam de override — já
+   funcionam nos dois temas. bg-primary como fundo de botão foi trocado
+   por bg-secondary nos 2 lugares que usavam (AddItemForm,
+   ProcessCompliance) justamente pra liberar primary como cor de texto de
+   título, que agora pode clarear sem quebrar aqueles botões. */
 .dark {
   --background: #0b1220;
   --foreground: #f1f5f9;
@@ -132,6 +138,24 @@
   --border: #1e293b;
   --input: #1e293b;
   --ring: #3b82f6;
+
+  /* ---- tokens antigos ---- */
+  --color-background: #0b1220;
+  --color-on-background: #f1f5f9;
+  --color-surface: #0b1220;
+  --color-surface-dim: #1e293b;
+  --color-surface-bright: #1e293b;
+  --color-surface-container-lowest: #111827;
+  --color-surface-container-low: #0f172a;
+  --color-surface-container: #111827;
+  --color-surface-container-high: #1e293b;
+  --color-surface-container-highest: #243244;
+  --color-surface-variant: #1e293b;
+  --color-on-surface: #f1f5f9;
+  --color-on-surface-variant: #94a3b8;
+  --color-outline-variant: #1e293b;
+  --color-primary: #f1f5f9;
+  --color-error-container: #7f1d1d;
 }
 
 @theme inline {

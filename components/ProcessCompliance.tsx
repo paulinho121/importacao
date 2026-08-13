@@ -193,7 +193,7 @@ export default function ProcessCompliance({
           />
           <button
             type="submit"
-            className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-bold hover:opacity-90 transition-all"
+            className="px-3 py-2 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
           >
             Adicionar LPCO
           </button>

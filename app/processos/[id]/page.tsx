@@ -33,6 +33,7 @@ import { locationLabel } from "@/lib/locations";
 import {
   advanceProcessStep,
   updateProcessStatus,
+  updateProcessNumber,
   addProcessItem,
   addProcessInvoice,
   addItemReservation,
@@ -131,6 +132,7 @@ export default async function ProcessDetailPage({
   const dias = diasRestantes(process.etaEstimated);
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
   const boundUpdateStatus = updateProcessStatus.bind(null, id);
+  const boundUpdateProcessNumber = updateProcessNumber.bind(null, id);
   const boundAddItem = addProcessItem.bind(null, id);
   const boundAddInvoice = addProcessInvoice.bind(null, id);
   const destinationLabel = process.destinationCode
@@ -179,7 +181,35 @@ export default async function ProcessDetailPage({
               >
                 {STATUS_LABEL[process.status as ProcessStatus]}
               </span>
+              <details className="relative">
+                <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
+                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  Editar número
+                </summary>
+                <form
+                  action={boundUpdateProcessNumber}
+                  className="absolute z-10 mt-2 flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-lg"
+                >
+                  <input
+                    type="text"
+                    name="processNumber"
+                    defaultValue={process.processNumber}
+                    required
+                    className="bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
+                  >
+                    Salvar
+                  </button>
+                </form>
+              </details>
             </div>
+            <p className="text-on-surface-variant font-body-sm text-body-sm -mt-1 mb-2">
+              Use isso pra renomear o número quando precisar mesclar dois ou mais processos em um só —
+              itens, invoices e documentos ficam associados ao processo, não ao número.
+            </p>
             <p className="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md max-w-2xl">
               <SupplierLogo
                 logoUrl={process.supplierLogoUrl}

@@ -90,7 +90,7 @@ export default function AddItemForm({
 
       <button
         type="submit"
-        className="w-full px-4 py-2 rounded-lg bg-primary text-white font-label-md text-label-md hover:opacity-90 transition-all"
+        className="w-full px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
       >
         Adicionar Item
       </button>

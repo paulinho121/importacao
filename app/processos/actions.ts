@@ -11,7 +11,7 @@ import {
   processLpcos,
   itemReservations,
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -106,6 +106,34 @@ export async function createProcess(formData: FormData) {
   revalidatePath("/processos");
   revalidatePath("/");
   redirect(`/processos/${created.id}`);
+}
+
+export async function updateProcessNumber(processId: string, formData: FormData) {
+  const processNumber = String(formData.get("processNumber") ?? "").trim();
+  if (!processNumber) throw new Error("Número do processo é obrigatório.");
+
+  const [existing] = await db
+    .select({ id: processes.id })
+    .from(processes)
+    .where(and(eq(processes.processNumber, processNumber), ne(processes.id, processId)));
+  if (existing) {
+    throw new Error(`Já existe outro processo com o número "${processNumber}" — use um número diferente.`);
+  }
+
+  await db
+    .update(processes)
+    .set({ processNumber, updatedAt: new Date() })
+    .where(eq(processes.id, processId));
+
+  await db.insert(processEvents).values({
+    processId,
+    eventDate: new Date(),
+    eventType: `Número do processo alterado para ${processNumber}`,
+  });
+
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  revalidatePath("/");
 }
 
 export async function addProcessInvoice(processId: string, formData: FormData) {

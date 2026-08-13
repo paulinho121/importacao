@@ -36,12 +36,17 @@ function useBreadcrumb(pathname: string) {
 export default function Header() {
   const pathname = usePathname();
   const crumbs = useBreadcrumb(pathname);
-  const [dark, setDark] = React.useState(false);
+  const [dark, setDark] = React.useState(true);
+
+  React.useEffect(() => {
+    setDark(document.documentElement.classList.contains("dark"));
+  }, []);
 
   const toggleTheme = () => {
     setDark((prev) => {
       const next = !prev;
       document.documentElement.classList.toggle("dark", next);
+      localStorage.setItem("theme", next ? "dark" : "light");
       return next;
     });
   };
