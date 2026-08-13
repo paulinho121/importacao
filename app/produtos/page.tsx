@@ -2,7 +2,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { db } from "@/db/client";
 import { products, suppliers, processItems } from "@/db/schema";
-import { eq, ilike, or, sql } from "drizzle-orm";
+import { and, eq, ilike, or, sql } from "drizzle-orm";
 import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
@@ -10,41 +10,51 @@ export const dynamic = "force-dynamic";
 export default async function ProdutosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; divergente?: string }>;
 }) {
-  const { q = "" } = await searchParams;
+  const { q = "", divergente = "" } = await searchParams;
+  const onlyDivergent = divergente === "1";
 
-  const rows = await db
-    .select({
-      id: products.id,
-      sku: products.sku,
-      manufacturerSku: products.manufacturerSku,
-      ncm: products.ncm,
-      ncmDivergent: products.ncmDivergent,
-      ncmOfficialSuggested: products.ncmOfficialSuggested,
-      description: products.description,
-      licenseStatus: products.licenseStatus,
-      costPrice: products.costPrice,
-      costCurrency: products.costCurrency,
-      markupPercent: products.markupPercent,
-      supplierName: suppliers.name,
-      usageCount: sql<number>`count(${processItems.id})`.mapWith(Number),
-    })
-    .from(products)
-    .leftJoin(suppliers, eq(products.defaultSupplierId, suppliers.id))
-    .leftJoin(processItems, eq(processItems.productId, products.id))
-    .where(
-      q
-        ? or(
-            ilike(products.sku, `%${q}%`),
-            ilike(products.manufacturerSku, `%${q}%`),
-            ilike(products.description, `%${q}%`),
-            ilike(products.ncm, `%${q}%`),
-          )
-        : undefined,
-    )
-    .groupBy(products.id, suppliers.name)
-    .orderBy(products.sku);
+  const conditions = [
+    q
+      ? or(
+          ilike(products.sku, `%${q}%`),
+          ilike(products.manufacturerSku, `%${q}%`),
+          ilike(products.description, `%${q}%`),
+          ilike(products.ncm, `%${q}%`),
+        )
+      : undefined,
+    onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
+  ].filter((c) => c !== undefined);
+
+  const [rows, [{ divergentCount }]] = await Promise.all([
+    db
+      .select({
+        id: products.id,
+        sku: products.sku,
+        manufacturerSku: products.manufacturerSku,
+        ncm: products.ncm,
+        ncmDivergent: products.ncmDivergent,
+        ncmOfficialSuggested: products.ncmOfficialSuggested,
+        description: products.description,
+        licenseStatus: products.licenseStatus,
+        costPrice: products.costPrice,
+        costCurrency: products.costCurrency,
+        markupPercent: products.markupPercent,
+        supplierName: suppliers.name,
+        usageCount: sql<number>`count(${processItems.id})`.mapWith(Number),
+      })
+      .from(products)
+      .leftJoin(suppliers, eq(products.defaultSupplierId, suppliers.id))
+      .leftJoin(processItems, eq(processItems.productId, products.id))
+      .where(conditions.length ? and(...conditions) : undefined)
+      .groupBy(products.id, suppliers.name)
+      .orderBy(products.sku),
+    db
+      .select({ divergentCount: sql<number>`count(*)`.mapWith(Number) })
+      .from(products)
+      .where(eq(products.ncmDivergent, true)),
+  ]);
 
   return (
     <AppShell title="Produtos">
@@ -66,18 +76,35 @@ export default async function ProdutosPage({
           </Link>
         </div>
 
-        <form action="/produtos" className="relative max-w-md">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
-            search
-          </span>
-          <input
-            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:border-secondary transition-colors font-body-md text-body-md"
-            placeholder="Buscar por SKU interno, SKU fabricante, descrição ou NCM..."
-            type="text"
-            name="q"
-            defaultValue={q}
-          />
-        </form>
+        <div className="flex flex-wrap items-center gap-3">
+          <form action="/produtos" className="relative max-w-md flex-1 min-w-[280px]">
+            {onlyDivergent && <input type="hidden" name="divergente" value="1" />}
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              search
+            </span>
+            <input
+              className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:border-secondary transition-colors font-body-md text-body-md"
+              placeholder="Buscar por SKU interno, SKU fabricante, descrição ou NCM..."
+              type="text"
+              name="q"
+              defaultValue={q}
+            />
+          </form>
+
+          {divergentCount > 0 && (
+            <Link
+              href={onlyDivergent ? (q ? `/produtos?q=${encodeURIComponent(q)}` : "/produtos") : `/produtos?divergente=1${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border transition-colors ${
+                onlyDivergent
+                  ? "bg-warning text-warning-foreground border-warning"
+                  : "bg-warning/10 text-warning border-warning/30 hover:bg-warning/20"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">warning</span>
+              {onlyDivergent ? "Mostrando só divergentes — ver todos" : `Só divergentes do Decex (${divergentCount})`}
+            </Link>
+          )}
+        </div>
 
         <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -100,7 +127,11 @@ export default async function ProdutosPage({
                 {rows.length === 0 && (
                   <tr>
                     <td colSpan={10} className="px-6 py-6 text-on-surface-variant text-center">
-                      {q ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado ainda."}
+                      {q
+                        ? "Nenhum produto encontrado para essa busca."
+                        : onlyDivergent
+                          ? "Nenhum produto com divergência de NCM no momento."
+                          : "Nenhum produto cadastrado ainda."}
                     </td>
                   </tr>
                 )}
