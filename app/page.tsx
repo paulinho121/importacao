@@ -53,7 +53,7 @@ export default async function DashboardPage() {
             value={String(metrics.kpis.emTransito.value)}
             trend={metrics.kpis.emTransito.trend}
             sparklineData={metrics.kpis.emTransito.sparkline}
-            accent="var(--chart-2)"
+            accent="var(--chart-1)"
           />
           <KpiCard
             icon={<CheckCircle2 className="h-[18px] w-[18px]" />}
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             value={String(metrics.kpis.itensEmProcesso.value)}
             trend={metrics.kpis.itensEmProcesso.trend}
             sparklineData={metrics.kpis.itensEmProcesso.sparkline}
-            accent="var(--chart-4)"
+            accent="var(--chart-1)"
           />
           <KpiCard
             icon={<DollarSign className="h-[18px] w-[18px]" />}
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
             value={brlFormatter.format(metrics.kpis.valorFobTotal.value)}
             trend={metrics.kpis.valorFobTotal.trend}
             sparklineData={metrics.kpis.valorFobTotal.sparkline}
-            accent="var(--chart-2)"
+            accent="var(--chart-1)"
           />
           <KpiCard
             icon={<Wallet className="h-[18px] w-[18px]" />}
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
             value={brlFormatter.format(metrics.kpis.valorCifTotal.value)}
             trend={metrics.kpis.valorCifTotal.trend}
             sparklineData={metrics.kpis.valorCifTotal.sparkline}
-            accent="var(--chart-3)"
+            accent="var(--chart-1)"
           />
         </div>
 

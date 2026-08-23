@@ -56,8 +56,14 @@ export function KpiCard({
           >
             {trend.direction === "up" && <ArrowUpRight className="h-3.5 w-3.5" />}
             {trend.direction === "down" && <ArrowDownRight className="h-3.5 w-3.5" />}
-            {trend.direction === "flat" && <Minus className="h-3.5 w-3.5" />}
-            {trend.value}%
+            {trend.direction === "flat" ? (
+              <>
+                <Minus className="h-3.5 w-3.5" />
+                Estável
+              </>
+            ) : (
+              `${trend.value}%`
+            )}
           </span>
         )}
       </div>

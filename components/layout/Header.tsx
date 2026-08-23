@@ -39,7 +39,14 @@ export default function Header() {
   const [dark, setDark] = React.useState(true);
 
   React.useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
+    // Escuro é o padrão (já vem assim do servidor); só troca pra claro se o
+    // usuário tiver escolhido isso antes. Fica no efeito em vez de um script
+    // bloqueante em <head>/<body> — evita 1 frame de flash pra quem não
+    // mudou o tema, ao custo de um flash mínimo só pra quem escolheu claro.
+    if (localStorage.getItem("theme") === "light") {
+      document.documentElement.classList.remove("dark");
+      setDark(false);
+    }
   }, []);
 
   const toggleTheme = () => {
