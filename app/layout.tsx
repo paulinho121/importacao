@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,17 +26,18 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
-        {/* Tema escuro é o padrão; só remove a classe se o usuário já tiver
-            escolhido claro explicitamente (evita flash: roda antes do body
-            pintar, então nunca aparece um frame no tema errado). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{if(localStorage.getItem('theme')==='light'){document.documentElement.classList.remove('dark')}}catch(e){}",
-          }}
-        />
       </head>
       <body className="min-h-full bg-background text-on-surface antialiased">
+        {/* Tema escuro é o padrão; só remove a classe se o usuário já tiver
+            escolhido claro explicitamente (evita flash: roda antes do body
+            pintar, então nunca aparece um frame no tema errado).
+            next/script com beforeInteractive precisa ficar dentro do <body>
+            (documentação do Next) — dentro do <head> causava erro de
+            hidratação, porque o React tentava reconciliar o script como um
+            nó normal da árvore junto com o gerenciamento próprio do <head>. */}
+        <Script id="theme-init" strategy="beforeInteractive">
+          {"try{if(localStorage.getItem('theme')==='light'){document.documentElement.classList.remove('dark')}}catch(e){}"}
+        </Script>
         {children}
       </body>
     </html>
