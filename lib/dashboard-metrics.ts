@@ -22,6 +22,7 @@ import {
 } from "@/lib/status";
 import type { KpiTrend } from "@/components/dashboard/KpiCard";
 import type { AlertLevel } from "@/components/shared/PriorityBadge";
+import { calcValorAduaneiro } from "@/lib/landed-cost";
 
 const DAY_MS = 86_400_000;
 const DOC_TYPES_PER_PROCESS = 3; // INVOICE, BL, PACKING_LIST — ver process_documents
@@ -172,7 +173,7 @@ export async function getDashboardMetrics() {
     const freight = p.internationalFreightValue ? Number(p.internationalFreightValue) : 0;
     const insurance = p.insuranceValue ? Number(p.insuranceValue) : 0;
     fobTotalBRL += invoicesSum * rate;
-    cifTotalBRL += (invoicesSum + freight + insurance) * rate;
+    cifTotalBRL += calcValorAduaneiro({ invoicesSum, freight, insurance, rate });
     financialCompleteDates.push(new Date(p.createdAt));
   }
 

@@ -93,6 +93,11 @@ export default async function EditProdutoPage({
               licenseApprovedAt: product.licenseApprovedAt,
               customsBrokerRef: product.customsBrokerRef,
               active: product.active,
+              taxRateII: product.taxRateII,
+              taxRateIPI: product.taxRateIPI,
+              taxRatePIS: product.taxRatePIS,
+              taxRateCOFINS: product.taxRateCOFINS,
+              taxRateICMS: product.taxRateICMS,
             }}
             submitLabel="Salvar Alterações"
             suppliers={supplierRows}

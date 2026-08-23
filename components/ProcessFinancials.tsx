@@ -10,6 +10,7 @@ import {
 import { INCOTERMS } from "@/lib/incoterms";
 import { CURRENCIES } from "@/lib/currencies";
 import { formatDate } from "@/lib/status";
+import { calcValorAduaneiro } from "@/lib/landed-cost";
 
 export type ProcessFinancialsData = {
   currency: string | null;
@@ -49,7 +50,10 @@ export default function ProcessFinancials({
   const insurance = Number(financials.insuranceValue ?? 0);
   const totalForeign = totalInvoicesValue + freight + insurance;
   const rate = financials.exchangeRate ? Number(financials.exchangeRate) : null;
-  const totalBRL = rate !== null ? totalForeign * rate : null;
+  const totalBRL =
+    rate !== null
+      ? calcValorAduaneiro({ invoicesSum: totalInvoicesValue, freight, insurance, rate })
+      : null;
   const currencyLabel = financials.currency ?? "";
 
   return (

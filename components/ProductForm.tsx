@@ -29,6 +29,11 @@ export type ProductFormValues = {
   licenseApprovedAt?: string | null;
   customsBrokerRef?: string | null;
   active?: boolean | null;
+  taxRateII?: string | null;
+  taxRateIPI?: string | null;
+  taxRatePIS?: string | null;
+  taxRateCOFINS?: string | null;
+  taxRateICMS?: string | null;
 };
 
 export default function ProductForm({
@@ -178,6 +183,66 @@ export default function ProductForm({
             <span className="text-xs">(recalculado após salvar)</span>
           </p>
         )}
+      </div>
+
+      <div className="pt-6 border-t border-outline-variant">
+        <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Tributos (NCM)</h3>
+        <p className="text-xs text-on-surface-variant mb-4">
+          Alíquotas de importação cadastradas manualmente (sem integração com a tabela TEC) — usadas
+          pra calcular o custo pousado do produto. Percentuais, ex: 12.5 = 12,5%.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">II (%)</label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.001"
+              name="taxRateII"
+              defaultValue={defaultValues?.taxRateII ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">IPI (%)</label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.001"
+              name="taxRateIPI"
+              defaultValue={defaultValues?.taxRateIPI ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">PIS (%)</label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.001"
+              name="taxRatePIS"
+              defaultValue={defaultValues?.taxRatePIS ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">COFINS (%)</label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.001"
+              name="taxRateCOFINS"
+              defaultValue={defaultValues?.taxRateCOFINS ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">ICMS (%)</label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.001"
+              name="taxRateICMS"
+              defaultValue={defaultValues?.taxRateICMS ?? ""}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="pt-6 border-t border-outline-variant">

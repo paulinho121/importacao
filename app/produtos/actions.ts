@@ -44,6 +44,13 @@ function readProductForm(formData: FormData) {
     licenseApprovedAt: optionalText(formData, "licenseApprovedAt"),
     customsBrokerRef: optionalText(formData, "customsBrokerRef"),
     active: formData.get("active") === "on",
+    // Alíquotas de importação do NCM — todas opcionais, cadastradas
+    // manualmente (ver lib/import-tax.ts).
+    taxRateII: optionalNumber(formData, "taxRateII"),
+    taxRateIPI: optionalNumber(formData, "taxRateIPI"),
+    taxRatePIS: optionalNumber(formData, "taxRatePIS"),
+    taxRateCOFINS: optionalNumber(formData, "taxRateCOFINS"),
+    taxRateICMS: optionalNumber(formData, "taxRateICMS"),
   };
 }
 

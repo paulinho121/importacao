@@ -10,3 +10,11 @@ export const CURRENCIES = [
   { value: "JPY", label: "JPY - Iene japonês" },
   { value: "OTHER", label: "Outra" },
 ];
+
+// Só pra contas a pagar (process_payables) — desembaraço/armazenagem
+// costumam já vir em reais, diferente do resto (sempre moeda estrangeira
+// convertida por PTAX), por isso BRL não entra na lista genérica acima.
+export const PAYABLE_CURRENCIES = [
+  { value: "BRL", label: "BRL - Real" },
+  ...CURRENCIES.slice(1),
+];

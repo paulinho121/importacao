@@ -342,6 +342,18 @@ export async function addProcessItem(processId: string, formData: FormData) {
   revalidatePath(`/processos/${processId}`);
 }
 
+// Valor unitário manual pra ratear custo pousado/imposto — só precisa ser
+// preenchido quando o item é avulso ou o costPrice do catálogo não serve
+// pra esta compra (ver lib/landed-cost.ts).
+export async function updateProcessItemValue(itemId: string, processId: string, formData: FormData) {
+  await db
+    .update(processItems)
+    .set({ unitValueOverride: optionalNumber(formData, "unitValueOverride") })
+    .where(eq(processItems.id, itemId));
+
+  revalidatePath(`/processos/${processId}`);
+}
+
 export async function addItemReservation(processId: string, itemId: string, formData: FormData) {
   const personName = optionalText(formData, "personName");
   const quantity = optionalNumber(formData, "quantity");

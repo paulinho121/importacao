@@ -83,6 +83,11 @@ export const currencyEnum = pgEnum("currency", [
   "GBP",
   "JPY",
   "OTHER",
+  // Adicionado pra contas a pagar (process_payables) — desembaraço e
+  // armazenagem normalmente já são cobrados em reais por prestadores
+  // nacionais, diferente de invoice/frete/seguro (sempre moeda
+  // estrangeira). Nenhum valor existente usa BRL ainda.
+  "BRL",
 ]);
 
 // Canal de parametrização — resultado da análise de risco da declaração
@@ -109,6 +114,43 @@ export const lpcoAgencyEnum = pgEnum("lpco_agency", [
   "DECEX",
   "OUTRO",
 ]);
+
+// Papel do usuário no sistema — Admin vê/edita tudo (inclusive
+// Financeiro/Configurações); Operador vê/edita a operação, sem acesso a
+// essas duas telas. Modelo simples de propósito — sem matriz de
+// permissão por tela.
+export const profileRoleEnum = pgEnum("profile_role", ["ADMIN", "OPERADOR"]);
+
+// Categoria de uma conta a pagar — define de onde veio o custo dentro do
+// processo (fornecedor, frete internacional, seguro, desembaraço
+// aduaneiro, armazenagem, imposto apurado, ou outro).
+export const payableCategoryEnum = pgEnum("payable_category", [
+  "FORNECEDOR",
+  "FRETE",
+  "SEGURO",
+  "DESEMBARACO",
+  "ARMAZENAGEM",
+  "IMPOSTO",
+  "OUTRO",
+]);
+
+// Perfil de cada usuário autenticado. `id` é o mesmo valor de
+// `auth.users.id` do Supabase Auth (schema `auth`, gerenciado pelo
+// Supabase) — sem FK cruzando schema porque o Drizzle não tem acesso
+// direto a esse schema; a integridade é garantida na aplicação (só é
+// criado junto com o usuário no Supabase Auth, ver db/seed-admin.ts).
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  role: profileRoleEnum("role").notNull().default("OPERADOR"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
 
 // Fornecedores. Processos referenciam por FK, nunca por texto livre —
 // resolve a duplicidade tipo "APUTURE" vs "APUTURE + DEARKOL" vista na planilha.
@@ -239,6 +281,35 @@ export const processInvoices = pgTable("process_invoices", {
     .defaultNow(),
 });
 
+// Contas a pagar ligadas a um processo — fornecedor, frete, seguro,
+// desembaraço, armazenagem, imposto apurado etc. Só controle/trilha (data
+// de vencimento, se já foi pago e quando); não executa pagamento nenhum.
+// "Vencida" é calculado na leitura via diasRestantes(dueDate) (mesmo
+// helper já usado pra ETA/LPCO em lib/status.ts), não um status
+// armazenado — evita ficar desatualizado.
+export const processPayables = pgTable("process_payables", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  processId: uuid("process_id")
+    .notNull()
+    .references(() => processes.id, { onDelete: "cascade" }),
+  category: payableCategoryEnum("category").notNull(),
+  description: text("description").notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: currencyEnum("currency").notNull(),
+  dueDate: date("due_date"),
+  paidAt: date("paid_at"),
+  notes: text("notes"),
+  // Sem FK cruzando pro schema auth do Supabase — mesmo raciocínio de
+  // profiles.id (ver comentário lá).
+  createdByUserId: uuid("created_by_user_id"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // LPCOs (Licença, Permissão, Certificado e Outros documentos) efetivamente
 // abertos/obtidos para um processo específico — um processo pode precisar
 // de LPCOs de vários órgãos anuentes diferentes ao mesmo tempo. Não
@@ -305,6 +376,15 @@ export const products = pgTable("products", {
   ncmDivergent: boolean("ncm_divergent").notNull().default(false),
   ncmOfficialSuggested: text("ncm_official_suggested"),
   ncmCheckedAt: date("ncm_checked_at"),
+  // Alíquotas de importação do NCM deste produto — cadastradas
+  // manualmente (sem integração com a tabela TEC). Usadas em
+  // lib/import-tax.ts pra calcular II/IPI/PIS/COFINS/ICMS na fórmula em
+  // cascata padrão. Percentuais (ex: 12.5 = 12,5%), todas opcionais.
+  taxRateII: numeric("tax_rate_ii", { precision: 6, scale: 3 }),
+  taxRateIPI: numeric("tax_rate_ipi", { precision: 6, scale: 3 }),
+  taxRatePIS: numeric("tax_rate_pis", { precision: 6, scale: 3 }),
+  taxRateCOFINS: numeric("tax_rate_cofins", { precision: 6, scale: 3 }),
+  taxRateICMS: numeric("tax_rate_icms", { precision: 6, scale: 3 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -326,6 +406,13 @@ export const processItems = pgTable("process_items", {
   sku: text("sku"),
   description: text("description").notNull(),
   quantity: numeric("quantity", { precision: 10, scale: 2 }),
+  // Valor unitário (na moeda do processo) pra ratear custo pousado/imposto
+  // por item — ver lib/landed-cost.ts. Só precisa ser preenchido quando o
+  // item é avulso (sem productId) ou quando o costPrice do catálogo não
+  // reflete o valor real desta compra específica; quando vazio, o cálculo
+  // usa products.costPrice do item ligado, com fallback pra rateio por
+  // quantidade se nenhum dos dois existir.
+  unitValueOverride: numeric("unit_value_override", { precision: 12, scale: 2 }),
   // reservedTo (legado, texto livre tipo "1 Joao Sousa / 1 Felipe"): mantido
   // por compatibilidade com os itens já seedados da planilha original.
   // Reservas novas usam itemReservations abaixo (permite múltiplas pessoas

@@ -125,6 +125,26 @@ export const CUSTOMS_CHANNEL_BADGE_CLASS: Record<CustomsChannel, string> = {
   CINZA: "bg-surface-container-high text-on-surface-variant",
 };
 
+// Categoria de conta a pagar — ver process_payables.
+export type PayableCategory =
+  | "FORNECEDOR"
+  | "FRETE"
+  | "SEGURO"
+  | "DESEMBARACO"
+  | "ARMAZENAGEM"
+  | "IMPOSTO"
+  | "OUTRO";
+
+export const PAYABLE_CATEGORY_LABEL: Record<PayableCategory, string> = {
+  FORNECEDOR: "Fornecedor",
+  FRETE: "Frete",
+  SEGURO: "Seguro",
+  DESEMBARACO: "Desembaraço",
+  ARMAZENAGEM: "Armazenagem",
+  IMPOSTO: "Imposto",
+  OUTRO: "Outro",
+};
+
 // Órgãos anuentes que exigem LPCO — ver process_lpcos.
 export type LpcoAgency =
   | "ANVISA"

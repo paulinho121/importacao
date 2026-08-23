@@ -5,6 +5,8 @@ import AddItemForm from "@/components/AddItemForm";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import ProcessCompliance from "@/components/ProcessCompliance";
+import LandedCostBreakdown from "@/components/LandedCostBreakdown";
+import ProcessPayables from "@/components/ProcessPayables";
 import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import {
@@ -16,6 +18,7 @@ import {
   products,
   processInvoices,
   processLpcos,
+  processPayables,
   freightAgents,
   itemReservations,
 } from "@/db/schema";
@@ -37,9 +40,13 @@ import {
   addProcessItem,
   addProcessInvoice,
   addItemReservation,
+  updateProcessItemValue,
   uploadProcessDocument,
 } from "@/app/processos/actions";
+import { createPayable } from "@/app/financeiro/actions";
 import { getSignedDocumentUrl } from "@/lib/supabase-admin";
+import { calcValorAduaneiro, calcLandedCostByItem } from "@/lib/landed-cost";
+import { getCurrentUser } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -102,8 +109,26 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, productRows, invoices, lpcos] = await Promise.all([
-    db.select().from(processItems).where(eq(processItems.processId, id)),
+  const [items, events, documents, productRows, invoices, lpcos, payables] = await Promise.all([
+    db
+      .select({
+        id: processItems.id,
+        productId: processItems.productId,
+        sku: processItems.sku,
+        description: processItems.description,
+        quantity: processItems.quantity,
+        unitValueOverride: processItems.unitValueOverride,
+        reservedTo: processItems.reservedTo,
+        productCostPrice: products.costPrice,
+        productTaxRateII: products.taxRateII,
+        productTaxRateIPI: products.taxRateIPI,
+        productTaxRatePIS: products.taxRatePIS,
+        productTaxRateCOFINS: products.taxRateCOFINS,
+        productTaxRateICMS: products.taxRateICMS,
+      })
+      .from(processItems)
+      .leftJoin(products, eq(processItems.productId, products.id))
+      .where(eq(processItems.processId, id)),
     db
       .select()
       .from(processEvents)
@@ -116,6 +141,11 @@ export default async function ProcessDetailPage({
       .orderBy(products.sku),
     db.select().from(processInvoices).where(eq(processInvoices.processId, id)),
     db.select().from(processLpcos).where(eq(processLpcos.processId, id)),
+    db
+      .select()
+      .from(processPayables)
+      .where(eq(processPayables.processId, id))
+      .orderBy(processPayables.dueDate),
   ]);
 
   const itemIds = items.map((item) => item.id);
@@ -135,6 +165,47 @@ export default async function ProcessDetailPage({
   const boundUpdateProcessNumber = updateProcessNumber.bind(null, id);
   const boundAddItem = addProcessItem.bind(null, id);
   const boundAddInvoice = addProcessInvoice.bind(null, id);
+  const boundCreatePayable = createPayable.bind(null, id);
+  const currentUser = await getCurrentUser();
+  const isAdmin = currentUser?.role === "ADMIN";
+
+  // Custo pousado por item — só calcula quando há câmbio (mesma condição
+  // já usada em ProcessFinancials pro Valor Aduaneiro estimado).
+  const rate = process.exchangeRate ? Number(process.exchangeRate) : null;
+  const invoicesSum = invoices.reduce((sum, inv) => sum + Number(inv.value ?? 0), 0);
+  const freight = Number(process.internationalFreightValue ?? 0);
+  const insurance = Number(process.insuranceValue ?? 0);
+  const valorAduaneiro = rate !== null ? calcValorAduaneiro({ invoicesSum, freight, insurance, rate }) : null;
+  const payablesBRL = payables.reduce((sum, p) => {
+    const amount = Number(p.amount);
+    // BRL já está na moeda certa; moeda estrangeira usa o mesmo câmbio do
+    // processo (não dá pra ter câmbio por conta a pagar individual).
+    return sum + (p.currency === "BRL" || !rate ? amount : amount * rate);
+  }, 0);
+  const landedCost =
+    valorAduaneiro !== null
+      ? calcLandedCostByItem({
+          items: items.map((item) => ({
+            id: item.id,
+            sku: item.sku,
+            description: item.description,
+            quantity: item.quantity,
+            unitValueOverride: item.unitValueOverride,
+            product: item.productId
+              ? {
+                  costPrice: item.productCostPrice,
+                  taxRateII: item.productTaxRateII,
+                  taxRateIPI: item.productTaxRateIPI,
+                  taxRatePIS: item.productTaxRatePIS,
+                  taxRateCOFINS: item.productTaxRateCOFINS,
+                  taxRateICMS: item.productTaxRateICMS,
+                }
+              : null,
+          })),
+          valorAduaneiro,
+          payablesBRL,
+        })
+      : null;
   const destinationLabel = process.destinationCode
     ? locationLabel(process.destinationCode, process.destinationCity ?? "", process.destinationState ?? "")
     : process.destination;
@@ -405,6 +476,7 @@ export default async function ProcessDetailPage({
                       const available = total - reserved;
                       const badge = stockStatus(available, total);
                       const boundReserve = addItemReservation.bind(null, id, item.id);
+                      const boundUpdateValue = updateProcessItemValue.bind(null, item.id, id);
                       return (
                         <li
                           key={item.id}
@@ -424,6 +496,28 @@ export default async function ProcessDetailPage({
                             </div>
                             <span className="font-bold text-primary shrink-0">{total || "—"}</span>
                           </div>
+                          <details className="mt-1.5">
+                            <summary className="cursor-pointer text-xs text-secondary hover:underline list-none inline-flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px]">edit</span>
+                              Valor unitário{item.unitValueOverride ? `: ${item.unitValueOverride}` : ""}
+                            </summary>
+                            <form action={boundUpdateValue} className="flex gap-1.5 mt-1.5">
+                              <input
+                                className="w-28 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                                placeholder="Valor unitário"
+                                type="number"
+                                step="0.01"
+                                name="unitValueOverride"
+                                defaultValue={item.unitValueOverride ?? ""}
+                              />
+                              <button
+                                type="submit"
+                                className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
+                              >
+                                Salvar
+                              </button>
+                            </form>
+                          </details>
                           {total > 0 && (
                             <>
                               <div className="flex items-center gap-3 mt-2 text-xs">
@@ -500,6 +594,22 @@ export default async function ProcessDetailPage({
                 invoiceNumber: inv.invoiceNumber,
                 value: inv.value,
               }))}
+            />
+
+            <LandedCostBreakdown items={landedCost?.items ?? null} usedFallbackQuantity={landedCost?.usedFallbackQuantity ?? false} />
+
+            <ProcessPayables
+              payables={payables.map((p) => ({
+                id: p.id,
+                category: p.category,
+                description: p.description,
+                amount: p.amount,
+                currency: p.currency,
+                dueDate: p.dueDate,
+                paidAt: p.paidAt,
+              }))}
+              createPayableAction={boundCreatePayable}
+              canEdit={isAdmin}
             />
 
             <ProcessCompliance

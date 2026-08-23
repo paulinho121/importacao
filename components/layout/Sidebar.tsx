@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ChevronsLeft, ChevronsRight, Ship } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { useCurrentUser, initials } from "@/lib/use-current-user";
 import { NAV_GROUPS } from "@/constants/nav";
 import {
   Tooltip,
@@ -30,6 +31,7 @@ export default function Sidebar() {
   const searchParams = useSearchParams();
   const currentStatus = searchParams.get("status") ?? "";
   const { collapsed, toggle } = useSidebar();
+  const user = useCurrentUser();
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -90,12 +92,16 @@ export default function Sidebar() {
         <div className="border-t border-sidebar-border p-3 shrink-0 space-y-2">
           <div className={cn("flex items-center gap-3 rounded-lg px-2 py-2", collapsed && "justify-center px-0")}>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent text-sm font-semibold text-white shrink-0">
-              LM
+              {user ? initials(user.name, user.email) : "…"}
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-white">Logistics Manager</p>
-                <p className="truncate text-xs text-sidebar-muted-foreground">Global Ops</p>
+                <p className="truncate text-sm font-medium text-white">
+                  {user?.name || user?.email || "Carregando..."}
+                </p>
+                <p className="truncate text-xs text-sidebar-muted-foreground">
+                  {user?.role === "ADMIN" ? "Admin" : user?.role === "OPERADOR" ? "Operador" : ""}
+                </p>
               </div>
             )}
           </div>

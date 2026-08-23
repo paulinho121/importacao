@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { Bell, ChevronRight, Home, Moon, Search, Sun, LogOut, Settings, User } from "lucide-react";
+import { Bell, ChevronRight, Home, Moon, Search, Sun, LogOut, Settings } from "lucide-react";
 import { NAV_GROUPS } from "@/constants/nav";
 import {
   DropdownMenu,
@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useCurrentUser, initials } from "@/lib/use-current-user";
+import { signOutAction } from "@/app/session-actions";
 
 const LABEL_BY_PATH = new Map<string, string>(
   NAV_GROUPS.flatMap((group) => group.items.map((item) => [item.href.split("?")[0], item.label] as const)),
@@ -37,6 +39,7 @@ export default function Header() {
   const pathname = usePathname();
   const crumbs = useBreadcrumb(pathname);
   const [dark, setDark] = React.useState(true);
+  const user = useCurrentUser();
 
   React.useEffect(() => {
     // Escuro é o padrão (já vem assim do servidor); só troca pra claro se o
@@ -45,6 +48,7 @@ export default function Header() {
     // mudou o tema, ao custo de um flash mínimo só pra quem escolheu claro.
     if (localStorage.getItem("theme") === "light") {
       document.documentElement.classList.remove("dark");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza com localStorage (sistema externo), não estado derivado de props/render.
       setDark(false);
     }
   }, []);
@@ -114,29 +118,26 @@ export default function Header() {
 
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
 
-        <button className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-on-surface hover:bg-muted transition-colors sm:flex">
-          Global Ops
-        </button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-lg p-1 hover:bg-muted transition-colors">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-secondary text-on-secondary text-xs">LM</AvatarFallback>
+                <AvatarFallback className="bg-secondary text-on-secondary text-xs">
+                  {user ? initials(user.name, user.email) : "…"}
+                </AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Logistics Manager</DropdownMenuLabel>
+            <DropdownMenuLabel>{user?.name || user?.email || "Carregando..."}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" /> Perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" /> Configurações
+            <DropdownMenuItem asChild>
+              <Link href="/configuracoes">
+                <Settings className="mr-2 h-4 w-4" /> Configurações
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOutAction()}>
               <LogOut className="mr-2 h-4 w-4" /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
