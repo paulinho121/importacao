@@ -16,14 +16,6 @@
     "family": "LS MODIFIERS"
   },
   {
-    "model": "LSC300DIIVKIT",
-    "description": "LSC300d II Daylight LED Light (V-mount)",
-    "manufacturerSku": "APV0129A2F",
-    "distPrice": 451.0,
-    "mapPrice": 807.0,
-    "family": "LIGHT STORM"
-  },
-  {
     "model": "LIGHTDOME150",
     "description": "Light Dome 150",
     "manufacturerSku": "APA0227A30",
@@ -56,14 +48,6 @@
     "family": "LS MODIFIERS"
   },
   {
-    "model": "SPACELIGHT",
-    "description": "Space Light",
-    "manufacturerSku": "APB047DD6J",
-    "distPrice": 30.0,
-    "mapPrice": 50.0,
-    "family": "LS MODIFIERS"
-  },
-  {
     "model": "LTCLAMP",
     "description": "Lighting Clamp",
     "manufacturerSku": "APQ0148A30",
@@ -77,14 +61,6 @@
     "manufacturerSku": "APC0107A2B",
     "distPrice": 810.0,
     "mapPrice": 1000.0,
-    "family": "NOVA"
-  },
-  {
-    "model": "NOVAP300CKIT",
-    "description": "Nova P300c Kit",
-    "manufacturerSku": "APD0107A2B",
-    "distPrice": 910.0,
-    "mapPrice": 1200.0,
     "family": "NOVA"
   },
   {
@@ -200,14 +176,6 @@
     "family": "ACCENT"
   },
   {
-    "model": "Ligth Octadome 120",
-    "description": "Ligth Octadome 120",
-    "manufacturerSku": "APA0226A30",
-    "distPrice": 59.0,
-    "mapPrice": 129.0,
-    "family": "LIGHT STORM"
-  },
-  {
     "model": "AMARAN T2c",
     "description": "Amaran T2c",
     "manufacturerSku": "APM0241A14",
@@ -320,30 +288,6 @@
     "family": "Amaran"
   },
   {
-    "model": "Amaran PT2c",
-    "description": "Amaran PT2c",
-    "manufacturerSku": "AP20012A10",
-    "distPrice": 90.0,
-    "mapPrice": 149.0,
-    "family": "Amaran"
-  },
-  {
-    "model": "Amaran PT4c",
-    "description": "Amaran PT4c",
-    "manufacturerSku": "AP40012A10",
-    "distPrice": 138.0,
-    "mapPrice": 214.0,
-    "family": "Amaran"
-  },
-  {
-    "model": "INFINIBAR PB3",
-    "description": "INFINIBAR PB3",
-    "manufacturerSku": "APS0300A1G",
-    "distPrice": 108.0,
-    "mapPrice": 299.0,
-    "family": "Aputure"
-  },
-  {
     "model": "InfiniBar PB3 Softbox",
     "description": "InfiniBar PB3 Softbox",
     "manufacturerSku": "APS0300A31",
@@ -365,14 +309,6 @@
     "manufacturerSku": "APM0300A1G",
     "distPrice": 180.0,
     "mapPrice": 479.0,
-    "family": "Aputure"
-  },
-  {
-    "model": "InfiniBar PB6 Softbox",
-    "description": "InfiniBar PB6 Softbox",
-    "manufacturerSku": "APM0300A31",
-    "distPrice": 32.0,
-    "mapPrice": 89.0,
     "family": "Aputure"
   },
   {
@@ -792,14 +728,6 @@
     "family": "amaran"
   },
   {
-    "model": "Amaran Light Dome Mini SE Light Control Grid",
-    "description": "Amaran Light Dome Mini SE Light Control Grid",
-    "manufacturerSku": "AP40010A71",
-    "distPrice": 8.0,
-    "mapPrice": 15.0,
-    "family": "amaran"
-  },
-  {
     "model": "Spotlight Max ETC Lens Adapte",
     "description": "Spotlight Max ETC Lens Adapte",
     "manufacturerSku": "APXF043A37",
@@ -872,27 +800,11 @@
     "family": "Modifier"
   },
   {
-    "model": "Electro CS15（US）",
-    "description": "Electro CS15（US）",
-    "manufacturerSku": "APP0307A91",
-    "distPrice": 4000.0,
-    "mapPrice": 6190.0,
-    "family": "Electro Storm"
-  },
-  {
     "model": "Electro CS15（No plug）",
     "description": "Electro CS15（No plug）",
     "manufacturerSku": "APN0307A92",
     "distPrice": 4000.0,
     "mapPrice": 6190.0,
-    "family": "Electro Storm"
-  },
-  {
-    "model": "Electro CS15 Flight Case Version",
-    "description": "Electro CS15 Flight Case Version",
-    "manufacturerSku": "APF0307A91",
-    "distPrice": 4600.0,
-    "mapPrice": 7490.0,
     "family": "Electro Storm"
   },
   {
@@ -907,14 +819,6 @@
     "model": "F14 Fresnel",
     "description": "F14 Fresnel",
     "manufacturerSku": "APP3738A92",
-    "distPrice": 1100.0,
-    "mapPrice": 2190.0,
-    "family": "Modifier"
-  },
-  {
-    "model": "Motorized Yoke",
-    "description": "Motorized Yoke",
-    "manufacturerSku": "APP3738A91",
     "distPrice": 1100.0,
     "mapPrice": 2190.0,
     "family": "Modifier"
@@ -949,14 +853,6 @@
     "manufacturerSku": "APP3738A99",
     "distPrice": 390.0,
     "mapPrice": 729.0,
-    "family": "Electro Storm"
-  },
-  {
-    "model": "CS15/XT26 Flight Case",
-    "description": "CS15/XT26 Flight Case",
-    "manufacturerSku": "APP3738A9C",
-    "distPrice": 1000.0,
-    "mapPrice": 1690.0,
     "family": "Electro Storm"
   },
   {
@@ -1424,51 +1320,83 @@
     "family": "amaran Ace"
   },
   {
-    "model": "Aputure INFINIMAT 1x2 V-Mount Kit (US)",
-    "description": "1* INFINIMAT & Softbox Pack 1x2 - APD0039AR0\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
-    "manufacturerSku": "AP10039AR2",
+    "model": "Aputure INFINIMAT 1x2 V-Mount Kit w/ Clear Softbox(US)",
+    "description": "1* Aputure INFINIMAT LED & Clear Softbox Pack 1x2 - AP0506020K\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP10039AC2",
     "distPrice": 940.0,
     "mapPrice": 1350.0,
     "family": "INIFINIMAT"
   },
   {
-    "model": "Aputure INFINIMAT 1x4 V-Mount Kit (US)",
-    "description": "1* INFINIMAT & Softbox Pack 1x4 - APD0039AR1\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
-    "manufacturerSku": "AP10039AR7",
+    "model": "Aputure INFINIMAT 1x4 V-Mount Kit w/ Clear Softbox(US)",
+    "description": "1* Aputure INFINIMAT LED & Clear Softbox Pack 1x4 - AP0506020L\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP10039AC7",
     "distPrice": 1128.0,
     "mapPrice": 1690.0,
     "family": "INIFINIMAT"
   },
   {
-    "model": "Aputure INFINIMAT 2x4 V-Mount Kit (US)",
-    "description": "1* INFINIMAT & Softbox Pack 2x4 - APD0039AR4\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
-    "manufacturerSku": "AP30039AR7",
+    "model": "Aputure INFINIMAT 2x4 V-Mount Kit w/ Clear Softbox(US)",
+    "description": "1* Aputure INFINIMAT LED & Clear Softbox Pack 2x4 - AP0506020M\n1* Control Box 400W V-Mount Pack (US) - APC0039AR2",
+    "manufacturerSku": "AP30039AC7",
     "distPrice": 1316.0,
     "mapPrice": 2150.0,
     "family": "INIFINIMAT"
   },
   {
-    "model": "Aputure INFINIMAT 4x4 Kit (US)",
-    "description": "1* INFINIMAT & Softbox Pack 4x4 - APD0039AR6\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8",
-    "manufacturerSku": "AP50039AR7",
+    "model": "Aputure INFINIMAT 4x4 Kit w/ Clear Softbox(US)",
+    "description": "1* Aputure INFINIMAT LED & Clear Softbox Pack 4x4 - AP0506020N\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8",
+    "manufacturerSku": "AP50039AC7",
     "distPrice": 2115.0,
     "mapPrice": 3450.0,
     "family": "INIFINIMAT"
   },
   {
-    "model": "Aputure INFINIMAT 8x8 Kit (US)",
-    "description": "1* INFINIMAT & Softbox Pack 8x8 (US) - APD0039ARA\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n1* INFINIMAT Control Grid 8x8 - APG0039ARB",
-    "manufacturerSku": "AP60039AR7",
+    "model": "Aputure INFINIMAT 8x8 Kit w/ Clear Softbox(US)",
+    "description": "1* Aputure INFINIMAT LED & Clear Softbox Pack 8x8 (US) - AP0500020R\n1* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n1* INFINIMAT Control Grid 8x8 - APG0039ARB",
+    "manufacturerSku": "AP60039AC7",
     "distPrice": 7849.0,
     "mapPrice": 13500.0,
     "family": "INIFINIMAT"
   },
   {
-    "model": "Aputure INFINIMAT 20x20 Kit (US)",
-    "description": "4* INFINIMAT & Softbox Pack 8x8 (US) - APD0039ARA\n4* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n4* INFINIMAT Control Grid 8x8 - APG0039ARB\n1* INFINIMAT Softbox Pack 20x20 - APA0039AR0",
-    "manufacturerSku": "AP80039AR2",
+    "model": "Aputure INFINIMAT 20x20 Kit w/ Clear Softbox(US)",
+    "description": "4* Aputure INFINIMAT LED & Clear Softbox Pack 8x8 (US) - AP0500020R\n4* INFINIMAT Control Box 1600W Pack (US) - APC0039AR8\n4* INFINIMAT Control Grid 8x8 - APG0039ARB\n1* Aputure INFINIMAT Clear Softbox Pack 20x20 - AP0506020U",
+    "manufacturerSku": "AP80039AC2",
     "distPrice": 31396.0,
     "mapPrice": 55000.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT Rigid Softbox 1×2",
+    "description": "Aputure INFINIMAT Rigid Softbox 1×2",
+    "manufacturerSku": "AA05060216",
+    "distPrice": 38.0,
+    "mapPrice": 59.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT Rigid Softbox 1×4",
+    "description": "Aputure INFINIMAT Rigid Softbox 1×4",
+    "manufacturerSku": "AA05060217",
+    "distPrice": 48.0,
+    "mapPrice": 75.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT Rigid Softbox 2x4",
+    "description": "Aputure INFINIMAT Rigid Softbox 2x4",
+    "manufacturerSku": "AA05060218",
+    "distPrice": 60.0,
+    "mapPrice": 99.0,
+    "family": "INIFINIMAT"
+  },
+  {
+    "model": "Aputure INFINIMAT Rigid Softbox 4x4",
+    "description": "Aputure INFINIMAT Rigid Softbox 4x4",
+    "manufacturerSku": "AA05060219",
+    "distPrice": 90.0,
+    "mapPrice": 130.0,
     "family": "INIFINIMAT"
   },
   {
@@ -2264,19 +2192,19 @@
     "family": "Storm Series"
   },
   {
-    "model": "NOVA II 1x2 Hard Rolling Case Kit (US)",
-    "description": "NOVA II 1x2 Hard Rolling Case Kit (US)",
-    "manufacturerSku": "AP04000318",
-    "distPrice": 1850.0,
-    "mapPrice": 3850.0,
-    "family": "NOVA Series"
-  },
-  {
     "model": "NOVA II 2x1 (No Case) (US)",
     "description": "NOVA II 2x1 (No Case) (US)",
     "manufacturerSku": "AP0400040J",
     "distPrice": 1700.0,
     "mapPrice": 3650.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA II 1x2 Hard Rolling Case Kit (US)",
+    "description": "NOVA II 1x2 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP04000318",
+    "distPrice": 1850.0,
+    "mapPrice": 3850.0,
     "family": "NOVA Series"
   },
   {
@@ -2360,19 +2288,19 @@
     "family": "NOVA II Series"
   },
   {
-    "model": "NOVA II 1x1 Hard Rolling Case Kit (US)",
-    "description": "NOVA II 1x1 Hard Rolling Case Kit (US)",
-    "manufacturerSku": "AP0400031F",
-    "distPrice": 1000.0,
-    "mapPrice": 2390.0,
-    "family": "NOVA Series"
-  },
-  {
     "model": "NOVA II 1x1 (No Case) (US)",
     "description": "NOVA II 1x1 (No Case) (US)",
     "manufacturerSku": "AP0400040B",
     "distPrice": 900.0,
     "mapPrice": 2290.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+    "description": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP0400031F",
+    "distPrice": 1000.0,
+    "mapPrice": 2390.0,
     "family": "NOVA Series"
   },
   {
@@ -2432,19 +2360,19 @@
     "family": "NOVA II Series"
   },
   {
-    "model": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
-    "description": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
-    "manufacturerSku": "AP0400044V",
-    "distPrice": 1850.0,
-    "mapPrice": 3850.0,
-    "family": "NOVA Series"
-  },
-  {
     "model": "NOVA 9° 2x1 (No Case) (US)",
     "description": "NOVA 9° 2x1 (No Case) (US)",
     "manufacturerSku": "AP0400044P",
     "distPrice": 1700.0,
     "mapPrice": 3650.0,
+    "family": "NOVA Series"
+  },
+  {
+    "model": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
+    "description": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
+    "manufacturerSku": "AP0400044V",
+    "distPrice": 1850.0,
+    "mapPrice": 3850.0,
     "family": "NOVA Series"
   },
   {
@@ -2573,6 +2501,14 @@
     "manufacturerSku": "MA00060404",
     "distPrice": 70.0,
     "mapPrice": 129.0,
+    "family": "amaran accessories"
+  },
+  {
+    "model": "amaran Reflector",
+    "description": "amaran Reflector",
+    "manufacturerSku": "MA00060402",
+    "distPrice": 17.0,
+    "mapPrice": 29.0,
     "family": "amaran accessories"
   },
   {
@@ -2758,5 +2694,85 @@
     "distPrice": 55.0,
     "mapPrice": 89.0,
     "family": "Spotlight Mount II"
+  },
+  {
+    "model": "STORM CS32 (No Case) (EU CEE 16A)",
+    "description": "STORM CS32 (No Case) (EU CEE 16A)",
+    "manufacturerSku": "AP0701051V",
+    "distPrice": 3200.0,
+    "mapPrice": 6990.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM CS32 (No Case) (US/BARE LEADS)",
+    "description": "STORM CS32 (No Case) (US/BARE LEADS)",
+    "manufacturerSku": "AP0706051T",
+    "distPrice": 3200.0,
+    "mapPrice": 6990.0,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM CS32 Flight Case Kit (EU CEE 16A)",
+    "description": "STORM CS32 Flight Case Kit (EU CEE 16A)",
+    "manufacturerSku": "AP0706051W",
+    "distPrice": 3600.0,
+    "mapPrice": null,
+    "family": "Storm Series"
+  },
+  {
+    "model": "STORM CS32 Flight Case Kit (US/BARE LEADS)",
+    "description": "STORM CS32 Flight Case Kit (US/BARE LEADS)",
+    "manufacturerSku": "AP0701051U",
+    "distPrice": 3600.0,
+    "mapPrice": null,
+    "family": "Storm Series"
+  },
+  {
+    "model": "amaran Mic - Desktop Stand Kit  (White)",
+    "description": "amaran Mic - Desktop Stand Kit  (White)",
+    "manufacturerSku": "MP0706048M",
+    "distPrice": 54.0,
+    "mapPrice": 99.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Mic - Desktop Stand Kit (Charcoal)",
+    "description": "amaran Mic - Desktop Stand Kit (Charcoal)",
+    "manufacturerSku": "MP0706048P",
+    "distPrice": 54.0,
+    "mapPrice": 99.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Mic - Low-Profile Boom Arm Kit (Charcoal)",
+    "description": "amaran Mic - Low-Profile Boom Arm Kit (Charcoal)",
+    "manufacturerSku": "MP07060563",
+    "distPrice": 68.0,
+    "mapPrice": 125.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Mic - Low-Profile Boom Arm Kit (White)",
+    "description": "amaran Mic - Low-Profile Boom Arm Kit (White)",
+    "manufacturerSku": "MP07060564",
+    "distPrice": 68.0,
+    "mapPrice": 125.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Low-Profile Boom Arm (Charcoal)",
+    "description": "amaran Low-Profile Boom Arm (Charcoal) for MIC",
+    "manufacturerSku": "MA0706054C",
+    "distPrice": 27.0,
+    "mapPrice": 49.0,
+    "family": "amaran"
+  },
+  {
+    "model": "amaran Low-Profile Boom Arm (White)",
+    "description": "amaran Low-Profile Boom Arm (White) for MIC",
+    "manufacturerSku": "MA0706054D",
+    "distPrice": 27.0,
+    "mapPrice": 49.0,
+    "family": "amaran"
   }
 ]

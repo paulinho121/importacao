@@ -1,22 +1,20 @@
-// Carrega o catálogo de produtos Aputure da "MCI Pricelist - include deity
-// 20260224 (6).xls" (planilha de preços do distribuidor, em USD) para a
-// tabela `products`. Rodar com: npx tsx db/seed-aputure-mci.ts
+// Carrega/atualiza o catálogo de produtos Aputure a partir da price list
+// mais recente do distribuidor (em USD) para a tabela `products`. Rodar
+// com: npx tsx db/seed-aputure-mci.ts
 //
-// A planilha original mistura Aputure (32 famílias: LS MODIFIERS, LIGHT
-// STORM, NOVA*, M-SERIES, ACCENT, AMARAN/Amaran/amaran*, Sidus*, INFINIBAR,
-// Storm Series, Spotlight Mount II etc.) com Deity (marca de áudio — 18
-// famílias: Accessories, THEOS*, SPD*, SRD Mini*, S-Mic, V-Mic, W.Lav
-// Series, IFB, SF1, PR, Charger, TC-1, TC-SL1). db/aputure-mci-data.json já
-// contém só as 345 linhas Aputure/Amaran filtradas (fornecedor diferente,
-// fora do pedido desta importação).
+// db/aputure-mci-data.json já contém só as linhas Aputure/Amaran (Deity,
+// quando presente na planilha original, fica de fora — fornecedor
+// diferente). Reimportar com um arquivo mais novo é seguro: produtos já
+// cadastrados só têm o custo atualizado (descrição/SKU fabricante/
+// fornecedor já cadastrados são preservados); modelos novos na planilha
+// viram inserts. Última atualização: MCI Pricelist 20260717.xls (347
+// linhas — 21 modelos novos frente à rodada anterior, sem mudança de
+// preço nos demais).
 //
-// 28 desses 345 SKUs já existem em `products` (vieram antes da importação
-// "BD Itens Amparados Inciso V", com descrições em PT-BR mais ricas) — para
-// esses, só o custo é atualizado; descrição/SKU fabricante/fornecedor já
-// cadastrados são preservados. Os demais são inserts novos. A comparação de
-// SKU é case-insensitive (ex: "FRESNEL F10" na base antiga vs "Fresnel F10"
-// nesta planilha são o mesmo produto) — sem isso, uma primeira versão deste
-// script criou 9 duplicatas por diferença de maiúsculas/minúsculas.
+// A comparação de SKU é case-insensitive (ex: "FRESNEL F10" na base
+// antiga vs "Fresnel F10" na planilha são o mesmo produto) — sem isso,
+// uma primeira versão deste script criou 9 duplicatas por diferença de
+// maiúsculas/minúsculas.
 
 import { config } from "dotenv";
 config({ path: ".env.local" });
