@@ -45,6 +45,7 @@ export default async function PedidoCompraDetailPage({
       sentAt: purchaseOrders.sentAt,
       confirmedAt: purchaseOrders.confirmedAt,
       processId: purchaseOrders.processId,
+      supplierId: purchaseOrders.supplierId,
       supplierName: suppliers.name,
     })
     .from(purchaseOrders)
@@ -58,6 +59,7 @@ export default async function PedidoCompraDetailPage({
     db
       .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
       .from(products)
+      .where(eq(products.defaultSupplierId, po.supplierId))
       .orderBy(products.sku),
     po.status === "CONFIRMADO" && !po.processId ? suggestProcessNumber() : Promise.resolve(""),
   ]);
