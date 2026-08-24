@@ -125,6 +125,23 @@ export const CUSTOMS_CHANNEL_BADGE_CLASS: Record<CustomsChannel, string> = {
   CINZA: "bg-surface-container-high text-on-surface-variant",
 };
 
+// Ciclo de vida do Pedido de Compra — ver purchase_orders.
+export type PurchaseOrderStatus = "RASCUNHO" | "ENVIADO" | "CONFIRMADO" | "CANCELADO";
+
+export const PURCHASE_ORDER_STATUS_LABEL: Record<PurchaseOrderStatus, string> = {
+  RASCUNHO: "Rascunho",
+  ENVIADO: "Enviado",
+  CONFIRMADO: "Confirmado",
+  CANCELADO: "Cancelado",
+};
+
+export const PURCHASE_ORDER_STATUS_BADGE_CLASS: Record<PurchaseOrderStatus, string> = {
+  RASCUNHO: "bg-surface-container-high text-on-surface-variant",
+  ENVIADO: "bg-secondary-fixed text-on-secondary-fixed-variant",
+  CONFIRMADO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
+  CANCELADO: "bg-error-container text-on-error-container",
+};
+
 // Categoria de conta a pagar — ver process_payables.
 export type PayableCategory =
   | "FORNECEDOR"

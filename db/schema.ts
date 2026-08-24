@@ -134,6 +134,18 @@ export const payableCategoryEnum = pgEnum("payable_category", [
   "OUTRO",
 ]);
 
+// Ciclo de vida do Pedido de Compra — nasce Rascunho (edita itens
+// livremente), vira Enviado quando o documento já foi mandado pro
+// fornecedor (itens travados a partir daí — o documento passa a
+// representar o que foi de fato enviado), e Confirmado quando o
+// fornecedor aceita (só a partir daí pode virar Processo de Importação).
+export const purchaseOrderStatusEnum = pgEnum("purchase_order_status", [
+  "RASCUNHO",
+  "ENVIADO",
+  "CONFIRMADO",
+  "CANCELADO",
+]);
+
 // Perfil de cada usuário autenticado. `id` é o mesmo valor de
 // `auth.users.id` do Supabase Auth (schema `auth`, gerenciado pelo
 // Supabase) — sem FK cruzando schema porque o Drizzle não tem acesso
@@ -389,6 +401,52 @@ export const products = pgTable("products", {
     .notNull()
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Pedido de Compra — etapa formal ANTES do processo de importação
+// existir. Nasce Rascunho, vira Enviado quando o documento (ver
+// /pedidos-compra/[id]/imprimir) é gerado pra mandar ao fornecedor, e só
+// depois de Confirmado é que pode virar um processo de verdade (ver
+// convertToProcess em app/pedidos-compra/actions.ts) — processId fica
+// nulo até essa conversão acontecer.
+export const purchaseOrders = pgTable("purchase_orders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  poNumber: text("po_number").notNull().unique(),
+  supplierId: uuid("supplier_id")
+    .notNull()
+    .references(() => suppliers.id),
+  status: purchaseOrderStatusEnum("status").notNull().default("RASCUNHO"),
+  currency: currencyEnum("currency"),
+  incoterm: text("incoterm"),
+  expectedDeliveryDate: date("expected_delivery_date"),
+  notes: text("notes"),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  processId: uuid("process_id").references(() => processes.id),
+  // Sem FK cruzando pro schema auth do Supabase — mesmo padrão de
+  // profiles.id / processPayables.createdByUserId.
+  createdByUserId: uuid("created_by_user_id"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const purchaseOrderItems = pgTable("purchase_order_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  purchaseOrderId: uuid("purchase_order_id")
+    .notNull()
+    .references(() => purchaseOrders.id, { onDelete: "cascade" }),
+  productId: uuid("product_id").references(() => products.id, { onDelete: "set null" }),
+  sku: text("sku"),
+  description: text("description").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }),
+  unitPrice: numeric("unit_price", { precision: 12, scale: 2 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });

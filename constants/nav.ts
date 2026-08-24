@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  ClipboardList,
   PackageSearch,
   Ship,
   Anchor,
@@ -32,6 +33,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Operações",
     items: [
+      { label: "Pedidos de Compra", href: "/pedidos-compra", icon: ClipboardList },
       { label: "Processos", href: "/processos", icon: PackageSearch },
       { label: "Em Trânsito", href: "/processos?status=EM_TRANSITO", icon: Ship },
       { label: "Embarques", href: "/processos?status=EMBARCADO", icon: Anchor },
