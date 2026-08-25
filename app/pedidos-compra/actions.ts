@@ -73,6 +73,19 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
   revalidatePath("/pedidos-compra");
 }
 
+export async function deletePurchaseOrder(poId: string) {
+  const [po] = await db.select({ status: purchaseOrders.status, processId: purchaseOrders.processId }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  if (!po) throw new Error("Pedido de compra não encontrado.");
+  if (po.status === "CONFIRMADO" || po.processId) {
+    throw new Error("Só é possível excluir pedidos que ainda não foram confirmados pelo fornecedor.");
+  }
+
+  await db.delete(purchaseOrders).where(eq(purchaseOrders.id, poId));
+
+  revalidatePath("/pedidos-compra");
+  redirect("/pedidos-compra");
+}
+
 export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   const productId = optionalText(formData, "productId");
   const quantity = optionalNumber(formData, "quantity");

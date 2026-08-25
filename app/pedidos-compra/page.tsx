@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import { db } from "@/db/client";
 import { purchaseOrders, suppliers, purchaseOrderItems } from "@/db/schema";
 import { eq, ilike, sql } from "drizzle-orm";
@@ -9,6 +10,7 @@ import {
   formatDate,
   type PurchaseOrderStatus,
 } from "@/lib/status";
+import { deletePurchaseOrder } from "@/app/pedidos-compra/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -125,25 +127,34 @@ export default async function PedidosCompraPage({
                       )}
                     </td>
                     <td className="px-6 py-3">
-                      {po.status === "RASCUNHO" && (
-                        <Link
-                          href={`/pedidos-compra/${po.id}`}
-                          className="flex items-center gap-1 text-secondary hover:underline w-fit"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">edit</span>
-                          Editar
-                        </Link>
-                      )}
-                      {po.status === "CONFIRMADO" && !po.processId && (
-                        <Link
-                          href={`/pedidos-compra/${po.id}`}
-                          className="flex items-center gap-1 text-secondary hover:underline w-fit"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">send</span>
-                          Enviar para Processo
-                        </Link>
-                      )}
-                      {!(po.status === "RASCUNHO" || (po.status === "CONFIRMADO" && !po.processId)) && "—"}
+                      <div className="flex flex-col gap-1.5 items-start">
+                        {po.status === "RASCUNHO" && (
+                          <Link
+                            href={`/pedidos-compra/${po.id}`}
+                            className="flex items-center gap-1 text-secondary hover:underline w-fit"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">edit</span>
+                            Editar
+                          </Link>
+                        )}
+                        {po.status === "CONFIRMADO" && !po.processId && (
+                          <Link
+                            href={`/pedidos-compra/${po.id}`}
+                            className="flex items-center gap-1 text-secondary hover:underline w-fit"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">send</span>
+                            Enviar para Processo
+                          </Link>
+                        )}
+                        {po.status !== "CONFIRMADO" && !po.processId && (
+                          <DeletePurchaseOrderButton
+                            action={deletePurchaseOrder.bind(null, po.id)}
+                            poNumber={po.poNumber}
+                            compact
+                          />
+                        )}
+                        {po.status === "CONFIRMADO" && po.processId && "—"}
+                      </div>
                     </td>
                   </tr>
                 ))}

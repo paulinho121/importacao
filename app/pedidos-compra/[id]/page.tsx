@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import AddPurchaseOrderItemForm from "@/components/AddPurchaseOrderItemForm";
+import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, processes } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -16,6 +17,7 @@ import {
   removePurchaseOrderItem,
   updatePurchaseOrderStatus,
   updatePurchaseOrder,
+  deletePurchaseOrder,
   convertToProcess,
 } from "@/app/pedidos-compra/actions";
 import { CURRENCIES } from "@/lib/currencies";
@@ -72,6 +74,7 @@ export default async function PedidoCompraDetailPage({
   const boundAddItem = addPurchaseOrderItem.bind(null, id);
   const boundUpdateStatus = updatePurchaseOrderStatus.bind(null, id);
   const boundUpdatePo = updatePurchaseOrder.bind(null, id);
+  const boundDelete = deletePurchaseOrder.bind(null, id);
   const boundConvert = convertToProcess.bind(null, id);
 
   return (
@@ -345,6 +348,12 @@ export default async function PedidoCompraDetailPage({
 
               {po.status === "CANCELADO" && (
                 <p className="text-on-surface-variant font-body-sm text-body-sm">Este pedido foi cancelado.</p>
+              )}
+
+              {po.status !== "CONFIRMADO" && !po.processId && (
+                <div className="pt-2 border-t border-outline-variant">
+                  <DeletePurchaseOrderButton action={boundDelete} poNumber={po.poNumber} />
+                </div>
               )}
             </section>
           </div>
