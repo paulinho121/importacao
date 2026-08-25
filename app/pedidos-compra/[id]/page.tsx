@@ -60,7 +60,18 @@ export default async function PedidoCompraDetailPage({
   if (!po) notFound();
 
   const [items, productRows, suggestedProcessNumber] = await Promise.all([
-    db.select().from(purchaseOrderItems).where(eq(purchaseOrderItems.purchaseOrderId, id)),
+    db
+      .select({
+        id: purchaseOrderItems.id,
+        sku: purchaseOrderItems.sku,
+        description: purchaseOrderItems.description,
+        quantity: purchaseOrderItems.quantity,
+        unitPrice: purchaseOrderItems.unitPrice,
+        manufacturerSku: products.manufacturerSku,
+      })
+      .from(purchaseOrderItems)
+      .leftJoin(products, eq(purchaseOrderItems.productId, products.id))
+      .where(eq(purchaseOrderItems.purchaseOrderId, id)),
     db
       .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
       .from(products)
@@ -224,7 +235,11 @@ export default async function PedidoCompraDetailPage({
                           <tr key={item.id}>
                             <td className="py-2 pr-3 font-body-sm">
                               {item.description}
-                              {item.sku && <span className="block text-xs text-outline">SKU: {item.sku}</span>}
+                              {(item.manufacturerSku || item.sku) && (
+                                <span className="block text-xs text-outline">
+                                  SKU Fabricante: {item.manufacturerSku ?? item.sku}
+                                </span>
+                              )}
                             </td>
                             <td className="py-2 pr-3 text-right">{item.quantity ?? "—"}</td>
                             <td className="py-2 pr-3 text-right">{Number(item.unitPrice ?? 0).toFixed(2)}</td>

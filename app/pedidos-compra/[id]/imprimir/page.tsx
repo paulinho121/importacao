@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, suppliers } from "@/db/schema";
+import { purchaseOrders, purchaseOrderItems, suppliers, products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { formatDate } from "@/lib/status";
 import PrintButton from "@/components/PrintButton";
@@ -34,7 +34,18 @@ export default async function PedidoCompraImprimirPage({
 
   if (!po) notFound();
 
-  const items = await db.select().from(purchaseOrderItems).where(eq(purchaseOrderItems.purchaseOrderId, id));
+  const items = await db
+    .select({
+      id: purchaseOrderItems.id,
+      sku: purchaseOrderItems.sku,
+      description: purchaseOrderItems.description,
+      quantity: purchaseOrderItems.quantity,
+      unitPrice: purchaseOrderItems.unitPrice,
+      manufacturerSku: products.manufacturerSku,
+    })
+    .from(purchaseOrderItems)
+    .leftJoin(products, eq(purchaseOrderItems.productId, products.id))
+    .where(eq(purchaseOrderItems.purchaseOrderId, id));
   const total = items.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0), 0);
 
   return (
@@ -66,7 +77,7 @@ export default async function PedidoCompraImprimirPage({
         <thead>
           <tr className="border-b-2 border-black">
             <th className="py-2 pr-3">Item</th>
-            <th className="py-2 pr-3">SKU</th>
+            <th className="py-2 pr-3">SKU Fabricante</th>
             <th className="py-2 pr-3 text-right">Qtd</th>
             <th className="py-2 pr-3 text-right">Preço Unit.</th>
             <th className="py-2 text-right">Subtotal</th>
@@ -78,7 +89,7 @@ export default async function PedidoCompraImprimirPage({
             return (
               <tr key={item.id} className="border-b border-gray-300">
                 <td className="py-2 pr-3">{item.description}</td>
-                <td className="py-2 pr-3 font-mono">{item.sku ?? "—"}</td>
+                <td className="py-2 pr-3 font-mono">{item.manufacturerSku ?? item.sku ?? "—"}</td>
                 <td className="py-2 pr-3 text-right">{item.quantity ?? "—"}</td>
                 <td className="py-2 pr-3 text-right">{Number(item.unitPrice ?? 0).toFixed(2)}</td>
                 <td className="py-2 text-right font-semibold">{subtotal.toFixed(2)}</td>
