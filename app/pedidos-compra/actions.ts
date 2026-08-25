@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, products, processes, processItems } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
@@ -84,6 +84,25 @@ export async function deletePurchaseOrder(poId: string) {
 
   revalidatePath("/pedidos-compra");
   redirect("/pedidos-compra");
+}
+
+// Busca sob demanda (em vez de mandar o catalogo inteiro do fornecedor pro
+// cliente): AddPurchaseOrderItemForm chama isso a cada digitacao (com
+// debounce), evitando serializar centenas de produtos como prop toda vez
+// que a pagina do pedido revalida.
+export async function searchPurchaseOrderProducts(supplierId: string, query: string) {
+  const q = query.trim();
+
+  return db
+    .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
+    .from(products)
+    .where(
+      q
+        ? and(eq(products.defaultSupplierId, supplierId), or(ilike(products.sku, `%${q}%`), ilike(products.description, `%${q}%`)))
+        : eq(products.defaultSupplierId, supplierId),
+    )
+    .orderBy(products.sku)
+    .limit(50);
 }
 
 export async function addPurchaseOrderItem(poId: string, formData: FormData) {

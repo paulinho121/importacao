@@ -59,7 +59,7 @@ export default async function PedidoCompraDetailPage({
 
   if (!po) notFound();
 
-  const [items, productRows, suggestedProcessNumber] = await Promise.all([
+  const [items, [{ catalogCount }], suggestedProcessNumber] = await Promise.all([
     db
       .select({
         id: purchaseOrderItems.id,
@@ -73,10 +73,9 @@ export default async function PedidoCompraDetailPage({
       .leftJoin(products, eq(purchaseOrderItems.productId, products.id))
       .where(eq(purchaseOrderItems.purchaseOrderId, id)),
     db
-      .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
+      .select({ catalogCount: sql<number>`count(*)`.mapWith(Number) })
       .from(products)
-      .where(eq(products.defaultSupplierId, po.supplierId))
-      .orderBy(products.sku),
+      .where(eq(products.defaultSupplierId, po.supplierId)),
     po.status === "CONFIRMADO" && !po.processId ? suggestProcessNumber() : Promise.resolve(""),
   ]);
 
@@ -271,8 +270,9 @@ export default async function PedidoCompraDetailPage({
               {isRascunho && (
                 <AddPurchaseOrderItemForm
                   action={boundAddItem}
-                  products={productRows}
+                  supplierId={po.supplierId}
                   supplierName={po.supplierName}
+                  hasProducts={catalogCount > 0}
                 />
               )}
             </section>

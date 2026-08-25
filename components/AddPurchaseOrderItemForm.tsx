@@ -1,30 +1,50 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { searchPurchaseOrderProducts } from "@/app/pedidos-compra/actions";
 
 type Product = { id: string; sku: string; description: string; costPrice: string | null };
 
 export default function AddPurchaseOrderItemForm({
   action,
-  products,
+  supplierId,
   supplierName,
+  hasProducts,
 }: {
   action: (formData: FormData) => void;
-  products: Product[];
+  supplierId: string;
   supplierName: string;
+  hasProducts: boolean;
 }) {
   const [mode, setMode] = useState<"catalogo" | "avulso">("catalogo");
   const [unitPrice, setUnitPrice] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestIdRef = useRef(0);
 
-  const query = search.trim().toLowerCase();
-  const filtered = useMemo(() => {
-    if (!query) return products;
-    return products.filter((p) => p.sku.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
-  }, [products, query]);
+  useEffect(() => {
+    if (!open) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const requestId = ++requestIdRef.current;
+    debounceRef.current = setTimeout(() => {
+      setLoading(true);
+      searchPurchaseOrderProducts(supplierId, search).then((rows) => {
+        if (requestId !== requestIdRef.current) return; // resposta antiga, ignora
+        setResults(rows);
+        setLoading(false);
+      });
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [open, search, supplierId]);
 
   function selectProduct(p: Product) {
     setSelected(p);
@@ -74,7 +94,7 @@ export default function AddPurchaseOrderItemForm({
       </div>
 
       {mode === "catalogo" ? (
-        products.length === 0 ? (
+        !hasProducts ? (
           <p className="text-on-surface-variant font-body-sm text-body-sm">
             Nenhum produto do catálogo tem este fornecedor como padrão. Use &quot;Item avulso&quot; ou
             ajuste o fornecedor padrão do produto em Produtos.
@@ -125,16 +145,16 @@ export default function AddPurchaseOrderItemForm({
                 <div className="px-3 py-1.5 bg-surface-container-low border-b border-outline-variant text-xs font-label-md text-on-surface-variant flex justify-between">
                   <span>{supplierName}</span>
                   <span>
-                    {filtered.length} {filtered.length === 1 ? "item" : "itens"}
+                    {loading ? "Buscando..." : `${results.length}${results.length === 50 ? "+" : ""} ${results.length === 1 ? "item" : "itens"}`}
                   </span>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  {filtered.length === 0 ? (
+                  {!loading && results.length === 0 ? (
                     <p className="p-3 text-body-sm font-body-sm text-on-surface-variant">
                       Nenhum produto encontrado.
                     </p>
                   ) : (
-                    filtered.map((p) => (
+                    results.map((p) => (
                       <button
                         key={p.id}
                         type="button"
