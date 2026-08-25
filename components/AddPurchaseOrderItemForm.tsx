@@ -1,28 +1,29 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type Product = { id: string; sku: string; description: string; costPrice: string | null };
 
 export default function AddPurchaseOrderItemForm({
   action,
   products,
+  supplierName,
 }: {
   action: (formData: FormData) => void;
   products: Product[];
+  supplierName: string;
 }) {
   const [mode, setMode] = useState<"catalogo" | "avulso">("catalogo");
   const [unitPrice, setUnitPrice] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const query = search.trim().toLowerCase();
   const filtered = useMemo(() => {
-    if (query.length < 2) return [];
-    return products
-      .filter((p) => p.sku.toLowerCase().includes(query) || p.description.toLowerCase().includes(query))
-      .slice(0, 50);
+    if (!query) return products;
+    return products.filter((p) => p.sku.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
   }, [products, query]);
 
   function selectProduct(p: Product) {
@@ -30,6 +31,13 @@ export default function AddPurchaseOrderItemForm({
     setSearch(`${p.sku} — ${p.description}`);
     setOpen(false);
     if (p.costPrice) setUnitPrice(p.costPrice);
+  }
+
+  function clearSelection() {
+    setSelected(null);
+    setSearch("");
+    setOpen(true);
+    inputRef.current?.focus();
   }
 
   return (
@@ -73,46 +81,75 @@ export default function AddPurchaseOrderItemForm({
           </p>
         ) : (
           <div className="relative">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">
+              search
+            </span>
             <input
-              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+              ref={inputRef}
+              className="w-full pl-11 pr-9 bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
               type="text"
-              placeholder="Buscar por SKU ou nome do produto..."
+              placeholder={`Buscar item de ${supplierName} por SKU ou nome...`}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setSelected(null);
                 setOpen(true);
               }}
-              onFocus={() => setOpen(true)}
+              onFocus={(e) => {
+                setOpen(true);
+                if (selected) e.target.select();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setOpen(false);
+                  inputRef.current?.blur();
+                }
+              }}
               onBlur={() => setTimeout(() => setOpen(false), 150)}
             />
+            {search && (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={clearSelection}
+                aria-label="Limpar busca"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            )}
             <input type="hidden" name="productId" value={selected?.id ?? ""} />
 
-            {open && query.length > 0 && query.length < 2 && (
-              <p className="absolute z-10 mt-1 px-1 text-xs text-on-surface-variant">
-                Digite ao menos 2 caracteres para buscar.
-              </p>
-            )}
-
-            {open && query.length >= 2 && (
-              <div className="absolute z-10 mt-1 w-full max-h-64 overflow-y-auto bg-surface-container border border-outline-variant rounded-lg shadow-lg">
-                {filtered.length === 0 ? (
-                  <p className="p-3 text-body-sm font-body-sm text-on-surface-variant">
-                    Nenhum produto encontrado.
-                  </p>
-                ) : (
-                  filtered.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => selectProduct(p)}
-                      className="w-full text-left px-3 py-2 hover:bg-surface-container-high text-body-sm font-body-sm border-b border-outline-variant/50 last:border-0 transition-colors"
-                    >
-                      <span className="font-mono-data">{p.sku}</span> — {p.description}
-                    </button>
-                  ))
-                )}
+            {open && (
+              <div className="absolute z-10 mt-1 w-full bg-surface-container border border-outline-variant rounded-lg shadow-lg overflow-hidden">
+                <div className="px-3 py-1.5 bg-surface-container-low border-b border-outline-variant text-xs font-label-md text-on-surface-variant flex justify-between">
+                  <span>{supplierName}</span>
+                  <span>
+                    {filtered.length} {filtered.length === 1 ? "item" : "itens"}
+                  </span>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {filtered.length === 0 ? (
+                    <p className="p-3 text-body-sm font-body-sm text-on-surface-variant">
+                      Nenhum produto encontrado.
+                    </p>
+                  ) : (
+                    filtered.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => selectProduct(p)}
+                        className={`w-full text-left px-3 py-2 hover:bg-surface-container-high text-body-sm font-body-sm border-b border-outline-variant/50 last:border-0 transition-colors ${
+                          selected?.id === p.id ? "bg-secondary/10" : ""
+                        }`}
+                      >
+                        <span className="font-mono-data text-xs text-secondary">{p.sku}</span>
+                        <span className="block text-on-surface-variant truncate">{p.description}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </div>

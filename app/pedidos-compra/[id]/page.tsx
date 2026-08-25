@@ -162,7 +162,13 @@ export default async function PedidoCompraDetailPage({
                 </div>
               )}
 
-              {isRascunho && <AddPurchaseOrderItemForm action={boundAddItem} products={productRows} />}
+              {isRascunho && (
+                <AddPurchaseOrderItemForm
+                  action={boundAddItem}
+                  products={productRows}
+                  supplierName={po.supplierName}
+                />
+              )}
             </section>
 
             {po.notes && (
