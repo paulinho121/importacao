@@ -24,6 +24,7 @@ export default function AddPurchaseOrderItemForm({
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
 
@@ -62,10 +63,25 @@ export default function AddPurchaseOrderItemForm({
 
   return (
     <form
+      ref={formRef}
       action={action}
       className="mt-4 pt-4 border-t border-outline-variant space-y-3"
       onSubmit={(e) => {
-        if (mode === "catalogo" && !selected) e.preventDefault();
+        if (mode === "catalogo" && !selected) {
+          e.preventDefault();
+          return;
+        }
+        // Espera o FormData ser capturado pro envio antes de limpar os
+        // campos — resetar no mesmo tick apagaria os valores antes de
+        // serem lidos pela Server Action.
+        setTimeout(() => {
+          formRef.current?.reset();
+          setSearch("");
+          setSelected(null);
+          setUnitPrice("");
+          setResults([]);
+          if (mode === "catalogo") inputRef.current?.focus();
+        }, 0);
       }}
     >
       <div className="flex gap-2">
