@@ -45,6 +45,34 @@ export async function createPurchaseOrder(formData: FormData) {
   redirect(`/pedidos-compra/${created.id}`);
 }
 
+export async function updatePurchaseOrder(poId: string, formData: FormData) {
+  const [po] = await db.select({ status: purchaseOrders.status }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  if (po?.status !== "RASCUNHO") throw new Error("Só é possível editar o pedido enquanto ele está em Rascunho.");
+
+  const poNumber = String(formData.get("poNumber") ?? "").trim();
+  if (!poNumber) throw new Error("Número do pedido é obrigatório.");
+
+  const [existing] = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber));
+  if (existing && existing.id !== poId) {
+    throw new Error(`Já existe um pedido com o número "${poNumber}" — use um número diferente.`);
+  }
+
+  await db
+    .update(purchaseOrders)
+    .set({
+      poNumber,
+      currency: optionalText(formData, "currency") as (typeof purchaseOrders.$inferInsert)["currency"] | null,
+      incoterm: optionalText(formData, "incoterm"),
+      expectedDeliveryDate: optionalDate(formData, "expectedDeliveryDate"),
+      notes: optionalText(formData, "notes"),
+      updatedAt: new Date(),
+    })
+    .where(eq(purchaseOrders.id, poId));
+
+  revalidatePath(`/pedidos-compra/${poId}`);
+  revalidatePath("/pedidos-compra");
+}
+
 export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   const productId = optionalText(formData, "productId");
   const quantity = optionalNumber(formData, "quantity");

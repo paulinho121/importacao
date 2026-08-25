@@ -15,8 +15,11 @@ import {
   addPurchaseOrderItem,
   removePurchaseOrderItem,
   updatePurchaseOrderStatus,
+  updatePurchaseOrder,
   convertToProcess,
 } from "@/app/pedidos-compra/actions";
+import { CURRENCIES } from "@/lib/currencies";
+import { INCOTERMS } from "@/lib/incoterms";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +71,7 @@ export default async function PedidoCompraDetailPage({
   const isRascunho = po.status === "RASCUNHO";
   const boundAddItem = addPurchaseOrderItem.bind(null, id);
   const boundUpdateStatus = updatePurchaseOrderStatus.bind(null, id);
+  const boundUpdatePo = updatePurchaseOrder.bind(null, id);
   const boundConvert = convertToProcess.bind(null, id);
 
   return (
@@ -100,6 +104,90 @@ export default async function PedidoCompraDetailPage({
           >
             {PURCHASE_ORDER_STATUS_LABEL[po.status as PurchaseOrderStatus]}
           </span>
+          {isRascunho && (
+            <details className="relative">
+              <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
+                <span className="material-symbols-outlined text-[16px]">edit</span>
+                Editar Pedido
+              </summary>
+              <form
+                action={boundUpdatePo}
+                className="absolute z-10 mt-2 w-[360px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-lg space-y-3"
+              >
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                    Número do Pedido
+                  </label>
+                  <input
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm font-mono-data focus:outline-none focus:border-secondary transition-all"
+                    type="text"
+                    name="poNumber"
+                    defaultValue={po.poNumber}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-1">Moeda</label>
+                    <select
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+                      name="currency"
+                      defaultValue={po.currency ?? ""}
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                      Entrega Prevista
+                    </label>
+                    <input
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                      type="date"
+                      name="expectedDeliveryDate"
+                      defaultValue={po.expectedDeliveryDate ?? ""}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-1">Incoterm</label>
+                  <select
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+                    name="incoterm"
+                    defaultValue={po.incoterm ?? ""}
+                  >
+                    <option value="">Selecione</option>
+                    {INCOTERMS.map((i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                    Observações
+                  </label>
+                  <textarea
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                    name="notes"
+                    rows={3}
+                    defaultValue={po.notes ?? ""}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full px-3 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
+                >
+                  Salvar
+                </button>
+              </form>
+            </details>
+          )}
         </div>
         <p className="text-on-surface-variant font-body-md text-body-md -mt-4">
           Fornecedor: {po.supplierName}

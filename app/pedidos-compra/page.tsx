@@ -84,12 +84,13 @@ export default async function PedidosCompraPage({
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">TOTAL</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">ENTREGA PREVISTA</th>
                   <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PROCESSO</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-6 text-on-surface-variant text-center">
+                    <td colSpan={8} className="px-6 py-6 text-on-surface-variant text-center">
                       {q ? "Nenhum pedido encontrado para essa busca." : "Nenhum pedido de compra criado ainda."}
                     </td>
                   </tr>
@@ -122,6 +123,27 @@ export default async function PedidosCompraPage({
                       ) : (
                         "—"
                       )}
+                    </td>
+                    <td className="px-6 py-3">
+                      {po.status === "RASCUNHO" && (
+                        <Link
+                          href={`/pedidos-compra/${po.id}`}
+                          className="flex items-center gap-1 text-secondary hover:underline w-fit"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          Editar
+                        </Link>
+                      )}
+                      {po.status === "CONFIRMADO" && !po.processId && (
+                        <Link
+                          href={`/pedidos-compra/${po.id}`}
+                          className="flex items-center gap-1 text-secondary hover:underline w-fit"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">send</span>
+                          Enviar para Processo
+                        </Link>
+                      )}
+                      {!(po.status === "RASCUNHO" || (po.status === "CONFIRMADO" && !po.processId)) && "—"}
                     </td>
                   </tr>
                 ))}
