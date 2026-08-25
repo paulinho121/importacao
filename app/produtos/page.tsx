@@ -2,7 +2,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { db } from "@/db/client";
 import { products, suppliers, processItems } from "@/db/schema";
-import { and, eq, ilike, or, sql } from "drizzle-orm";
+import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +10,21 @@ export const dynamic = "force-dynamic";
 export default async function ProdutosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; divergente?: string }>;
+  searchParams: Promise<{ q?: string; divergente?: string; semPreco?: string }>;
 }) {
-  const { q = "", divergente = "" } = await searchParams;
+  const { q = "", divergente = "", semPreco = "" } = await searchParams;
   const onlyDivergent = divergente === "1";
+  const onlyNoPrice = semPreco === "1";
+
+  function buildQuery(overrides: Record<string, string | undefined>) {
+    const params = new URLSearchParams();
+    const merged = { q, divergente: onlyDivergent ? "1" : "", semPreco: onlyNoPrice ? "1" : "", ...overrides };
+    if (merged.q) params.set("q", merged.q);
+    if (merged.divergente === "1") params.set("divergente", "1");
+    if (merged.semPreco === "1") params.set("semPreco", "1");
+    const qs = params.toString();
+    return qs ? `/produtos?${qs}` : "/produtos";
+  }
 
   const conditions = [
     q
@@ -25,9 +36,10 @@ export default async function ProdutosPage({
         )
       : undefined,
     onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
+    onlyNoPrice ? isNull(products.costPrice) : undefined,
   ].filter((c) => c !== undefined);
 
-  const [rows, [{ divergentCount }]] = await Promise.all([
+  const [rows, [{ divergentCount }], [{ noPriceCount }]] = await Promise.all([
     db
       .select({
         id: products.id,
@@ -54,6 +66,10 @@ export default async function ProdutosPage({
       .select({ divergentCount: sql<number>`count(*)`.mapWith(Number) })
       .from(products)
       .where(eq(products.ncmDivergent, true)),
+    db
+      .select({ noPriceCount: sql<number>`count(*)`.mapWith(Number) })
+      .from(products)
+      .where(isNull(products.costPrice)),
   ]);
 
   return (
@@ -79,6 +95,7 @@ export default async function ProdutosPage({
         <div className="flex flex-wrap items-center gap-3">
           <form action="/produtos" className="relative max-w-md flex-1 min-w-[280px]">
             {onlyDivergent && <input type="hidden" name="divergente" value="1" />}
+            {onlyNoPrice && <input type="hidden" name="semPreco" value="1" />}
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
               search
             </span>
@@ -93,7 +110,7 @@ export default async function ProdutosPage({
 
           {divergentCount > 0 && (
             <Link
-              href={onlyDivergent ? (q ? `/produtos?q=${encodeURIComponent(q)}` : "/produtos") : `/produtos?divergente=1${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+              href={buildQuery({ divergente: onlyDivergent ? undefined : "1" })}
               className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border transition-colors ${
                 onlyDivergent
                   ? "bg-warning text-warning-foreground border-warning"
@@ -102,6 +119,20 @@ export default async function ProdutosPage({
             >
               <span className="material-symbols-outlined text-[18px]">warning</span>
               {onlyDivergent ? "Mostrando só divergentes — ver todos" : `Só divergentes do Decex (${divergentCount})`}
+            </Link>
+          )}
+
+          {noPriceCount > 0 && (
+            <Link
+              href={buildQuery({ semPreco: onlyNoPrice ? undefined : "1" })}
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border transition-colors ${
+                onlyNoPrice
+                  ? "bg-error text-white border-error"
+                  : "bg-error-container/20 text-error border-error/30 hover:bg-error-container/40"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              {onlyNoPrice ? "Mostrando só sem preço — ver todos" : `Sem preço cadastrado (${noPriceCount})`}
             </Link>
           )}
         </div>
@@ -131,7 +162,9 @@ export default async function ProdutosPage({
                         ? "Nenhum produto encontrado para essa busca."
                         : onlyDivergent
                           ? "Nenhum produto com divergência de NCM no momento."
-                          : "Nenhum produto cadastrado ainda."}
+                          : onlyNoPrice
+                            ? "Todos os produtos têm preço cadastrado."
+                            : "Nenhum produto cadastrado ainda."}
                     </td>
                   </tr>
                 )}
