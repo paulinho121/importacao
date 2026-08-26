@@ -164,6 +164,25 @@ export const profiles = pgTable("profiles", {
     .defaultNow(),
 });
 
+// Filiais/matriz da própria empresa (compradora) — mesmo CNPJ raiz, sedes
+// diferentes (ex: Multicomercial e Importadora LTDA tem endereço em Itajaí,
+// São Paulo e Fortaleza, cada uma com sufixo de CNPJ próprio). Selecionada
+// ao criar um pedido de compra pra aparecer no documento impresso como
+// "Comprador" — sem isso o PDF só mostrava o fornecedor.
+export const companyBranches = pgTable("company_branches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  cnpj: text("cnpj").notNull().unique(),
+  address: text("address").notNull(),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Fornecedores. Processos referenciam por FK, nunca por texto livre —
 // resolve a duplicidade tipo "APUTURE" vs "APUTURE + DEARKOL" vista na planilha.
 export const suppliers = pgTable("suppliers", {
@@ -435,6 +454,10 @@ export const purchaseOrders = pgTable("purchase_orders", {
   supplierId: uuid("supplier_id")
     .notNull()
     .references(() => suppliers.id),
+  // Qual filial da própria empresa está comprando — aparece no documento
+  // impresso como "Comprador". Opcional pra não quebrar pedidos criados
+  // antes desse campo existir.
+  branchId: uuid("branch_id").references(() => companyBranches.id),
   status: purchaseOrderStatusEnum("status").notNull().default("RASCUNHO"),
   currency: currencyEnum("currency"),
   incoterm: text("incoterm"),

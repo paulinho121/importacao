@@ -1,8 +1,8 @@
 import AppShell from "@/components/AppShell";
 import { createPurchaseOrder } from "@/app/pedidos-compra/actions";
 import { db } from "@/db/client";
-import { suppliers, purchaseOrders } from "@/db/schema";
-import { sql } from "drizzle-orm";
+import { suppliers, purchaseOrders, companyBranches } from "@/db/schema";
+import { sql, desc } from "drizzle-orm";
 import { CURRENCIES } from "@/lib/currencies";
 import { INCOTERMS } from "@/lib/incoterms";
 
@@ -17,10 +17,12 @@ async function suggestPoNumber(): Promise<string> {
 }
 
 export default async function NovoPedidoCompraPage() {
-  const [supplierRows, suggestedNumber] = await Promise.all([
+  const [supplierRows, branchRows, suggestedNumber] = await Promise.all([
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
+    db.select().from(companyBranches).orderBy(desc(companyBranches.isDefault), companyBranches.name),
     suggestPoNumber(),
   ]);
+  const defaultBranch = branchRows.find((b) => b.isDefault) ?? branchRows[0];
 
   return (
     <AppShell title="Novo Pedido de Compra">
@@ -67,6 +69,28 @@ export default async function NovoPedidoCompraPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                  Comprador (sua empresa)
+                </label>
+                {branchRows.length === 0 ? (
+                  <p className="text-body-sm font-body-sm text-on-surface-variant p-3 bg-surface-container-low border border-outline-variant rounded-lg">
+                    Nenhuma filial cadastrada — adicione em Configurações.
+                  </p>
+                ) : (
+                  <select
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+                    name="branchId"
+                    defaultValue={defaultBranch?.id ?? ""}
+                  >
+                    {branchRows.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} — {b.cnpj}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">

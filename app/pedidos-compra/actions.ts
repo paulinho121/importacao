@@ -33,6 +33,7 @@ export async function createPurchaseOrder(formData: FormData) {
     .values({
       poNumber,
       supplierId,
+      branchId: optionalText(formData, "branchId"),
       currency: optionalText(formData, "currency") as (typeof purchaseOrders.$inferInsert)["currency"] | null,
       incoterm: optionalText(formData, "incoterm"),
       expectedDeliveryDate: optionalDate(formData, "expectedDeliveryDate"),
@@ -61,6 +62,7 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
     .update(purchaseOrders)
     .set({
       poNumber,
+      branchId: optionalText(formData, "branchId"),
       currency: optionalText(formData, "currency") as (typeof purchaseOrders.$inferInsert)["currency"] | null,
       incoterm: optionalText(formData, "incoterm"),
       expectedDeliveryDate: optionalDate(formData, "expectedDeliveryDate"),

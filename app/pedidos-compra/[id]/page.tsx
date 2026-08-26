@@ -4,8 +4,8 @@ import AppShell from "@/components/AppShell";
 import AddPurchaseOrderItemForm from "@/components/AddPurchaseOrderItemForm";
 import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, suppliers, products, processes } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { purchaseOrders, purchaseOrderItems, suppliers, products, processes, companyBranches } from "@/db/schema";
+import { eq, sql, desc } from "drizzle-orm";
 import {
   PURCHASE_ORDER_STATUS_LABEL,
   PURCHASE_ORDER_STATUS_BADGE_CLASS,
@@ -52,14 +52,19 @@ export default async function PedidoCompraDetailPage({
       processId: purchaseOrders.processId,
       supplierId: purchaseOrders.supplierId,
       supplierName: suppliers.name,
+      branchId: purchaseOrders.branchId,
+      branchName: companyBranches.name,
+      branchCnpj: companyBranches.cnpj,
+      branchAddress: companyBranches.address,
     })
     .from(purchaseOrders)
     .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+    .leftJoin(companyBranches, eq(purchaseOrders.branchId, companyBranches.id))
     .where(eq(purchaseOrders.id, id));
 
   if (!po) notFound();
 
-  const [items, [{ catalogCount }], suggestedProcessNumber] = await Promise.all([
+  const [items, [{ catalogCount }], suggestedProcessNumber, branchRows] = await Promise.all([
     db
       .select({
         id: purchaseOrderItems.id,
@@ -77,6 +82,7 @@ export default async function PedidoCompraDetailPage({
       .from(products)
       .where(eq(products.defaultSupplierId, po.supplierId)),
     po.status === "CONFIRMADO" && !po.processId ? suggestProcessNumber() : Promise.resolve(""),
+    db.select().from(companyBranches).orderBy(desc(companyBranches.isDefault), companyBranches.name),
   ]);
 
   const total = items.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0), 0);
@@ -138,6 +144,23 @@ export default async function PedidoCompraDetailPage({
                     defaultValue={po.poNumber}
                     required
                   />
+                </div>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                    Comprador (sua empresa)
+                  </label>
+                  <select
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+                    name="branchId"
+                    defaultValue={po.branchId ?? ""}
+                  >
+                    <option value="">Nenhum</option>
+                    {branchRows.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} — {b.cnpj}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -204,6 +227,7 @@ export default async function PedidoCompraDetailPage({
         </div>
         <p className="text-on-surface-variant font-body-md text-body-md -mt-4">
           Fornecedor: {po.supplierName}
+          {po.branchName ? ` · Comprador: ${po.branchName} (${po.branchCnpj})` : ""}
           {po.incoterm ? ` · Incoterm: ${po.incoterm}` : ""}
           {po.expectedDeliveryDate ? ` · Entrega prevista: ${formatDate(po.expectedDeliveryDate)}` : ""}
         </p>

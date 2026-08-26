@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, suppliers, products } from "@/db/schema";
+import { purchaseOrders, purchaseOrderItems, suppliers, products, companyBranches } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { formatDate } from "@/lib/status";
 import PrintButton from "@/components/PrintButton";
@@ -47,9 +47,13 @@ export default async function PedidoCompraImprimirPage({
       supplierEmail: suppliers.email,
       supplierPhone: suppliers.phone,
       supplierCountry: suppliers.country,
+      branchName: companyBranches.name,
+      branchCnpj: companyBranches.cnpj,
+      branchAddress: companyBranches.address,
     })
     .from(purchaseOrders)
     .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+    .leftJoin(companyBranches, eq(purchaseOrders.branchId, companyBranches.id))
     .where(eq(purchaseOrders.id, id));
 
   if (!po) notFound();
@@ -104,30 +108,47 @@ export default async function PedidoCompraImprimirPage({
         </div>
       </div>
 
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
-          Fornecedor
-        </p>
-        <p className="text-base font-bold">{po.supplierName}</p>
-        {po.supplierContactName && (
-          <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-            Contato: {po.supplierContactName}
+      <div className="grid grid-cols-2 gap-8 mb-8">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
+            Fornecedor
           </p>
-        )}
-        {po.supplierEmail && (
-          <p className="text-sm" style={{ color: MUTED }}>
-            {po.supplierEmail}
-          </p>
-        )}
-        {po.supplierPhone && (
-          <p className="text-sm" style={{ color: MUTED }}>
-            {po.supplierPhone}
-          </p>
-        )}
-        {po.supplierCountry && (
-          <p className="text-sm" style={{ color: MUTED }}>
-            {po.supplierCountry}
-          </p>
+          <p className="text-base font-bold">{po.supplierName}</p>
+          {po.supplierContactName && (
+            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+              Contato: {po.supplierContactName}
+            </p>
+          )}
+          {po.supplierEmail && (
+            <p className="text-sm" style={{ color: MUTED }}>
+              {po.supplierEmail}
+            </p>
+          )}
+          {po.supplierPhone && (
+            <p className="text-sm" style={{ color: MUTED }}>
+              {po.supplierPhone}
+            </p>
+          )}
+          {po.supplierCountry && (
+            <p className="text-sm" style={{ color: MUTED }}>
+              {po.supplierCountry}
+            </p>
+          )}
+        </div>
+
+        {po.branchName && (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
+              Comprador
+            </p>
+            <p className="text-base font-bold">{po.branchName}</p>
+            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+              CNPJ: {po.branchCnpj}
+            </p>
+            <p className="text-sm" style={{ color: MUTED }}>
+              {po.branchAddress}
+            </p>
+          </div>
         )}
       </div>
 
