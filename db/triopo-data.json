@@ -1,0 +1,954 @@
+[
+  {
+    "model": "U-65120",
+    "price": 22.8
+  },
+  {
+    "model": "K3-45",
+    "price": 15.5
+  },
+  {
+    "model": "K3-45 with grid",
+    "price": 17.5
+  },
+  {
+    "model": "K3-55",
+    "price": 16.0
+  },
+  {
+    "model": "K3-55 with grid",
+    "price": 18.0
+  },
+  {
+    "model": "K3-65",
+    "price": 18.0
+  },
+  {
+    "model": "K3-65 with grid",
+    "price": 21.5
+  },
+  {
+    "model": "K3-90",
+    "price": 19.5
+  },
+  {
+    "model": "K3-90  with grid",
+    "price": 24.0
+  },
+  {
+    "model": "K3-120",
+    "price": 24.0
+  },
+  {
+    "model": "K3-120 with grid",
+    "price": 30.0
+  },
+  {
+    "model": "KS3-55",
+    "price": 18.0
+  },
+  {
+    "model": "KS3 with grid",
+    "price": 20.5
+  },
+  {
+    "model": "KS3-65",
+    "price": 20.0
+  },
+  {
+    "model": "KS3-65 with grid",
+    "price": 23.5
+  },
+  {
+    "model": "KS3-90",
+    "price": 22.0
+  },
+  {
+    "model": "KS3-90  with grid",
+    "price": 26.0
+  },
+  {
+    "model": "KS3-120",
+    "price": 26.0
+  },
+  {
+    "model": "KS3-120 with grid",
+    "price": 31.5
+  },
+  {
+    "model": "K3-60*90",
+    "price": 14.0
+  },
+  {
+    "model": "K3-60*90 with grid",
+    "price": 17.8
+  },
+  {
+    "model": "K3-30*120",
+    "price": 15.0
+  },
+  {
+    "model": "K3-30*120 with grid",
+    "price": 18.5
+  },
+  {
+    "model": "MARS-TR45",
+    "price": 15.5
+  },
+  {
+    "model": "MARS-TR45 with grid",
+    "price": 17.5
+  },
+  {
+    "model": "MARS-TR55",
+    "price": 16.0
+  },
+  {
+    "model": "MARS-TR55 with grid",
+    "price": 18.0
+  },
+  {
+    "model": "MARS-TR65",
+    "price": 18.0
+  },
+  {
+    "model": "MARS-TR65 with grid",
+    "price": 21.5
+  },
+  {
+    "model": "MARS-TR90",
+    "price": 19.5
+  },
+  {
+    "model": "MARS-TR90 with grid",
+    "price": 24.0
+  },
+  {
+    "model": "MARS-TR120",
+    "price": 24.0
+  },
+  {
+    "model": "MARS-TR120 with grid",
+    "price": 30.0
+  },
+  {
+    "model": "K3mini-30 with grid",
+    "price": 11.5
+  },
+  {
+    "model": "K3mini-40 with grid",
+    "price": 13.0
+  },
+  {
+    "model": "K3mini-50 with grid",
+    "price": 14.0
+  },
+  {
+    "model": "K3mini-60 with grid",
+    "price": 16.5
+  },
+  {
+    "model": "KP3-60 with grid",
+    "price": 26.5
+  },
+  {
+    "model": "KP3-70 with grid",
+    "price": 29.5
+  },
+  {
+    "model": "KP3-90 with grid",
+    "price": 34.0
+  },
+  {
+    "model": "KP3-120 with grid",
+    "price": 38.5
+  },
+  {
+    "model": "FD-65",
+    "price": 18.5
+  },
+  {
+    "model": "FD-90",
+    "price": 20.0
+  },
+  {
+    "model": "FD",
+    "price": 6.0
+  },
+  {
+    "model": "TR-05B K3",
+    "price": 6.0
+  },
+  {
+    "model": "KD-60*90",
+    "price": 12.0
+  },
+  {
+    "model": "KD-60*90 with grid",
+    "price": 16.0
+  },
+  {
+    "model": "KD-70*100",
+    "price": 15.5
+  },
+  {
+    "model": "KD-70*100 with grid",
+    "price": 19.0
+  },
+  {
+    "model": "KD-80*120",
+    "price": 16.5
+  },
+  {
+    "model": "KD-80*120 with grid",
+    "price": 21.0
+  },
+  {
+    "model": "KD-30*120",
+    "price": 14.0
+  },
+  {
+    "model": "KD-30*120 with grid",
+    "price": 17.5
+  },
+  {
+    "model": "KD-35*160",
+    "price": 19.0
+  },
+  {
+    "model": "KD-35*160 with grid",
+    "price": 25.0
+  },
+  {
+    "model": "K2-55",
+    "price": 15.0
+  },
+  {
+    "model": "K2-55 with grid",
+    "price": 17.5
+  },
+  {
+    "model": "K2-65",
+    "price": 17.0
+  },
+  {
+    "model": "K2-65 with grid",
+    "price": 20.0
+  },
+  {
+    "model": "K2-90",
+    "price": 18.5
+  },
+  {
+    "model": "K2-90 with grid",
+    "price": 22.0
+  },
+  {
+    "model": "K2-120",
+    "price": 22.0
+  },
+  {
+    "model": "K2-120 with grid",
+    "price": 27.0
+  },
+  {
+    "model": "KS2-55",
+    "price": 16.0
+  },
+  {
+    "model": "KS2-55 with grid",
+    "price": 18.5
+  },
+  {
+    "model": "KS2-65",
+    "price": 18.0
+  },
+  {
+    "model": "KS2-65 with grid",
+    "price": 21.0
+  },
+  {
+    "model": "KS2-90",
+    "price": 19.5
+  },
+  {
+    "model": "KS2-90with grid",
+    "price": 23.0
+  },
+  {
+    "model": "KS2-120",
+    "price": 23.0
+  },
+  {
+    "model": "KS2-120 with grid",
+    "price": 28.0
+  },
+  {
+    "model": "KX55",
+    "price": 15.0
+  },
+  {
+    "model": "KX-55 with grid",
+    "price": 17.5
+  },
+  {
+    "model": "KX65",
+    "price": 17.0
+  },
+  {
+    "model": "KX-65 with grid",
+    "price": 20.0
+  },
+  {
+    "model": "KX90",
+    "price": 18.5
+  },
+  {
+    "model": "KX-90with grid",
+    "price": 22.0
+  },
+  {
+    "model": "KX120",
+    "price": 22.0
+  },
+  {
+    "model": "KX-120 with grid",
+    "price": 27.0
+  },
+  {
+    "model": "KP2-60",
+    "price": 22.0
+  },
+  {
+    "model": "KP2-60 with grid",
+    "price": 24.0
+  },
+  {
+    "model": "KP2-70",
+    "price": 24.0
+  },
+  {
+    "model": "KP2-70 with grid",
+    "price": 27.0
+  },
+  {
+    "model": "KP2-90",
+    "price": 29.0
+  },
+  {
+    "model": "KP2-90 with grid",
+    "price": 30.0
+  },
+  {
+    "model": "KP2-120",
+    "price": 32.0
+  },
+  {
+    "model": "KP2-120 with grid",
+    "price": 34.0
+  },
+  {
+    "model": "SL-60 with grid",
+    "price": 22.0
+  },
+  {
+    "model": "SL-70with grid",
+    "price": 24.0
+  },
+  {
+    "model": "SL-90with grid",
+    "price": 27.0
+  },
+  {
+    "model": "SL-120with grid",
+    "price": 34.0
+  },
+  {
+    "model": "FL-65 with grid",
+    "price": 28.0
+  },
+  {
+    "model": "FL-85 with grid",
+    "price": 30.0
+  },
+  {
+    "model": "FL-105 with grid",
+    "price": 34.0
+  },
+  {
+    "model": "KQ55",
+    "price": 13.0
+  },
+  {
+    "model": "KQ65",
+    "price": 14.0
+  },
+  {
+    "model": "KQ85",
+    "price": 17.0
+  },
+  {
+    "model": "TS-255N+X2",
+    "price": 62.0
+  },
+  {
+    "model": "TS-254X+X2",
+    "price": 60.0
+  },
+  {
+    "model": "TS-254B+X2",
+    "price": 66.0
+  },
+  {
+    "model": "Heracles405",
+    "price": 54.0
+  },
+  {
+    "model": "M2508+D2A",
+    "price": 36.0
+  },
+  {
+    "model": "MT2509+D2A",
+    "price": 39.0
+  },
+  {
+    "model": "T-268",
+    "price": 22.0
+  },
+  {
+    "model": "K2808+HY-",
+    "price": 22.0
+  },
+  {
+    "model": "K268",
+    "price": 18.0
+  },
+  {
+    "model": "G2508+Q2",
+    "price": 56.0
+  },
+  {
+    "model": "G2808+Q2",
+    "price": 74.0
+  },
+  {
+    "model": "GS2808+X40",
+    "price": 93.0
+  },
+  {
+    "model": "GS3108+X40",
+    "price": 107.0
+  },
+  {
+    "model": "GA258+D2A",
+    "price": 50.0
+  },
+  {
+    "model": "GX258+D2A",
+    "price": 81.0
+  },
+  {
+    "model": "M2508+D2A (2)",
+    "price": 22.0
+  },
+  {
+    "model": "TX254X+X2D",
+    "price": 22.0
+  },
+  {
+    "model": "MPT-2504+KJ",
+    "price": 19.0
+  },
+  {
+    "model": "GPT-2504+KJ",
+    "price": 35.0
+  },
+  {
+    "model": "TR-111",
+    "price": 33.5
+  },
+  {
+    "model": "DV965+HY-",
+    "price": 53.0
+  },
+  {
+    "model": "DV965S+HY",
+    "price": 69.0
+  },
+  {
+    "model": "LS-255 light stand",
+    "price": 24.0
+  },
+  {
+    "model": "LS-285 light stand",
+    "price": 29.0
+  },
+  {
+    "model": "LS-285L light stand",
+    "price": 23.0
+  },
+  {
+    "model": "HY-350",
+    "price": 9.0
+  },
+  {
+    "model": "X-30",
+    "price": 26.0
+  },
+  {
+    "model": "X-40",
+    "price": 41.0
+  },
+  {
+    "model": "X-55（no stock）",
+    "price": 56.0
+  },
+  {
+    "model": "D1",
+    "price": 7.0
+  },
+  {
+    "model": "D2",
+    "price": 7.0
+  },
+  {
+    "model": "D2A",
+    "price": 8.0
+  },
+  {
+    "model": "B1",
+    "price": 15.0
+  },
+  {
+    "model": "B2",
+    "price": 21.0
+  },
+  {
+    "model": "B3",
+    "price": 35.0
+  },
+  {
+    "model": "B4",
+    "price": 50.0
+  },
+  {
+    "model": "HY-550",
+    "price": 26.0
+  },
+  {
+    "model": "X2",
+    "price": 18.0
+  },
+  {
+    "model": "KJ36",
+    "price": 5.0
+  },
+  {
+    "model": "Q2",
+    "price": 15.0
+  },
+  {
+    "model": "W-4",
+    "price": 16.0
+  },
+  {
+    "model": "MameiyaRG100B",
+    "price": 67.0
+  },
+  {
+    "model": "EK150Bi",
+    "price": 105.0
+  },
+  {
+    "model": "EK200D",
+    "price": 97.0
+  },
+  {
+    "model": "EK200Bi",
+    "price": 112.0
+  },
+  {
+    "model": "EK300D",
+    "price": 134.0
+  },
+  {
+    "model": "EK300Bi",
+    "price": 161.0
+  },
+  {
+    "model": "M-150Bi",
+    "price": 66.0
+  },
+  {
+    "model": "M-200D",
+    "price": 79.0
+  },
+  {
+    "model": "M-200Bi",
+    "price": 95.0
+  },
+  {
+    "model": "M-300D",
+    "price": 128.0
+  },
+  {
+    "model": "M-300Bi",
+    "price": 144.0
+  },
+  {
+    "model": "M-400D",
+    "price": 144.0
+  },
+  {
+    "model": "M-600D",
+    "price": 223.0
+  },
+  {
+    "model": "M-600Bi",
+    "price": 237.0
+  },
+  {
+    "model": "M-150Bi kit",
+    "price": 169.0
+  },
+  {
+    "model": "M-200RGB",
+    "price": 150.0
+  },
+  {
+    "model": "P-200D",
+    "price": 46.0
+  },
+  {
+    "model": "P-200BI",
+    "price": 51.0
+  },
+  {
+    "model": "P-300D",
+    "price": 85.0
+  },
+  {
+    "model": "P-300Bi",
+    "price": 94.0
+  },
+  {
+    "model": "XL-80",
+    "price": 30.0
+  },
+  {
+    "model": "EX-60",
+    "price": 43.0
+  },
+  {
+    "model": "EX-60Bi",
+    "price": 53.0
+  },
+  {
+    "model": "EX-150",
+    "price": 83.0
+  },
+  {
+    "model": "EX-200",
+    "price": 110.0
+  },
+  {
+    "model": "EV-200",
+    "price": 129.0
+  },
+  {
+    "model": "EX-300",
+    "price": 144.0
+  },
+  {
+    "model": "EX-300Bi",
+    "price": 162.0
+  },
+  {
+    "model": "H60B",
+    "price": 36.0
+  },
+  {
+    "model": "H150D",
+    "price": 45.0
+  },
+  {
+    "model": "H150Bi",
+    "price": 53.0
+  },
+  {
+    "model": "H200D",
+    "price": 54.0
+  },
+  {
+    "model": "H200Bi",
+    "price": 64.0
+  },
+  {
+    "model": "H300D",
+    "price": 66.0
+  },
+  {
+    "model": "H300Bi",
+    "price": 77.0
+  },
+  {
+    "model": "TTV204",
+    "price": 12.0
+  },
+  {
+    "model": "TTV600",
+    "price": 37.0
+  },
+  {
+    "model": "PL-02",
+    "price": 18.0
+  },
+  {
+    "model": "TTV-480Bi",
+    "price": 26.0
+  },
+  {
+    "model": "TTV-192Bi",
+    "price": 24.0
+  },
+  {
+    "model": "Folding LC-18L",
+    "price": 24.0
+  },
+  {
+    "model": "LC-18",
+    "price": 41.0
+  },
+  {
+    "model": "RGB-18",
+    "price": 72.0
+  },
+  {
+    "model": "LC-18L",
+    "price": 34.0
+  },
+  {
+    "model": "LC-14",
+    "price": 28.0
+  },
+  {
+    "model": "LC-10",
+    "price": 11.0
+  },
+  {
+    "model": "LC-8",
+    "price": 8.0
+  },
+  {
+    "model": "LB-26",
+    "price": 25.0
+  },
+  {
+    "model": "LB-80",
+    "price": 42.0
+  },
+  {
+    "model": "LB-100",
+    "price": 55.0
+  },
+  {
+    "model": "F1-200",
+    "price": 118.0
+  },
+  {
+    "model": "A1-300",
+    "price": 56.0
+  },
+  {
+    "model": "A1-400",
+    "price": 66.0
+  },
+  {
+    "model": "A1-600",
+    "price": 75.0
+  },
+  {
+    "model": "TTF-300",
+    "price": 59.0
+  },
+  {
+    "model": "TTF-400",
+    "price": 69.0
+  },
+  {
+    "model": "TTF-600",
+    "price": 78.0
+  },
+  {
+    "model": "DP-250",
+    "price": 43.0
+  },
+  {
+    "model": "DP-300",
+    "price": 51.0
+  },
+  {
+    "model": "DP-400",
+    "price": 57.0
+  },
+  {
+    "model": "F1-250",
+    "price": 139.0
+  },
+  {
+    "model": "F1-600",
+    "price": 287.0
+  },
+  {
+    "model": "AF-250",
+    "price": 31.0
+  },
+  {
+    "model": "TD-01",
+    "price": 42.0
+  },
+  {
+    "model": "D",
+    "price": 10.0
+  },
+  {
+    "model": "D-280",
+    "price": 71.0
+  },
+  {
+    "model": "LP-60Bi",
+    "price": 112.0
+  },
+  {
+    "model": "LP-200",
+    "price": 127.0
+  },
+  {
+    "model": "LP-300",
+    "price": 225.0
+  },
+  {
+    "model": "LP-300Bi",
+    "price": 241.0
+  },
+  {
+    "model": "LP-600",
+    "price": 448.0
+  },
+  {
+    "model": "LP-600Bi",
+    "price": 505.0
+  },
+  {
+    "model": "LA -200Bi",
+    "price": 92.0
+  },
+  {
+    "model": "LA-300",
+    "price": 123.0
+  },
+  {
+    "model": "LA-300Bi",
+    "price": 138.0
+  },
+  {
+    "model": "TR-100",
+    "price": 14.0
+  },
+  {
+    "model": "Z1",
+    "price": 17.0
+  },
+  {
+    "model": "RI",
+    "price": 72.0
+  },
+  {
+    "model": "G-1800",
+    "price": 68.0
+  },
+  {
+    "model": "G-1500",
+    "price": 46.0
+  },
+  {
+    "model": "TR-15",
+    "price": 56.0
+  },
+  {
+    "model": "TR-350",
+    "price": 43.0
+  },
+  {
+    "model": "TR-985",
+    "price": 44.0
+  },
+  {
+    "model": "TR-982III",
+    "price": 43.0
+  },
+  {
+    "model": "TR-988",
+    "price": 38.0
+  },
+  {
+    "model": "R2",
+    "price": 28.0
+  },
+  {
+    "model": "TR-960II",
+    "price": 26.0
+  },
+  {
+    "model": "TR-950II",
+    "price": 24.0
+  },
+  {
+    "model": "TR-950",
+    "price": 22.0
+  },
+  {
+    "model": "TR-08",
+    "price": 7.0
+  },
+  {
+    "model": "TR-09",
+    "price": 18.0
+  },
+  {
+    "model": "TR-05",
+    "price": 7.0
+  },
+  {
+    "model": "G1",
+    "price": 25.0
+  },
+  {
+    "model": "G1 receiver",
+    "price": 13.0
+  },
+  {
+    "model": "G2",
+    "price": 25.0
+  },
+  {
+    "model": "Fold2 Lamp Pro 100W",
+    "price": 68.0
+  },
+  {
+    "model": "Fold2 Lamp Pro 150W",
+    "price": 75.0
+  },
+  {
+    "model": "Fold2 Lamp Pro 100W E",
+    "price": 110.0
+  },
+  {
+    "model": "Fold2 Lamp Pro 150W E",
+    "price": 119.0
+  },
+  {
+    "model": "EK150D",
+    "price": 99.5
+  }
+]
