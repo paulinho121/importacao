@@ -125,7 +125,7 @@ export default async function PedidoCompraDetailPage({
               </summary>
               <form
                 action={boundUpdatePo}
-                className="absolute z-10 mt-2 w-[360px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-lg space-y-3"
+                className="fixed inset-x-4 top-20 sm:absolute sm:inset-x-auto sm:top-auto sm:left-0 sm:mt-2 sm:w-[360px] z-10 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-lg space-y-3"
               >
                 <div>
                   <label className="block font-label-md text-label-md text-on-surface-variant mb-1">

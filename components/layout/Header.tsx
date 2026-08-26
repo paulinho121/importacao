@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser, initials } from "@/lib/use-current-user";
 import { signOutAction } from "@/app/session-actions";
+import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
 
 const LABEL_BY_PATH = new Map<string, string>(
   NAV_GROUPS.flatMap((group) => group.items.map((item) => [item.href.split("?")[0], item.label] as const)),
@@ -63,7 +64,8 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b border-border bg-card px-4 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card px-4 lg:px-6">
+      <MobileNavDrawer />
       <nav className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
         <Home className="h-4 w-4 shrink-0" />
         {crumbs.map((crumb, idx) => (
