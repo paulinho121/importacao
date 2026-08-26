@@ -55,7 +55,17 @@ export default async function PedidoCompraImprimirPage({
       supplierContactName: suppliers.contactName,
       supplierEmail: suppliers.email,
       supplierPhone: suppliers.phone,
+      supplierFax: suppliers.fax,
       supplierCountry: suppliers.country,
+      manufacturerAddress: suppliers.manufacturerAddress,
+      exporterName: suppliers.exporterName,
+      exporterAddress: suppliers.exporterAddress,
+      bankBeneficiary: suppliers.bankBeneficiary,
+      bankAccount: suppliers.bankAccount,
+      bankName: suppliers.bankName,
+      bankAddress: suppliers.bankAddress,
+      swiftCode: suppliers.swiftCode,
+      paymentInstructions: suppliers.paymentInstructions,
       branchName: companyBranches.name,
       branchCnpj: companyBranches.cnpj,
       branchAddress: companyBranches.address,
@@ -124,8 +134,18 @@ export default async function PedidoCompraImprimirPage({
             Supplier
           </p>
           <p className="text-base font-bold">{po.supplierName}</p>
-          {po.supplierContactName && (
+          {po.manufacturerAddress && (
             <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+              Add: {po.manufacturerAddress}
+            </p>
+          )}
+          {po.supplierCountry && !po.manufacturerAddress && (
+            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+              {po.supplierCountry}
+            </p>
+          )}
+          {po.supplierContactName && (
+            <p className="text-sm mt-1.5" style={{ color: MUTED }}>
               Attn: {po.supplierContactName}
             </p>
           )}
@@ -139,10 +159,24 @@ export default async function PedidoCompraImprimirPage({
               Tel: {po.supplierPhone}
             </p>
           )}
-          {po.supplierCountry && (
+          {po.supplierFax && (
             <p className="text-sm" style={{ color: MUTED }}>
-              {po.supplierCountry}
+              Fax: {po.supplierFax}
             </p>
+          )}
+
+          {po.exporterName && (
+            <div className="mt-3 pt-3 border-t" style={{ borderColor: LINE }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: MUTED }}>
+                Exporter
+              </p>
+              <p className="text-sm font-semibold">{po.exporterName}</p>
+              {po.exporterAddress && (
+                <p className="text-sm" style={{ color: MUTED }}>
+                  {po.exporterAddress}
+                </p>
+              )}
+            </div>
           )}
         </div>
 
@@ -221,6 +255,59 @@ export default async function PedidoCompraImprimirPage({
           </tr>
         </tfoot>
       </table>
+
+      {(po.bankBeneficiary || po.bankAccount) && (
+        <div className="mb-8 p-4 rounded-lg" style={{ background: "#f0f9ff", border: `1px solid ${LINE}` }}>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: MUTED }}>
+            {po.currency ?? ""} Pay To
+          </p>
+          <div className="text-sm space-y-1">
+            {po.bankBeneficiary && (
+              <p>
+                <span style={{ color: MUTED }}>Beneficiary: </span>
+                <span className="font-semibold">{po.bankBeneficiary}</span>
+              </p>
+            )}
+            {po.bankAccount && (
+              <p>
+                <span style={{ color: MUTED }}>Beneficiary Account: </span>
+                <span className="font-semibold" style={{ fontVariantNumeric: "tabular-nums" }}>
+                  {po.bankAccount}
+                </span>
+              </p>
+            )}
+            {po.bankName && (
+              <p>
+                <span style={{ color: MUTED }}>Bank Name: </span>
+                {po.bankName}
+              </p>
+            )}
+            {po.bankAddress && (
+              <p>
+                <span style={{ color: MUTED }}>Bank Address: </span>
+                {po.bankAddress}
+              </p>
+            )}
+            {po.swiftCode && (
+              <p>
+                <span style={{ color: MUTED }}>SWIFT Code: </span>
+                <span className="font-semibold">{po.swiftCode}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {po.paymentInstructions && (
+        <div className="mb-8">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
+            Your Attention Please
+          </p>
+          <p className="text-sm whitespace-pre-wrap" style={{ color: MUTED }}>
+            {po.paymentInstructions}
+          </p>
+        </div>
+      )}
 
       {po.notes && (
         <div className="mb-8">

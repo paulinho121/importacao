@@ -193,7 +193,30 @@ export const suppliers = pgTable("suppliers", {
   contactName: text("contact_name"),
   email: text("email"),
   phone: text("phone"),
+  fax: text("fax"),
   notes: text("notes"),
+  // Endereço de fábrica do fabricante — visto em invoice real como
+  // "Manufacturer Add:", pode divergir do endereço do exportador
+  // (comum vender via trading intermediária, ex: Aputure fabrica na
+  // China mas fatura via Hong Kong).
+  manufacturerAddress: text("manufacturer_address"),
+  // Exportador/faturador de fato, quando é uma empresa diferente do
+  // fabricante (ex: "AMGREAT HONG KONG LIMITED" fatura pela Aputure).
+  // Deixa em branco quando fabricante e exportador são a mesma empresa.
+  exporterName: text("exporter_name"),
+  exporterAddress: text("exporter_address"),
+  // Dados bancários pra remessa internacional — aparecem no documento
+  // impresso do pedido de compra ("USD pay to:" na invoice de
+  // referência), pra não precisar digitar de novo em cada pedido.
+  bankBeneficiary: text("bank_beneficiary"),
+  bankAccount: text("bank_account"),
+  bankName: text("bank_name"),
+  bankAddress: text("bank_address"),
+  swiftCode: text("swift_code"),
+  // Texto livre tipo "Your Attention please:" — instruções de pagamento
+  // que o fornecedor sempre repete (ex: não descontar taxa bancária do
+  // total, como confirmar o pagamento etc.).
+  paymentInstructions: text("payment_instructions"),
   // URL pública no bucket "supplier-logos" do Supabase Storage. Bucket
   // público (não assinado) porque o logo aparece em várias listagens ao
   // mesmo tempo — gerar signed URL por item em cada render seria caro à

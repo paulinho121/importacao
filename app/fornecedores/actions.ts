@@ -19,6 +19,16 @@ function readSupplierForm(formData: FormData) {
     contactName: String(formData.get("contactName") ?? "").trim() || null,
     email: String(formData.get("email") ?? "").trim() || null,
     phone: String(formData.get("phone") ?? "").trim() || null,
+    fax: String(formData.get("fax") ?? "").trim() || null,
+    manufacturerAddress: String(formData.get("manufacturerAddress") ?? "").trim() || null,
+    exporterName: String(formData.get("exporterName") ?? "").trim() || null,
+    exporterAddress: String(formData.get("exporterAddress") ?? "").trim() || null,
+    bankBeneficiary: String(formData.get("bankBeneficiary") ?? "").trim() || null,
+    bankAccount: String(formData.get("bankAccount") ?? "").trim() || null,
+    bankName: String(formData.get("bankName") ?? "").trim() || null,
+    bankAddress: String(formData.get("bankAddress") ?? "").trim() || null,
+    swiftCode: String(formData.get("swiftCode") ?? "").trim() || null,
+    paymentInstructions: String(formData.get("paymentInstructions") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
   };
 }

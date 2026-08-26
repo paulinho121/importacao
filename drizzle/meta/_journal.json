@@ -120,6 +120,13 @@
       "when": 1787782656140,
       "tag": "0016_lame_arclight",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1787783373696,
+      "tag": "0017_motionless_demogoblin",
+      "breakpoints": true
     }
   ]
 }
