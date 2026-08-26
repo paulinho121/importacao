@@ -45,6 +45,7 @@ export default async function PedidoCompraDetailPage({
       status: purchaseOrders.status,
       currency: purchaseOrders.currency,
       incoterm: purchaseOrders.incoterm,
+      paymentTerms: purchaseOrders.paymentTerms,
       expectedDeliveryDate: purchaseOrders.expectedDeliveryDate,
       notes: purchaseOrders.notes,
       sentAt: purchaseOrders.sentAt,
@@ -203,6 +204,18 @@ export default async function PedidoCompraDetailPage({
                       </option>
                     ))}
                   </select>
+                </div>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                    Payment Terms
+                  </label>
+                  <input
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                    type="text"
+                    name="paymentTerms"
+                    defaultValue={po.paymentTerms ?? ""}
+                    placeholder="Ex: Net 120 Days"
+                  />
                 </div>
                 <div>
                   <label className="block font-label-md text-label-md text-on-surface-variant mb-1">

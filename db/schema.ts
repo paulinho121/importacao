@@ -461,6 +461,10 @@ export const purchaseOrders = pgTable("purchase_orders", {
   status: purchaseOrderStatusEnum("status").notNull().default("RASCUNHO"),
   currency: currencyEnum("currency"),
   incoterm: text("incoterm"),
+  // Ex: "Net 120 Days", "50% deposit / 50% before shipment" — texto livre,
+  // aparece no documento impresso em inglês (mesmo padrão de layout visto
+  // em invoices reais de fornecedor, ex: AMGREAT/Aputure).
+  paymentTerms: text("payment_terms"),
   expectedDeliveryDate: date("expected_delivery_date"),
   notes: text("notes"),
   sentAt: timestamp("sent_at", { withTimezone: true }),

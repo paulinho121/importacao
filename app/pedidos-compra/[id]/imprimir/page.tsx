@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, companyBranches } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { formatDate } from "@/lib/status";
 import PrintButton from "@/components/PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +25,15 @@ function currencyFormatter(currency: string | null) {
   return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Documento sempre em inglês (pedido é enviado a fornecedores estrangeiros)
+// — por isso usa seu próprio formatador de data em vez de lib/status.ts
+// formatDate, que é pt-BR (usado no resto do app, que fica em português).
+function formatDateEN(value: string | Date | null) {
+  if (!value) return null;
+  const d = typeof value === "string" ? new Date(`${value}T00:00:00Z`) : value;
+  return d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+}
+
 export default async function PedidoCompraImprimirPage({
   params,
 }: {
@@ -38,6 +46,7 @@ export default async function PedidoCompraImprimirPage({
       poNumber: purchaseOrders.poNumber,
       currency: purchaseOrders.currency,
       incoterm: purchaseOrders.incoterm,
+      paymentTerms: purchaseOrders.paymentTerms,
       expectedDeliveryDate: purchaseOrders.expectedDeliveryDate,
       notes: purchaseOrders.notes,
       createdAt: purchaseOrders.createdAt,
@@ -94,39 +103,40 @@ export default async function PedidoCompraImprimirPage({
             />
           )}
           <div>
-            <h1 className="text-[26px] font-bold tracking-tight leading-none">PEDIDO DE COMPRA</h1>
+            <h1 className="text-[26px] font-bold tracking-tight leading-none">PURCHASE ORDER</h1>
             <p className="text-lg font-semibold mt-1.5" style={{ color: ACCENT, fontVariantNumeric: "tabular-nums" }}>
-              Nº {po.poNumber}
+              No. {po.poNumber}
             </p>
           </div>
         </div>
         <div className="text-right text-sm space-y-0.5" style={{ color: MUTED }}>
-          <p>Data: {formatDate(new Date(po.createdAt).toISOString().slice(0, 10))}</p>
-          {po.expectedDeliveryDate && <p>Entrega prevista: {formatDate(po.expectedDeliveryDate)}</p>}
+          <p>Date: {formatDateEN(po.createdAt)}</p>
+          {po.expectedDeliveryDate && <p>Expected Delivery: {formatDateEN(po.expectedDeliveryDate)}</p>}
           {po.incoterm && <p>Incoterm: {po.incoterm}</p>}
-          {po.currency && <p>Moeda: {po.currency}</p>}
+          {po.currency && <p>Currency: {po.currency}</p>}
+          {po.paymentTerms && <p>Payment Terms: {po.paymentTerms}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
-            Fornecedor
+            Supplier
           </p>
           <p className="text-base font-bold">{po.supplierName}</p>
           {po.supplierContactName && (
             <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-              Contato: {po.supplierContactName}
+              Attn: {po.supplierContactName}
             </p>
           )}
           {po.supplierEmail && (
             <p className="text-sm" style={{ color: MUTED }}>
-              {po.supplierEmail}
+              Email: {po.supplierEmail}
             </p>
           )}
           {po.supplierPhone && (
             <p className="text-sm" style={{ color: MUTED }}>
-              {po.supplierPhone}
+              Tel: {po.supplierPhone}
             </p>
           )}
           {po.supplierCountry && (
@@ -139,7 +149,7 @@ export default async function PedidoCompraImprimirPage({
         {po.branchName && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
-              Comprador
+              Buyer
             </p>
             <p className="text-base font-bold">{po.branchName}</p>
             <p className="text-sm mt-0.5" style={{ color: MUTED }}>
@@ -156,27 +166,33 @@ export default async function PedidoCompraImprimirPage({
         <thead>
           <tr className="border-b-2" style={{ borderColor: INK }}>
             <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
-              Item
+              #
             </th>
             <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
-              SKU Fabricante
+              Description
+            </th>
+            <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+              Code
             </th>
             <th className="py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
-              Qtd
+              Qty
             </th>
             <th className="py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
-              Preço Unit.
+              Unit Price
             </th>
             <th className="py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
-              Subtotal
+              Amount
             </th>
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const subtotal = Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0);
             return (
               <tr key={item.id} className="border-b" style={{ borderColor: LINE }}>
+                <td className="py-2.5 pr-3" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+                  {idx + 1}
+                </td>
                 <td className="py-2.5 pr-3">{item.description}</td>
                 <td className="py-2.5 pr-3 text-sm" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
                   {item.manufacturerSku ?? item.sku ?? "—"}
@@ -196,7 +212,7 @@ export default async function PedidoCompraImprimirPage({
         </tbody>
         <tfoot>
           <tr className="border-t-2" style={{ borderColor: INK }}>
-            <td colSpan={4} className="pt-3 pr-3 text-right font-bold">
+            <td colSpan={5} className="pt-3 pr-3 text-right font-bold">
               Total ({po.currency ?? "—"})
             </td>
             <td className="pt-3 text-right font-bold text-base" style={{ color: ACCENT, fontVariantNumeric: "tabular-nums" }}>
@@ -209,14 +225,14 @@ export default async function PedidoCompraImprimirPage({
       {po.notes && (
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
-            Observações
+            Notes
           </p>
           <p className="text-sm whitespace-pre-wrap">{po.notes}</p>
         </div>
       )}
 
       <div className="pt-6 mt-4 border-t text-xs text-center" style={{ borderColor: LINE, color: MUTED }}>
-        Documento gerado pelo ImportFlow TMS
+        Document generated by ImportFlow TMS
       </div>
     </div>
   );

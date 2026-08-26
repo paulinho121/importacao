@@ -135,6 +135,17 @@ export default async function NovoPedidoCompraPage() {
                   name="expectedDeliveryDate"
                 />
               </div>
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                  Payment Terms
+                </label>
+                <input
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
+                  type="text"
+                  name="paymentTerms"
+                  placeholder="Ex: Net 120 Days, 30% deposit / 70% before shipment"
+                />
+              </div>
             </div>
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
