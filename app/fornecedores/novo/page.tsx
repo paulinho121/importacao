@@ -2,6 +2,8 @@ import AppShell from "@/components/AppShell";
 import SupplierForm from "@/components/SupplierForm";
 import { createSupplier } from "@/app/fornecedores/actions";
 
+export const dynamic = "force-dynamic";
+
 export default function NovoFornecedorPage() {
   return (
     <AppShell title="Novo Fornecedor">

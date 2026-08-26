@@ -2,6 +2,8 @@ import AppShell from "@/components/AppShell";
 import AgentForm from "@/components/AgentForm";
 import { createAgent } from "@/app/agentes/actions";
 
+export const dynamic = "force-dynamic";
+
 export default function NovoAgentePage() {
   return (
     <AppShell title="Novo Agente de Carga">
