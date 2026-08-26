@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import SupplierFilterSelect from "@/components/SupplierFilterSelect";
 import { db } from "@/db/client";
 import { products, suppliers, processItems } from "@/db/schema";
 import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
@@ -10,18 +11,25 @@ export const dynamic = "force-dynamic";
 export default async function ProdutosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; divergente?: string; semPreco?: string }>;
+  searchParams: Promise<{ q?: string; divergente?: string; semPreco?: string; fornecedor?: string }>;
 }) {
-  const { q = "", divergente = "", semPreco = "" } = await searchParams;
+  const { q = "", divergente = "", semPreco = "", fornecedor = "" } = await searchParams;
   const onlyDivergent = divergente === "1";
   const onlyNoPrice = semPreco === "1";
 
   function buildQuery(overrides: Record<string, string | undefined>) {
     const params = new URLSearchParams();
-    const merged = { q, divergente: onlyDivergent ? "1" : "", semPreco: onlyNoPrice ? "1" : "", ...overrides };
+    const merged = {
+      q,
+      divergente: onlyDivergent ? "1" : "",
+      semPreco: onlyNoPrice ? "1" : "",
+      fornecedor,
+      ...overrides,
+    };
     if (merged.q) params.set("q", merged.q);
     if (merged.divergente === "1") params.set("divergente", "1");
     if (merged.semPreco === "1") params.set("semPreco", "1");
+    if (merged.fornecedor) params.set("fornecedor", merged.fornecedor);
     const qs = params.toString();
     return qs ? `/produtos?${qs}` : "/produtos";
   }
@@ -37,9 +45,10 @@ export default async function ProdutosPage({
       : undefined,
     onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
     onlyNoPrice ? isNull(products.costPrice) : undefined,
+    fornecedor ? eq(products.defaultSupplierId, fornecedor) : undefined,
   ].filter((c) => c !== undefined);
 
-  const [rows, [{ divergentCount }], [{ noPriceCount }]] = await Promise.all([
+  const [rows, [{ divergentCount }], [{ noPriceCount }], supplierOptions] = await Promise.all([
     db
       .select({
         id: products.id,
@@ -70,6 +79,16 @@ export default async function ProdutosPage({
       .select({ noPriceCount: sql<number>`count(*)`.mapWith(Number) })
       .from(products)
       .where(isNull(products.costPrice)),
+    db
+      .select({
+        id: suppliers.id,
+        name: suppliers.name,
+        count: sql<number>`count(${products.id})`.mapWith(Number),
+      })
+      .from(suppliers)
+      .innerJoin(products, eq(products.defaultSupplierId, suppliers.id))
+      .groupBy(suppliers.id, suppliers.name)
+      .orderBy(suppliers.name),
   ]);
 
   return (
@@ -96,6 +115,7 @@ export default async function ProdutosPage({
           <form action="/produtos" className="relative max-w-md flex-1 min-w-[280px]">
             {onlyDivergent && <input type="hidden" name="divergente" value="1" />}
             {onlyNoPrice && <input type="hidden" name="semPreco" value="1" />}
+            {fornecedor && <input type="hidden" name="fornecedor" value={fornecedor} />}
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
               search
             </span>
@@ -107,6 +127,8 @@ export default async function ProdutosPage({
               defaultValue={q}
             />
           </form>
+
+          <SupplierFilterSelect suppliers={supplierOptions} current={fornecedor} />
 
           {divergentCount > 0 && (
             <Link
@@ -164,7 +186,9 @@ export default async function ProdutosPage({
                           ? "Nenhum produto com divergência de NCM no momento."
                           : onlyNoPrice
                             ? "Todos os produtos têm preço cadastrado."
-                            : "Nenhum produto cadastrado ainda."}
+                            : fornecedor
+                              ? "Nenhum produto cadastrado para esse fornecedor."
+                              : "Nenhum produto cadastrado ainda."}
                     </td>
                   </tr>
                 )}
