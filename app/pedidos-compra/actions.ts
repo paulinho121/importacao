@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, products, processes, processItems } from "@/db/schema";
-import { and, eq, ilike, or } from "drizzle-orm";
+import { purchaseOrders, purchaseOrderItems, products, processes, processItems, productPriceTiers } from "@/db/schema";
+import { and, eq, ilike, inArray, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
@@ -93,7 +93,7 @@ export async function deletePurchaseOrder(poId: string) {
 export async function searchPurchaseOrderProducts(supplierId: string, query: string) {
   const q = query.trim();
 
-  return db
+  const rows = await db
     .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
     .from(products)
     .where(
@@ -103,6 +103,22 @@ export async function searchPurchaseOrderProducts(supplierId: string, query: str
     )
     .orderBy(products.sku)
     .limit(50);
+
+  if (rows.length === 0) return rows.map((r) => ({ ...r, priceTiers: [] as { minQuantity: string; price: string }[] }));
+
+  const tierRows = await db
+    .select({ productId: productPriceTiers.productId, minQuantity: productPriceTiers.minQuantity, price: productPriceTiers.price })
+    .from(productPriceTiers)
+    .where(inArray(productPriceTiers.productId, rows.map((r) => r.id)));
+
+  const tiersByProduct = new Map<string, { minQuantity: string; price: string }[]>();
+  for (const t of tierRows) {
+    const list = tiersByProduct.get(t.productId) ?? [];
+    list.push({ minQuantity: t.minQuantity, price: t.price });
+    tiersByProduct.set(t.productId, list);
+  }
+
+  return rows.map((r) => ({ ...r, priceTiers: tiersByProduct.get(r.id) ?? [] }));
 }
 
 export async function addPurchaseOrderItem(poId: string, formData: FormData) {

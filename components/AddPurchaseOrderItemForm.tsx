@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { searchPurchaseOrderProducts } from "@/app/pedidos-compra/actions";
+import { resolveTieredPrice, type PriceTier } from "@/lib/price-tiers";
 
-type Product = { id: string; sku: string; description: string; costPrice: string | null };
+type Product = { id: string; sku: string; description: string; costPrice: string | null; priceTiers: PriceTier[] };
 
 export default function AddPurchaseOrderItemForm({
   action,
@@ -18,6 +19,7 @@ export default function AddPurchaseOrderItemForm({
 }) {
   const [mode, setMode] = useState<"catalogo" | "avulso">("catalogo");
   const [unitPrice, setUnitPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
@@ -51,8 +53,24 @@ export default function AddPurchaseOrderItemForm({
     setSelected(p);
     setSearch(`${p.sku} — ${p.description}`);
     setOpen(false);
-    if (p.costPrice) setUnitPrice(p.costPrice);
+    const price = resolveTieredPrice(p.priceTiers, quantity ? Number(quantity) : null, p.costPrice);
+    if (price) setUnitPrice(price);
   }
+
+  function handleQuantityChange(value: string) {
+    setQuantity(value);
+    if (selected) {
+      const price = resolveTieredPrice(selected.priceTiers, value ? Number(value) : null, selected.costPrice);
+      if (price) setUnitPrice(price);
+    }
+  }
+
+  const appliedTier =
+    selected && quantity
+      ? selected.priceTiers
+          .filter((t) => Number(t.minQuantity) <= Number(quantity))
+          .sort((a, b) => Number(b.minQuantity) - Number(a.minQuantity))[0]
+      : null;
 
   function clearSelection() {
     setSelected(null);
@@ -79,6 +97,7 @@ export default function AddPurchaseOrderItemForm({
           setSearch("");
           setSelected(null);
           setUnitPrice("");
+          setQuantity("");
           setResults([]);
           if (mode === "catalogo") inputRef.current?.focus();
         }, 0);
@@ -215,6 +234,8 @@ export default function AddPurchaseOrderItemForm({
           type="number"
           step="0.01"
           name="quantity"
+          value={quantity}
+          onChange={(e) => handleQuantityChange(e.target.value)}
         />
         <input
           className="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm font-mono-data focus:outline-none focus:border-secondary transition-all"
@@ -226,6 +247,13 @@ export default function AddPurchaseOrderItemForm({
           onChange={(e) => setUnitPrice(e.target.value)}
         />
       </div>
+
+      {appliedTier && (
+        <p className="text-xs text-secondary flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">local_offer</span>
+          Preço por volume aplicado: a partir de {Number(appliedTier.minQuantity)} un.
+        </p>
+      )}
 
       <button
         type="submit"

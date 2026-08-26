@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { products } from "@/db/schema";
+import { products, productPriceTiers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -99,4 +99,20 @@ export async function resolveNcmDivergence(id: string, formData: FormData) {
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   revalidatePath("/");
+}
+
+export async function addPriceTier(productId: string, formData: FormData) {
+  const minQuantity = String(formData.get("minQuantity") ?? "").trim();
+  const price = String(formData.get("price") ?? "").trim();
+  if (!minQuantity || Number(minQuantity) <= 0) throw new Error("Quantidade mínima deve ser maior que zero.");
+  if (!price || Number(price) <= 0) throw new Error("Preço deve ser maior que zero.");
+
+  await db.insert(productPriceTiers).values({ productId, minQuantity, price });
+
+  revalidatePath(`/produtos/${productId}`);
+}
+
+export async function removePriceTier(tierId: string, productId: string) {
+  await db.delete(productPriceTiers).where(eq(productPriceTiers.id, tierId));
+  revalidatePath(`/produtos/${productId}`);
 }

@@ -405,6 +405,24 @@ export const products = pgTable("products", {
     .defaultNow(),
 });
 
+// Preço por faixa de quantidade (MOQ) — ex: Aputure vende "amaran Halo
+// 100x" a US$92 na unidade, mas US$85 a partir de 100 unidades. price
+// vale a partir de minQuantity (inclusive), na mesma moeda de
+// products.costCurrency. Aplicado automaticamente ao escolher item de
+// pedido de compra: a maior faixa cuja minQuantity <= quantidade digitada
+// vence (ver lib/price-tiers.ts).
+export const productPriceTiers = pgTable("product_price_tiers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  minQuantity: numeric("min_quantity", { precision: 10, scale: 2 }).notNull(),
+  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Pedido de Compra — etapa formal ANTES do processo de importação
 // existir. Nasce Rascunho, vira Enviado quando o documento (ver
 // /pedidos-compra/[id]/imprimir) é gerado pra mandar ao fornecedor, e só
