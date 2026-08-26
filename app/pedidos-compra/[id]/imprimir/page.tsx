@@ -119,7 +119,7 @@ export default async function PedidoCompraImprimirPage({
             </p>
           </div>
         </div>
-        <div className="text-right text-sm space-y-0.5" style={{ color: MUTED }}>
+        <div className="text-right text-xs space-y-0.5" style={{ color: MUTED }}>
           <p>Date: {formatDateEN(po.createdAt)}</p>
           {po.expectedDeliveryDate && <p>Expected Delivery: {formatDateEN(po.expectedDeliveryDate)}</p>}
           {po.incoterm && <p>Incoterm: {po.incoterm}</p>}
@@ -133,46 +133,46 @@ export default async function PedidoCompraImprimirPage({
           <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
             Supplier
           </p>
-          <p className="text-base font-bold">{po.supplierName}</p>
+          <p className="text-sm font-bold">{po.supplierName}</p>
           {po.manufacturerAddress && (
-            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>
               Add: {po.manufacturerAddress}
             </p>
           )}
           {po.supplierCountry && !po.manufacturerAddress && (
-            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>
               {po.supplierCountry}
             </p>
           )}
           {po.supplierContactName && (
-            <p className="text-sm mt-1.5" style={{ color: MUTED }}>
+            <p className="text-xs mt-1.5" style={{ color: MUTED }}>
               Attn: {po.supplierContactName}
             </p>
           )}
           {po.supplierEmail && (
-            <p className="text-sm" style={{ color: MUTED }}>
+            <p className="text-xs" style={{ color: MUTED }}>
               Email: {po.supplierEmail}
             </p>
           )}
           {po.supplierPhone && (
-            <p className="text-sm" style={{ color: MUTED }}>
+            <p className="text-xs" style={{ color: MUTED }}>
               Tel: {po.supplierPhone}
             </p>
           )}
           {po.supplierFax && (
-            <p className="text-sm" style={{ color: MUTED }}>
+            <p className="text-xs" style={{ color: MUTED }}>
               Fax: {po.supplierFax}
             </p>
           )}
 
           {po.exporterName && (
             <div className="mt-3 pt-3 border-t" style={{ borderColor: LINE }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: MUTED }}>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: MUTED }}>
                 Exporter
               </p>
               <p className="text-sm font-semibold">{po.exporterName}</p>
               {po.exporterAddress && (
-                <p className="text-sm" style={{ color: MUTED }}>
+                <p className="text-xs" style={{ color: MUTED }}>
                   {po.exporterAddress}
                 </p>
               )}
@@ -185,36 +185,36 @@ export default async function PedidoCompraImprimirPage({
             <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
               Buyer
             </p>
-            <p className="text-base font-bold">{po.branchName}</p>
-            <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+            <p className="text-sm font-bold">{po.branchName}</p>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>
               CNPJ: {po.branchCnpj}
             </p>
-            <p className="text-sm" style={{ color: MUTED }}>
+            <p className="text-xs" style={{ color: MUTED }}>
               {po.branchAddress}
             </p>
           </div>
         )}
       </div>
 
-      <table className="w-full text-left border-collapse text-sm mb-8">
+      <table className="w-full text-left border-collapse text-base mb-8">
         <thead>
           <tr className="border-b-2" style={{ borderColor: INK }}>
-            <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 pr-3 text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               #
             </th>
-            <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 pr-3 text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               Description
             </th>
-            <th className="py-2.5 pr-3 text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 pr-3 text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               Code
             </th>
-            <th className="py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 pr-3 text-right text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               Qty
             </th>
-            <th className="py-2.5 pr-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 pr-3 text-right text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               Unit Price
             </th>
-            <th className="py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+            <th className="py-3 text-right text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
               Amount
             </th>
           </tr>
@@ -224,20 +224,20 @@ export default async function PedidoCompraImprimirPage({
             const subtotal = Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0);
             return (
               <tr key={item.id} className="border-b" style={{ borderColor: LINE }}>
-                <td className="py-2.5 pr-3" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+                <td className="py-3 pr-3 text-sm" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
                   {idx + 1}
                 </td>
-                <td className="py-2.5 pr-3">{item.description}</td>
-                <td className="py-2.5 pr-3 text-sm" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+                <td className="py-3 pr-3 font-medium">{item.description}</td>
+                <td className="py-3 pr-3 text-xs" style={{ color: MUTED, fontVariantNumeric: "tabular-nums" }}>
                   {item.manufacturerSku ?? item.sku ?? "—"}
                 </td>
-                <td className="py-2.5 pr-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+                <td className="py-3 pr-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
                   {item.quantity ?? "—"}
                 </td>
-                <td className="py-2.5 pr-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+                <td className="py-3 pr-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
                   {money.format(Number(item.unitPrice ?? 0))}
                 </td>
-                <td className="py-2.5 text-right font-semibold" style={{ fontVariantNumeric: "tabular-nums" }}>
+                <td className="py-3 text-right font-semibold" style={{ fontVariantNumeric: "tabular-nums" }}>
                   {money.format(subtotal)}
                 </td>
               </tr>
@@ -246,10 +246,10 @@ export default async function PedidoCompraImprimirPage({
         </tbody>
         <tfoot>
           <tr className="border-t-2" style={{ borderColor: INK }}>
-            <td colSpan={5} className="pt-3 pr-3 text-right font-bold">
+            <td colSpan={5} className="pt-3 pr-3 text-right font-bold text-sm">
               Total ({po.currency ?? "—"})
             </td>
-            <td className="pt-3 text-right font-bold text-base" style={{ color: ACCENT, fontVariantNumeric: "tabular-nums" }}>
+            <td className="pt-3 text-right font-bold text-lg" style={{ color: ACCENT, fontVariantNumeric: "tabular-nums" }}>
               {money.format(total)}
             </td>
           </tr>
@@ -257,11 +257,11 @@ export default async function PedidoCompraImprimirPage({
       </table>
 
       {(po.bankBeneficiary || po.bankAccount) && (
-        <div className="mb-8 p-4 rounded-lg" style={{ background: "#f0f9ff", border: `1px solid ${LINE}` }}>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: MUTED }}>
+        <div className="mb-6 p-4 rounded-lg" style={{ background: "#f0f9ff", border: `1px solid ${LINE}` }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: MUTED }}>
             {po.currency ?? ""} Pay To
           </p>
-          <div className="text-sm space-y-1">
+          <div className="text-xs space-y-1">
             {po.bankBeneficiary && (
               <p>
                 <span style={{ color: MUTED }}>Beneficiary: </span>
@@ -299,22 +299,22 @@ export default async function PedidoCompraImprimirPage({
       )}
 
       {po.paymentInstructions && (
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
+        <div className="mb-6">
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
             Your Attention Please
           </p>
-          <p className="text-sm whitespace-pre-wrap" style={{ color: MUTED }}>
+          <p className="text-xs whitespace-pre-wrap" style={{ color: MUTED }}>
             {po.paymentInstructions}
           </p>
         </div>
       )}
 
       {po.notes && (
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
+        <div className="mb-6">
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: MUTED }}>
             Notes
           </p>
-          <p className="text-sm whitespace-pre-wrap">{po.notes}</p>
+          <p className="text-xs whitespace-pre-wrap">{po.notes}</p>
         </div>
       )}
 
