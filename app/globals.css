@@ -25,19 +25,19 @@
   --color-on-primary: #ffffff;
   --color-surface-bright: #ffffff;
   --color-on-tertiary-container: #059669;
-  --color-on-secondary-fixed-variant: #1d4ed8;
+  --color-on-secondary-fixed-variant: #0f6e56;
   --color-on-tertiary-fixed: #065f46;
   --color-on-primary-fixed-variant: #334155;
   --color-on-secondary: #ffffff;
   --color-primary: #0f172a;
-  --color-secondary-fixed-dim: #93c5fd;
-  --color-on-secondary-fixed: #1e3a8a;
+  --color-secondary-fixed-dim: #7fddc3;
+  --color-on-secondary-fixed: #0b4a3b;
   --color-primary-fixed-dim: #cbd5e1;
   --color-on-surface-variant: #64748b;
   --color-surface-dim: #e2e8f0;
   --color-background: #eef1f6;
   --color-on-primary-container: #94a3b8;
-  --color-secondary-fixed: #dbeafe;
+  --color-secondary-fixed: #d3f5ea;
   --color-on-primary-fixed: #0f172a;
   --color-surface-container-high: #e4e9f0;
   --color-on-tertiary: #ffffff;
@@ -54,18 +54,18 @@
   --color-on-tertiary-fixed-variant: #065f46;
   --color-on-secondary-container: #ffffff;
   --color-on-error: #ffffff;
-  --color-surface-tint: #2563eb;
-  --color-inverse-primary: #93c5fd;
+  --color-surface-tint: #2abf9c;
+  --color-inverse-primary: #7fddc3;
   --color-tertiary-fixed-dim: #34d399;
   --color-surface-container: #f1f5f9;
   --color-error-container: #fee2e2;
-  --color-secondary: #2563eb;
+  --color-secondary: #2abf9c;
   --color-inverse-surface: #1e293b;
   --color-tertiary-container: #d1fae5;
   --color-surface-container-lowest: #ffffff;
   --color-on-error-container: #991b1b;
   --color-tertiary-fixed: #d1fae5;
-  --color-secondary-container: #2563eb;
+  --color-secondary-container: #2abf9c;
   --color-on-surface: #0f172a;
   --color-outline: #94a3b8;
   --color-surface-container-low: #eef1f6;
@@ -78,8 +78,8 @@
   --popover-foreground: #0f172a;
   --muted: #eef1f6;
   --muted-foreground: #64748b;
-  --accent: #eff6ff;
-  --accent-foreground: #2563eb;
+  --accent: #e9fbf5;
+  --accent-foreground: #2abf9c;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --success: #10b981;
@@ -88,7 +88,7 @@
   --warning-foreground: #0f172a;
   --border: #d8e0e9;
   --input: #d8e0e9;
-  --ring: #2563eb;
+  --ring: #2abf9c;
   --radius: 0.75rem;
 
   /* Sidebar — sempre escura, independente do tema claro/escuro do app */
@@ -98,12 +98,15 @@
   --sidebar-accent: #1e293b;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #1e293b;
-  --sidebar-primary: #2563eb;
+  --sidebar-primary: #2abf9c;
   --sidebar-primary-foreground: #ffffff;
 
-  /* Recharts */
-  --chart-1: #2563eb;
-  --chart-2: #10b981;
+  /* Recharts — chart-1 é o acento de marca (teal); chart-2 herda o azul
+     antigo pra manter as 5 cores do Sankey (analytics) bem diferenciáveis
+     entre si, já que chart-2 original (verde) ficaria parecido demais com
+     o novo teal quando os dois aparecem lado a lado no mesmo diagrama. */
+  --chart-1: #2abf9c;
+  --chart-2: #2563eb;
   --chart-3: #f59e0b;
   --chart-4: #8b5cf6;
   --chart-5: #ef4444;
@@ -127,8 +130,8 @@
   --popover-foreground: #f1f5f9;
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #93c5fd;
+  --accent: #103a30;
+  --accent-foreground: #7eead0;
   --destructive: #f87171;
   --destructive-foreground: #0b1220;
   --success: #34d399;
@@ -137,7 +140,7 @@
   --warning-foreground: #0b1220;
   --border: #1e293b;
   --input: #1e293b;
-  --ring: #3b82f6;
+  --ring: #3ddbb8;
 
   /* ---- tokens antigos ---- */
   --color-background: #0b1220;

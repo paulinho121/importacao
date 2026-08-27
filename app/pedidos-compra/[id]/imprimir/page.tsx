@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // documento e impresso/exportado em PDF e precisa ficar sempre igual,
 // independente do tema que o usuario tiver escolhido na tela.
 const INK = "#0f172a";
-const ACCENT = "#2563eb";
+const ACCENT = "#2abf9c";
 const MUTED = "#64748b";
 const LINE = "#d8e0e9";
 
