@@ -6,15 +6,17 @@ export function Sparkline({
   data,
   color = "var(--chart-1)",
   className,
+  height = 40,
 }: {
   data: number[];
   color?: string;
   className?: string;
+  height?: number;
 }) {
   const points = data.map((value, index) => ({ index, value }));
 
   return (
-    <div className={className} style={{ width: "100%", height: 40 }}>
+    <div className={className} style={{ width: "100%", height }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={points} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
           <defs>

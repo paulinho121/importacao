@@ -34,11 +34,11 @@ export function KpiCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="rounded-card border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow"
+      className="rounded-card border border-border bg-card p-3.5 shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-lg"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
           style={{ backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
         >
           {icon}
@@ -46,7 +46,7 @@ export function KpiCard({
         {trend && (
           <span
             className={cn(
-              "flex items-center gap-0.5 text-xs font-medium",
+              "flex items-center gap-0.5 text-[11px] font-medium",
               trend.direction === "flat"
                 ? "text-muted-foreground"
                 : trendGood
@@ -54,11 +54,11 @@ export function KpiCard({
                   : "text-destructive",
             )}
           >
-            {trend.direction === "up" && <ArrowUpRight className="h-3.5 w-3.5" />}
-            {trend.direction === "down" && <ArrowDownRight className="h-3.5 w-3.5" />}
+            {trend.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
+            {trend.direction === "down" && <ArrowDownRight className="h-3 w-3" />}
             {trend.direction === "flat" ? (
               <>
-                <Minus className="h-3.5 w-3.5" />
+                <Minus className="h-3 w-3" />
                 Estável
               </>
             ) : (
@@ -68,12 +68,12 @@ export function KpiCard({
         )}
       </div>
 
-      <p className="mt-4 text-2xl font-semibold tracking-tight text-on-surface">{value}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+      <p className="mt-2.5 text-xl font-bold tracking-tight text-on-surface">{value}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground truncate">{label}</p>
 
       {sparklineData && sparklineData.length > 1 && (
-        <div className="mt-3 -mx-1">
-          <Sparkline data={sparklineData} color={accent} />
+        <div className="mt-2 -mx-1">
+          <Sparkline data={sparklineData} color={accent} height={24} />
         </div>
       )}
     </motion.div>

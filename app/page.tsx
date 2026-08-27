@@ -38,9 +38,9 @@ export default async function DashboardPage() {
       <div className="space-y-6 pb-12">
         <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
 
-        <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:px-6">
+        <div className="grid grid-cols-2 gap-3 px-4 lg:grid-cols-4 lg:px-6">
           <KpiCard
-            icon={<PackageSearch className="h-[18px] w-[18px]" />}
+            icon={<PackageSearch className="h-4 w-4" />}
             label="Processos Ativos"
             value={String(metrics.kpis.processosAtivos.value)}
             trend={metrics.kpis.processosAtivos.trend}
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
             accent="var(--chart-1)"
           />
           <KpiCard
-            icon={<Ship className="h-[18px] w-[18px]" />}
+            icon={<Ship className="h-4 w-4" />}
             label="Em Trânsito"
             value={String(metrics.kpis.emTransito.value)}
             trend={metrics.kpis.emTransito.trend}
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             accent="var(--chart-1)"
           />
           <KpiCard
-            icon={<CheckCircle2 className="h-[18px] w-[18px]" />}
+            icon={<CheckCircle2 className="h-4 w-4" />}
             label="Processos Finalizados"
             value={String(metrics.kpis.finalizados.value)}
             trend={metrics.kpis.finalizados.trend}
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
             accent="var(--chart-2)"
           />
           <KpiCard
-            icon={<AlertTriangle className="h-[18px] w-[18px]" />}
+            icon={<AlertTriangle className="h-4 w-4" />}
             label="Atrasados"
             value={String(metrics.kpis.atrasados.value)}
             trend={metrics.kpis.atrasados.trend}
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
             accent="var(--chart-5)"
           />
           <KpiCard
-            icon={<FileWarning className="h-[18px] w-[18px]" />}
+            icon={<FileWarning className="h-4 w-4" />}
             label="Documentos Pendentes"
             value={String(metrics.kpis.documentosPendentes.value)}
             trend={metrics.kpis.documentosPendentes.trend}
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
             accent="var(--chart-3)"
           />
           <KpiCard
-            icon={<Boxes className="h-[18px] w-[18px]" />}
+            icon={<Boxes className="h-4 w-4" />}
             label="Itens em Processo"
             value={String(metrics.kpis.itensEmProcesso.value)}
             trend={metrics.kpis.itensEmProcesso.trend}
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
             accent="var(--chart-1)"
           />
           <KpiCard
-            icon={<DollarSign className="h-[18px] w-[18px]" />}
+            icon={<DollarSign className="h-4 w-4" />}
             label="Valor FOB Total"
             value={brlFormatter.format(metrics.kpis.valorFobTotal.value)}
             trend={metrics.kpis.valorFobTotal.trend}
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
             accent="var(--chart-1)"
           />
           <KpiCard
-            icon={<Wallet className="h-[18px] w-[18px]" />}
+            icon={<Wallet className="h-4 w-4" />}
             label="Valor CIF Total"
             value={brlFormatter.format(metrics.kpis.valorCifTotal.value)}
             trend={metrics.kpis.valorCifTotal.trend}
