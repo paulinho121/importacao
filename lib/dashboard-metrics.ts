@@ -25,7 +25,9 @@ import type { AlertLevel } from "@/components/shared/PriorityBadge";
 import { calcValorAduaneiro } from "@/lib/landed-cost";
 
 const DAY_MS = 86_400_000;
-const DOC_TYPES_PER_PROCESS = 3; // INVOICE, BL, PACKING_LIST — ver process_documents
+// Exportado pra /processos?docsPendentes=1 usar o mesmo limiar do card
+// "Documentos Pendentes" do Dashboard, em vez de duplicar o número.
+export const DOC_TYPES_PER_PROCESS = 3; // INVOICE, BL, PACKING_LIST — ver process_documents
 
 function utcMidnight(d: Date) {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());

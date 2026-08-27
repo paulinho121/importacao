@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "@/components/charts/Sparkline";
 
@@ -12,6 +13,11 @@ export interface KpiTrend {
   positive?: boolean;
 }
 
+// Quando tem href, o card inteiro é clicável (linka pra tela onde o dado
+// que ele resume pode ser visto/filtrado) — Link já dá cursor de mão
+// nativamente, então só acrescenta a affordance visual de hover.
+const MotionLink = motion(Link);
+
 export function KpiCard({
   icon,
   label,
@@ -19,6 +25,7 @@ export function KpiCard({
   trend,
   sparklineData,
   accent = "var(--chart-1)",
+  href,
 }: {
   icon: ReactNode;
   label: string;
@@ -26,16 +33,17 @@ export function KpiCard({
   trend?: KpiTrend;
   sparklineData?: number[];
   accent?: string;
+  href?: string;
 }) {
   const trendGood = trend ? (trend.positive ?? trend.direction !== "down") : null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      className="rounded-card border border-border bg-card p-3.5 shadow-sm hover:shadow-md transition-shadow"
-    >
+  const className = cn(
+    "group relative block rounded-card border border-border bg-card p-3.5 shadow-sm transition-shadow",
+    href ? "hover:shadow-md hover:border-secondary/40" : "hover:shadow-md",
+  );
+
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
@@ -78,6 +86,30 @@ export function KpiCard({
           <Sparkline data={sparklineData} color={accent} height={24} />
         </div>
       )}
+
+      {href && (
+        <ChevronRight className="absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+      )}
+    </>
+  );
+
+  const motionProps = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.25 },
+  };
+
+  if (href) {
+    return (
+      <MotionLink href={href} className={className} {...motionProps}>
+        {content}
+      </MotionLink>
+    );
+  }
+
+  return (
+    <motion.div className={className} {...motionProps}>
+      {content}
     </motion.div>
   );
 }

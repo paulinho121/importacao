@@ -44,6 +44,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.processosAtivos.trend}
           sparklineData={metrics.kpis.processosAtivos.sparkline}
           accent="var(--chart-1)"
+          href="/processos?ativos=1"
         />
         <KpiCard
           icon={<Ship className="h-4 w-4" />}
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.emTransito.trend}
           sparklineData={metrics.kpis.emTransito.sparkline}
           accent="var(--chart-1)"
+          href="/processos?status=EM_TRANSITO"
         />
         <KpiCard
           icon={<CheckCircle2 className="h-4 w-4" />}
@@ -60,6 +62,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.finalizados.trend}
           sparklineData={metrics.kpis.finalizados.sparkline}
           accent="var(--chart-2)"
+          href="/processos?status=CONCLUIDO"
         />
         <KpiCard
           icon={<AlertTriangle className="h-4 w-4" />}
@@ -68,6 +71,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.atrasados.trend}
           sparklineData={metrics.kpis.atrasados.sparkline}
           accent="var(--chart-5)"
+          href="/processos?status=ATRASADO"
         />
         <KpiCard
           icon={<FileWarning className="h-4 w-4" />}
@@ -76,6 +80,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.documentosPendentes.trend}
           sparklineData={metrics.kpis.documentosPendentes.sparkline}
           accent="var(--chart-3)"
+          href="/processos?docsPendentes=1"
         />
         <KpiCard
           icon={<Boxes className="h-4 w-4" />}
@@ -84,6 +89,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.itensEmProcesso.trend}
           sparklineData={metrics.kpis.itensEmProcesso.sparkline}
           accent="var(--chart-1)"
+          href="/processos?ativos=1"
         />
         <KpiCard
           icon={<DollarSign className="h-4 w-4" />}
@@ -92,6 +98,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.valorFobTotal.trend}
           sparklineData={metrics.kpis.valorFobTotal.sparkline}
           accent="var(--chart-1)"
+          href="/processos?ativos=1"
         />
         <KpiCard
           icon={<Wallet className="h-4 w-4" />}
@@ -100,6 +107,7 @@ export default async function DashboardPage() {
           trend={metrics.kpis.valorCifTotal.trend}
           sparklineData={metrics.kpis.valorCifTotal.sparkline}
           accent="var(--chart-1)"
+          href="/processos?ativos=1"
         />
       </div>
 

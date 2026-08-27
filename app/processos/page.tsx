@@ -6,8 +6,8 @@ import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/db/client";
-import { processes, suppliers, processItems, processInvoices } from "@/db/schema";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { processes, suppliers, processItems, processInvoices, processDocuments } from "@/db/schema";
+import { and, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
   STATUS_ICON,
@@ -16,6 +16,7 @@ import {
   formatDate,
   type ProcessStatus,
 } from "@/lib/status";
+import { DOC_TYPES_PER_PROCESS } from "@/lib/dashboard-metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -59,9 +60,18 @@ const MODAL_ICON: Record<string, string> = {
 export default async function ProcessosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; modal?: string; status?: string; view?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    modal?: string;
+    status?: string;
+    view?: string;
+    ativos?: string;
+    docsPendentes?: string;
+  }>;
 }) {
-  const { q = "", modal = "", status = "", view = "list" } = await searchParams;
+  const { q = "", modal = "", status = "", view = "list", ativos = "", docsPendentes = "" } = await searchParams;
+  const onlyAtivos = ativos === "1";
+  const onlyDocsPendentes = docsPendentes === "1";
 
   const conditions = [];
   if (modal) {
@@ -69,6 +79,24 @@ export default async function ProcessosPage({
   }
   if (status) {
     conditions.push(eq(processes.status, status as ProcessStatus));
+  }
+  // "Ativos"/"Documentos Pendentes" vêm dos cards de KPI do Dashboard —
+  // não são exclusivos de "status" (não têm chip próprio na tela), então
+  // convivem com ele em vez de substituí-lo.
+  if (onlyAtivos || onlyDocsPendentes) {
+    conditions.push(ne(processes.status, "CONCLUIDO"));
+  }
+  if (onlyDocsPendentes) {
+    // Mesma regra do card "Documentos Pendentes": conta uploads com
+    // status UPLOADED e considera pendente quem tem menos que o total de
+    // tipos de documento esperado (INVOICE, BL, PACKING_LIST).
+    conditions.push(
+      sql`(
+        select count(*) from ${processDocuments}
+        where ${processDocuments.processId} = ${processes.id}
+        and ${processDocuments.status} = 'UPLOADED'
+      ) < ${DOC_TYPES_PER_PROCESS}`,
+    );
   }
   if (q) {
     conditions.push(
@@ -138,10 +166,23 @@ export default async function ProcessosPage({
       </Link>
     </div>
     <div className="p-gutter lg:px-stack-lg">
+      {(onlyAtivos || onlyDocsPendentes) && (
+        <Link
+          href={{ pathname: "/processos", query: q ? { q } : {} }}
+          className="mb-4 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border bg-secondary/10 text-secondary border-secondary/30 hover:bg-secondary/20 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+          {onlyDocsPendentes
+            ? "Filtrando: processos ativos com documento pendente — ver todos"
+            : "Filtrando: processos ativos (exclui Finalizados) — ver todos"}
+        </Link>
+      )}
       <form className="flex flex-col md:flex-row gap-4 items-end md:items-center" action="/processos">
         {status && <input type="hidden" name="status" value={status} />}
         {modal && <input type="hidden" name="modal" value={modal} />}
         {view !== "list" && <input type="hidden" name="view" value={view} />}
+        {onlyAtivos && <input type="hidden" name="ativos" value="1" />}
+        {onlyDocsPendentes && <input type="hidden" name="docsPendentes" value="1" />}
         <div className="relative flex-1 w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
             search
@@ -165,6 +206,8 @@ export default async function ProcessosPage({
                   ...(status ? { status } : {}),
                   ...(f.value ? { modal: f.value } : {}),
                   ...(view !== "list" ? { view } : {}),
+                  ...(onlyAtivos ? { ativos: "1" } : {}),
+                  ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
                 },
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-label-md text-label-md whitespace-nowrap transition-colors ${
@@ -183,7 +226,14 @@ export default async function ProcessosPage({
           <Link
             href={{
               pathname: "/processos",
-              query: { ...(q ? { q } : {}), ...(status ? { status } : {}), ...(modal ? { modal } : {}), view: "grid" },
+              query: {
+                ...(q ? { q } : {}),
+                ...(status ? { status } : {}),
+                ...(modal ? { modal } : {}),
+                ...(onlyAtivos ? { ativos: "1" } : {}),
+                ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
+                view: "grid",
+              },
             }}
             className={`flex items-center justify-center h-9 w-9 rounded-md transition-colors ${
               view === "grid" ? "bg-secondary text-on-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
@@ -195,7 +245,14 @@ export default async function ProcessosPage({
           <Link
             href={{
               pathname: "/processos",
-              query: { ...(q ? { q } : {}), ...(status ? { status } : {}), ...(modal ? { modal } : {}), view: "list" },
+              query: {
+                ...(q ? { q } : {}),
+                ...(status ? { status } : {}),
+                ...(modal ? { modal } : {}),
+                ...(onlyAtivos ? { ativos: "1" } : {}),
+                ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
+                view: "list",
+              },
             }}
             className={`flex items-center justify-center h-9 w-9 rounded-md transition-colors ${
               view === "list" ? "bg-secondary text-on-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
