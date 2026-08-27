@@ -127,6 +127,13 @@
       "when": 1787783373696,
       "tag": "0017_motionless_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1787845820559,
+      "tag": "0018_thick_molten_man",
+      "breakpoints": true
     }
   ]
 }

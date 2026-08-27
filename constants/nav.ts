@@ -11,6 +11,7 @@ import {
   BarChart3,
   Wallet,
   Settings,
+  Warehouse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -34,6 +35,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Operações",
     items: [
       { label: "Pedidos de Compra", href: "/pedidos-compra", icon: ClipboardList },
+      { label: "Em Importação (Externo)", href: "/em-importacao", icon: Warehouse },
       { label: "Processos", href: "/processos", icon: PackageSearch },
       { label: "Em Trânsito", href: "/processos?status=EM_TRANSITO", icon: Ship },
       { label: "Embarques", href: "/processos?status=EMBARCADO", icon: Anchor },

@@ -142,6 +142,35 @@ export const PURCHASE_ORDER_STATUS_BADGE_CLASS: Record<PurchaseOrderStatus, stri
   CANCELADO: "bg-error-container text-on-error-container",
 };
 
+// Status do controle externo de itens já em importação — ver
+// external_import_items. Vocabulário livre migrado da planilha que o
+// usuário mantinha por fora do sistema.
+export type ExternalImportItemStatus =
+  | "EM_NEGOCIACAO"
+  | "AGUARDANDO_EMBARQUE"
+  | "EM_DESEMBARACO"
+  | "CONCLUIDO"
+  | "CONSOLIDADO_EM_OUTRO_PROCESSO"
+  | "CANCELADO";
+
+export const EXTERNAL_IMPORT_ITEM_STATUS_LABEL: Record<ExternalImportItemStatus, string> = {
+  EM_NEGOCIACAO: "Em Negociação",
+  AGUARDANDO_EMBARQUE: "Aguardando Embarque",
+  EM_DESEMBARACO: "Em Desembaraço",
+  CONCLUIDO: "Concluído",
+  CONSOLIDADO_EM_OUTRO_PROCESSO: "Consolidado em Outro Processo",
+  CANCELADO: "Cancelado",
+};
+
+export const EXTERNAL_IMPORT_ITEM_STATUS_BADGE_CLASS: Record<ExternalImportItemStatus, string> = {
+  EM_NEGOCIACAO: "bg-surface-container-high text-on-surface-variant",
+  AGUARDANDO_EMBARQUE: "bg-warning/10 text-warning",
+  EM_DESEMBARACO: "bg-secondary-fixed text-on-secondary-fixed-variant",
+  CONCLUIDO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
+  CONSOLIDADO_EM_OUTRO_PROCESSO: "bg-surface-container-high text-on-surface-variant",
+  CANCELADO: "bg-error-container text-on-error-container",
+};
+
 // Categoria de conta a pagar — ver process_payables.
 export type PayableCategory =
   | "FORNECEDOR"

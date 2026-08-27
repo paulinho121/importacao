@@ -465,6 +465,49 @@ export const productPriceTiers = pgTable("product_price_tiers", {
     .defaultNow(),
 });
 
+// Registro externo de itens que já estão em importação (controle
+// paralelo que o usuário mantinha numa planilha própria, fora do
+// sistema — cada linha vem de um processo/embarque que não
+// necessariamente foi criado aqui dentro). Serve só de referência:
+// ao montar um pedido de compra, o item escolhido é comparado contra
+// esta tabela (por SKU ou descrição) pra avisar "isso já está vindo".
+// Sem FK pro catálogo (products) de propósito — nem todo item aqui tem
+// correspondente exato cadastrado, e o objetivo é so alertar, não
+// reconciliar automaticamente.
+export const externalImportItemStatusEnum = pgEnum("external_import_item_status", [
+  "EM_NEGOCIACAO",
+  "AGUARDANDO_EMBARQUE",
+  "EM_DESEMBARACO",
+  "CONCLUIDO",
+  "CONSOLIDADO_EM_OUTRO_PROCESSO",
+  "CANCELADO",
+]);
+
+export const externalImportItems = pgTable("external_import_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sku: text("sku"),
+  description: text("description").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }),
+  supplierName: text("supplier_name"),
+  processNumber: text("process_number"),
+  status: externalImportItemStatusEnum("status"),
+  modal: text("modal"),
+  invoice: text("invoice"),
+  etd: date("etd"),
+  eta: date("eta"),
+  agent: text("agent"),
+  destination: text("destination"),
+  reservation: text("reservation"),
+  notes: text("notes"),
+  createdByUserId: uuid("created_by_user_id"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Pedido de Compra — etapa formal ANTES do processo de importação
 // existir. Nasce Rascunho, vira Enviado quando o documento (ver
 // /pedidos-compra/[id]/imprimir) é gerado pra mandar ao fornecedor, e só

@@ -2,9 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import { searchPurchaseOrderProducts } from "@/app/pedidos-compra/actions";
+import { checkExternalImportMatch } from "@/app/em-importacao/actions";
 import { resolveTieredPrice, type PriceTier } from "@/lib/price-tiers";
+import {
+  EXTERNAL_IMPORT_ITEM_STATUS_LABEL,
+  formatDate,
+  type ExternalImportItemStatus,
+} from "@/lib/status";
 
 type Product = { id: string; sku: string; description: string; costPrice: string | null; priceTiers: PriceTier[] };
+
+type ExternalMatch = {
+  id: string;
+  sku: string | null;
+  description: string;
+  quantity: string | null;
+  processNumber: string | null;
+  status: string | null;
+  eta: string | null;
+};
 
 export default function AddPurchaseOrderItemForm({
   action,
@@ -25,10 +41,41 @@ export default function AddPurchaseOrderItemForm({
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [avulsoDescription, setAvulsoDescription] = useState("");
+  const [avulsoSku, setAvulsoSku] = useState("");
+  const [externalMatches, setExternalMatches] = useState<ExternalMatch[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
+  const matchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const matchRequestIdRef = useRef(0);
+
+  // Avisa (sem bloquear) quando o item que está sendo adicionado ao
+  // pedido já aparece no controle externo de itens em importação —
+  // dispara ao selecionar um produto do catálogo, e com debounce ao
+  // digitar descrição/SKU no modo avulso.
+  useEffect(() => {
+    const sku = mode === "catalogo" ? (selected?.sku ?? null) : avulsoSku || null;
+    const description = mode === "catalogo" ? (selected?.description ?? "") : avulsoDescription;
+
+    if (matchDebounceRef.current) clearTimeout(matchDebounceRef.current);
+    const requestId = ++matchRequestIdRef.current;
+    matchDebounceRef.current = setTimeout(() => {
+      if (!sku && description.trim().length < 4) {
+        setExternalMatches([]);
+        return;
+      }
+      checkExternalImportMatch(sku, description).then((rows) => {
+        if (requestId !== matchRequestIdRef.current) return;
+        setExternalMatches(rows);
+      });
+    }, 300);
+
+    return () => {
+      if (matchDebounceRef.current) clearTimeout(matchDebounceRef.current);
+    };
+  }, [mode, selected, avulsoSku, avulsoDescription]);
 
   useEffect(() => {
     if (!open) return;
@@ -99,6 +146,9 @@ export default function AddPurchaseOrderItemForm({
           setUnitPrice("");
           setQuantity("");
           setResults([]);
+          setAvulsoDescription("");
+          setAvulsoSku("");
+          setExternalMatches([]);
           if (mode === "catalogo") inputRef.current?.focus();
         }, 0);
       }}
@@ -216,6 +266,8 @@ export default function AddPurchaseOrderItemForm({
             placeholder="Descrição do item"
             type="text"
             name="description"
+            value={avulsoDescription}
+            onChange={(e) => setAvulsoDescription(e.target.value)}
             required
           />
           <input
@@ -223,6 +275,8 @@ export default function AddPurchaseOrderItemForm({
             placeholder="SKU (opcional)"
             type="text"
             name="sku"
+            value={avulsoSku}
+            onChange={(e) => setAvulsoSku(e.target.value)}
           />
         </div>
       )}
@@ -253,6 +307,31 @@ export default function AddPurchaseOrderItemForm({
           <span className="material-symbols-outlined text-[14px]">local_offer</span>
           Preço por volume aplicado: a partir de {Number(appliedTier.minQuantity)} un.
         </p>
+      )}
+
+      {externalMatches.length > 0 && (
+        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 space-y-2">
+          <p className="text-xs font-label-md text-warning flex items-center gap-1">
+            <span className="material-symbols-outlined text-[16px]">warning</span>
+            Este item já aparece em &quot;Em Importação (Externo)&quot;:
+          </p>
+          <ul className="space-y-1.5">
+            {externalMatches.map((m) => (
+              <li key={m.id} className="text-xs font-body-sm text-on-surface-variant leading-snug">
+                <span className="font-mono-data text-on-surface">{m.sku ?? "sem SKU"}</span> — {m.description}
+                {" · "}
+                Qtd: {m.quantity ?? "—"}
+                {" · "}
+                Processo: {m.processNumber ?? "—"}
+                {" · "}
+                {m.status
+                  ? EXTERNAL_IMPORT_ITEM_STATUS_LABEL[m.status as ExternalImportItemStatus]
+                  : "Sem status"}
+                {m.eta ? ` · ETA: ${formatDate(m.eta)}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <button
