@@ -320,6 +320,50 @@ button:not(:disabled),
   cursor: pointer;
 }
 
+/* components/ui/animated-gradient-border.tsx — borda com gradiente cônico
+   giratório (usada nos cards de KPI do Dashboard). @property registra
+   --gradient-angle como <angle> pra o navegador conseguir interpolar o
+   giro suavemente pelo keyframe, em vez de tratar a custom property como
+   string opaca (sem isso o gradiente pula direto de 0° pra 360°, sem
+   animação visível); onde @property não é suportado, a borda continua
+   aparecendo, só sem o giro. */
+@property --gradient-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes gradient-rotate {
+  from {
+    --gradient-angle: 0deg;
+  }
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+.gradient-border-component {
+  --gradient-angle: 0deg;
+}
+
+.gradient-border-auto {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+
+.gradient-border-hover {
+  animation: none;
+}
+.gradient-border-hover:hover {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+
+.gradient-border-stop-hover {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+.gradient-border-stop-hover:hover {
+  animation-play-state: paused;
+}
+
 /* Respeita "reduzir movimento" do sistema operacional — cobre as
    transições CSS comuns (Tailwind transition-*, usadas em ~40 arquivos)
    que o MotionConfig do Framer Motion (ver AppShell) não alcança, já que

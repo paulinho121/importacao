@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "@/components/charts/Sparkline";
+import { BorderRotate } from "@/components/ui/animated-gradient-border";
 
 export interface KpiTrend {
   value: number;
@@ -37,13 +38,18 @@ export function KpiCard({
 }) {
   const trendGood = trend ? (trend.positive ?? trend.direction !== "down") : null;
 
-  const className = cn(
-    "group relative block rounded-card border border-border bg-card p-3.5 shadow-sm transition-shadow",
-    href ? "hover:shadow-md hover:border-secondary/40" : "hover:shadow-md",
-  );
+  // BorderRotate cuida da borda/fundo/raio do card (gradiente giratório em
+  // teal, gira só no hover) — o wrapper de fora só cuida de entrada
+  // animada, link e da sombra que muda no hover.
+  const wrapperClassName = "group relative block h-full";
 
   const content = (
-    <>
+    <BorderRotate
+      animationMode="rotate-on-hover"
+      borderWidth={1.5}
+      borderRadius={16}
+      className="h-full p-3.5 shadow-sm transition-shadow group-hover:shadow-md"
+    >
       <div className="flex items-center justify-between">
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
@@ -90,7 +96,7 @@ export function KpiCard({
       {href && (
         <ChevronRight className="absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       )}
-    </>
+    </BorderRotate>
   );
 
   const motionProps = {
@@ -101,14 +107,14 @@ export function KpiCard({
 
   if (href) {
     return (
-      <MotionLink href={href} className={className} {...motionProps}>
+      <MotionLink href={href} className={wrapperClassName} {...motionProps}>
         {content}
       </MotionLink>
     );
   }
 
   return (
-    <motion.div className={className} {...motionProps}>
+    <motion.div className={wrapperClassName} {...motionProps}>
       {content}
     </motion.div>
   );
