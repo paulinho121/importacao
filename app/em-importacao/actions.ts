@@ -61,18 +61,36 @@ export async function deleteExternalImportItem(id: string) {
 // Usado pelo formulário de item do pedido de compra: ao escolher um
 // produto do catálogo, checa se algo parecido já está em importação
 // (por SKU exato ou descrição em comum) — só avisa, não bloqueia nada.
+//
+// A busca no banco (por SKU exato OU qualquer palavra em comum) é
+// deliberadamente ampla, só pra trazer um lote de candidatos — o filtro
+// que decide o que de fato é "parecido" roda em JS depois, exigindo SKU
+// exato OU pelo menos 2 palavras significativas em comum. Com 1 palavra
+// só, praticamente qualquer item da mesma marca (ex: "amaran", "aputure")
+// batia e a lista de avisos virava ruído.
+function normalizeWord(word: string) {
+  return word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "").toLowerCase();
+}
+
 export async function checkExternalImportMatch(sku: string | null, description: string) {
-  const skuCondition = sku ? ilike(externalImportItems.sku, sku) : undefined;
-  const descWords = description
-    .split(/\s+/)
-    .filter((w) => w.length >= 4)
-    .slice(0, 4);
-  const descCondition = descWords.length > 0 ? or(...descWords.map((w) => ilike(externalImportItems.description, `%${w}%`))) : undefined;
+  const skuLower = sku?.trim().toLowerCase() || null;
+  const descWords = Array.from(
+    new Set(
+      description
+        .split(/\s+/)
+        .map(normalizeWord)
+        .filter((w) => w.length >= 4),
+    ),
+  ).slice(0, 8);
+
+  const skuCondition = skuLower ? ilike(externalImportItems.sku, skuLower) : undefined;
+  const descCondition =
+    descWords.length > 0 ? or(...descWords.map((w) => ilike(externalImportItems.description, `%${w}%`))) : undefined;
 
   const condition = skuCondition && descCondition ? or(skuCondition, descCondition) : (skuCondition ?? descCondition);
   if (!condition) return [];
 
-  return db
+  const candidates = await db
     .select({
       id: externalImportItems.id,
       sku: externalImportItems.sku,
@@ -84,5 +102,23 @@ export async function checkExternalImportMatch(sku: string | null, description: 
     })
     .from(externalImportItems)
     .where(condition)
-    .limit(5);
+    .limit(40);
+
+  // Quantas palavras significativas exigir em comum: com só 1 disponível
+  // (ex: "camera"), essa 1 já basta; com 2+, exige pelo menos 2 — evita
+  // que uma palavra genérica isolada (marca, "with", "for"...) sozinha
+  // dispare o aviso pra itens sem relação nenhuma.
+  const minWordMatches = Math.min(2, descWords.length);
+
+  const scored = candidates
+    .map((c) => {
+      const exactSku = skuLower !== null && c.sku?.trim().toLowerCase() === skuLower;
+      const candidateDescLower = c.description.toLowerCase();
+      const wordMatches = descWords.filter((w) => candidateDescLower.includes(w)).length;
+      return { item: c, exactSku, wordMatches };
+    })
+    .filter((c) => c.exactSku || c.wordMatches >= minWordMatches)
+    .sort((a, b) => Number(b.exactSku) - Number(a.exactSku) || b.wordMatches - a.wordMatches);
+
+  return scored.slice(0, 5).map((c) => c.item);
 }
