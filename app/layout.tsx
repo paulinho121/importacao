@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import AppFrame from "@/components/layout/AppFrame";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,7 +39,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-on-surface antialiased">
-        {children}
+        <AppFrame>{children}</AppFrame>
       </body>
     </html>
   );

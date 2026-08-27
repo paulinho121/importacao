@@ -311,6 +311,21 @@ body {
   vertical-align: middle;
 }
 
+/* Respeita "reduzir movimento" do sistema operacional — cobre as
+   transições CSS comuns (Tailwind transition-*, usadas em ~40 arquivos)
+   que o MotionConfig do Framer Motion (ver AppShell) não alcança, já que
+   esse só controla as animações feitas via framer-motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
