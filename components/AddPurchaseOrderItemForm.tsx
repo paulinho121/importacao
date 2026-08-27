@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { searchPurchaseOrderProducts } from "@/app/pedidos-compra/actions";
 import { checkExternalImportMatch } from "@/app/em-importacao/actions";
 import { resolveTieredPrice, type PriceTier } from "@/lib/price-tiers";
@@ -318,7 +319,15 @@ export default function AddPurchaseOrderItemForm({
           <ul className="space-y-1.5">
             {externalMatches.map((m) => (
               <li key={m.id} className="text-xs font-body-sm text-on-surface-variant leading-snug">
-                <span className="font-mono-data text-on-surface">{m.sku ?? "sem SKU"}</span> — {m.description}
+                <Link
+                  href={`/em-importacao/${m.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-secondary hover:underline"
+                  title="Abrir e editar em Em Importação (Externo)"
+                >
+                  <span className="font-mono-data">{m.sku ?? "sem SKU"}</span> — {m.description}
+                </Link>
                 {" · "}
                 Qtd: {m.quantity ?? "—"}
                 {" · "}

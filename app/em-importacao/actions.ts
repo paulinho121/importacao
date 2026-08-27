@@ -2,9 +2,11 @@
 
 import { db } from "@/db/client";
 import { externalImportItems } from "@/db/schema";
-import { eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, isNull, notInArray, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase-server";
+import { EXTERNAL_IMPORT_ITEM_INACTIVE_STATUSES } from "@/lib/status";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -40,8 +42,12 @@ function readForm(formData: FormData) {
 export async function createExternalImportItem(formData: FormData) {
   const values = readForm(formData);
   const user = await getCurrentUser();
-  await db.insert(externalImportItems).values({ ...values, createdByUserId: user?.id ?? null });
+  const [created] = await db
+    .insert(externalImportItems)
+    .values({ ...values, createdByUserId: user?.id ?? null })
+    .returning({ id: externalImportItems.id });
   revalidatePath("/em-importacao");
+  redirect(`/em-importacao/${created.id}`);
 }
 
 export async function updateExternalImportItem(id: string, formData: FormData) {
@@ -51,11 +57,14 @@ export async function updateExternalImportItem(id: string, formData: FormData) {
     .set({ ...values, updatedAt: new Date() })
     .where(eq(externalImportItems.id, id));
   revalidatePath("/em-importacao");
+  revalidatePath(`/em-importacao/${id}`);
+  redirect("/em-importacao");
 }
 
 export async function deleteExternalImportItem(id: string) {
   await db.delete(externalImportItems).where(eq(externalImportItems.id, id));
   revalidatePath("/em-importacao");
+  redirect("/em-importacao");
 }
 
 // Usado pelo formulário de item do pedido de compra: ao escolher um
@@ -87,8 +96,20 @@ export async function checkExternalImportMatch(sku: string | null, description: 
   const descCondition =
     descWords.length > 0 ? or(...descWords.map((w) => ilike(externalImportItems.description, `%${w}%`))) : undefined;
 
-  const condition = skuCondition && descCondition ? or(skuCondition, descCondition) : (skuCondition ?? descCondition);
-  if (!condition) return [];
+  const matchCondition = skuCondition && descCondition ? or(skuCondition, descCondition) : (skuCondition ?? descCondition);
+  if (!matchCondition) return [];
+
+  // Item cancelado ou já consolidado em outro processo não está mais
+  // "em importação" de verdade — não faz sentido avisar sobre ele. NOT IN
+  // exclui silenciosamente linha com status NULL (semântica de NULL do
+  // SQL), então reinclui explicitamente quem não tem status definido.
+  const condition = and(
+    matchCondition,
+    or(
+      isNull(externalImportItems.status),
+      notInArray(externalImportItems.status, [...EXTERNAL_IMPORT_ITEM_INACTIVE_STATUSES]),
+    ),
+  );
 
   const candidates = await db
     .select({

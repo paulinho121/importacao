@@ -171,6 +171,15 @@ export const EXTERNAL_IMPORT_ITEM_STATUS_BADGE_CLASS: Record<ExternalImportItemS
   CANCELADO: "bg-error-container text-on-error-container",
 };
 
+// Status que significam que o item não está mais realmente "em
+// importação" (cancelado, ou consolidado dentro de outro processo) —
+// ficam ocultos por padrão na listagem e não contam pro cruzamento com o
+// Pedido de Compra (ver app/em-importacao/actions.ts e page.tsx).
+export const EXTERNAL_IMPORT_ITEM_INACTIVE_STATUSES = [
+  "CANCELADO",
+  "CONSOLIDADO_EM_OUTRO_PROCESSO",
+] as const satisfies readonly ExternalImportItemStatus[];
+
 // Categoria de conta a pagar — ver process_payables.
 export type PayableCategory =
   | "FORNECEDOR"
