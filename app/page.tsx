@@ -38,7 +38,7 @@ export default async function DashboardPage() {
       <div className="space-y-6 pb-12">
         <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
 
-        <div className="grid grid-cols-2 gap-3 px-4 lg:grid-cols-4 lg:px-6">
+        <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
           <KpiCard
             icon={<PackageSearch className="h-4 w-4" />}
             label="Processos Ativos"

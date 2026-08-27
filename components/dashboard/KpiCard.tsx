@@ -68,7 +68,9 @@ export function KpiCard({
         )}
       </div>
 
-      <p className="mt-2.5 text-xl font-bold tracking-tight text-on-surface">{value}</p>
+      <p className="mt-2.5 text-xl font-bold tracking-tight text-on-surface truncate" title={value}>
+        {value}
+      </p>
       <p className="mt-0.5 text-xs text-muted-foreground truncate">{label}</p>
 
       {sparklineData && sparklineData.length > 1 && (
