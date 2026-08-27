@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddItemForm from "@/components/AddItemForm";
+import AbandonProcessButton from "@/components/AbandonProcessButton";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import ProcessCompliance from "@/components/ProcessCompliance";
@@ -36,6 +37,7 @@ import {
   advanceProcessStep,
   updateProcessStatus,
   updateProcessNumber,
+  abandonProcess,
   addProcessItem,
   addProcessInvoice,
   addItemReservation,
@@ -161,6 +163,7 @@ export default async function ProcessDetailPage({
   const dias = diasRestantes(process.etaEstimated);
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
   const boundUpdateStatus = updateProcessStatus.bind(null, id);
+  const boundAbandon = abandonProcess.bind(null, id);
   const boundUpdateProcessNumber = updateProcessNumber.bind(null, id);
   const boundAddItem = addProcessItem.bind(null, id);
   const boundAddInvoice = addProcessInvoice.bind(null, id);
@@ -290,7 +293,7 @@ export default async function ProcessDetailPage({
             {destinationLabel ? ` · Destino: ${destinationLabel}` : ""}
           </p>
         </div>
-        <div className="lg:col-span-4 flex items-center lg:justify-end">
+        <div className="lg:col-span-4 flex flex-col items-start gap-2 lg:items-end">
           <form action={boundUpdateStatus} className="flex items-center gap-2">
             <select
               name="status"
@@ -310,6 +313,9 @@ export default async function ProcessDetailPage({
               Alterar Status
             </button>
           </form>
+          {process.status !== "CONCLUIDO" && process.status !== "ABANDONADO" && (
+            <AbandonProcessButton action={boundAbandon} processNumber={process.processNumber} />
+          )}
         </div>
       </div>
 

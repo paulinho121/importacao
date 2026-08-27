@@ -44,6 +44,11 @@ export const processStatusEnum = pgEnum("process_status", [
   "RECEBIDO",
   "ATRASADO",
   "CONCLUIDO",
+  // Encerramento manual e imediato (ver abandonProcess em
+  // app/processos/actions.ts) — processo que não vai seguir adiante
+  // (pedido cancelado pelo fornecedor, desistência, etc.), fora da
+  // progressão normal do workflow, igual ATRASADO/CONCLUIDO.
+  "ABANDONADO",
 ]);
 
 // Status do licenciamento de importação ("Inciso V") de um produto —

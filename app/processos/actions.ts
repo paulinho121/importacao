@@ -311,6 +311,29 @@ export async function updateProcessStatus(processId: string, formData: FormData)
   revalidatePath("/");
 }
 
+// Encerra o processo imediatamente (fora da progressão normal do
+// workflow) — pedido cancelado pelo fornecedor, desistência, etc. Motivo é
+// opcional, mas fica registrado no evento pra dar contexto depois.
+export async function abandonProcess(processId: string, formData: FormData) {
+  const reason = String(formData.get("reason") ?? "").trim();
+
+  await db
+    .update(processes)
+    .set({ status: "ABANDONADO", updatedAt: new Date() })
+    .where(eq(processes.id, processId));
+
+  await db.insert(processEvents).values({
+    processId,
+    eventDate: new Date(),
+    eventType: reason ? `Processo abandonado: ${reason}` : "Processo abandonado",
+    statusAtEvent: "ABANDONADO",
+  });
+
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  revalidatePath("/");
+}
+
 export async function addProcessItem(processId: string, formData: FormData) {
   const productId = optionalText(formData, "productId");
   const quantity = optionalNumber(formData, "quantity");

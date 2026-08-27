@@ -8,6 +8,7 @@ import {
   PackageCheck,
   AlertTriangle,
   CheckCircle2,
+  XCircle,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const STATUS_LUCIDE_ICON: Record<ProcessStatus, LucideIcon> = {
   RECEBIDO: PackageCheck,
   ATRASADO: AlertTriangle,
   CONCLUIDO: CheckCircle2,
+  ABANDONADO: XCircle,
 };
 
 export function StatusBadge({

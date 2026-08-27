@@ -8,7 +8,8 @@ export type ProcessStatus =
   | "TRANSPORTE_NACIONAL"
   | "RECEBIDO"
   | "ATRASADO"
-  | "CONCLUIDO";
+  | "CONCLUIDO"
+  | "ABANDONADO";
 
 // Rótulos seguem a nomenclatura vista em "FLUXOGRAMA DE IMPORTAÇÃO.xlsx"
 // (aba TABELA AUXILIAR) — por isso EMBARCADO exibe "Embarque" e CONCLUIDO
@@ -24,6 +25,7 @@ export const STATUS_LABEL: Record<ProcessStatus, string> = {
   RECEBIDO: "Recebido",
   ATRASADO: "Atrasado",
   CONCLUIDO: "Finalizado",
+  ABANDONADO: "Abandonado",
 };
 
 export const STATUS_BADGE_CLASS: Record<ProcessStatus, string> = {
@@ -37,6 +39,10 @@ export const STATUS_BADGE_CLASS: Record<ProcessStatus, string> = {
   RECEBIDO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
   ATRASADO: "bg-error-container text-on-error-container",
   CONCLUIDO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
+  // Mesmo tratamento visual de "Cancelado" no registro de itens em
+  // importação (lib/status.ts) — vermelho neutro, não é urgência (não
+  // precisa de ação), é só "isso não vingou".
+  ABANDONADO: "bg-error-container text-on-error-container",
 };
 
 export const STATUS_ICON: Record<ProcessStatus, string> = {
@@ -50,6 +56,7 @@ export const STATUS_ICON: Record<ProcessStatus, string> = {
   RECEBIDO: "inventory_2",
   ATRASADO: "warning",
   CONCLUIDO: "check_circle",
+  ABANDONADO: "cancel",
 };
 
 // 8 etapas — alinhado ao pipeline visto na planilha (TABELA AUXILIAR):

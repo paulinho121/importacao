@@ -1,0 +1,1 @@
+ALTER TYPE "public"."process_status" ADD VALUE 'ABANDONADO';

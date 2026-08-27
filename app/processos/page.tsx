@@ -22,7 +22,8 @@ export const dynamic = "force-dynamic";
 
 // Ordem de exibição dos grupos por status quando a lista não está filtrada
 // por um único status — atrasados primeiro (precisam de atenção), depois a
-// ordem natural do fluxo, finalizados por último.
+// ordem natural do fluxo, finalizados e abandonados por último (encerrados,
+// não precisam mais de atenção).
 const STATUS_GROUP_ORDER: ProcessStatus[] = [
   "ATRASADO",
   "AGUARDANDO_EMBARQUE",
@@ -34,6 +35,7 @@ const STATUS_GROUP_ORDER: ProcessStatus[] = [
   "TRANSPORTE_NACIONAL",
   "RECEBIDO",
   "CONCLUIDO",
+  "ABANDONADO",
 ];
 
 const MODAL_FILTERS = [
@@ -84,7 +86,7 @@ export default async function ProcessosPage({
   // não são exclusivos de "status" (não têm chip próprio na tela), então
   // convivem com ele em vez de substituí-lo.
   if (onlyAtivos || onlyDocsPendentes) {
-    conditions.push(ne(processes.status, "CONCLUIDO"));
+    conditions.push(ne(processes.status, "CONCLUIDO"), ne(processes.status, "ABANDONADO"));
   }
   if (onlyDocsPendentes) {
     // Mesma regra do card "Documentos Pendentes": conta uploads com

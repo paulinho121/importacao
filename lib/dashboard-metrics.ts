@@ -137,7 +137,7 @@ export async function getDashboardMetrics() {
       .orderBy(products.sku),
   ]);
 
-  const ativos = processRows.filter((p) => p.status !== "CONCLUIDO");
+  const ativos = processRows.filter((p) => p.status !== "CONCLUIDO" && p.status !== "ABANDONADO");
   const emTransito = processRows.filter((p) => p.status === "EM_TRANSITO");
   const finalizados = processRows.filter((p) => p.status === "CONCLUIDO");
   const atrasados = processRows.filter((p) => p.status === "ATRASADO");
