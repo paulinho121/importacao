@@ -34,6 +34,11 @@ export type ProductFormValues = {
   taxRatePIS?: string | null;
   taxRateCOFINS?: string | null;
   taxRateICMS?: string | null;
+  cartonPiecesPerCarton?: string | null;
+  cartonLengthCm?: string | null;
+  cartonWidthCm?: string | null;
+  cartonHeightCm?: string | null;
+  cartonWeightKg?: string | null;
 };
 
 export default function ProductForm({
@@ -243,6 +248,94 @@ export default function ProductForm({
             />
           </div>
         </div>
+      </div>
+
+      <div className="pt-6 border-t border-outline-variant">
+        <h3 className="font-headline-sm text-headline-sm text-primary mb-1">
+          Especificações de Carton (Cubagem)
+        </h3>
+        <p className="text-xs text-on-surface-variant mb-4">
+          Da &quot;Carton Specs&quot; da price list do fornecedor — base pra estimar cubagem (m³) e
+          quantos containers um Pedido de Compra vai precisar.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Peças/Carton
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="1"
+              min="1"
+              name="cartonPiecesPerCarton"
+              defaultValue={defaultValues?.cartonPiecesPerCarton ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Comprimento (cm)
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="cartonLengthCm"
+              defaultValue={defaultValues?.cartonLengthCm ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Largura (cm)
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="cartonWidthCm"
+              defaultValue={defaultValues?.cartonWidthCm ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Altura (cm)
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="cartonHeightCm"
+              defaultValue={defaultValues?.cartonHeightCm ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Peso bruto (kg)
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
+              type="number"
+              step="0.01"
+              name="cartonWeightKg"
+              defaultValue={defaultValues?.cartonWeightKg ?? ""}
+            />
+          </div>
+        </div>
+        {defaultValues?.cartonLengthCm && defaultValues?.cartonWidthCm && defaultValues?.cartonHeightCm && (
+          <p className="mt-3 text-body-sm font-body-sm text-on-surface-variant">
+            Cubagem por carton:{" "}
+            <span className="font-bold text-primary font-mono-data">
+              {(
+                (Number(defaultValues.cartonLengthCm) *
+                  Number(defaultValues.cartonWidthCm) *
+                  Number(defaultValues.cartonHeightCm)) /
+                1_000_000
+              ).toLocaleString("pt-BR", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}{" "}
+              m³
+            </span>{" "}
+            <span className="text-xs">(recalculado após salvar)</span>
+          </p>
+        )}
       </div>
 
       <div className="pt-6 border-t border-outline-variant">

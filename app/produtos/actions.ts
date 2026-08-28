@@ -51,6 +51,13 @@ function readProductForm(formData: FormData) {
     taxRatePIS: optionalNumber(formData, "taxRatePIS"),
     taxRateCOFINS: optionalNumber(formData, "taxRateCOFINS"),
     taxRateICMS: optionalNumber(formData, "taxRateICMS"),
+    // Especificações de carton — base pra estimar cubagem/containers no
+    // Pedido de Compra (ver lib/container-estimate.ts). Todas opcionais.
+    cartonPiecesPerCarton: optionalNumber(formData, "cartonPiecesPerCarton"),
+    cartonLengthCm: optionalNumber(formData, "cartonLengthCm"),
+    cartonWidthCm: optionalNumber(formData, "cartonWidthCm"),
+    cartonHeightCm: optionalNumber(formData, "cartonHeightCm"),
+    cartonWeightKg: optionalNumber(formData, "cartonWeightKg"),
   };
 }
 

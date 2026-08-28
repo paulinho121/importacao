@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddPurchaseOrderItemForm from "@/components/AddPurchaseOrderItemForm";
 import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
+import ContainerEstimate from "@/components/ContainerEstimate";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, processes, companyBranches } from "@/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
@@ -73,6 +74,11 @@ export default async function PedidoCompraDetailPage({
         quantity: purchaseOrderItems.quantity,
         unitPrice: purchaseOrderItems.unitPrice,
         manufacturerSku: products.manufacturerSku,
+        cartonPiecesPerCarton: products.cartonPiecesPerCarton,
+        cartonLengthCm: products.cartonLengthCm,
+        cartonWidthCm: products.cartonWidthCm,
+        cartonHeightCm: products.cartonHeightCm,
+        cartonWeightKg: products.cartonWeightKg,
       })
       .from(purchaseOrderItems)
       .leftJoin(products, eq(purchaseOrderItems.productId, products.id))
@@ -86,6 +92,18 @@ export default async function PedidoCompraDetailPage({
   ]);
 
   const total = items.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0), 0);
+  const containerEstimateItems = items.map((item) => ({
+    id: item.id,
+    description: item.description,
+    quantity: Number(item.quantity ?? 0),
+    spec: {
+      piecesPerCarton: item.cartonPiecesPerCarton !== null ? Number(item.cartonPiecesPerCarton) : null,
+      cartonLengthCm: item.cartonLengthCm !== null ? Number(item.cartonLengthCm) : null,
+      cartonWidthCm: item.cartonWidthCm !== null ? Number(item.cartonWidthCm) : null,
+      cartonHeightCm: item.cartonHeightCm !== null ? Number(item.cartonHeightCm) : null,
+      cartonWeightKg: item.cartonWeightKg !== null ? Number(item.cartonWeightKg) : null,
+    },
+  }));
   const isRascunho = po.status === "RASCUNHO";
   const boundAddItem = addPurchaseOrderItem.bind(null, id);
   const boundUpdateStatus = updatePurchaseOrderStatus.bind(null, id);
@@ -311,6 +329,8 @@ export default async function PedidoCompraDetailPage({
               />
             )}
           </section>
+
+          <ContainerEstimate items={containerEstimateItems} />
 
           {po.notes && (
             <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">

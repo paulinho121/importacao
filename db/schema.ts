@@ -444,6 +444,20 @@ export const products = pgTable("products", {
   taxRatePIS: numeric("tax_rate_pis", { precision: 6, scale: 3 }),
   taxRateCOFINS: numeric("tax_rate_cofins", { precision: 6, scale: 3 }),
   taxRateICMS: numeric("tax_rate_icms", { precision: 6, scale: 3 }),
+  // Especificações de carton (caixa de embarque) — vistas na "Carton
+  // Specs" da price list do fornecedor (Pieces per Carton / Length /
+  // Height / Width / Weight). Base pra estimar cubagem (m³) e quantos
+  // containers um pedido vai precisar — ver lib/container-estimate.ts.
+  // Cubagem em si não é armazenada (calculada a partir das 3 dimensões,
+  // mesmo princípio do preço sugerido: nunca fica desatualizada).
+  // numeric (não integer) por consistência com o resto do form de produto
+  // (quantidade/preço sempre chegam como string do FormData — ver
+  // readProductForm em app/produtos/actions.ts).
+  cartonPiecesPerCarton: numeric("carton_pieces_per_carton", { precision: 6, scale: 0 }),
+  cartonLengthCm: numeric("carton_length_cm", { precision: 8, scale: 2 }),
+  cartonWidthCm: numeric("carton_width_cm", { precision: 8, scale: 2 }),
+  cartonHeightCm: numeric("carton_height_cm", { precision: 8, scale: 2 }),
+  cartonWeightKg: numeric("carton_weight_kg", { precision: 8, scale: 2 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

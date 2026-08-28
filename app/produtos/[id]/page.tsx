@@ -179,6 +179,11 @@ export default async function EditProdutoPage({
             taxRatePIS: product.taxRatePIS,
             taxRateCOFINS: product.taxRateCOFINS,
             taxRateICMS: product.taxRateICMS,
+            cartonPiecesPerCarton: product.cartonPiecesPerCarton,
+            cartonLengthCm: product.cartonLengthCm,
+            cartonWidthCm: product.cartonWidthCm,
+            cartonHeightCm: product.cartonHeightCm,
+            cartonWeightKg: product.cartonWeightKg,
           }}
           submitLabel="Salvar Alterações"
           suppliers={supplierRows}

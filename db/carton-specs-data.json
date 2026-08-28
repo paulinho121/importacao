@@ -1,0 +1,2324 @@
+[
+  {
+    "sku": "Fresnel F10",
+    "manufacturerSku": "APA0172A30",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 46.5,
+    "cartonHeightCm": 47.0,
+    "cartonWeightKg": 10.8
+  },
+  {
+    "sku": "Barndoor F10",
+    "manufacturerSku": "APA0191A30",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 46.5,
+    "cartonHeightCm": 47.0,
+    "cartonWeightKg": 10.8
+  },
+  {
+    "sku": "LIGHTDOME150",
+    "manufacturerSku": "APA0227A30",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 128.0,
+    "cartonWidthCm": 46.0,
+    "cartonHeightCm": 46.0,
+    "cartonWeightKg": 20.0
+  },
+  {
+    "sku": "Lightbox 6090",
+    "manufacturerSku": "APA0222A30",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 71.5,
+    "cartonWidthCm": 29.0,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 11.05
+  },
+  {
+    "sku": "LANTERN",
+    "manufacturerSku": "APJ0155A3E",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 85.5,
+    "cartonWidthCm": 58.0,
+    "cartonHeightCm": 39.5,
+    "cartonWeightKg": 18.4
+  },
+  {
+    "sku": "AMOLANTERN90",
+    "manufacturerSku": "APA0220A30",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 122.0,
+    "cartonWidthCm": 46.0,
+    "cartonHeightCm": 67.0,
+    "cartonWeightKg": 22.64
+  },
+  {
+    "sku": "LTCLAMP",
+    "manufacturerSku": "APQ0148A30",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 44.5,
+    "cartonWidthCm": 23.0,
+    "cartonHeightCm": 35.6,
+    "cartonWeightKg": 12.9
+  },
+  {
+    "sku": "NOVAP300C",
+    "manufacturerSku": "APC0107A2B",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 68.0,
+    "cartonWidthCm": 61.5,
+    "cartonHeightCm": 37.0,
+    "cartonWeightKg": 17.24
+  },
+  {
+    "sku": "P300SOFTBOX",
+    "manufacturerSku": "APD0157A3C",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 64.2,
+    "cartonWidthCm": 38.8,
+    "cartonHeightCm": 43.0,
+    "cartonWeightKg": 12.0
+  },
+  {
+    "sku": "P300BARNDOOR",
+    "manufacturerSku": "APA0219A30",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 66.2,
+    "cartonWidthCm": 40.8,
+    "cartonHeightCm": 45.0,
+    "cartonWeightKg": 16.27
+  },
+  {
+    "sku": "P600CBARNDOOR",
+    "manufacturerSku": "APB0179A30",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 72.0,
+    "cartonWidthCm": 37.0,
+    "cartonHeightCm": 38.0,
+    "cartonWeightKg": 17.5
+  },
+  {
+    "sku": "Nova P600C Space Light",
+    "manufacturerSku": "APS1179A30",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 105.0,
+    "cartonWidthCm": 6.0,
+    "cartonHeightCm": 106.0,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "Nova P600C Case",
+    "manufacturerSku": "APC0179A30",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 95.0,
+    "cartonWidthCm": 66.0,
+    "cartonHeightCm": 32.0,
+    "cartonWeightKg": 17.5
+  },
+  {
+    "sku": "Nova P600C Dual Head Yoke",
+    "manufacturerSku": "APM5179A30",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 87.0,
+    "cartonWidthCm": 79.0,
+    "cartonHeightCm": 17.0,
+    "cartonWeightKg": 6.5
+  },
+  {
+    "sku": "Nova P600C Pole Operated Yoke",
+    "manufacturerSku": "APM1179A30",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 87.0,
+    "cartonWidthCm": 55.0,
+    "cartonHeightCm": 18.0,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "Nova P600C Rain Shield",
+    "manufacturerSku": "APW0179A30",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 65.0,
+    "cartonWidthCm": 46.0,
+    "cartonHeightCm": 46.0,
+    "cartonWeightKg": 17.0
+  },
+  {
+    "sku": "MC",
+    "manufacturerSku": "APA0142A10",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 46.0,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 29.0,
+    "cartonWeightKg": 13.0
+  },
+  {
+    "sku": "MC4KIT",
+    "manufacturerSku": "APA0152A10",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 30.5,
+    "cartonWeightKg": 13.0
+  },
+  {
+    "sku": "MC12KIT",
+    "manufacturerSku": "APA0147A10",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 46.5,
+    "cartonHeightCm": 47.0,
+    "cartonWeightKg": 29.03
+  },
+  {
+    "sku": "AACB7C",
+    "manufacturerSku": "APC0146A7B",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 40.5,
+    "cartonWidthCm": 31.3,
+    "cartonHeightCm": 35.0,
+    "cartonWeightKg": 11.0
+  },
+  {
+    "sku": "AACB7C8KITUS",
+    "manufacturerSku": "APC0213A7B",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 40.0,
+    "cartonWidthCm": 34.0,
+    "cartonHeightCm": 38.8,
+    "cartonWeightKg": 12.0
+  },
+  {
+    "sku": "Accent B7c 8-Light Case",
+    "manufacturerSku": "APC0213A3B",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 40.0,
+    "cartonWidthCm": 34.0,
+    "cartonHeightCm": 38.8,
+    "cartonWeightKg": 8.27
+  },
+  {
+    "sku": "AMARAN T2c",
+    "manufacturerSku": "APM0241A14",
+    "piecesPerCarton": 9,
+    "cartonLengthCm": 69.0,
+    "cartonWidthCm": 38.0,
+    "cartonHeightCm": 34.0,
+    "cartonWeightKg": 22.6
+  },
+  {
+    "sku": "AMARAN T4c",
+    "manufacturerSku": "APL0241A14",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 129.0,
+    "cartonWidthCm": 25.0,
+    "cartonHeightCm": 31.0,
+    "cartonWeightKg": 22.0
+  },
+  {
+    "sku": "Amaran F21c",
+    "manufacturerSku": "AP30232A14",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 72.0,
+    "cartonWidthCm": 42.5,
+    "cartonHeightCm": 28.6,
+    "cartonWeightKg": 14.4
+  },
+  {
+    "sku": "Amaran F21x",
+    "manufacturerSku": "AP20232A14",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 72.0,
+    "cartonWidthCm": 42.5,
+    "cartonHeightCm": 28.6,
+    "cartonWeightKg": 14.4
+  },
+  {
+    "sku": "Amaran F22c",
+    "manufacturerSku": "AP30235A14",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 72.0,
+    "cartonWidthCm": 42.5,
+    "cartonHeightCm": 28.6,
+    "cartonWeightKg": 16.57
+  },
+  {
+    "sku": "Amaran F22x",
+    "manufacturerSku": "AP20235A14",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 72.0,
+    "cartonWidthCm": 42.5,
+    "cartonHeightCm": 28.6,
+    "cartonWeightKg": 16.57
+  },
+  {
+    "sku": "LS 600c Pro II(V-mount)（US）",
+    "manufacturerSku": "AP30332A20",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 63.0,
+    "cartonWidthCm": 39.0,
+    "cartonHeightCm": 44.0,
+    "cartonWeightKg": 21.0
+  },
+  {
+    "sku": "Aputure MT Pro-1 light Kit lumenradio",
+    "manufacturerSku": "APA0202A10",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 40.0,
+    "cartonWidthCm": 29.5,
+    "cartonHeightCm": 27.0,
+    "cartonWeightKg": 6.5
+  },
+  {
+    "sku": "Handheld Bracket for the COB 60",
+    "manufacturerSku": "APA0209PJ2",
+    "piecesPerCarton": 15,
+    "cartonLengthCm": 40.5,
+    "cartonWidthCm": 35.5,
+    "cartonHeightCm": 25.0,
+    "cartonWeightKg": 5.4
+  },
+  {
+    "sku": "Amaran SM5c",
+    "manufacturerSku": "APA0008A11",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 41.0,
+    "cartonWidthCm": 35.8,
+    "cartonHeightCm": 21.7,
+    "cartonWeightKg": 7.5
+  },
+  {
+    "sku": "amaran SM5c Extension 5 meters",
+    "manufacturerSku": "APA0008A16",
+    "piecesPerCarton": 36,
+    "cartonLengthCm": 41.0,
+    "cartonWidthCm": 35.8,
+    "cartonHeightCm": 21.7,
+    "cartonWeightKg": 11.0
+  },
+  {
+    "sku": "45 Degree Grid For amaran T2c",
+    "manufacturerSku": "APB0241A38",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 129.0,
+    "cartonWidthCm": 25.0,
+    "cartonHeightCm": 31.0,
+    "cartonWeightKg": 22.0
+  },
+  {
+    "sku": "45 Degree Grid For amaran T4c",
+    "manufacturerSku": "APB0241A39",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 129.0,
+    "cartonWidthCm": 25.0,
+    "cartonHeightCm": 31.0,
+    "cartonWeightKg": 22.0
+  },
+  {
+    "sku": "Battery station For amaran Tube",
+    "manufacturerSku": "APB0241A3A",
+    "piecesPerCarton": 15,
+    "cartonLengthCm": 49.0,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 27.0,
+    "cartonWeightKg": 12.2
+  },
+  {
+    "sku": "InfiniBar PB3 Softbox",
+    "manufacturerSku": "APS0300A31",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 35.2,
+    "cartonWidthCm": 38.5,
+    "cartonHeightCm": 36.7,
+    "cartonWeightKg": 10.9
+  },
+  {
+    "sku": "InfiniBar PB3 Light Control Grid(45°）",
+    "manufacturerSku": "APS0300A32",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 38.7,
+    "cartonWidthCm": 39.0,
+    "cartonHeightCm": 34.0,
+    "cartonWeightKg": 14.36
+  },
+  {
+    "sku": "INFINIBAR PB6",
+    "manufacturerSku": "APM0300A1G",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 69.5,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 39.5,
+    "cartonWeightKg": 22.2
+  },
+  {
+    "sku": "InfiniBar PB6 Light Control Grid(45°)",
+    "manufacturerSku": "APM0300A32",
+    "piecesPerCarton": 50,
+    "cartonLengthCm": 69.2,
+    "cartonWidthCm": 33.0,
+    "cartonHeightCm": 42.0,
+    "cartonWeightKg": 19.7
+  },
+  {
+    "sku": "INFINIBAR PB6 8-Light Kit（US)",
+    "manufacturerSku": "APM0300AX1",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 143.0,
+    "cartonWidthCm": 21.0,
+    "cartonHeightCm": 56.0,
+    "cartonWeightKg": 43.4
+  },
+  {
+    "sku": "INFINIBAR PB12",
+    "manufacturerSku": "APL0300A1G",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 129.0,
+    "cartonWidthCm": 27.5,
+    "cartonHeightCm": 27.5,
+    "cartonWeightKg": 22.3
+  },
+  {
+    "sku": "InfiniBar PB12 Softbox",
+    "manufacturerSku": "APL0300A31",
+    "piecesPerCarton": 15,
+    "cartonLengthCm": 66.2,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 38.0,
+    "cartonWeightKg": 14.07
+  },
+  {
+    "sku": "InfiniBar PB12 Light Control Grid(45°)",
+    "manufacturerSku": "APL0300A32",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 67.2,
+    "cartonWidthCm": 32.7,
+    "cartonHeightCm": 42.3,
+    "cartonWeightKg": 18.2
+  },
+  {
+    "sku": "INFINIBAR PB12 8-Light Kit",
+    "manufacturerSku": "APL0300AX1",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 143.0,
+    "cartonWidthCm": 21.0,
+    "cartonHeightCm": 59.0,
+    "cartonWeightKg": 53.0
+  },
+  {
+    "sku": "Aputure InfiniBar Multi-Light Shaping Kit",
+    "manufacturerSku": "APD0300A30",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 71.5,
+    "cartonWidthCm": 60.5,
+    "cartonHeightCm": 30.0,
+    "cartonWeightKg": 19.5
+  },
+  {
+    "sku": "INFINIBAR 4-Way Power Splitter Cable",
+    "manufacturerSku": "APX0300AX0",
+    "piecesPerCarton": 36,
+    "cartonLengthCm": 41.0,
+    "cartonWidthCm": 21.7,
+    "cartonHeightCm": 35.8,
+    "cartonWeightKg": 7.58
+  },
+  {
+    "sku": "INFINIBAR 3-Way Flat Connector",
+    "manufacturerSku": "APD0300A35",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 31.0,
+    "cartonWeightKg": 8.28
+  },
+  {
+    "sku": "INFINIBAR 4-Way Flat Connector",
+    "manufacturerSku": "APD0300A36",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 35.2,
+    "cartonWidthCm": 38.5,
+    "cartonHeightCm": 36.7,
+    "cartonWeightKg": 7.07
+  },
+  {
+    "sku": "INFINIBAR 6-Way Flat Connector",
+    "manufacturerSku": "APD0300A37",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 46.5,
+    "cartonHeightCm": 47.0,
+    "cartonWeightKg": 13.62
+  },
+  {
+    "sku": "INFINIBAR Triangle Flat Connector",
+    "manufacturerSku": "APD0300A31",
+    "piecesPerCarton": 18,
+    "cartonLengthCm": 56.0,
+    "cartonWidthCm": 26.5,
+    "cartonHeightCm": 55.0,
+    "cartonWeightKg": 14.62
+  },
+  {
+    "sku": "INFINIBAR Triangle 3D Connector",
+    "manufacturerSku": "APD0300A32",
+    "piecesPerCarton": 21,
+    "cartonLengthCm": 56.0,
+    "cartonWidthCm": 26.5,
+    "cartonHeightCm": 55.0,
+    "cartonWeightKg": 16.9
+  },
+  {
+    "sku": "INFINIBAR Hexagon Flat Connector",
+    "manufacturerSku": "APD0300A33",
+    "piecesPerCarton": 14,
+    "cartonLengthCm": 50.0,
+    "cartonWidthCm": 37.5,
+    "cartonHeightCm": 38.5,
+    "cartonWeightKg": 15.41
+  },
+  {
+    "sku": "INFINIBAR Hexagon 3D Connector",
+    "manufacturerSku": "APD0300A34",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 35.2,
+    "cartonWidthCm": 38.5,
+    "cartonHeightCm": 36.7,
+    "cartonWeightKg": 12.67
+  },
+  {
+    "sku": "INFINIBAR Square Flat Connector",
+    "manufacturerSku": "APD0300A38",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 35.2,
+    "cartonWidthCm": 38.5,
+    "cartonHeightCm": 36.7,
+    "cartonWeightKg": 10.74
+  },
+  {
+    "sku": "INFINIBAR Square 3D Connector",
+    "manufacturerSku": "APD0300A39",
+    "piecesPerCarton": 18,
+    "cartonLengthCm": 54.0,
+    "cartonWidthCm": 23.0,
+    "cartonHeightCm": 53.0,
+    "cartonWeightKg": 16.68
+  },
+  {
+    "sku": "D-Tap Power Cable (2-Pin)",
+    "manufacturerSku": "APB0152A30",
+    "piecesPerCarton": 32,
+    "cartonLengthCm": 43.0,
+    "cartonWidthCm": 23.5,
+    "cartonHeightCm": 31.5,
+    "cartonWeightKg": 2.72
+  },
+  {
+    "sku": "D-Tap to 5.5mm DC Barrel Power Cable",
+    "manufacturerSku": "APA0209PJ4",
+    "piecesPerCarton": 56,
+    "cartonLengthCm": 43.0,
+    "cartonWidthCm": 23.5,
+    "cartonHeightCm": 31.5,
+    "cartonWeightKg": 3.93
+  },
+  {
+    "sku": "MC 8-Light Accessory Kit",
+    "manufacturerSku": "APB0147A30",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 32.8,
+    "cartonHeightCm": 41.5,
+    "cartonWeightKg": 12.36
+  },
+  {
+    "sku": "Waterproof Pouch for MT pro",
+    "manufacturerSku": "APA0202PJ1",
+    "piecesPerCarton": 84,
+    "cartonLengthCm": 20.0,
+    "cartonWidthCm": 2.1,
+    "cartonHeightCm": 11.5,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "Baby Pin Adapter to Back Clamp for MT pro",
+    "manufacturerSku": "APA0202PJ2",
+    "piecesPerCarton": 54,
+    "cartonLengthCm": 13.0,
+    "cartonWidthCm": 2.6,
+    "cartonHeightCm": 6.8,
+    "cartonWeightKg": 9.2
+  },
+  {
+    "sku": "1/4 Screw Adapter Adsorption Parts for MT pro",
+    "manufacturerSku": "APA0202PJ3",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 30.0,
+    "cartonWidthCm": 20.0,
+    "cartonHeightCm": 20.0,
+    "cartonWeightKg": 2.9
+  },
+  {
+    "sku": "Lantern for amaran F21",
+    "manufacturerSku": "APB0232A31",
+    "piecesPerCarton": 9,
+    "cartonLengthCm": 31.0,
+    "cartonWidthCm": 70.0,
+    "cartonHeightCm": 5.0,
+    "cartonWeightKg": 10.0
+  },
+  {
+    "sku": "Lantern for amaran F22",
+    "manufacturerSku": "APB0235A31",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 43.0,
+    "cartonWidthCm": 70.0,
+    "cartonHeightCm": 6.0,
+    "cartonWeightKg": 8.0
+  },
+  {
+    "sku": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter",
+    "manufacturerSku": "APT0011A31",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 54.0,
+    "cartonWidthCm": 27.5,
+    "cartonHeightCm": 33.5,
+    "cartonWeightKg": 7.32
+  },
+  {
+    "sku": "Aputure Active USB-C to 5-Pin DMX In & Out Adapter Kit",
+    "manufacturerSku": "APT0011A30",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 54.0,
+    "cartonWidthCm": 27.5,
+    "cartonHeightCm": 33.5,
+    "cartonWeightKg": 13.21
+  },
+  {
+    "sku": "45 Degree Grid For amaran PT1c",
+    "manufacturerSku": "APG0012A31",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 41.5,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 31.0,
+    "cartonWeightKg": 3.4
+  },
+  {
+    "sku": "Aputure MC 4-Light Wireless Charging Case",
+    "manufacturerSku": "APA0152A11",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 53.0,
+    "cartonWidthCm": 30.0,
+    "cartonHeightCm": 32.5,
+    "cartonWeightKg": 9.9
+  },
+  {
+    "sku": "Aputure MC 12-Light Wireless Charging Case",
+    "manufacturerSku": "APA0147A11",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 48.0,
+    "cartonWidthCm": 45.0,
+    "cartonHeightCm": 32.5,
+    "cartonWeightKg": 16.6
+  },
+  {
+    "sku": "LS 1200 Four-Lights Bracket",
+    "manufacturerSku": "APB0249A35",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 127.0,
+    "cartonWidthCm": 24.0,
+    "cartonHeightCm": 37.0,
+    "cartonWeightKg": 22.4
+  },
+  {
+    "sku": "MC Pro",
+    "manufacturerSku": "APA0229A10",
+    "piecesPerCarton": 18,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 34.3,
+    "cartonHeightCm": 27.0,
+    "cartonWeightKg": 17.39
+  },
+  {
+    "sku": "MC Pro 8-Light Kit",
+    "manufacturerSku": "APA0229A11",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 49.0,
+    "cartonWidthCm": 46.0,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 21.58
+  },
+  {
+    "sku": "amaran Floor Stand with 3/8-16in Screw for amaran PT",
+    "manufacturerSku": "OEX0012A11",
+    "piecesPerCarton": 60,
+    "cartonLengthCm": 41.7,
+    "cartonWidthCm": 28.7,
+    "cartonHeightCm": 23.8,
+    "cartonWeightKg": 13.0
+  },
+  {
+    "sku": "Magnetic T12 Bracket for amaran PT",
+    "manufacturerSku": "OEX0012A12",
+    "piecesPerCarton": 27,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 24.4,
+    "cartonHeightCm": 24.4,
+    "cartonWeightKg": 4.65
+  },
+  {
+    "sku": "Electro CS15（No plug）",
+    "manufacturerSku": "APN0307A92",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 98.0,
+    "cartonWidthCm": 68.0,
+    "cartonHeightCm": 84.0,
+    "cartonWeightKg": 83.3
+  },
+  {
+    "sku": "Electro XT26（No plug）",
+    "manufacturerSku": "APN0308A92",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 97.0,
+    "cartonWidthCm": 68.5,
+    "cartonHeightCm": 84.0,
+    "cartonWeightKg": 83.2
+  },
+  {
+    "sku": "Sidus One",
+    "manufacturerSku": "APR0316A31",
+    "piecesPerCarton": 14,
+    "cartonLengthCm": 23.7,
+    "cartonWidthCm": 5.05,
+    "cartonHeightCm": 21.8,
+    "cartonWeightKg": 11.7
+  },
+  {
+    "sku": "Sidus One 2-Way Splitter Cable",
+    "manufacturerSku": "APR0316A34",
+    "piecesPerCarton": 32,
+    "cartonLengthCm": 18.4,
+    "cartonWidthCm": 5.0,
+    "cartonHeightCm": 7.4,
+    "cartonWeightKg": 4.66
+  },
+  {
+    "sku": "Sidus One Power Cable",
+    "manufacturerSku": "APR0316A35",
+    "piecesPerCarton": 40,
+    "cartonLengthCm": 4.8,
+    "cartonWidthCm": 11.6,
+    "cartonHeightCm": 2.8,
+    "cartonWeightKg": 2.03
+  },
+  {
+    "sku": "Sidus One Antenna",
+    "manufacturerSku": "APR0316A36",
+    "piecesPerCarton": 40,
+    "cartonLengthCm": 4.8,
+    "cartonWidthCm": 11.6,
+    "cartonHeightCm": 2.8,
+    "cartonWeightKg": 1.71
+  },
+  {
+    "sku": "INFINIBAR PB6 4-Light Kit （US)",
+    "manufacturerSku": "APM0300AX6",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 86.5,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 52.5,
+    "cartonWeightKg": 24.97
+  },
+  {
+    "sku": "INFINIBAR PB12 4-Light Kit（US)",
+    "manufacturerSku": "APL0300AXR",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 140.5,
+    "cartonWidthCm": 30.8,
+    "cartonHeightCm": 44.5,
+    "cartonWeightKg": 32.57
+  },
+  {
+    "sku": "INFINIBAR PB6 4-Light Rolling Hard Case",
+    "manufacturerSku": "APL0300AXP",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 83.8,
+    "cartonWidthCm": 28.5,
+    "cartonHeightCm": 49.8,
+    "cartonWeightKg": 17.8
+  },
+  {
+    "sku": "INFINIBAR PB12 4-Light Rolling Hard Case",
+    "manufacturerSku": "APL0300AXB",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 137.8,
+    "cartonWidthCm": 27.8,
+    "cartonHeightCm": 42.8,
+    "cartonWeightKg": 14.9
+  },
+  {
+    "sku": "INFINIBAR 330W(24V) Power Adapter Kit(US)",
+    "manufacturerSku": "AP40300AX6",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 61.7,
+    "cartonWidthCm": 21.8,
+    "cartonHeightCm": 49.7,
+    "cartonWeightKg": 12.12
+  },
+  {
+    "sku": "INFINIBAR 330W(24V) Power Adapter Kit and Extension Cables（US）",
+    "manufacturerSku": "AP40300AXB",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 66.9,
+    "cartonWidthCm": 38.8,
+    "cartonHeightCm": 32.6,
+    "cartonWeightKg": 14.45
+  },
+  {
+    "sku": "3m Locking 5.5mm DC to 5.5mm DC Barrel Extension Cable",
+    "manufacturerSku": "APE0300AX1",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 47.0,
+    "cartonWidthCm": 27.4,
+    "cartonHeightCm": 40.0,
+    "cartonWeightKg": 16.0
+  },
+  {
+    "sku": "INFINIBAR 8-Way DC Power Splitter",
+    "manufacturerSku": "APW0300AX2",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 47.0,
+    "cartonWidthCm": 28.4,
+    "cartonHeightCm": 40.0,
+    "cartonWeightKg": 9.8
+  },
+  {
+    "sku": "1/4-20in Collapsible Tripod Base for INFINIBAR",
+    "manufacturerSku": "APT0300AXH",
+    "piecesPerCarton": 32,
+    "cartonLengthCm": 71.0,
+    "cartonWidthCm": 36.0,
+    "cartonHeightCm": 33.0,
+    "cartonWeightKg": 25.62
+  },
+  {
+    "sku": "INFINIBAR Tilting Mounting Bracket",
+    "manufacturerSku": "APT0300AXK",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 46.1,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 10.1
+  },
+  {
+    "sku": "2Battery Power Station (24V) (V-Mount) for INFINIBAR",
+    "manufacturerSku": "APB0300AXA",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 61.7,
+    "cartonWidthCm": 21.8,
+    "cartonHeightCm": 49.7,
+    "cartonWeightKg": 11.5
+  },
+  {
+    "sku": "3/8in Screw to lightning Clamp Plate Adapter",
+    "manufacturerSku": "APB0300AXF",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 40.6,
+    "cartonWidthCm": 23.0,
+    "cartonHeightCm": 17.5,
+    "cartonWeightKg": 3.5
+  },
+  {
+    "sku": "INFINIBAR Straight Connector (Passive)",
+    "manufacturerSku": "APC0300AXP",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 46.1,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 9.67
+  },
+  {
+    "sku": "INFINIBAR 3-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXT",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 56.0,
+    "cartonWidthCm": 24.6,
+    "cartonHeightCm": 51.0,
+    "cartonWeightKg": 11.47
+  },
+  {
+    "sku": "INFINIBAR 4-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXR",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 56.0,
+    "cartonWidthCm": 24.6,
+    "cartonHeightCm": 51.0,
+    "cartonWeightKg": 13.95
+  },
+  {
+    "sku": "INFINIBAR 6-Way Flat Connector (Passive)",
+    "manufacturerSku": "APC0300AXS",
+    "piecesPerCarton": 30,
+    "cartonLengthCm": 56.0,
+    "cartonWidthCm": 24.6,
+    "cartonHeightCm": 51.0,
+    "cartonWeightKg": 18.59
+  },
+  {
+    "sku": "Sidus Four",
+    "manufacturerSku": "APR0317A31",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 48.0,
+    "cartonWidthCm": 33.5,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 14.9
+  },
+  {
+    "sku": "5-Pin XLR Male to 5-Pin XLR Male Adapter",
+    "manufacturerSku": "APR0317A35",
+    "piecesPerCarton": 105,
+    "cartonLengthCm": 28.7,
+    "cartonWidthCm": 13.4,
+    "cartonHeightCm": 20.0,
+    "cartonWeightKg": 4.95
+  },
+  {
+    "sku": "Sidus Four 18W（9V) Power Adapter",
+    "manufacturerSku": "APR0317A37",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 39.5,
+    "cartonWidthCm": 20.5,
+    "cartonHeightCm": 33.0,
+    "cartonWeightKg": 3.99
+  },
+  {
+    "sku": "Sidus Four antenna",
+    "manufacturerSku": "APR0317A38",
+    "piecesPerCarton": 98,
+    "cartonLengthCm": 44.3,
+    "cartonWidthCm": 25.0,
+    "cartonHeightCm": 20.6,
+    "cartonWeightKg": 5.5
+  },
+  {
+    "sku": "Storm 1200x（US）",
+    "manufacturerSku": "AP20334A20",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 68.5,
+    "cartonWidthCm": 49.0,
+    "cartonHeightCm": 45.5,
+    "cartonWeightKg": 28.9
+  },
+  {
+    "sku": "Storm 1200x Reflector Kit",
+    "manufacturerSku": "AA00060000",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 39.5,
+    "cartonWidthCm": 50.5,
+    "cartonHeightCm": 39.5,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "amaran Ace 25x Green",
+    "manufacturerSku": "MP02060004",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25x Charcoal",
+    "manufacturerSku": "MP0206000Q",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25x White",
+    "manufacturerSku": "MP02060002",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25x Pink",
+    "manufacturerSku": "MP02060003",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25x Silver",
+    "manufacturerSku": "MP02060001",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25c Green",
+    "manufacturerSku": "MP0206000C",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25c Charcoal",
+    "manufacturerSku": "MP0206000U",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25c White",
+    "manufacturerSku": "MP0206000A",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25c Pink",
+    "manufacturerSku": "MP0206000B",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "amaran Ace 25c Silver",
+    "manufacturerSku": "MP02060009",
+    "piecesPerCarton": 20,
+    "cartonLengthCm": 5.33,
+    "cartonWidthCm": 2.05,
+    "cartonHeightCm": 3.35,
+    "cartonWeightKg": 11.9
+  },
+  {
+    "sku": "Aputure INFINIMAT 1x2 V-Mount Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP10039AC2",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 12.6
+  },
+  {
+    "sku": "Aputure INFINIMAT 1x4 V-Mount Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP10039AC7",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 14.3
+  },
+  {
+    "sku": "Aputure INFINIMAT 2x4 V-Mount Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP30039AC7",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 17.4
+  },
+  {
+    "sku": "Aputure INFINIMAT 4x4 Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP50039AC7",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 91.0,
+    "cartonWidthCm": 39.8,
+    "cartonHeightCm": 79.5,
+    "cartonWeightKg": 39.5
+  },
+  {
+    "sku": "Aputure INFINIMAT 8x8 Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP60039AC7",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 83.0,
+    "cartonWidthCm": 93.0,
+    "cartonHeightCm": 75.0,
+    "cartonWeightKg": 116.0
+  },
+  {
+    "sku": "Aputure INFINIMAT 20x20 Kit w/ Clear Softbox(US)",
+    "manufacturerSku": "AP80039AC2",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 83.0,
+    "cartonWidthCm": 93.0,
+    "cartonHeightCm": 75.0,
+    "cartonWeightKg": 116.0
+  },
+  {
+    "sku": "Aputure INFINIMAT Rigid Softbox 1×2",
+    "manufacturerSku": "AA05060216",
+    "piecesPerCarton": 9,
+    "cartonLengthCm": 67.0,
+    "cartonWidthCm": 30.7,
+    "cartonHeightCm": 67.0,
+    "cartonWeightKg": 13.08
+  },
+  {
+    "sku": "Aputure INFINIMAT Rigid Softbox 1×4",
+    "manufacturerSku": "AA05060217",
+    "piecesPerCarton": 9,
+    "cartonLengthCm": 67.0,
+    "cartonWidthCm": 30.7,
+    "cartonHeightCm": 67.0,
+    "cartonWeightKg": 17.08
+  },
+  {
+    "sku": "Aputure INFINIMAT Rigid Softbox 2x4",
+    "manufacturerSku": "AA05060218",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 67.2,
+    "cartonWidthCm": 32.7,
+    "cartonHeightCm": 42.3,
+    "cartonWeightKg": 9.72
+  },
+  {
+    "sku": "Aputure INFINIMAT Rigid Softbox 4x4",
+    "manufacturerSku": "AA05060219",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 67.2,
+    "cartonWidthCm": 32.7,
+    "cartonHeightCm": 42.3,
+    "cartonWeightKg": 15.6
+  },
+  {
+    "sku": "amaran Go-Green (Global)",
+    "manufacturerSku": "MP0206014H",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 4.38,
+    "cartonWidthCm": 2.3,
+    "cartonHeightCm": 2.0,
+    "cartonWeightKg": 8.45
+  },
+  {
+    "sku": "amaran Go-Charcoal (Global)",
+    "manufacturerSku": "MP0206014K",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 4.38,
+    "cartonWidthCm": 2.3,
+    "cartonHeightCm": 2.0,
+    "cartonWeightKg": 8.45
+  },
+  {
+    "sku": "amaran Go-White (Global)",
+    "manufacturerSku": "MP0206014F",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 4.38,
+    "cartonWidthCm": 2.3,
+    "cartonHeightCm": 2.0,
+    "cartonWeightKg": 8.45
+  },
+  {
+    "sku": "amaran Go-Pink (Global)",
+    "manufacturerSku": "MP0206014G",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 4.38,
+    "cartonWidthCm": 2.3,
+    "cartonHeightCm": 2.0,
+    "cartonWeightKg": 8.45
+  },
+  {
+    "sku": "amaran Go-Blue (Global)",
+    "manufacturerSku": "MP0206014J",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 4.38,
+    "cartonWidthCm": 2.3,
+    "cartonHeightCm": 2.0,
+    "cartonWeightKg": 8.45
+  },
+  {
+    "sku": "amaran Tag (Lightning, Cream White)",
+    "manufacturerSku": "MP07060018",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 5.5,
+    "cartonWidthCm": 2.8,
+    "cartonHeightCm": 5.5,
+    "cartonWeightKg": 26.0
+  },
+  {
+    "sku": "amaran Tag (USB-C, Cream White)",
+    "manufacturerSku": "MP07060017",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 5.5,
+    "cartonWidthCm": 2.8,
+    "cartonHeightCm": 5.5,
+    "cartonWeightKg": 26.0
+  },
+  {
+    "sku": "amaran Tag (Lightning, Midnight Black)",
+    "manufacturerSku": "MP07060016",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 5.5,
+    "cartonWidthCm": 2.8,
+    "cartonHeightCm": 5.5,
+    "cartonWeightKg": 26.0
+  },
+  {
+    "sku": "amaran Tag (USB-C, Midnight Black)",
+    "manufacturerSku": "MP07060015",
+    "piecesPerCarton": 80,
+    "cartonLengthCm": 5.5,
+    "cartonWidthCm": 2.8,
+    "cartonHeightCm": 5.5,
+    "cartonWeightKg": 26.0
+  },
+  {
+    "sku": "CF4 Fresnel",
+    "manufacturerSku": "AP0F056A35",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 48.0,
+    "cartonWidthCm": 33.5,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 6.45
+  },
+  {
+    "sku": "CF4 Barn Doors",
+    "manufacturerSku": "AA07060068",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 54.0,
+    "cartonWidthCm": 27.5,
+    "cartonHeightCm": 33.5,
+    "cartonWeightKg": 6.6
+  },
+  {
+    "sku": "CF12 Fresnel",
+    "manufacturerSku": "AP20334A30",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 52.0,
+    "cartonWidthCm": 52.0,
+    "cartonHeightCm": 49.0,
+    "cartonWeightKg": 17.5
+  },
+  {
+    "sku": "CF12 Barn Doors",
+    "manufacturerSku": "AA0706003E",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 59.0,
+    "cartonWidthCm": 49.5,
+    "cartonHeightCm": 48.0,
+    "cartonWeightKg": 14.7
+  },
+  {
+    "sku": "Skid for STORM 1200x/1000c",
+    "manufacturerSku": "AA0706003G",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 52.2,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 7.6
+  },
+  {
+    "sku": "amaran Light Dome 60",
+    "manufacturerSku": "MA0006014L",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 53.5,
+    "cartonWidthCm": 45.5,
+    "cartonHeightCm": 43.5,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "amaran Light Dome 90",
+    "manufacturerSku": "MA0006014M",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 79.2,
+    "cartonWidthCm": 45.5,
+    "cartonHeightCm": 43.5,
+    "cartonWeightKg": 8.0
+  },
+  {
+    "sku": "amaran Light Box 45x45",
+    "manufacturerSku": "MA0006014N",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 79.0,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 40.9,
+    "cartonWeightKg": 4.5
+  },
+  {
+    "sku": "amaran Light Box 30x120",
+    "manufacturerSku": "MA0006014P",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 92.0,
+    "cartonWidthCm": 24.7,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 6.6
+  },
+  {
+    "sku": "amaran Light Box 60x90",
+    "manufacturerSku": "MA0006014Q",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 79.0,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 40.9,
+    "cartonWeightKg": 5.5
+  },
+  {
+    "sku": "amaran Octa Dome 60",
+    "manufacturerSku": "MA0006014R",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 63.0,
+    "cartonWidthCm": 23.5,
+    "cartonHeightCm": 37.3,
+    "cartonWeightKg": 4.5
+  },
+  {
+    "sku": "amaran Octa Dome 90",
+    "manufacturerSku": "MA0006014S",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 79.0,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 40.9,
+    "cartonWeightKg": 6.0
+  },
+  {
+    "sku": "amaran Octa Dome 120",
+    "manufacturerSku": "MA0006014T",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 92.0,
+    "cartonWidthCm": 24.7,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 9.0
+  },
+  {
+    "sku": "amaran Lantern 65",
+    "manufacturerSku": "MA0006014U",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 89.0,
+    "cartonWidthCm": 35.5,
+    "cartonHeightCm": 50.5,
+    "cartonWeightKg": 4.0
+  },
+  {
+    "sku": "amaran Lantern 90",
+    "manufacturerSku": "MA0006014V",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 112.8,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 51.3,
+    "cartonWeightKg": 6.6
+  },
+  {
+    "sku": "amaran Pano 60c Kit-White (US)",
+    "manufacturerSku": "MP0100008T",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 45.0,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 14.7
+  },
+  {
+    "sku": "amaran Pano 60c Kit-Charcoal (US)",
+    "manufacturerSku": "MP01000090",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 45.0,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 14.7
+  },
+  {
+    "sku": "amaran Pano 60c 2-Light Kit-White (US)",
+    "manufacturerSku": "MP01000096",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 52.0,
+    "cartonWidthCm": 34.0,
+    "cartonHeightCm": 45.0,
+    "cartonWeightKg": 16.7
+  },
+  {
+    "sku": "amaran Pano 60c 2-Light Kit-Charcoal (US)",
+    "manufacturerSku": "MP0100009C",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 52.0,
+    "cartonWidthCm": 34.0,
+    "cartonHeightCm": 45.0,
+    "cartonWeightKg": 16.7
+  },
+  {
+    "sku": "amaran Pano 120c Kit-White (US)",
+    "manufacturerSku": "MP0100009L",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 48.5,
+    "cartonWidthCm": 33.6,
+    "cartonHeightCm": 40.5,
+    "cartonWeightKg": 12.7
+  },
+  {
+    "sku": "amaran Pano 120c Kit-Charcoal (US)",
+    "manufacturerSku": "MP0100009S",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 48.5,
+    "cartonWidthCm": 33.6,
+    "cartonHeightCm": 40.5,
+    "cartonWeightKg": 12.7
+  },
+  {
+    "sku": "amaran Verge-White(US)",
+    "manufacturerSku": "MP0100007R",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 26.5,
+    "cartonWidthCm": 55.0,
+    "cartonHeightCm": 7.0,
+    "cartonWeightKg": 14.2
+  },
+  {
+    "sku": "amaran Verge-Charcoal(US)",
+    "manufacturerSku": "MP0100007Y",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 26.5,
+    "cartonWidthCm": 55.0,
+    "cartonHeightCm": 7.0,
+    "cartonWeightKg": 14.2
+  },
+  {
+    "sku": "amaran Verge Max Kit-White(US)",
+    "manufacturerSku": "MP01000085",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 74.4,
+    "cartonWidthCm": 96.3,
+    "cartonHeightCm": 10.4,
+    "cartonWeightKg": 23.27
+  },
+  {
+    "sku": "amaran Verge Max Kit-Charcoal(US)",
+    "manufacturerSku": "MP0100008B",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 74.4,
+    "cartonWidthCm": 96.3,
+    "cartonHeightCm": 10.4,
+    "cartonWeightKg": 23.27
+  },
+  {
+    "sku": "STORM 80c 3-Light Kit（US）",
+    "manufacturerSku": "AP0700012J",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 71.5,
+    "cartonWidthCm": 60.5,
+    "cartonHeightCm": 30.0,
+    "cartonWeightKg": 29.395
+  },
+  {
+    "sku": "STORM 80c 3-Light Kit Rolling Hard Case",
+    "manufacturerSku": "AA0706032N",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 71.5,
+    "cartonWidthCm": 60.5,
+    "cartonHeightCm": 30.0,
+    "cartonWeightKg": 12.68
+  },
+  {
+    "sku": "Aputure Super Clamp with Anti-rotate 3/8in Screw",
+    "manufacturerSku": "AS0706012Q",
+    "piecesPerCarton": 48,
+    "cartonLengthCm": 38.7,
+    "cartonWidthCm": 21.8,
+    "cartonHeightCm": 26.7,
+    "cartonWeightKg": 7.8
+  },
+  {
+    "sku": "Aputure Universal Magic Arm with Dual Ball Joint",
+    "manufacturerSku": "AS0706012R",
+    "piecesPerCarton": 54,
+    "cartonLengthCm": 41.5,
+    "cartonWidthCm": 31.5,
+    "cartonHeightCm": 36.5,
+    "cartonWeightKg": 15.7
+  },
+  {
+    "sku": "STORM XT52(EU CEE 32A)",
+    "manufacturerSku": "AP070G0155",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 119.0,
+    "cartonWidthCm": 60.0,
+    "cartonHeightCm": 62.0,
+    "cartonWeightKg": 74.4
+  },
+  {
+    "sku": "STORM XT52 (Bare Leads)",
+    "manufacturerSku": "AP07060156",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 119.0,
+    "cartonWidthCm": 60.0,
+    "cartonHeightCm": 62.0,
+    "cartonWeightKg": 74.4
+  },
+  {
+    "sku": "STORM XT52 Dual Flight Case Kit(EU CEE 32A)",
+    "manufacturerSku": "AG07010002",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 84.5,
+    "cartonWidthCm": 64.0,
+    "cartonHeightCm": 66.0,
+    "cartonWeightKg": 61.4
+  },
+  {
+    "sku": "STORM XT52 Dual Flight Case Kit（Bare Leads）",
+    "manufacturerSku": "AG07060003",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 84.5,
+    "cartonWidthCm": 64.0,
+    "cartonHeightCm": 66.0,
+    "cartonWeightKg": 61.4
+  },
+  {
+    "sku": "STORM Parallel Beam 70",
+    "manufacturerSku": "AA0706028X",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 83.8,
+    "cartonWidthCm": 58.0,
+    "cartonHeightCm": 81.3,
+    "cartonWeightKg": 22.0
+  },
+  {
+    "sku": "STORM Parallel Beam 70 Flight Case Kit",
+    "manufacturerSku": "AA0706034T",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 90.0,
+    "cartonWidthCm": 75.0,
+    "cartonHeightCm": 90.0,
+    "cartonWeightKg": 54.5
+  },
+  {
+    "sku": "Motorized CF16 Fresnel Rolling Case Kit",
+    "manufacturerSku": "AA07060370",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 84.5,
+    "cartonWidthCm": 49.0,
+    "cartonHeightCm": 75.0,
+    "cartonWeightKg": 40.0
+  },
+  {
+    "sku": "Motorized CF16 Fresnel Flight Case Kit",
+    "manufacturerSku": "AA0706028U",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 86.5,
+    "cartonWidthCm": 54.0,
+    "cartonHeightCm": 75.5,
+    "cartonWeightKg": 58.5
+  },
+  {
+    "sku": "CF16 Barn Doors Adapter",
+    "manufacturerSku": "AA0706028Y",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 59.0,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 59.0,
+    "cartonWeightKg": 7.92
+  },
+  {
+    "sku": "STORM XT52 Skid",
+    "manufacturerSku": "AA0706028V",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 70.0,
+    "cartonWidthCm": 22.0,
+    "cartonHeightCm": 41.0,
+    "cartonWeightKg": 4.83
+  },
+  {
+    "sku": "STORM XT52 Reflector Kit",
+    "manufacturerSku": "AA0706015G",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 65.0,
+    "cartonWidthCm": 59.0,
+    "cartonHeightCm": 65.0,
+    "cartonWeightKg": 16.73
+  },
+  {
+    "sku": "STORM XT52 Wide-angle Reflector",
+    "manufacturerSku": "AA0706015E",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 60.5,
+    "cartonWidthCm": 31.5,
+    "cartonHeightCm": 47.2,
+    "cartonWeightKg": 8.68
+  },
+  {
+    "sku": "STORM XT52 Narrow-angle Reflector for XT52",
+    "manufacturerSku": "AA0706015F",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 60.5,
+    "cartonWidthCm": 48.0,
+    "cartonHeightCm": 60.5,
+    "cartonWeightKg": 10.6
+  },
+  {
+    "sku": "AM Lightdome 150",
+    "manufacturerSku": "AA0706015H",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 111.2,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 53.5,
+    "cartonWeightKg": 13.03
+  },
+  {
+    "sku": "AM Lantern 120",
+    "manufacturerSku": "AA0706015J",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 155.7,
+    "cartonWidthCm": 25.8,
+    "cartonHeightCm": 49.0,
+    "cartonWeightKg": 12.06
+  },
+  {
+    "sku": "Aputure Y50X-2011 Male to Female Extendable Head Cable-7.5m",
+    "manufacturerSku": "AA0706015K",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 42.0,
+    "cartonWeightKg": 24.5
+  },
+  {
+    "sku": "Aputure Y50X-2011 Male to Female Extendable Head Cable-15m",
+    "manufacturerSku": "AA0706036L",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 59.0,
+    "cartonWidthCm": 27.5,
+    "cartonHeightCm": 43.0,
+    "cartonWeightKg": 21.0
+  },
+  {
+    "sku": "STORM XT52 Lamp Head",
+    "manufacturerSku": "AS0706034V",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 65.5,
+    "cartonWidthCm": 45.5,
+    "cartonHeightCm": 46.0,
+    "cartonWeightKg": 32.52
+  },
+  {
+    "sku": "STORM XT52 Control Box",
+    "manufacturerSku": "AS0706034U",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 46.5,
+    "cartonWidthCm": 45.0,
+    "cartonHeightCm": 21.5,
+    "cartonWeightKg": 14.41
+  },
+  {
+    "sku": "Aputure LP-28-T455 to CEE 32A Power Input AC Cable - 1m (CN/EU)",
+    "manufacturerSku": "AS070E034W",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 59.0,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 59.0,
+    "cartonWeightKg": 14.0
+  },
+  {
+    "sku": "Aputure LP-28-T455 to Bare Leads Power Input AC Cable - 1m （No Plug）",
+    "manufacturerSku": "AS0706034X",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 25.0,
+    "cartonHeightCm": 30.5,
+    "cartonWeightKg": 8.08
+  },
+  {
+    "sku": "Aputure Mount Protection Cover for XT52",
+    "manufacturerSku": "AS0706034Y",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 51.0,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 30.5,
+    "cartonWeightKg": 5.21
+  },
+  {
+    "sku": "Medium-angle Reflector for XT52",
+    "manufacturerSku": "AS07060351",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 39.0,
+    "cartonWidthCm": 35.5,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 3.35
+  },
+  {
+    "sku": "Removable Yoke for XT52",
+    "manufacturerSku": "AS07060352",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 76.0,
+    "cartonWidthCm": 29.0,
+    "cartonHeightCm": 60.5,
+    "cartonWeightKg": 13.51
+  },
+  {
+    "sku": "STORM XT52 Control Box Flight Case Kit",
+    "manufacturerSku": "AS010E0375",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 82.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 63.2,
+    "cartonWeightKg": 40.5
+  },
+  {
+    "sku": "STORM XT52 Lamp Head Flight Case Kit",
+    "manufacturerSku": "AS01060376",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 82.5,
+    "cartonWidthCm": 47.0,
+    "cartonHeightCm": 48.0,
+    "cartonWeightKg": 26.0
+  },
+  {
+    "sku": "amaran Peak",
+    "manufacturerSku": "MP0506013X",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 50.0,
+    "cartonWidthCm": 26.0,
+    "cartonHeightCm": 38.5,
+    "cartonWeightKg": 17.43
+  },
+  {
+    "sku": "amaran USB-C to DC (20V Power Adapter Cable)",
+    "manufacturerSku": "MA0506026M",
+    "piecesPerCarton": 54,
+    "cartonLengthCm": 41.5,
+    "cartonWidthCm": 31.5,
+    "cartonHeightCm": 31.5,
+    "cartonWeightKg": 9.64
+  },
+  {
+    "sku": "amaran USB-C Charging Cable (150cm)",
+    "manufacturerSku": "MA0506026N",
+    "piecesPerCarton": 54,
+    "cartonLengthCm": 41.5,
+    "cartonWidthCm": 31.5,
+    "cartonHeightCm": 31.5,
+    "cartonWeightKg": 6.15
+  },
+  {
+    "sku": "amaran Peak Light Stand Clamp",
+    "manufacturerSku": "MA0506026P",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 38.0,
+    "cartonWidthCm": 20.6,
+    "cartonHeightCm": 29.0,
+    "cartonWeightKg": 3.54
+  },
+  {
+    "sku": "amaran Ace E-Lock Adapter (1/4” & 3/8” Screw Compatible)",
+    "manufacturerSku": "MA0506026Q",
+    "piecesPerCarton": 98,
+    "cartonLengthCm": 20.0,
+    "cartonWidthCm": 14.0,
+    "cartonHeightCm": 18.0,
+    "cartonWeightKg": 1.08
+  },
+  {
+    "sku": "STORM 400x (V-Mount) (US)",
+    "manufacturerSku": "AP00339A20",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 67.5,
+    "cartonWidthCm": 32.7,
+    "cartonHeightCm": 30.0,
+    "cartonWeightKg": 14.0
+  },
+  {
+    "sku": "STORM 400x 5pin Extension cable（7.5m）",
+    "manufacturerSku": "AA0706032P",
+    "piecesPerCarton": 14,
+    "cartonLengthCm": 57.0,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 53.5,
+    "cartonWeightKg": 21.37
+  },
+  {
+    "sku": "CF7 Fresnel and Barn Doors Kit",
+    "manufacturerSku": "AP0F055A3A",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 64.5,
+    "cartonWidthCm": 37.3,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 13.56
+  },
+  {
+    "sku": "Aputure Spotlight Mini 19° Lens Kit",
+    "manufacturerSku": "AA0706012E",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 64.5,
+    "cartonWidthCm": 37.3,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 15.36
+  },
+  {
+    "sku": "Aputure Spotlight Mini 36° Lens Kit",
+    "manufacturerSku": "AA0706012F",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 64.5,
+    "cartonWidthCm": 37.3,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 14.62
+  },
+  {
+    "sku": "Aputure Spotlight Mini 19° lens",
+    "manufacturerSku": "AA0706012G",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 64.5,
+    "cartonWidthCm": 37.3,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 17.45
+  },
+  {
+    "sku": "Aputure Spotlight Mini 36° lens",
+    "manufacturerSku": "AA0706012H",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 64.5,
+    "cartonWidthCm": 37.3,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 14.0
+  },
+  {
+    "sku": "Aputure Spotlight Iris (M Size)",
+    "manufacturerSku": "AA0706012U",
+    "piecesPerCarton": 72,
+    "cartonLengthCm": 41.8,
+    "cartonWidthCm": 26.5,
+    "cartonHeightCm": 28.0,
+    "cartonWeightKg": 9.24
+  },
+  {
+    "sku": "NOVA II 2x1 (No Case) (US)",
+    "manufacturerSku": "AP0400040J",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 89.9,
+    "cartonWidthCm": 50.4,
+    "cartonHeightCm": 35.4,
+    "cartonWeightKg": 30.5
+  },
+  {
+    "sku": "NOVA II 1x2 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP04000318",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 96.5,
+    "cartonWidthCm": 70.0,
+    "cartonHeightCm": 39.0,
+    "cartonWeightKg": 41.5
+  },
+  {
+    "sku": "NOVA 2x1 Softbox",
+    "manufacturerSku": "AA0406031Y",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 69.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 47.5,
+    "cartonWeightKg": 12.17
+  },
+  {
+    "sku": "NOVA 2x1 Dome Diffuser",
+    "manufacturerSku": "AA04060422",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 8.79
+  },
+  {
+    "sku": "Space Light 90",
+    "manufacturerSku": "AA04060447",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 13.9
+  },
+  {
+    "sku": "NOVA 2x1 Barn Doors",
+    "manufacturerSku": "AA04060321",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 11.01
+  },
+  {
+    "sku": "NOVA 2x1 Rolling Hard Case",
+    "manufacturerSku": "AA04060322",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 96.5,
+    "cartonWidthCm": 68.5,
+    "cartonHeightCm": 38.7,
+    "cartonWeightKg": 19.0
+  },
+  {
+    "sku": "NOVA 2x1 Flat Diffuser",
+    "manufacturerSku": "AA04060421",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 78.0,
+    "cartonWidthCm": 48.8,
+    "cartonHeightCm": 27.4,
+    "cartonWeightKg": 7.38
+  },
+  {
+    "sku": "NOVA 2x1 Fabric Control Grid",
+    "manufacturerSku": "AA04060423",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 41.5,
+    "cartonWidthCm": 28.6,
+    "cartonHeightCm": 40.5,
+    "cartonWeightKg": 5.9
+  },
+  {
+    "sku": "Dual Quick Release to Truss Clamp Adapter",
+    "manufacturerSku": "AA0406044C",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 50.2,
+    "cartonWidthCm": 30.5,
+    "cartonHeightCm": 30.0,
+    "cartonWeightKg": 13.05
+  },
+  {
+    "sku": "NOVA 2x1 Removable Yoke with Junior Pin",
+    "manufacturerSku": "AA0406044D",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 89.5,
+    "cartonWidthCm": 49.5,
+    "cartonHeightCm": 40.5,
+    "cartonWeightKg": 15.43
+  },
+  {
+    "sku": "NOVA II 1x1 (No Case) (US)",
+    "manufacturerSku": "AP0400040B",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 57.6,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 35.8,
+    "cartonWeightKg": 19.6
+  },
+  {
+    "sku": "NOVA II 1x1 Hard Rolling Case Kit (US)",
+    "manufacturerSku": "AP0400031F",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 67.5,
+    "cartonWidthCm": 70.5,
+    "cartonHeightCm": 39.5,
+    "cartonWeightKg": 28.9
+  },
+  {
+    "sku": "NOVA  1x1 Softbox",
+    "manufacturerSku": "AA0406031X",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 66.2,
+    "cartonWidthCm": 35.0,
+    "cartonHeightCm": 38.0,
+    "cartonWeightKg": 6.55
+  },
+  {
+    "sku": "NOVA 1x1 Barn Doors",
+    "manufacturerSku": "AA04060320",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 16.92
+  },
+  {
+    "sku": "NOVA 1x1 Rolling Hard Case",
+    "manufacturerSku": "AA04060323",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 64.0,
+    "cartonWidthCm": 30.0,
+    "cartonHeightCm": 35.85,
+    "cartonWeightKg": 14.71
+  },
+  {
+    "sku": "NOVA 1x1 Dome Diffuser (Heavy Frost)",
+    "manufacturerSku": "AA04060448",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 12.25
+  },
+  {
+    "sku": "NOVA 1x1 Fabric Control Grid",
+    "manufacturerSku": "AA04060449",
+    "piecesPerCarton": 9,
+    "cartonLengthCm": 46.5,
+    "cartonWidthCm": 45.0,
+    "cartonHeightCm": 21.5,
+    "cartonWeightKg": 5.47
+  },
+  {
+    "sku": "NOVA 1x1 Removable Yoke with Junior Pin",
+    "manufacturerSku": "AA0406044A",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 57.6,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 35.8,
+    "cartonWeightKg": 10.23
+  },
+  {
+    "sku": "NOVA 1x1 Flat Diffuser",
+    "manufacturerSku": "AA0406044F",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 51.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 48.5,
+    "cartonWeightKg": 10.41
+  },
+  {
+    "sku": "NOVA 9° 2x1 (No Case) (US)",
+    "manufacturerSku": "AP0400044P",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 89.9,
+    "cartonWidthCm": 50.4,
+    "cartonHeightCm": 35.4,
+    "cartonWeightKg": 29.77
+  },
+  {
+    "sku": "NOVA 9° 2x1 Rolling Hard Case Kit (US)",
+    "manufacturerSku": "AP0400044V",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 96.5,
+    "cartonWidthCm": 98.5,
+    "cartonHeightCm": 38.7,
+    "cartonWeightKg": 30.5
+  },
+  {
+    "sku": "NOVA 2x1 3-Light Yoke",
+    "manufacturerSku": "AA04060424",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 95.5,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 42.5,
+    "cartonWeightKg": 17.46
+  },
+  {
+    "sku": "RCAC3F-X to Bare Ends AC Power Cable (6m) (20A Max)",
+    "manufacturerSku": "AA04060495",
+    "piecesPerCarton": 14,
+    "cartonLengthCm": 57.0,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 53.5,
+    "cartonWeightKg": 18.41
+  },
+  {
+    "sku": "amaran Ray 60c (US)",
+    "manufacturerSku": "MP0000018A",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 59.5,
+    "cartonWidthCm": 29.0,
+    "cartonHeightCm": 42.6,
+    "cartonWeightKg": 16.7
+  },
+  {
+    "sku": "amaran Ray 120c (US)",
+    "manufacturerSku": "MP0000018G",
+    "piecesPerCarton": 5,
+    "cartonLengthCm": 59.5,
+    "cartonWidthCm": 29.0,
+    "cartonHeightCm": 42.6,
+    "cartonWeightKg": 17.2
+  },
+  {
+    "sku": "amaran Ray 360c (US)",
+    "manufacturerSku": "MP00000191",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 50.5,
+    "cartonWidthCm": 52.0,
+    "cartonHeightCm": 35.8,
+    "cartonWeightKg": 11.5
+  },
+  {
+    "sku": "amaran Ray 660c (US)",
+    "manufacturerSku": "MP00000197",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 61.0,
+    "cartonWidthCm": 61.0,
+    "cartonHeightCm": 35.0,
+    "cartonWeightKg": 17.5
+  },
+  {
+    "sku": "Quick Dome 90",
+    "manufacturerSku": "AA07060382",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 93.5,
+    "cartonWidthCm": 28.0,
+    "cartonHeightCm": 45.5,
+    "cartonWeightKg": 10.1
+  },
+  {
+    "sku": "Quick Dome 60",
+    "manufacturerSku": "AA07060383",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 67.2,
+    "cartonWidthCm": 32.7,
+    "cartonHeightCm": 42.3,
+    "cartonWeightKg": 7.69
+  },
+  {
+    "sku": "Quick Dome 40",
+    "manufacturerSku": "AA07060384",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 47.0,
+    "cartonWidthCm": 37.0,
+    "cartonHeightCm": 46.5,
+    "cartonWeightKg": 7.35
+  },
+  {
+    "sku": "amaran USB-C to 5-Pin DMX In & Out Adapter",
+    "manufacturerSku": "MA0006041R",
+    "piecesPerCarton": 24,
+    "cartonLengthCm": 58.0,
+    "cartonWidthCm": 20.0,
+    "cartonHeightCm": 42.0,
+    "cartonWeightKg": 9.26
+  },
+  {
+    "sku": "amaran Peak 75",
+    "manufacturerSku": "MP0506047V",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 50.0,
+    "cartonWidthCm": 26.0,
+    "cartonHeightCm": 38.5,
+    "cartonWeightKg": 13.6
+  },
+  {
+    "sku": "amaran Mini Reflector",
+    "manufacturerSku": "MA00060401",
+    "piecesPerCarton": 18,
+    "cartonLengthCm": 47.0,
+    "cartonWidthCm": 37.0,
+    "cartonHeightCm": 46.5,
+    "cartonWeightKg": 5.71
+  },
+  {
+    "sku": "amaran Mini Fresnel",
+    "manufacturerSku": "MA00060403",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 56.5,
+    "cartonWidthCm": 31.0,
+    "cartonHeightCm": 53.5,
+    "cartonWeightKg": 12.12
+  },
+  {
+    "sku": "amaran Fresnel",
+    "manufacturerSku": "MA00060404",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 52.5,
+    "cartonWidthCm": 49.5,
+    "cartonHeightCm": 52.5,
+    "cartonWeightKg": 7.74
+  },
+  {
+    "sku": "amaran Reflector",
+    "manufacturerSku": "MA00060402",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 52.0,
+    "cartonWidthCm": 46.0,
+    "cartonHeightCm": 36.0,
+    "cartonWeightKg": 11.4
+  },
+  {
+    "sku": "amaran Ace Lock to Baby Pin Adapter Grip",
+    "manufacturerSku": "MA0006039X",
+    "piecesPerCarton": 32,
+    "cartonLengthCm": 48.5,
+    "cartonWidthCm": 46.5,
+    "cartonHeightCm": 46.0,
+    "cartonWeightKg": 20.11
+  },
+  {
+    "sku": "amaran Ace Lock to Baby Pin Adapter",
+    "manufacturerSku": "MA0006040V",
+    "piecesPerCarton": 10,
+    "cartonLengthCm": 20.0,
+    "cartonWidthCm": 14.0,
+    "cartonHeightCm": 18.0,
+    "cartonWeightKg": 2.41
+  },
+  {
+    "sku": "STORM 700x(US)",
+    "manufacturerSku": "AP0700017R",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 69.5,
+    "cartonWidthCm": 42.5,
+    "cartonHeightCm": 46.5,
+    "cartonWeightKg": 20.55
+  },
+  {
+    "sku": "STORM 700x Skid",
+    "manufacturerSku": "AA07060180",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 68.5,
+    "cartonWidthCm": 48.5,
+    "cartonHeightCm": 45.0,
+    "cartonWeightKg": 16.07
+  },
+  {
+    "sku": "CF10 Fresnel and Barn Doors Kit",
+    "manufacturerSku": "AA0706039T",
+    "piecesPerCarton": 2,
+    "cartonLengthCm": 52.0,
+    "cartonWidthCm": 49.5,
+    "cartonHeightCm": 52.5,
+    "cartonWeightKg": 16.5
+  },
+  {
+    "sku": "STORM 700x 8-pin Lamp Head Cable(15m)",
+    "manufacturerSku": "AA0706039U",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 63.0,
+    "cartonWidthCm": 38.1,
+    "cartonHeightCm": 37.6,
+    "cartonWeightKg": 25.5
+  },
+  {
+    "sku": "BM6825 25° Reflector",
+    "manufacturerSku": "AA0706039V",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 56.5,
+    "cartonWidthCm": 36.0,
+    "cartonHeightCm": 56.0,
+    "cartonWeightKg": 6.43
+  },
+  {
+    "sku": "amaran Halo 60x (US)",
+    "manufacturerSku": "MP00000437",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 60.0,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 38.0,
+    "cartonWeightKg": 12.9
+  },
+  {
+    "sku": "amaran Halo 100x (US)",
+    "manufacturerSku": "MP0000043D",
+    "piecesPerCarton": 8,
+    "cartonLengthCm": 60.0,
+    "cartonWidthCm": 27.0,
+    "cartonHeightCm": 38.0,
+    "cartonWeightKg": 15.0
+  },
+  {
+    "sku": "amaran Halo 200x (US)",
+    "manufacturerSku": "MP0000043K",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 69.0,
+    "cartonWidthCm": 52.0,
+    "cartonHeightCm": 29.0,
+    "cartonWeightKg": 18.7
+  },
+  {
+    "sku": "amaran Halo 300x (US)",
+    "manufacturerSku": "MP0000043R",
+    "piecesPerCarton": 6,
+    "cartonLengthCm": 69.0,
+    "cartonWidthCm": 52.0,
+    "cartonHeightCm": 29.0,
+    "cartonWeightKg": 20.7
+  },
+  {
+    "sku": "amaran Halo 600x (US)",
+    "manufacturerSku": "MP0000043X",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 46.4,
+    "cartonWidthCm": 54.0,
+    "cartonHeightCm": 33.5,
+    "cartonWeightKg": 20.0
+  },
+  {
+    "sku": "Spotlight Mount II 19º Lens Kit",
+    "manufacturerSku": "AP0706019R",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 55.0,
+    "cartonWidthCm": 32.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 11.61
+  },
+  {
+    "sku": "Spotlight Mount II 26º Lens Kit",
+    "manufacturerSku": "AP0706019S",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 55.0,
+    "cartonWidthCm": 32.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 11.18
+  },
+  {
+    "sku": "Spotlight Mount II 36º Lens Kit",
+    "manufacturerSku": "AP0706019T",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 55.0,
+    "cartonWidthCm": 32.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 10.93
+  },
+  {
+    "sku": "Spotlight Mount II 50º Lens Kit",
+    "manufacturerSku": "AP0706025L",
+    "piecesPerCarton": 1,
+    "cartonLengthCm": 55.0,
+    "cartonWidthCm": 32.0,
+    "cartonHeightCm": 39.2,
+    "cartonWeightKg": 11.32
+  },
+  {
+    "sku": "Spotlight Mount II 19° lens",
+    "manufacturerSku": "AP0706019U",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 32.4,
+    "cartonHeightCm": 42.5,
+    "cartonWeightKg": 13.13
+  },
+  {
+    "sku": "Spotlight Mount II 26° lens",
+    "manufacturerSku": "AP0706019V",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 32.4,
+    "cartonHeightCm": 42.5,
+    "cartonWeightKg": 11.54
+  },
+  {
+    "sku": "Spotlight Mount II 36° lens",
+    "manufacturerSku": "AP0706019W",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 45.0,
+    "cartonWidthCm": 32.4,
+    "cartonHeightCm": 42.5,
+    "cartonWeightKg": 10.81
+  },
+  {
+    "sku": "Spotlight Mount II 50° lens",
+    "manufacturerSku": "AA0706025K",
+    "piecesPerCarton": 4,
+    "cartonLengthCm": 40.0,
+    "cartonWidthCm": 32.4,
+    "cartonHeightCm": 42.5,
+    "cartonWeightKg": 11.94
+  },
+  {
+    "sku": "Spotlight Iris (B-Size)",
+    "manufacturerSku": "APJ0118A3D",
+    "piecesPerCarton": 12,
+    "cartonLengthCm": 36.0,
+    "cartonWidthCm": 15.5,
+    "cartonHeightCm": 20.0,
+    "cartonWeightKg": 3.922
+  },
+  {
+    "sku": "Spotlight Mount II 3-Lens Hard Case",
+    "manufacturerSku": "AA0706025N",
+    "piecesPerCarton": 3,
+    "cartonLengthCm": 69.5,
+    "cartonWidthCm": 51.0,
+    "cartonHeightCm": 47.5,
+    "cartonWeightKg": 14.95
+  }
+]
