@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin, LOGOS_BUCKET } from "@/lib/supabase-admin";
+import { withFlash } from "@/lib/flash";
 
 function readSupplierForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -37,7 +38,7 @@ export async function createSupplier(formData: FormData) {
   const values = readSupplierForm(formData);
   const [created] = await db.insert(suppliers).values(values).returning({ id: suppliers.id });
   revalidatePath("/fornecedores");
-  redirect(`/fornecedores/${created.id}`);
+  redirect(withFlash(`/fornecedores/${created.id}`, "Fornecedor cadastrado."));
 }
 
 export async function updateSupplier(id: string, formData: FormData) {
@@ -48,7 +49,7 @@ export async function updateSupplier(id: string, formData: FormData) {
     .where(eq(suppliers.id, id));
   revalidatePath("/fornecedores");
   revalidatePath(`/fornecedores/${id}`);
-  redirect("/fornecedores");
+  redirect(withFlash("/fornecedores", "Alterações salvas."));
 }
 
 export async function uploadSupplierLogo(supplierId: string, formData: FormData) {

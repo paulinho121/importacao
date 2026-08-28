@@ -6,6 +6,7 @@ import { and, eq, ilike, inArray, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
+import { withFlash } from "@/lib/flash";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -44,7 +45,7 @@ export async function createPurchaseOrder(formData: FormData) {
     .returning({ id: purchaseOrders.id });
 
   revalidatePath("/pedidos-compra");
-  redirect(`/pedidos-compra/${created.id}`);
+  redirect(withFlash(`/pedidos-compra/${created.id}`, "Pedido de compra criado."));
 }
 
 export async function updatePurchaseOrder(poId: string, formData: FormData) {
@@ -87,7 +88,7 @@ export async function deletePurchaseOrder(poId: string) {
   await db.delete(purchaseOrders).where(eq(purchaseOrders.id, poId));
 
   revalidatePath("/pedidos-compra");
-  redirect("/pedidos-compra");
+  redirect(withFlash("/pedidos-compra", "Pedido excluído."));
 }
 
 // Busca sob demanda (em vez de mandar o catalogo inteiro do fornecedor pro
@@ -233,5 +234,5 @@ export async function convertToProcess(poId: string, formData: FormData) {
   revalidatePath("/pedidos-compra");
   revalidatePath(`/pedidos-compra/${poId}`);
   revalidatePath("/processos");
-  redirect(`/processos/${createdProcess.id}`);
+  redirect(withFlash(`/processos/${createdProcess.id}`, "Pedido convertido em Processo de Importação."));
 }

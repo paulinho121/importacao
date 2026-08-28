@@ -14,6 +14,7 @@ import {
 import { and, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { withFlash } from "@/lib/flash";
 import {
   STATUS_BY_STEP,
   WORKFLOW_STEPS,
@@ -105,7 +106,7 @@ export async function createProcess(formData: FormData) {
 
   revalidatePath("/processos");
   revalidatePath("/");
-  redirect(`/processos/${created.id}`);
+  redirect(withFlash(`/processos/${created.id}`, "Processo criado."));
 }
 
 export async function updateProcessNumber(processId: string, formData: FormData) {
@@ -332,6 +333,7 @@ export async function abandonProcess(processId: string, formData: FormData) {
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   revalidatePath("/");
+  redirect(withFlash(`/processos/${processId}`, "Processo abandonado."));
 }
 
 export async function addProcessItem(processId: string, formData: FormData) {

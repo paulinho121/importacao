@@ -82,14 +82,16 @@ export default function Header() {
         ))}
       </nav>
 
-      <div className="relative hidden flex-1 max-w-md md:block">
+      <form action="/processos" className="relative hidden flex-1 max-w-md md:block">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Buscar processos, fornecedores..."
+          name="q"
+          placeholder="Buscar processos por número, fornecedor, invoice ou item..."
+          aria-label="Buscar processos"
           className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-on-surface placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
-      </div>
+      </form>
 
       <div className="ml-auto flex items-center gap-1.5">
         <button

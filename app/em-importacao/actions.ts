@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase-server";
 import { EXTERNAL_IMPORT_ITEM_INACTIVE_STATUSES } from "@/lib/status";
+import { withFlash } from "@/lib/flash";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -47,7 +48,7 @@ export async function createExternalImportItem(formData: FormData) {
     .values({ ...values, createdByUserId: user?.id ?? null })
     .returning({ id: externalImportItems.id });
   revalidatePath("/em-importacao");
-  redirect(`/em-importacao/${created.id}`);
+  redirect(withFlash(`/em-importacao/${created.id}`, "Item cadastrado."));
 }
 
 export async function updateExternalImportItem(id: string, formData: FormData) {
@@ -58,13 +59,13 @@ export async function updateExternalImportItem(id: string, formData: FormData) {
     .where(eq(externalImportItems.id, id));
   revalidatePath("/em-importacao");
   revalidatePath(`/em-importacao/${id}`);
-  redirect("/em-importacao");
+  redirect(withFlash("/em-importacao", "Alterações salvas."));
 }
 
 export async function deleteExternalImportItem(id: string) {
   await db.delete(externalImportItems).where(eq(externalImportItems.id, id));
   revalidatePath("/em-importacao");
-  redirect("/em-importacao");
+  redirect(withFlash("/em-importacao", "Item excluído."));
 }
 
 // Usado pelo formulário de item do pedido de compra: ao escolher um

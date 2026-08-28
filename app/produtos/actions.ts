@@ -5,6 +5,7 @@ import { products, productPriceTiers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { withFlash } from "@/lib/flash";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -65,7 +66,7 @@ export async function createProduct(formData: FormData) {
   const values = readProductForm(formData);
   const [created] = await db.insert(products).values(values).returning({ id: products.id });
   revalidatePath("/produtos");
-  redirect(`/produtos/${created.id}`);
+  redirect(withFlash(`/produtos/${created.id}`, "Produto cadastrado."));
 }
 
 export async function updateProduct(id: string, formData: FormData) {
@@ -76,7 +77,7 @@ export async function updateProduct(id: string, formData: FormData) {
     .where(eq(products.id, id));
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
-  redirect("/produtos");
+  redirect(withFlash("/produtos", "Alterações salvas."));
 }
 
 export async function resolveNcmDivergence(id: string, formData: FormData) {

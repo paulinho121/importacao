@@ -8,6 +8,8 @@ import { LayoutDashboard, PackageSearch, Boxes, Building2, Users } from "lucide-
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import PageTransition from "@/components/layout/PageTransition";
+import FlashToast from "@/components/layout/FlashToast";
+import { Toaster } from "@/components/ui/sonner";
 import { CurrentUserProvider } from "@/lib/use-current-user";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <CurrentUserProvider>
       <MotionConfig reducedMotion="user" transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}>
+        <Toaster position="top-right" richColors />
+        <Suspense fallback={null}>
+          <FlashToast />
+        </Suspense>
         <div className="flex min-h-screen bg-background">
           <Suspense fallback={null}>
             <Sidebar />

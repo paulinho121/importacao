@@ -5,6 +5,7 @@ import { freightAgents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { withFlash } from "@/lib/flash";
 
 function readAgentForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -24,7 +25,7 @@ export async function createAgent(formData: FormData) {
   const values = readAgentForm(formData);
   const [created] = await db.insert(freightAgents).values(values).returning({ id: freightAgents.id });
   revalidatePath("/agentes");
-  redirect(`/agentes/${created.id}`);
+  redirect(withFlash(`/agentes/${created.id}`, "Agente de carga cadastrado."));
 }
 
 export async function updateAgent(id: string, formData: FormData) {
@@ -35,5 +36,5 @@ export async function updateAgent(id: string, formData: FormData) {
     .where(eq(freightAgents.id, id));
   revalidatePath("/agentes");
   revalidatePath(`/agentes/${id}`);
-  redirect("/agentes");
+  redirect(withFlash("/agentes", "Alterações salvas."));
 }
