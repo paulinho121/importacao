@@ -2,7 +2,7 @@ import Link from "next/link";
 import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import { db } from "@/db/client";
 import { purchaseOrders, suppliers, purchaseOrderItems } from "@/db/schema";
-import { eq, ilike, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, sql } from "drizzle-orm";
 import {
   PURCHASE_ORDER_STATUS_LABEL,
   PURCHASE_ORDER_STATUS_BADGE_CLASS,
@@ -16,9 +16,15 @@ export const dynamic = "force-dynamic";
 export default async function PedidosCompraPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; abertos?: string }>;
 }) {
-  const { q = "" } = await searchParams;
+  const { q = "", abertos = "" } = await searchParams;
+  const onlyAbertos = abertos === "1";
+
+  const conditions = [
+    q ? ilike(purchaseOrders.poNumber, `%${q}%`) : undefined,
+    onlyAbertos ? inArray(purchaseOrders.status, ["RASCUNHO", "ENVIADO"]) : undefined,
+  ].filter((c) => c !== undefined);
 
   const rows = await db
     .select({
@@ -36,7 +42,7 @@ export default async function PedidosCompraPage({
     .from(purchaseOrders)
     .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
     .leftJoin(purchaseOrderItems, eq(purchaseOrderItems.purchaseOrderId, purchaseOrders.id))
-    .where(q ? ilike(purchaseOrders.poNumber, `%${q}%`) : undefined)
+    .where(conditions.length ? and(...conditions) : undefined)
     .groupBy(purchaseOrders.id, suppliers.name)
     .orderBy(purchaseOrders.createdAt);
 
@@ -59,7 +65,18 @@ export default async function PedidosCompraPage({
         </Link>
       </div>
 
+      {onlyAbertos && (
+        <Link
+          href={q ? `/pedidos-compra?q=${encodeURIComponent(q)}` : "/pedidos-compra"}
+          className="inline-flex w-fit items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border bg-secondary/10 text-secondary border-secondary/30 hover:bg-secondary/20 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+          Filtrando: pedidos em aberto (Rascunho + Enviado) — ver todos
+        </Link>
+      )}
+
       <form action="/pedidos-compra" className="relative max-w-md">
+        {onlyAbertos && <input type="hidden" name="abertos" value="1" />}
         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
           search
         </span>
@@ -91,7 +108,11 @@ export default async function PedidosCompraPage({
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-6 py-6 text-on-surface-variant text-center">
-                    {q ? "Nenhum pedido encontrado para essa busca." : "Nenhum pedido de compra criado ainda."}
+                    {q
+                      ? "Nenhum pedido encontrado para essa busca."
+                      : onlyAbertos
+                        ? "Nenhum pedido em aberto no momento."
+                        : "Nenhum pedido de compra criado ainda."}
                   </td>
                 </tr>
               )}

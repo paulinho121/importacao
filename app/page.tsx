@@ -10,6 +10,7 @@ import { AreaChartCard } from "@/components/charts/AreaChartCard";
 import { BarChartCard } from "@/components/charts/BarChartCard";
 import { getDashboardMetrics } from "@/lib/dashboard-metrics";
 import {
+  ClipboardList,
   PackageSearch,
   Ship,
   CheckCircle2,
@@ -37,6 +38,15 @@ export default async function DashboardPage() {
       <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
 
       <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
+        <KpiCard
+          icon={<ClipboardList className="h-4 w-4" />}
+          label="Pedidos em Aberto"
+          value={String(metrics.kpis.pedidosAbertos.value)}
+          trend={metrics.kpis.pedidosAbertos.trend}
+          sparklineData={metrics.kpis.pedidosAbertos.sparkline}
+          accent="var(--chart-2)"
+          href="/pedidos-compra?abertos=1"
+        />
         <KpiCard
           icon={<PackageSearch className="h-4 w-4" />}
           label="Processos Ativos"

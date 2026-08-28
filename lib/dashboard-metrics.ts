@@ -9,6 +9,7 @@ import {
   processInvoices,
   processLpcos,
   products,
+  purchaseOrders,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
@@ -65,7 +66,8 @@ function buildTrend(dates: Date[], { invert = false }: { invert?: boolean } = {}
 }
 
 export async function getDashboardMetrics() {
-  const [processRows, itemRows, docRows, eventRows, invoiceRows, lpcoRows, ncmDivergentRows] = await Promise.all([
+  const [processRows, itemRows, docRows, eventRows, invoiceRows, lpcoRows, ncmDivergentRows, purchaseOrderRows] =
+    await Promise.all([
     db
       .select({
         id: processes.id,
@@ -135,6 +137,13 @@ export async function getDashboardMetrics() {
       .from(products)
       .where(eq(products.ncmDivergent, true))
       .orderBy(products.sku),
+    db
+      .select({
+        id: purchaseOrders.id,
+        status: purchaseOrders.status,
+        createdAt: purchaseOrders.createdAt,
+      })
+      .from(purchaseOrders),
   ]);
 
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO" && p.status !== "ABANDONADO");
@@ -187,6 +196,11 @@ export async function getDashboardMetrics() {
   const uploadDates = docRows.filter((d) => d.uploadedAt).map((d) => new Date(d.uploadedAt as unknown as string));
   const itemDates = itensAtivos.map((i) => new Date(i.createdAt));
 
+  // Rascunho/Enviado = pedido ainda não confirmado pelo fornecedor,
+  // precisa de acompanhamento — ver app/pedidos-compra?abertos=1.
+  const pedidosAbertos = purchaseOrderRows.filter((po) => po.status === "RASCUNHO" || po.status === "ENVIADO");
+  const pedidosAbertosDates = pedidosAbertos.map((po) => new Date(po.createdAt));
+
   const kpis = {
     processosAtivos: {
       value: ativos.length,
@@ -227,6 +241,11 @@ export async function getDashboardMetrics() {
       value: cifTotalBRL,
       trend: buildTrend(financialCompleteDates),
       sparkline: dailySeries(financialCompleteDates, 14),
+    },
+    pedidosAbertos: {
+      value: pedidosAbertos.length,
+      trend: buildTrend(pedidosAbertosDates),
+      sparkline: dailySeries(pedidosAbertosDates, 14),
     },
   };
 
