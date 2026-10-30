@@ -1,3 +1,4 @@
+import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import SupplierLogo from "@/components/SupplierLogo";
@@ -7,7 +8,6 @@ import { db } from "@/db/client";
 import { processes, suppliers, freightAgents, processItems, processInvoices } from "@/db/schema";
 import { and, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { formatDate, type ProcessStatus } from "@/lib/status";
-import { locationLabel } from "@/lib/locations";
 import { MODAIS } from "@/lib/modais";
 
 export const dynamic = "force-dynamic";
@@ -87,6 +87,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
         destinationCode: processes.destinationCode,
         destinationCity: processes.destinationCity,
         destinationState: processes.destinationState,
+        destinationBranch: processes.destinationBranch,
         supplierName: suppliers.name,
         supplierLogoUrl: suppliers.logoUrl,
         agentName: freightAgents.name,
@@ -257,7 +258,8 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
               <TableHead>ETD</TableHead>
               <TableHead>ETA</TableHead>
               <TableHead>Fechamento</TableHead>
-              <TableHead>Destino</TableHead>
+              <TableHead>Desembarque</TableHead>
+              <TableHead>Filial destino</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Itens</TableHead>
             </TableRow>
@@ -265,7 +267,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
           <TableBody>
             {rows.length === 0 && (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
                   {hasFilters ? "Nenhum processo encerrado com esses filtros." : "Nenhum processo encerrado ainda."}
                 </TableCell>
               </TableRow>
@@ -282,7 +284,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
                 </TableCell>
                 <TableCell>
                   <Link href={`/processos/${p.id}`} className="flex items-center gap-2 whitespace-nowrap">
-                    <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={22} />
+                    <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={32} />
                     <span className="text-sm">{p.supplierName}</span>
                   </Link>
                 </TableCell>
@@ -291,11 +293,8 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etd)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etaEstimated)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.closedAt)}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {p.destinationCode
-                    ? locationLabel(p.destinationCode, p.destinationCity ?? "", p.destinationState ?? "")
-                    : (p.destination ?? "—")}
-                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">{landingLabel(p)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{branchLabel(p.destinationBranch)}</TableCell>
                 <TableCell>
                   <StatusBadge status={p.status as ProcessStatus} />
                 </TableCell>

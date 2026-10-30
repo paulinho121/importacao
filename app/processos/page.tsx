@@ -1,3 +1,4 @@
+import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -126,6 +127,11 @@ export default async function ProcessosPage({
       modal: processes.modal,
       etd: processes.etd,
       etaEstimated: processes.etaEstimated,
+      destination: processes.destination,
+      destinationCode: processes.destinationCode,
+      destinationCity: processes.destinationCity,
+      destinationState: processes.destinationState,
+      destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
       supplierName: suppliers.name,
       supplierLogoUrl: suppliers.logoUrl,
@@ -280,6 +286,8 @@ export default async function ProcessosPage({
                 <TableHead>Modal</TableHead>
                 <TableHead>ETD</TableHead>
                 <TableHead>ETA</TableHead>
+                <TableHead>Desembarque</TableHead>
+                <TableHead>Filial destino</TableHead>
                 <TableHead>Progresso</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Itens</TableHead>
@@ -297,13 +305,15 @@ export default async function ProcessosPage({
                         </TableCell>
                         <TableCell>
                           <Link href={`/processos/${p.id}`} className="flex items-center gap-2">
-                            <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={22} />
+                            <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={32} />
                             <span className="text-sm">{p.supplierName}</span>
                           </Link>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{landingLabel(p)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{branchLabel(p.destinationBranch)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">

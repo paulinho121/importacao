@@ -27,7 +27,7 @@ const columns: ColumnDef<Row>[] = [
     header: "Fornecedor",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <SupplierLogo logoUrl={row.original.supplierLogoUrl} name={row.original.supplierName} size={22} />
+        <SupplierLogo logoUrl={row.original.supplierLogoUrl} name={row.original.supplierName} size={32} />
         <span className="text-sm">{row.original.supplierName}</span>
       </div>
     ),

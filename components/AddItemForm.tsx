@@ -3,18 +3,37 @@
 import { useEffect, useRef, useState } from "react";
 import { searchProductsForProcess } from "@/app/processos/actions";
 
-type Product = { id: string; sku: string; manufacturerSku: string | null; description: string };
+type Product = {
+  id: string;
+  sku: string;
+  manufacturerSku: string | null;
+  description: string;
+  licenseStatus: string | null;
+  licenseNumber: string | null;
+};
+
+export type InvoiceOption = { id: string; invoiceNumber: string };
 
 const INPUT_CLASS =
   "bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
 
-export default function AddItemForm({ action }: { action: (formData: FormData) => void }) {
+export default function AddItemForm({
+  action,
+  invoices = [],
+}: {
+  action: (formData: FormData) => void;
+  invoices?: InvoiceOption[];
+}) {
   const [mode, setMode] = useState<"catalogo" | "avulso">("catalogo");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  // LPCO do item: ao escolher um produto do catálogo, já vem preenchido com
+  // o que está cadastrado nele (dá pra ajustar antes de adicionar).
+  const [lpcoPublic, setLpcoPublic] = useState("");
+  const [lpcoNumber, setLpcoNumber] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const requestIdRef = useRef(0);
@@ -39,6 +58,8 @@ export default function AddItemForm({ action }: { action: (formData: FormData) =
   function selectProduct(p: Product) {
     setSelected(p);
     setSearch(`${p.sku} — ${p.description}`);
+    setLpcoPublic(p.licenseStatus === "EM_CONSULTA_PUBLICA" ? "sim" : "");
+    setLpcoNumber(p.licenseNumber ?? "");
     setOpen(false);
   }
 
@@ -65,6 +86,8 @@ export default function AddItemForm({ action }: { action: (formData: FormData) =
           setSearch("");
           setSelected(null);
           setResults([]);
+          setLpcoPublic("");
+          setLpcoNumber("");
         }, 0);
       }}
     >
@@ -84,6 +107,15 @@ export default function AddItemForm({ action }: { action: (formData: FormData) =
           </button>
         ))}
       </div>
+
+      <select className={`w-full appearance-none ${INPUT_CLASS}`} name="invoiceId" defaultValue="" aria-label="Invoice">
+        <option value="">Invoice (opcional)</option>
+        {invoices.map((inv) => (
+          <option key={inv.id} value={inv.id}>
+            Invoice {inv.invoiceNumber}
+          </option>
+        ))}
+      </select>
 
       {mode === "catalogo" ? (
         <div className="relative">
@@ -187,6 +219,38 @@ export default function AddItemForm({ action }: { action: (formData: FormData) =
         <input className={INPUT_CLASS} placeholder="Quantidade" type="number" step="0.01" name="quantity" />
         <input
           className={INPUT_CLASS}
+          placeholder="Valor unitário"
+          type="number"
+          step="0.01"
+          name="unitValueOverride"
+          aria-label="Valor unitário"
+        />
+        <select className={`appearance-none ${INPUT_CLASS}`} name="exchangeCoverage" defaultValue="" aria-label="Cobertura cambial">
+          <option value="">Cobertura cambial?</option>
+          <option value="sim">Cobertura cambial: Sim</option>
+          <option value="nao">Cobertura cambial: Não</option>
+        </select>
+        <select
+          className={`appearance-none ${INPUT_CLASS}`}
+          name="lpcoPublicConsultation"
+          value={lpcoPublic}
+          onChange={(e) => setLpcoPublic(e.target.value)}
+          aria-label="LPCO em consulta pública"
+        >
+          <option value="">LPCO em consulta pública?</option>
+          <option value="sim">LPCO consulta pública: Sim</option>
+          <option value="nao">LPCO consulta pública: Não</option>
+        </select>
+        <input
+          className={`col-span-2 font-mono-data ${INPUT_CLASS}`}
+          placeholder="LPCO do item (nº)"
+          type="text"
+          name="lpcoNumber"
+          value={lpcoNumber}
+          onChange={(e) => setLpcoNumber(e.target.value)}
+        />
+        <input
+          className={`col-span-2 ${INPUT_CLASS}`}
           placeholder="Reservado para (opcional)"
           type="text"
           name="reservedTo"

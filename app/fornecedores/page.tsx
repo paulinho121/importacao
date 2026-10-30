@@ -69,7 +69,7 @@ export default async function FornecedoresPage() {
                       href={`/fornecedores/${s.id}`}
                       className="flex items-center gap-3 text-secondary hover:underline"
                     >
-                      <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={28} />
+                      <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={40} />
                       {s.name}
                     </Link>
                   </td>

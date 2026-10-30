@@ -1,5 +1,5 @@
 import { updateProcessDetails } from "@/app/processos/actions";
-import { LOCATIONS, locationLabel } from "@/lib/locations";
+import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
 import { MODAIS } from "@/lib/modais";
 
 const INPUT_CLASS =
@@ -16,6 +16,7 @@ export type ProcessEditDefaults = {
   destinationCode: string | null;
   destinationCity: string | null;
   destinationState: string | null;
+  destinationBranch: string | null;
   weightKg: string | null;
   volumeM3: string | null;
   notes: string | null;
@@ -34,7 +35,7 @@ export default function ProcessEditDetails({
 
   // Destino atual no formato do <select> ("CODE|Cidade|UF"); se o processo
   // tem destino que não está na lista conhecida, cai em "Outro".
-  const knownLocation = LOCATIONS.find((l) => l.code === defaults.destinationCode);
+  const knownLocation = LANDING_LOCATIONS.find((l) => l.code === defaults.destinationCode);
   const locationValue = knownLocation
     ? `${knownLocation.code}|${knownLocation.city}|${knownLocation.state}`
     : defaults.destination || defaults.destinationCode
@@ -89,10 +90,10 @@ export default function ProcessEditDetails({
           <input className={INPUT_CLASS} type="date" name="etaActual" defaultValue={defaults.etaActual ?? ""} />
         </div>
         <div>
-          <label className={LABEL_CLASS}>Destino</label>
+          <label className={LABEL_CLASS}>Local de desembarque</label>
           <select className={`${INPUT_CLASS} appearance-none`} name="locationChoice" defaultValue={locationValue}>
-            <option value="">Sem destino</option>
-            {LOCATIONS.map((loc) => (
+            <option value="">Sem local</option>
+            {LANDING_LOCATIONS.map((loc) => (
               <option key={loc.code} value={`${loc.code}|${loc.city}|${loc.state}`}>
                 {locationLabel(loc.code, loc.city, loc.state)}
               </option>
@@ -100,8 +101,19 @@ export default function ProcessEditDetails({
             <option value="OUTRO">Outro (descrever abaixo)</option>
           </select>
         </div>
+        <div>
+          <label className={LABEL_CLASS}>Filial de destino</label>
+          <select className={`${INPUT_CLASS} appearance-none`} name="destinationBranch" defaultValue={defaults.destinationBranch ?? ""}>
+            <option value="">Sem filial</option>
+            {BRANCHES.map((b) => (
+              <option key={b.code} value={b.code}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="sm:col-span-2">
-          <label className={LABEL_CLASS}>Destino fora da lista (só se escolheu &quot;Outro&quot;)</label>
+          <label className={LABEL_CLASS}>Local fora da lista (só se escolheu &quot;Outro&quot;)</label>
           <input
             className={INPUT_CLASS}
             type="text"

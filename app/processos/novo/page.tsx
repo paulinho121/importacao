@@ -2,7 +2,7 @@ import { createProcess } from "@/app/processos/actions";
 import { db } from "@/db/client";
 import { suppliers, processes, freightAgents } from "@/db/schema";
 import { sql } from "drizzle-orm";
-import { LOCATIONS, locationLabel } from "@/lib/locations";
+import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
 import { MODAIS } from "@/lib/modais";
 
 export const dynamic = "force-dynamic";
@@ -156,7 +156,7 @@ export default async function NovoProcessoPage() {
             </div>
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Destino (porto/aeroporto conhecido)
+                Local de desembarque (porto/aeroporto)
               </label>
               <select
                 className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
@@ -164,7 +164,7 @@ export default async function NovoProcessoPage() {
                 defaultValue=""
               >
                 <option value="">Selecione (opcional)</option>
-                {LOCATIONS.map((loc) => (
+                {LANDING_LOCATIONS.map((loc) => (
                   <option key={loc.code} value={`${loc.code}|${loc.city}|${loc.state}`}>
                     {locationLabel(loc.code, loc.city, loc.state)}
                   </option>
@@ -174,7 +174,24 @@ export default async function NovoProcessoPage() {
             </div>
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Destino (se não estiver na lista)
+                Filial de destino
+              </label>
+              <select
+                className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+                name="destinationBranch"
+                defaultValue=""
+              >
+                <option value="">Selecione (opcional)</option>
+                {BRANCHES.map((b) => (
+                  <option key={b.code} value={b.code}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+                Local de desembarque (se não estiver na lista)
               </label>
               <input
                 className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"

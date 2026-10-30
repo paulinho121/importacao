@@ -1,3 +1,4 @@
+import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -39,7 +40,6 @@ import {
   stockStatus,
   type ProcessStatus,
 } from "@/lib/status";
-import { locationLabel } from "@/lib/locations";
 import {
   advanceProcessStep,
   updateProcessStatus,
@@ -90,6 +90,7 @@ export default async function ProcessDetailPage({
       destinationCode: processes.destinationCode,
       destinationCity: processes.destinationCity,
       destinationState: processes.destinationState,
+      destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,
@@ -136,6 +137,10 @@ export default async function ProcessDetailPage({
         quantity: processItems.quantity,
         unitValueOverride: processItems.unitValueOverride,
         reservedTo: processItems.reservedTo,
+        invoiceId: processItems.invoiceId,
+        exchangeCoverage: processItems.exchangeCoverage,
+        lpcoPublicConsultation: processItems.lpcoPublicConsultation,
+        lpcoNumber: processItems.lpcoNumber,
         productCostPrice: products.costPrice,
         productTaxRateII: products.taxRateII,
         productTaxRateIPI: products.taxRateIPI,
@@ -226,9 +231,7 @@ export default async function ProcessDetailPage({
           payablesBRL,
         })
       : null;
-  const destinationLabel = process.destinationCode
-    ? locationLabel(process.destinationCode, process.destinationCity ?? "", process.destinationState ?? "")
-    : process.destination;
+  const destinationLabel = landingLabel(process);
   const nextStepLabel =
     process.currentStep < WORKFLOW_STEPS.length ? WORKFLOW_STEPS[process.currentStep] : null;
 
@@ -304,11 +307,12 @@ export default async function ProcessDetailPage({
             <SupplierLogo
               logoUrl={process.supplierLogoUrl}
               name={process.supplierName}
-              size={20}
+              size={32}
             />
             Fornecedor: {process.supplierName}
             {process.externalReference ? ` · Ref: ${process.externalReference}` : ""}
-            {destinationLabel ? ` · Destino: ${destinationLabel}` : ""}
+            {destinationLabel !== "—" ? ` · Desembarque: ${destinationLabel}` : ""}
+            {process.destinationBranch ? ` · Filial: ${branchLabel(process.destinationBranch)}` : ""}
           </p>
         </div>
         <div className="lg:col-span-4 flex flex-col items-start gap-2 lg:items-end">
@@ -426,7 +430,8 @@ export default async function ProcessDetailPage({
                 />
                 <Field label="ETA Real" value={formatDate(process.etaActual)} />
                 <Field label="Agente" value={process.agentName ?? "—"} />
-                <Field label="Destino" value={destinationLabel ?? process.destination ?? "—"} />
+                <Field label="Local de desembarque" value={landingLabel(process)} />
+                <Field label="Filial de destino" value={branchLabel(process.destinationBranch)} />
                 <Field label="Peso" value={process.weightKg ? `${process.weightKg} kg` : "—"} />
                 <Field label="Volume" value={process.volumeM3 ? `${process.volumeM3} m³` : "—"} />
               </dl>
@@ -444,6 +449,7 @@ export default async function ProcessDetailPage({
                   destinationCode: process.destinationCode,
                   destinationCity: process.destinationCity,
                   destinationState: process.destinationState,
+                  destinationBranch: process.destinationBranch,
                   weightKg: process.weightKg,
                   volumeM3: process.volumeM3,
                   notes: process.notes,
@@ -551,6 +557,20 @@ export default async function ProcessDetailPage({
                                 Reserva (planilha): {item.reservedTo}
                               </p>
                             )}
+                            <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-on-surface-variant">
+                              {item.invoiceId && (
+                                <span>
+                                  Invoice: {invoices.find((inv) => inv.id === item.invoiceId)?.invoiceNumber ?? "—"}
+                                </span>
+                              )}
+                              {item.exchangeCoverage !== null && (
+                                <span>Cobertura cambial: {item.exchangeCoverage ? "Sim" : "Não"}</span>
+                              )}
+                              {item.lpcoPublicConsultation !== null && (
+                                <span>LPCO consulta pública: {item.lpcoPublicConsultation ? "Sim" : "Não"}</span>
+                              )}
+                              {item.lpcoNumber && <span>LPCO: {item.lpcoNumber}</span>}
+                            </p>
                           </div>
                           <span className="font-bold text-primary shrink-0">{total || "—"}</span>
                         </div>
@@ -621,6 +641,49 @@ export default async function ProcessDetailPage({
                               defaultValue={item.reservedTo ?? ""}
                               placeholder="Reserva (planilha)"
                               aria-label="Reserva"
+                            />
+                            <select
+                              className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                              name="invoiceId"
+                              defaultValue={item.invoiceId ?? ""}
+                              aria-label="Invoice"
+                            >
+                              <option value="">Sem invoice</option>
+                              {invoices.map((inv) => (
+                                <option key={inv.id} value={inv.id}>
+                                  Invoice {inv.invoiceNumber}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                              name="exchangeCoverage"
+                              defaultValue={item.exchangeCoverage === null ? "" : item.exchangeCoverage ? "sim" : "nao"}
+                              aria-label="Cobertura cambial"
+                            >
+                              <option value="">Cobertura cambial?</option>
+                              <option value="sim">Cobertura cambial: Sim</option>
+                              <option value="nao">Cobertura cambial: Não</option>
+                            </select>
+                            <select
+                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                              name="lpcoPublicConsultation"
+                              defaultValue={
+                                item.lpcoPublicConsultation === null ? "" : item.lpcoPublicConsultation ? "sim" : "nao"
+                              }
+                              aria-label="LPCO em consulta pública"
+                            >
+                              <option value="">LPCO consulta pública?</option>
+                              <option value="sim">LPCO consulta pública: Sim</option>
+                              <option value="nao">LPCO consulta pública: Não</option>
+                            </select>
+                            <input
+                              className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs font-mono-data focus:outline-none focus:border-secondary transition-all"
+                              type="text"
+                              name="lpcoNumber"
+                              defaultValue={item.lpcoNumber ?? ""}
+                              placeholder="LPCO do item (nº)"
+                              aria-label="LPCO do item"
                             />
                             <button
                               type="submit"
@@ -693,7 +756,10 @@ export default async function ProcessDetailPage({
                   })}
                 </ul>
               )}
-              <AddItemForm action={boundAddItem} />
+              <AddItemForm
+                action={boundAddItem}
+                invoices={invoices.map((inv) => ({ id: inv.id, invoiceNumber: inv.invoiceNumber }))}
+              />
             </section>
           </div>
 

@@ -8,6 +8,7 @@ import {
   date,
   timestamp,
   boolean,
+  unique,
 } from "drizzle-orm/pg-core";
 
 // SEA_BREAK_BULK/SEA_RORO adicionados para cobrir os tipos de embarque
@@ -278,6 +279,10 @@ export const processes = pgTable("processes", {
   destinationCode: text("destination_code"),
   destinationCity: text("destination_city"),
   destinationState: text("destination_state"),
+  // Filial MCI que recebe a carga no fim ("SP" | "SC", ver BRANCHES em
+  // lib/locations.ts). `destination*` acima passou a ser o local de
+  // desembarque (porto/aeroporto).
+  destinationBranch: text("destination_branch"),
   status: processStatusEnum("status").notNull().default("AGUARDANDO_EMBARQUE"),
   currentStep: integer("current_step").notNull().default(1),
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
@@ -625,6 +630,14 @@ export const processItems = pgTable("process_items", {
   // Reservas novas usam itemReservations abaixo (permite múltiplas pessoas
   // reservando quantidades parciais do mesmo item, com disponível calculado).
   reservedTo: text("reserved_to"),
+  // Invoice (do próprio processo) em que o item vem — vazio = não informada.
+  invoiceId: uuid("invoice_id").references(() => processInvoices.id, { onDelete: "set null" }),
+  // Cobertura cambial do item (sim/não); null = ainda não informado.
+  exchangeCoverage: boolean("exchange_coverage"),
+  // O produto está com LPCO em consulta pública? null = não informado.
+  lpcoPublicConsultation: boolean("lpco_public_consultation"),
+  // Nº do LPCO deste item (pode diferir do cadastro do produto).
+  lpcoNumber: text("lpco_number"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -674,3 +687,40 @@ export const processDocuments = pgTable("process_documents", {
   status: documentStatusEnum("status").notNull().default("PENDING"),
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }),
 });
+
+// Tipos de embarque (aba "Tipo de Embarques" da planilha FLUXOGRAMA DE
+// IMPORTAÇÃO): modalidade + tipo + descrição. `modalCode` aponta pro valor
+// do enum `modal` que o app usa nos processos (vários tipos de FCL 20'/40'
+// caem no mesmo SEA_FCL); processes.container_type guarda o nome do tipo.
+export const shipmentTypes = pgTable(
+  "shipment_types",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    modality: text("modality").notNull(), // MARITIMO | AEREO | TERRESTRE
+    name: text("name").notNull(),
+    description: text("description"),
+    modalCode: text("modal_code"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+  },
+  (t) => [unique("shipment_types_modality_name_unique").on(t.modality, t.name)],
+);
+
+// Locais de desembarque/entrega da planilha: portos, aeroportos, terminais
+// terrestres e as filiais MCI. O mesmo código pode existir em tipos
+// diferentes (ex: NVT = aeroporto e terminal de Navegantes), por isso a
+// unicidade é (code, kind).
+export const locations = pgTable(
+  "locations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: text("code").notNull(),
+    kind: text("kind").notNull(), // PORTO | AEROPORTO | TERMINAL | FILIAL
+    name: text("name").notNull(),
+    city: text("city"),
+    state: text("state"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+  },
+  (t) => [unique("locations_code_kind_unique").on(t.code, t.kind)],
+);

@@ -5,6 +5,7 @@ import { updateSupplier, uploadSupplierLogo } from "@/app/fornecedores/actions";
 import { db } from "@/db/client";
 import { suppliers } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,16 @@ export default async function EditFornecedorPage({
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
+      <Link
+        href="/fornecedores"
+        className="mb-6 flex w-fit items-center gap-2 text-secondary font-semibold hover:underline group"
+      >
+        <span className="material-symbols-outlined transition-transform group-hover:-translate-x-1">
+          arrow_back
+        </span>
+        <span className="font-label-md text-label-md">VOLTAR PARA FORNECEDORES</span>
+      </Link>
+
       <div className="mb-8">
         <h2 className="font-display-lg text-display-lg text-primary">{supplier.name}</h2>
         <p className="text-on-surface-variant font-body-md text-body-md mt-1">
@@ -32,8 +43,8 @@ export default async function EditFornecedorPage({
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 mb-6">
         <h3 className="font-headline-sm text-headline-sm text-primary mb-4">Logo da Marca</h3>
-        <div className="flex items-center gap-6">
-          <SupplierLogo logoUrl={supplier.logoUrl} name={supplier.name} size={64} />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+          <SupplierLogo logoUrl={supplier.logoUrl} name={supplier.name} size={96} />
           <form action={boundUploadLogo} className="flex-1 flex flex-col sm:flex-row gap-3">
             <input
               type="file"

@@ -40,6 +40,25 @@ function optionalNumber(formData: FormData, key: string) {
   return raw ? raw : null;
 }
 
+// Campo sim/não de <select> ("sim" | "nao" | vazio = não informado).
+function optionalBool(formData: FormData, key: string): boolean | null {
+  const raw = String(formData.get(key) ?? "").trim();
+  if (raw === "sim") return true;
+  if (raw === "nao") return false;
+  return null;
+}
+
+// A invoice do item precisa ser do mesmo processo.
+async function validInvoiceId(processId: string, invoiceId: string | null) {
+  if (!invoiceId) return null;
+  const [inv] = await db
+    .select({ id: processInvoices.id })
+    .from(processInvoices)
+    .where(and(eq(processInvoices.id, invoiceId), eq(processInvoices.processId, processId)));
+  if (!inv) throw new Error("Invoice não pertence a este processo.");
+  return inv.id;
+}
+
 export async function createProcess(formData: FormData) {
   const processNumber = String(formData.get("processNumber") ?? "").trim();
   const supplierId = String(formData.get("supplierId") ?? "").trim();
@@ -79,6 +98,7 @@ export async function createProcess(formData: FormData) {
       destinationCode,
       destinationCity,
       destinationState,
+      destinationBranch: optionalText(formData, "destinationBranch"),
       weightKg: optionalNumber(formData, "weightKg"),
       volumeM3: optionalNumber(formData, "volumeM3"),
       notes: optionalText(formData, "notes"),
@@ -411,6 +431,13 @@ export async function addProcessItem(processId: string, formData: FormData) {
   const productId = optionalText(formData, "productId");
   const quantity = optionalNumber(formData, "quantity");
   const reservedTo = optionalText(formData, "reservedTo");
+  const itemFields = {
+    invoiceId: await validInvoiceId(processId, optionalText(formData, "invoiceId")),
+    exchangeCoverage: optionalBool(formData, "exchangeCoverage"),
+    unitValueOverride: optionalNumber(formData, "unitValueOverride"),
+    lpcoPublicConsultation: optionalBool(formData, "lpcoPublicConsultation"),
+    lpcoNumber: optionalText(formData, "lpcoNumber"),
+  };
 
   if (productId) {
     const [product] = await db.select().from(products).where(eq(products.id, productId));
@@ -422,6 +449,7 @@ export async function addProcessItem(processId: string, formData: FormData) {
       description: product.description,
       quantity,
       reservedTo,
+      ...itemFields,
     });
   } else {
     const description = optionalText(formData, "description");
@@ -432,6 +460,7 @@ export async function addProcessItem(processId: string, formData: FormData) {
       description,
       quantity,
       reservedTo,
+      ...itemFields,
     });
   }
 
@@ -457,6 +486,8 @@ export async function searchProductsForProcess(query: string) {
       sku: products.sku,
       manufacturerSku: products.manufacturerSku,
       description: products.description,
+      licenseStatus: products.licenseStatus,
+      licenseNumber: products.licenseNumber,
     })
     .from(products)
     .where(
@@ -493,6 +524,7 @@ export async function updateProcessDetails(processId: string, formData: FormData
       destinationCode: code ?? null,
       destinationCity: city ?? null,
       destinationState: state ?? null,
+      destinationBranch: optionalText(formData, "destinationBranch"),
       weightKg: optionalNumber(formData, "weightKg"),
       volumeM3: optionalNumber(formData, "volumeM3"),
       notes: optionalText(formData, "notes"),
@@ -518,6 +550,10 @@ export async function updateProcessItem(itemId: string, processId: string, formD
   const values: Partial<typeof processItems.$inferInsert> = {
     quantity: optionalNumber(formData, "quantity"),
     reservedTo: optionalText(formData, "reservedTo"),
+    invoiceId: await validInvoiceId(processId, optionalText(formData, "invoiceId")),
+    exchangeCoverage: optionalBool(formData, "exchangeCoverage"),
+    lpcoPublicConsultation: optionalBool(formData, "lpcoPublicConsultation"),
+    lpcoNumber: optionalText(formData, "lpcoNumber"),
   };
   if (!item.productId) {
     const description = optionalText(formData, "description");
