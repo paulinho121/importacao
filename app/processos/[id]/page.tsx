@@ -1,3 +1,4 @@
+import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddItemForm from "@/components/AddItemForm";
@@ -413,7 +414,7 @@ export default async function ProcessDetailPage({
                 Dados do Processo
               </h3>
               <dl className="grid grid-cols-1 gap-3 font-body-sm text-body-sm">
-                <Field label="Modal" value={process.modal ?? "—"} />
+                <Field label="Modal" value={<ModalBadge modal={process.modal} />} />
                 <Field label="ETD" value={formatDate(process.etd)} />
                 <Field
                   label="ETA Estimado"
@@ -906,7 +907,7 @@ export default async function ProcessDetailPage({
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <span className="font-label-md text-label-md text-outline block">{label}</span>

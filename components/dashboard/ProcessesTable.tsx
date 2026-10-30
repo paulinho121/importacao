@@ -1,5 +1,6 @@
 "use client";
 
+import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { type ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
@@ -34,7 +35,7 @@ const columns: ColumnDef<Row>[] = [
   {
     accessorKey: "modal",
     header: "Modal",
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.modal ?? "—"}</span>,
+    cell: ({ row }) => <ModalBadge modal={row.original.modal} className="text-sm text-muted-foreground" />,
   },
   {
     accessorKey: "destination",

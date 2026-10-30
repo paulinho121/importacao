@@ -1,3 +1,4 @@
+import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -286,7 +287,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
                   </Link>
                 </TableCell>
                 <TableCell className="text-sm">{p.agentName ?? "—"}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{p.modal ?? "—"}</TableCell>
+                <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etd)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etaEstimated)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.closedAt)}</TableCell>

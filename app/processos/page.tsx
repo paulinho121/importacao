@@ -1,3 +1,4 @@
+import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
@@ -300,7 +301,7 @@ export default async function ProcessosPage({
                             <span className="text-sm">{p.supplierName}</span>
                           </Link>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{p.modal ?? "—"}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
                         <TableCell>
