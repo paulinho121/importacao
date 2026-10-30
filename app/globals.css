@@ -211,32 +211,35 @@
   --color-outline: var(--color-outline);
   --color-surface-container-low: var(--color-surface-container-low);
 
-  --font-body-md: var(--font-inter);
-  --font-body-sm: var(--font-inter);
-  --font-headline-md: var(--font-inter);
-  --font-mono-data: var(--font-inter);
-  --font-headline-sm: var(--font-inter);
-  --font-label-md: var(--font-inter);
-  --font-display-lg: var(--font-inter);
-  --font-body-lg: var(--font-inter);
+  /* Calibri (ou a clone Carlito) em todo o app. */
+  --font-app: Calibri, var(--font-carlito), Carlito, Arial, Helvetica, sans-serif;
 
-  --text-body-md: 14px;
-  --text-body-md--line-height: 20px;
+  --font-body-md: var(--font-app);
+  --font-body-sm: var(--font-app);
+  --font-headline-md: var(--font-app);
+  --font-mono-data: var(--font-app);
+  --font-headline-sm: var(--font-app);
+  --font-label-md: var(--font-app);
+  --font-display-lg: var(--font-app);
+  --font-body-lg: var(--font-app);
+
+  --text-body-md: 9pt;
+  --text-body-md--line-height: 16px;
   --text-body-md--font-weight: 400;
-  --text-body-sm: 12px;
+  --text-body-sm: 9pt;
   --text-body-sm--line-height: 16px;
   --text-body-sm--font-weight: 400;
   --text-headline-md: 24px;
   --text-headline-md--line-height: 32px;
   --text-headline-md--letter-spacing: -0.01em;
   --text-headline-md--font-weight: 600;
-  --text-mono-data: 13px;
+  --text-mono-data: 9pt;
   --text-mono-data--line-height: 18px;
   --text-mono-data--font-weight: 500;
   --text-headline-sm: 20px;
   --text-headline-sm--line-height: 28px;
   --text-headline-sm--font-weight: 600;
-  --text-label-md: 12px;
+  --text-label-md: 9pt;
   --text-label-md--line-height: 16px;
   --text-label-md--letter-spacing: 0.05em;
   --text-label-md--font-weight: 600;
@@ -247,6 +250,11 @@
   --text-body-lg: 16px;
   --text-body-lg--line-height: 24px;
   --text-body-lg--font-weight: 400;
+
+  /* Texto comum do app: Calibri 9pt (12px). Títulos, KPIs e textos
+     miúdos (text-xs) mantêm seus próprios tamanhos. */
+  --text-sm: 9pt;
+  --text-sm--line-height: 1.35;
 
   --spacing-unit: 4px;
   --spacing-gutter: 16px;
@@ -303,7 +311,8 @@
 body {
   background: var(--color-background);
   color: var(--color-on-surface);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-family: var(--font-app);
+  font-size: 9pt;
 }
 
 .material-symbols-outlined {

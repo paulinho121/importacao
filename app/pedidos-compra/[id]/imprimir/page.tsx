@@ -95,7 +95,7 @@ export default async function PedidoCompraImprimirPage({
   return (
     <div
       className="min-h-screen bg-white p-12 max-w-[860px] mx-auto"
-      style={{ color: INK, fontFamily: "var(--font-inter), Arial, Helvetica, sans-serif" }}
+      style={{ color: INK, fontFamily: "var(--font-app)" }}
     >
       <PrintButton />
 
