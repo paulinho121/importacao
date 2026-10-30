@@ -4,7 +4,6 @@ import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { LayoutGrid, List } from "lucide-react";
 import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,17 +21,6 @@ import {
 import { DOC_TYPES_PER_PROCESS } from "@/lib/dashboard-metrics";
 
 export const dynamic = "force-dynamic";
-
-const MODAL_FILTERS = [
-  { value: "", label: "Todos", icon: "filter_list" },
-  { value: "AIR", label: "Aéreo", icon: "flight" },
-  { value: "SEA_FCL", label: "Marítimo FCL", icon: "directions_boat" },
-  { value: "SEA_LCL", label: "Marítimo LCL", icon: "directions_boat" },
-  { value: "SEA_BREAK_BULK", label: "Break Bulk", icon: "directions_boat" },
-  { value: "SEA_RORO", label: "RORO", icon: "directions_boat" },
-  { value: "COURIER", label: "Courier", icon: "local_shipping" },
-  { value: "ROAD", label: "Rodoviário", icon: "local_shipping" },
-] as const;
 
 // Processos encerrados — não aparecem no fluxo, só em /finalizados.
 const CLOSED_STATUSES: ProcessStatus[] = ["CONCLUIDO", "ABANDONADO"];
@@ -202,73 +190,6 @@ export default async function ProcessosPage({
             name="q"
             defaultValue={q}
           />
-        </div>
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          {MODAL_FILTERS.map((f) => (
-            <Link
-              key={f.value}
-              href={{
-                pathname: "/processos",
-                query: {
-                  ...(q ? { q } : {}),
-                  ...(status ? { status } : {}),
-                  ...(f.value ? { modal: f.value } : {}),
-                  ...(view !== "list" ? { view } : {}),
-                  ...(onlyAtivos ? { ativos: "1" } : {}),
-                  ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
-                },
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-label-md text-label-md whitespace-nowrap transition-colors ${
-                modal === f.value
-                  ? "bg-secondary text-on-secondary"
-                  : "border border-outline-variant text-on-surface-variant hover:bg-surface-container-high"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">{f.icon}</span>
-              {f.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-1 rounded-lg border border-outline-variant p-1 shrink-0">
-          <Link
-            href={{
-              pathname: "/processos",
-              query: {
-                ...(q ? { q } : {}),
-                ...(status ? { status } : {}),
-                ...(modal ? { modal } : {}),
-                ...(onlyAtivos ? { ativos: "1" } : {}),
-                ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
-                view: "grid",
-              },
-            }}
-            className={`flex items-center justify-center h-9 w-9 rounded-md transition-colors ${
-              view === "grid" ? "bg-secondary text-on-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
-            }`}
-            aria-label="Visualização em grade"
-          >
-            <LayoutGrid className="h-[18px] w-[18px]" />
-          </Link>
-          <Link
-            href={{
-              pathname: "/processos",
-              query: {
-                ...(q ? { q } : {}),
-                ...(status ? { status } : {}),
-                ...(modal ? { modal } : {}),
-                ...(onlyAtivos ? { ativos: "1" } : {}),
-                ...(onlyDocsPendentes ? { docsPendentes: "1" } : {}),
-                view: "list",
-              },
-            }}
-            className={`flex items-center justify-center h-9 w-9 rounded-md transition-colors ${
-              view === "list" ? "bg-secondary text-on-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
-            }`}
-            aria-label="Visualização em lista"
-          >
-            <List className="h-[18px] w-[18px]" />
-          </Link>
         </div>
       </form>
     </div>
