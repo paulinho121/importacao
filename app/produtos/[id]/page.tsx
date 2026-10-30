@@ -77,6 +77,66 @@ export default async function EditProdutoPage({
           </div>
         </div>
       )}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
+        <ProductForm
+          action={boundUpdate}
+          defaultValues={{
+            sku: product.sku,
+            manufacturerSku: product.manufacturerSku,
+            ncm: product.ncm,
+            description: product.description,
+            longDescription: product.longDescription,
+            publicConsultationDate: product.publicConsultationDate,
+            hasPublicConsultation: product.hasPublicConsultation,
+            defaultSupplierId: product.defaultSupplierId,
+            costPrice: product.costPrice,
+            costCurrency: product.costCurrency,
+            markupPercent: product.markupPercent,
+            ncmAnterior: product.ncmAnterior,
+            manufacturerName: product.manufacturerName,
+            exporterName: product.exporterName,
+            licenseNumber: product.licenseNumber,
+            licenseRegisteredAt: product.licenseRegisteredAt,
+            licenseStatus: product.licenseStatus,
+            publicConsultationRef: product.publicConsultationRef,
+            licenseApprovedAt: product.licenseApprovedAt,
+            customsBrokerRef: product.customsBrokerRef,
+            active: product.active,
+            taxRateII: product.taxRateII,
+            taxRateIPI: product.taxRateIPI,
+            taxRatePIS: product.taxRatePIS,
+            taxRateCOFINS: product.taxRateCOFINS,
+            taxRateICMS: product.taxRateICMS,
+            cartonPiecesPerCarton: product.cartonPiecesPerCarton,
+            cartonLengthCm: product.cartonLengthCm,
+            cartonWidthCm: product.cartonWidthCm,
+            cartonHeightCm: product.cartonHeightCm,
+            cartonWeightKg: product.cartonWeightKg,
+          }}
+          submitLabel="Salvar Alterações"
+          suppliers={supplierRows}
+        />
+      </div>
+
+      {product.cpListResult && (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-6 flex flex-wrap items-center gap-3">
+          <span
+            className={`px-2.5 py-1 rounded-full font-label-md text-label-md ${CP_LIST_RESULT_CLASS[product.cpListResult as CpListResult]}`}
+          >
+            {CP_LIST_RESULT_LABEL[product.cpListResult as CpListResult]}
+          </span>
+          <span className="text-body-sm font-body-sm text-on-surface-variant">
+            Lista pública do governo
+            {product.cpListRef ? ` · CP ${product.cpListRef}` : ""}
+            {product.cpListNcm ? ` · NCM ${product.cpListNcm}` : ""}
+            {product.cpListCheckedAt ? ` · conferido em ${new Date(product.cpListCheckedAt).toLocaleDateString("pt-BR")}` : ""}
+            {product.cpListSource ? ` (${product.cpListSource})` : ""}
+          </span>
+        </div>
+      )}
+
+      <ProductLpcoPanel productId={id} lpcos={lpcos} />
+
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
         <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Faixas de Preço por Quantidade</h3>
         <p className="text-on-surface-variant font-body-sm text-body-sm mb-4">
@@ -153,66 +213,6 @@ export default async function EditProdutoPage({
             Adicionar
           </button>
         </form>
-      </div>
-
-      {product.cpListResult && (
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-6 flex flex-wrap items-center gap-3">
-          <span
-            className={`px-2.5 py-1 rounded-full font-label-md text-label-md ${CP_LIST_RESULT_CLASS[product.cpListResult as CpListResult]}`}
-          >
-            {CP_LIST_RESULT_LABEL[product.cpListResult as CpListResult]}
-          </span>
-          <span className="text-body-sm font-body-sm text-on-surface-variant">
-            Lista pública do governo
-            {product.cpListRef ? ` · CP ${product.cpListRef}` : ""}
-            {product.cpListNcm ? ` · NCM ${product.cpListNcm}` : ""}
-            {product.cpListCheckedAt ? ` · conferido em ${new Date(product.cpListCheckedAt).toLocaleDateString("pt-BR")}` : ""}
-            {product.cpListSource ? ` (${product.cpListSource})` : ""}
-          </span>
-        </div>
-      )}
-
-      <ProductLpcoPanel productId={id} lpcos={lpcos} />
-
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
-        <ProductForm
-          action={boundUpdate}
-          defaultValues={{
-            sku: product.sku,
-            manufacturerSku: product.manufacturerSku,
-            ncm: product.ncm,
-            description: product.description,
-            longDescription: product.longDescription,
-            publicConsultationDate: product.publicConsultationDate,
-            hasPublicConsultation: product.hasPublicConsultation,
-            defaultSupplierId: product.defaultSupplierId,
-            costPrice: product.costPrice,
-            costCurrency: product.costCurrency,
-            markupPercent: product.markupPercent,
-            ncmAnterior: product.ncmAnterior,
-            manufacturerName: product.manufacturerName,
-            exporterName: product.exporterName,
-            licenseNumber: product.licenseNumber,
-            licenseRegisteredAt: product.licenseRegisteredAt,
-            licenseStatus: product.licenseStatus,
-            publicConsultationRef: product.publicConsultationRef,
-            licenseApprovedAt: product.licenseApprovedAt,
-            customsBrokerRef: product.customsBrokerRef,
-            active: product.active,
-            taxRateII: product.taxRateII,
-            taxRateIPI: product.taxRateIPI,
-            taxRatePIS: product.taxRatePIS,
-            taxRateCOFINS: product.taxRateCOFINS,
-            taxRateICMS: product.taxRateICMS,
-            cartonPiecesPerCarton: product.cartonPiecesPerCarton,
-            cartonLengthCm: product.cartonLengthCm,
-            cartonWidthCm: product.cartonWidthCm,
-            cartonHeightCm: product.cartonHeightCm,
-            cartonWeightKg: product.cartonWeightKg,
-          }}
-          submitLabel="Salvar Alterações"
-          suppliers={supplierRows}
-        />
       </div>
     </div>
   );

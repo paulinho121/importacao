@@ -242,10 +242,9 @@ export default async function ProdutosPage({
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NCM</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NOME</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CP</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LISTA DECEX</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PREÇO SUGERIDO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
@@ -255,7 +254,7 @@ export default async function ProdutosPage({
             <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={13} className="px-6 py-6 text-on-surface-variant text-center">
+                  <td colSpan={12} className="px-6 py-6 text-on-surface-variant text-center">
                     {q
                       ? "Nenhum produto encontrado para essa busca."
                       : onlyDivergent
@@ -292,16 +291,14 @@ export default async function ProdutosPage({
                   <td className="px-6 py-3 font-medium">{p.description}</td>
                   <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
                   <td className="px-6 py-3">
-                    {p.hasPublicConsultation === null ? (
-                      "—"
-                    ) : (
+                    {p.licenseStatus ? (
                       <span
-                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${
-                          p.hasPublicConsultation ? LPCO_TONE_CLASS.ok : LPCO_TONE_CLASS.none
-                        }`}
+                        className={`px-2 py-1 rounded-full font-label-md text-label-md ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
                       >
-                        {p.hasPublicConsultation ? "Já possui" : "Não possui"}
+                        {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
                       </span>
+                    ) : (
+                      "—"
                     )}
                   </td>
                   <td className="px-6 py-3">
@@ -327,27 +324,17 @@ export default async function ProdutosPage({
                           ? `${b.label}: ${productLpcoStatusLabel(l.status)}${until ? ` (até ${formatDate(until)})` : ""}`
                           : `${b.label}: sem solicitação`;
                         return (
-                          <span
-                            key={b.code}
-                            title={title}
-                            className={`px-1.5 py-0.5 rounded font-label-md text-label-md ${LPCO_TONE_CLASS[tone]}`}
-                          >
-                            {b.code}
+                          <span key={b.code} title={title} className="flex flex-col items-center gap-0.5">
+                            <span className="h-3 text-[10px] leading-3 text-on-surface-variant whitespace-nowrap">
+                              {tone === "wait" ? "em análise" : ""}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded font-label-md text-label-md ${LPCO_TONE_CLASS[tone]}`}>
+                              {b.code}
+                            </span>
                           </span>
                         );
                       })}
                     </Link>
-                  </td>
-                  <td className="px-6 py-3">
-                    {p.licenseStatus ? (
-                      <span
-                        className={`px-2 py-1 rounded-full font-label-md text-label-md ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
-                      >
-                        {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
-                      </span>
-                    ) : (
-                      "—"
-                    )}
                   </td>
                   <td className="px-6 py-3 font-mono-data">
                     {p.costPrice ? `${Number(p.costPrice).toFixed(2)} ${p.costCurrency ?? ""}` : "—"}

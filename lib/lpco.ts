@@ -42,7 +42,7 @@ export function lpcoTone(lpco: { status: string; approvedAt: string | null }, to
 
 export const LPCO_TONE_CLASS: Record<LpcoTone, string> = {
   ok: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
-  wait: "bg-secondary-fixed text-on-secondary-fixed-variant",
+  wait: "bg-surface-container-high text-on-surface-variant",
   bad: "bg-error-container text-on-error-container",
   expired: "bg-warning/20 text-warning",
   none: "bg-surface-container-high text-on-surface-variant",
