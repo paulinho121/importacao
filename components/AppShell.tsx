@@ -50,7 +50,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </main>
           </div>
 
-          <nav className="fixed bottom-0 left-0 z-50 flex h-16 w-full items-center justify-around border-t border-border bg-card shadow-sm md:hidden">
+          <nav data-app-chrome className="fixed bottom-0 left-0 z-50 flex h-16 w-full items-center justify-around border-t border-border bg-card shadow-sm md:hidden">
             {MOBILE_NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               const Icon = item.icon;

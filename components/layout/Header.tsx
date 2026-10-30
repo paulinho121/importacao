@@ -64,7 +64,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card px-4 lg:px-6">
+    <header data-app-chrome className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card px-4 lg:px-6">
       <MobileNavDrawer />
       <nav className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
         <Home className="h-4 w-4 shrink-0" />

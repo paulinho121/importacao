@@ -257,10 +257,20 @@ export default async function ProcessDetailPage({
           </span>
           <span className="font-label-md text-label-md">VOLTAR PARA LISTA</span>
         </Link>
+        <div className="flex items-center gap-4">
+        <Link
+          href={`/processos/${id}/imprimir`}
+          target="_blank"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-all font-label-md text-label-md"
+        >
+          <span className="material-symbols-outlined text-[18px]">print</span>
+          Imprimir resumo
+        </Link>
         <div className="hidden sm:flex items-center gap-2 text-on-surface-variant text-sm">
           <span>Processos</span>
           <span className="material-symbols-outlined text-sm">chevron_right</span>
           <span className="text-primary font-medium">{process.processNumber}</span>
+        </div>
         </div>
       </div>
 

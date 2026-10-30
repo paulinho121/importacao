@@ -36,6 +36,7 @@ export default function Sidebar() {
   return (
     <TooltipProvider delayDuration={200}>
       <motion.aside
+        data-app-chrome
         animate={{ width: collapsed ? 76 : 256 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="hidden md:flex flex-col h-screen sticky top-0 shrink-0 bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border overflow-hidden"

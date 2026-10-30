@@ -425,3 +425,14 @@ button:not(:disabled),
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-outline);
 }
+
+/* Impressão: some com a casca do app (sidebar, header, barra mobile) pra só
+   o documento sair na folha — vale pras telas /imprimir. */
+@media print {
+  [data-app-chrome] {
+    display: none !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+}
