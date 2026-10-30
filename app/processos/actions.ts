@@ -1,5 +1,6 @@
 "use server";
 
+import { modalFromTipo, modalidadeFromModal } from "@/lib/modais";
 import { db } from "@/db/client";
 import {
   processes,
@@ -59,13 +60,24 @@ async function validInvoiceId(processId: string, invoiceId: string | null) {
   return inv.id;
 }
 
+// Modal estruturado (enum) a partir do tipo de embarque escolhido; sem tipo,
+// só mantém o modal atual se ele ainda pertence à modalidade escolhida.
+function resolveModal(formData: FormData, currentModal: string | null) {
+  const tipo = optionalText(formData, "containerType");
+  const modalidade = optionalText(formData, "modalidade");
+  const fromTipo = modalFromTipo(tipo);
+  if (fromTipo) return fromTipo;
+  if (modalidade && modalidadeFromModal(currentModal) === modalidade) return currentModal;
+  return null;
+}
+
 export async function createProcess(formData: FormData) {
   const processNumber = String(formData.get("processNumber") ?? "").trim();
   const supplierId = String(formData.get("supplierId") ?? "").trim();
   if (!processNumber) throw new Error("Número do processo é obrigatório.");
   if (!supplierId) throw new Error("Fornecedor é obrigatório.");
 
-  const modal = optionalText(formData, "modal");
+  const modal = resolveModal(formData, null);
   const agentId = optionalText(formData, "agentId");
 
   // Destino: o <select> manda "CODE|Cidade|UF" quando escolhido da lista
@@ -91,6 +103,7 @@ export async function createProcess(formData: FormData) {
       supplierId,
       externalReference: optionalText(formData, "externalReference"),
       modal: modal as (typeof processes.$inferInsert)["modal"],
+      containerType: optionalText(formData, "containerType"),
       etd: optionalDate(formData, "etd"),
       etaEstimated: optionalDate(formData, "etaEstimated"),
       agentId,
@@ -181,7 +194,6 @@ export async function updateShipmentInfo(processId: string, formData: FormData) 
     .update(processes)
     .set({
       externalReference: optionalText(formData, "externalReference"),
-      containerType: optionalText(formData, "containerType"),
       trackingNumber: optionalText(formData, "trackingNumber"),
       trackingUrl,
       closedAt: optionalDate(formData, "closedAt"),
@@ -511,11 +523,16 @@ export async function updateProcessDetails(processId: string, formData: FormData
   const locationChoice = optionalText(formData, "locationChoice");
   const known = locationChoice && locationChoice !== "OUTRO";
   const [code, city, state] = known ? locationChoice.split("|") : [null, null, null];
+  const [current] = await db
+    .select({ modal: processes.modal })
+    .from(processes)
+    .where(eq(processes.id, processId));
 
   await db
     .update(processes)
     .set({
-      modal: optionalText(formData, "modal") as (typeof processes.$inferInsert)["modal"],
+      modal: resolveModal(formData, current?.modal ?? null) as (typeof processes.$inferInsert)["modal"],
+      containerType: optionalText(formData, "containerType"),
       agentId: optionalText(formData, "agentId"),
       etd: optionalDate(formData, "etd"),
       etaEstimated: optionalDate(formData, "etaEstimated"),

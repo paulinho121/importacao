@@ -1,3 +1,4 @@
+import { tipoEmbarqueLabel } from "@/lib/modais";
 import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
@@ -418,7 +419,8 @@ export default async function ProcessDetailPage({
                 Dados do Processo
               </h3>
               <dl className="grid grid-cols-1 gap-3 font-body-sm text-body-sm">
-                <Field label="Modal" value={<ModalBadge modal={process.modal} />} />
+                <Field label="Modalidade" value={<ModalBadge modal={process.modal} />} />
+                <Field label="Tipo de embarque" value={tipoEmbarqueLabel(process.modal, process.containerType)} />
                 <Field label="ETD" value={formatDate(process.etd)} />
                 <Field
                   label="ETA Estimado"
@@ -441,6 +443,7 @@ export default async function ProcessDetailPage({
                 agents={agentOptions}
                 defaults={{
                   modal: process.modal,
+                  containerType: process.containerType,
                   agentId: process.agentId,
                   etd: process.etd,
                   etaEstimated: process.etaEstimated,
@@ -815,7 +818,6 @@ export default async function ProcessDetailPage({
             processId={id}
             shipment={{
               externalReference: process.externalReference,
-              containerType: process.containerType,
               trackingNumber: process.trackingNumber,
               trackingUrl: process.trackingUrl,
               closedAt: process.closedAt,

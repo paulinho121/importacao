@@ -3,7 +3,7 @@ import { db } from "@/db/client";
 import { suppliers, processes, freightAgents } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
-import { MODAIS } from "@/lib/modais";
+import ModalidadeTipoFields from "@/components/ModalidadeTipoFields";
 
 export const dynamic = "force-dynamic";
 
@@ -83,22 +83,12 @@ export default async function NovoProcessoPage() {
                 name="externalReference"
               />
             </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Modal
-              </label>
-              <select
-                className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
-                name="modal"
-                defaultValue=""
-              >
-                {MODAIS.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <ModalidadeTipoFields
+              defaultModal={null}
+              defaultContainerType={null}
+              selectClassName="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+              labelClassName="block font-label-md text-label-md text-on-surface-variant mb-2"
+            />
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                 Agente de Carga

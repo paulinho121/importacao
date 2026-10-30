@@ -1,3 +1,4 @@
+import { tipoEmbarqueLabel } from "@/lib/modais";
 import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
@@ -125,6 +126,7 @@ export default async function ProcessosPage({
       processNumber: processes.processNumber,
       status: processes.status,
       modal: processes.modal,
+      containerType: processes.containerType,
       etd: processes.etd,
       etaEstimated: processes.etaEstimated,
       destination: processes.destination,
@@ -283,7 +285,8 @@ export default async function ProcessosPage({
               <TableRow>
                 <TableHead>Processo</TableHead>
                 <TableHead>Fornecedor</TableHead>
-                <TableHead>Modal</TableHead>
+                <TableHead>Modalidade</TableHead>
+                <TableHead>Tipo de embarque</TableHead>
                 <TableHead>ETD</TableHead>
                 <TableHead>ETA</TableHead>
                 <TableHead>Desembarque</TableHead>
@@ -310,6 +313,7 @@ export default async function ProcessosPage({
                           </Link>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{tipoEmbarqueLabel(p.modal, p.containerType)}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{landingLabel(p)}</TableCell>

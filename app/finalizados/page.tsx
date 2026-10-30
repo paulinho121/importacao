@@ -1,3 +1,4 @@
+import { tipoEmbarqueLabel } from "@/lib/modais";
 import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
@@ -80,6 +81,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
         processNumber: processes.processNumber,
         status: processes.status,
         modal: processes.modal,
+        containerType: processes.containerType,
         etd: processes.etd,
         etaEstimated: processes.etaEstimated,
         closedAt: processes.closedAt,
@@ -254,7 +256,8 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
               <TableHead>Processo</TableHead>
               <TableHead>Fornecedor</TableHead>
               <TableHead>Agente</TableHead>
-              <TableHead>Modal</TableHead>
+              <TableHead>Modalidade</TableHead>
+              <TableHead>Tipo de embarque</TableHead>
               <TableHead>ETD</TableHead>
               <TableHead>ETA</TableHead>
               <TableHead>Fechamento</TableHead>
@@ -267,7 +270,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
           <TableBody>
             {rows.length === 0 && (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={12} className="py-8 text-center text-muted-foreground">
                   {hasFilters ? "Nenhum processo encerrado com esses filtros." : "Nenhum processo encerrado ainda."}
                 </TableCell>
               </TableRow>
@@ -290,6 +293,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
                 </TableCell>
                 <TableCell className="text-sm">{p.agentName ?? "—"}</TableCell>
                 <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
+                <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{tipoEmbarqueLabel(p.modal, p.containerType)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etd)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.etaEstimated)}</TableCell>
                 <TableCell className="font-mono text-sm whitespace-nowrap">{formatDate(p.closedAt)}</TableCell>

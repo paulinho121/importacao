@@ -1,26 +1,11 @@
 import { updateShipmentInfo } from "@/app/processos/actions";
 import { formatDate } from "@/lib/status";
 
-// Sugestões da coluna "Tipo de Embarque" da planilha do time — campo
-// continua texto livre (datalist só sugere), porque a planilha mistura
-// tipo de container com tipo de carga aérea.
-const CONTAINER_TYPE_SUGGESTIONS = [
-  "Air Cargo",
-  "Consolidated",
-  "Courier",
-  "LCL",
-  "FCL 20'",
-  "FCL 40'",
-  "FCL 40' HC",
-  "FCL 40' NOR",
-];
-
 const INPUT_CLASS =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
 
 export type ShipmentInfo = {
   externalReference: string | null;
-  containerType: string | null;
   trackingNumber: string | null;
   trackingUrl: string | null;
   closedAt: string | null;
@@ -57,24 +42,6 @@ export default function ProcessShipmentInfo({
       </div>
 
       <form action={boundUpdate} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
-            Tipo de embarque
-          </label>
-          <input
-            className={INPUT_CLASS}
-            type="text"
-            name="containerType"
-            list="container-type-suggestions"
-            defaultValue={shipment.containerType ?? ""}
-            placeholder="Ex: FCL 40' HC, Air Cargo"
-          />
-          <datalist id="container-type-suggestions">
-            {CONTAINER_TYPE_SUGGESTIONS.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
-        </div>
         <div>
           <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
             Referência do agente

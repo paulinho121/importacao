@@ -1,6 +1,6 @@
 import { updateProcessDetails } from "@/app/processos/actions";
 import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
-import { MODAIS } from "@/lib/modais";
+import ModalidadeTipoFields from "@/components/ModalidadeTipoFields";
 
 const INPUT_CLASS =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
@@ -8,6 +8,7 @@ const LABEL_CLASS = "block font-label-md text-label-md text-on-surface-variant m
 
 export type ProcessEditDefaults = {
   modal: string | null;
+  containerType: string | null;
   agentId: string | null;
   etd: string | null;
   etaEstimated: string | null;
@@ -56,16 +57,12 @@ export default function ProcessEditDetails({
       </summary>
 
       <form action={bound} className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className={LABEL_CLASS}>Modal</label>
-          <select className={`${INPUT_CLASS} appearance-none`} name="modal" defaultValue={defaults.modal ?? ""}>
-            {MODAIS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <ModalidadeTipoFields
+          defaultModal={defaults.modal}
+          defaultContainerType={defaults.containerType}
+          selectClassName={`${INPUT_CLASS} appearance-none`}
+          labelClassName={LABEL_CLASS}
+        />
         <div>
           <label className={LABEL_CLASS}>Agente de carga</label>
           <select className={`${INPUT_CLASS} appearance-none`} name="agentId" defaultValue={defaults.agentId ?? ""}>
