@@ -196,7 +196,7 @@ export default async function PedidoCompraImprimirPage({
         )}
       </div>
 
-      <table className="w-full text-left border-collapse text-base mb-8">
+      <table data-no-zebra className="w-full text-left border-collapse text-base mb-8">
         <thead>
           <tr className="border-b-2" style={{ borderColor: INK }}>
             <th className="py-3 pr-3 text-[10px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>

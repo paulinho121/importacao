@@ -320,6 +320,18 @@ button:not(:disabled),
   cursor: pointer;
 }
 
+/* Tabelas zebradas (branco / cinza) em todo o app: linhas pares usam o token
+   --muted, que troca sozinho no tema escuro. Fica em @layer base (e com
+   :where, especificidade zero) de propósito — assim qualquer utilitário de
+   linha, como o hover, continua vencendo. Linhas com colSpan (cabeçalho de
+   grupo, estado vazio) não são pintadas. Tabela com data-no-zebra fica de
+   fora (ex: documento do Pedido de Compra, que tem cores fixas p/ impressão). */
+@layer base {
+  :where(table:not([data-no-zebra]) > tbody > tr:nth-child(even):not(:has(> td[colspan]))) {
+    background-color: var(--muted);
+  }
+}
+
 /* Rede de segurança de foco de teclado (WCAG 2.4.7): muitos inputs do app
    usam `focus:outline-none` + troca de cor de borda (mais sutil que o
    anel padrão do navegador), e itens de navegação (Sidebar/Header) não
