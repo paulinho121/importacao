@@ -17,7 +17,7 @@ const columns: ColumnDef<Row>[] = [
     accessorKey: "processNumber",
     header: "Processo",
     cell: ({ row }) => (
-      <Link href={`/processos/${row.original.id}`} className="font-mono text-sm text-secondary hover:underline">
+      <Link href={`/processos/${row.original.id}`} className="font-mono text-sm text-secondary hover:underline whitespace-nowrap">
         {row.original.processNumber}
       </Link>
     ),

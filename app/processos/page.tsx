@@ -223,7 +223,7 @@ export default async function ProcessosPage({
                     return (
                       <TableRow key={p.id} className="cursor-pointer">
                         <TableCell className="p-0">
-                          <Link href={`/processos/${p.id}`} className="block px-4 py-3 font-mono text-sm text-secondary hover:underline">
+                          <Link href={`/processos/${p.id}`} className="block px-4 py-3 font-mono text-sm text-secondary hover:underline whitespace-nowrap">
                             {p.processNumber}
                           </Link>
                         </TableCell>
