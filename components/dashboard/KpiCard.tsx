@@ -50,18 +50,18 @@ export function KpiCard({
       borderRadius={12}
       className="h-full px-3 py-2 shadow-sm transition-shadow group-hover:shadow-md"
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-h-7 items-center gap-1.5 sm:min-h-0">
         <div
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded [&>svg]:h-3 [&>svg]:w-3"
           style={{ backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
         >
           {icon}
         </div>
-        <p className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground" title={label}>
+        <p className="min-w-0 flex-1 text-[11px] leading-tight text-muted-foreground line-clamp-2 sm:line-clamp-1" title={label}>
           {label}
         </p>
         {href && (
-          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          <ChevronRight className="hidden h-3 w-3 shrink-0 text-muted-foreground opacity-0 sm:block transition-opacity group-hover:opacity-100" />
         )}
       </div>
 

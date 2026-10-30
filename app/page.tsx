@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     <div className="space-y-6 pb-12">
       <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
 
-      <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-3 lg:grid-cols-5 lg:px-6 2xl:grid-cols-9">
+      <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-3 lg:grid-cols-5 lg:px-6 2xl:grid-cols-9 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <KpiCard
           icon={<ClipboardList className="h-4 w-4" />}
           label="Pedidos em Aberto"
