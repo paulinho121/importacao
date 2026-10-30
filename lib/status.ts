@@ -269,8 +269,8 @@ export function formatDate(value: string | null): string {
   const d = new Date(`${value}T00:00:00Z`);
   return d.toLocaleDateString("pt-BR", {
     day: "2-digit",
-    month: "short",
-    year: "numeric",
+    month: "2-digit",
+    year: "2-digit",
     timeZone: "UTC",
   });
 }
