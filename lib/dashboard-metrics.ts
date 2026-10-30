@@ -390,7 +390,8 @@ export async function getDashboardMetrics() {
   });
 
   // --- Tabela de processos (dados reais, sem "Cliente"/valores FOB/CIF) ---
-  const table = processRows
+  // Só o fluxo ativo — finalizados/abandonados ficam em /finalizados.
+  const table = ativos
     .slice()
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .map((p) => ({

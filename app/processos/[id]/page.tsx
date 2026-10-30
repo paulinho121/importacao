@@ -244,7 +244,7 @@ export default async function ProcessDetailPage({
     <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
       <div className="flex items-center justify-between">
         <Link
-          href="/processos"
+          href={process.status === "CONCLUIDO" || process.status === "ABANDONADO" ? "/finalizados" : "/processos"}
           className="flex items-center gap-2 text-secondary font-semibold hover:underline group"
         >
           <span className="material-symbols-outlined transition-transform group-hover:-translate-x-1">

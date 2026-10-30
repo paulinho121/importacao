@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 import { LayoutGrid, List } from "lucide-react";
 import SupplierLogo from "@/components/SupplierLogo";
@@ -6,7 +7,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/db/client";
 import { processes, suppliers, processItems, processInvoices, processDocuments } from "@/db/schema";
-import { and, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, notInArray, or, sql } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
   STATUS_ICON,
@@ -29,6 +30,9 @@ const MODAL_FILTERS = [
   { value: "COURIER", label: "Courier", icon: "local_shipping" },
   { value: "ROAD", label: "Rodoviário", icon: "local_shipping" },
 ] as const;
+
+// Processos encerrados — não aparecem no fluxo, só em /finalizados.
+const CLOSED_STATUSES: ProcessStatus[] = ["CONCLUIDO", "ABANDONADO"];
 
 const MODAL_ICON: Record<string, string> = {
   AIR: "flight",
@@ -56,19 +60,21 @@ export default async function ProcessosPage({
   const onlyAtivos = ativos === "1";
   const onlyDocsPendentes = docsPendentes === "1";
 
-  const conditions = [];
+  // Finalizados e abandonados saíram do fluxo — ficam em /finalizados.
+  // Links antigos (?status=CONCLUIDO) continuam funcionando via redirect.
+  if (status === "CONCLUIDO" || status === "ABANDONADO") {
+    redirect(status === "ABANDONADO" ? "/finalizados?status=ABANDONADO" : "/finalizados");
+  }
+
+  const conditions = [notInArray(processes.status, CLOSED_STATUSES)];
   if (modal) {
     conditions.push(eq(processes.modal, modal as (typeof processes.modal.enumValues)[number]));
   }
   if (status) {
     conditions.push(eq(processes.status, status as ProcessStatus));
   }
-  // "Ativos"/"Documentos Pendentes" vêm dos cards de KPI do Dashboard —
-  // não são exclusivos de "status" (não têm chip próprio na tela), então
-  // convivem com ele em vez de substituí-lo.
-  if (onlyAtivos || onlyDocsPendentes) {
-    conditions.push(ne(processes.status, "CONCLUIDO"), ne(processes.status, "ABANDONADO"));
-  }
+  // "Documentos Pendentes" vem do card de KPI do Dashboard — não é exclusivo
+  // de "status" (não tem chip próprio na tela), então convive com ele.
   if (onlyDocsPendentes) {
     // Mesma regra do card "Documentos Pendentes": conta uploads com
     // status UPLOADED e considera pendente quem tem menos que o total de
@@ -81,9 +87,8 @@ export default async function ProcessosPage({
       ) < ${DOC_TYPES_PER_PROCESS}`,
     );
   }
-  if (q) {
-    conditions.push(
-      or(
+  const qCondition = q
+    ? or(
         ilike(processes.processNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
         sql`exists (
@@ -96,9 +101,21 @@ export default async function ProcessosPage({
           where ${processItems.processId} = ${processes.id}
           and (${processItems.sku} ilike ${`%${q}%`} or ${processItems.description} ilike ${`%${q}%`})
         )`,
-      ),
-    );
-  }
+      )
+    : undefined;
+  if (qCondition) conditions.push(qCondition);
+
+  // A busca (inclusive a do topo da tela) só olha o fluxo; pra não "perder"
+  // um processo já finalizado, avisa quantos batem lá em /finalizados.
+  const closedMatches = qCondition
+    ? (
+        await db
+          .select({ n: sql<number>`count(*)`.mapWith(Number) })
+          .from(processes)
+          .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
+          .where(and(inArray(processes.status, CLOSED_STATUSES), qCondition))
+      )[0].n
+    : 0;
 
   const rows = await db
     .select({
@@ -140,15 +157,23 @@ export default async function ProcessosPage({
       </Link>
     </div>
     <div className="p-gutter lg:px-stack-lg">
-      {(onlyAtivos || onlyDocsPendentes) && (
+      {onlyDocsPendentes && (
         <Link
           href={{ pathname: "/processos", query: q ? { q } : {} }}
           className="mb-4 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border bg-secondary/10 text-secondary border-secondary/30 hover:bg-secondary/20 transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">filter_alt</span>
-          {onlyDocsPendentes
-            ? "Filtrando: processos ativos com documento pendente — ver todos"
-            : "Filtrando: processos ativos (exclui Finalizados) — ver todos"}
+          Filtrando: processos com documento pendente — ver todos
+        </Link>
+      )}
+      {closedMatches > 0 && (
+        <Link
+          href={{ pathname: "/finalizados", query: { q } }}
+          className="mb-4 ml-0 flex w-fit items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+          {closedMatches} {closedMatches === 1 ? "processo encerrado também bate" : "processos encerrados também batem"} com
+          essa busca — ver em Finalizados
         </Link>
       )}
       <form className="flex flex-col md:flex-row gap-4 items-end md:items-center" action="/processos">

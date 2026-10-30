@@ -12,6 +12,7 @@ import {
   Wallet,
   Settings,
   Warehouse,
+  Archive,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Em Trânsito", href: "/processos?status=EM_TRANSITO", icon: Ship },
       { label: "Embarques", href: "/processos?status=EMBARCADO", icon: Anchor },
       { label: "Entregas", href: "/processos?status=RECEBIDO", icon: PackageCheck },
+      { label: "Finalizados", href: "/finalizados", icon: Archive },
     ],
   },
   {
