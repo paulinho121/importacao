@@ -11,7 +11,7 @@ import {
   processLpcos,
   itemReservations,
 } from "@/db/schema";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
@@ -436,6 +436,110 @@ export async function addProcessItem(processId: string, formData: FormData) {
   }
 
   revalidatePath(`/processos/${processId}`);
+  redirect(withFlash(`/processos/${processId}`, "Item adicionado."));
+}
+
+// Busca do catálogo ao adicionar item: cada palavra digitada precisa
+// aparecer no SKU, no SKU do fabricante (System Code) ou na descrição
+// (nome) — ex: "ray 660" acha "amaran Ray 660c (US)". Sob demanda, em vez
+// de mandar o catálogo inteiro (585+ produtos) pra tela.
+export async function searchProductsForProcess(query: string) {
+  const tokens = query
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((t) => `%${t.replace(/[\\%_]/g, "\\$&")}%`);
+
+  return db
+    .select({
+      id: products.id,
+      sku: products.sku,
+      manufacturerSku: products.manufacturerSku,
+      description: products.description,
+    })
+    .from(products)
+    .where(
+      tokens.length
+        ? and(
+            ...tokens.map((t) =>
+              or(ilike(products.sku, t), ilike(products.manufacturerSku, t), ilike(products.description, t)),
+            ),
+          )
+        : undefined,
+    )
+    .orderBy(products.sku)
+    .limit(40);
+}
+
+// Edição dos dados básicos do processo (modal, datas, agente, destino,
+// peso/volume, observações) — antes só dava pra definir isso na criação.
+export async function updateProcessDetails(processId: string, formData: FormData) {
+  // Mesmo contrato do createProcess: o <select> manda "CODE|Cidade|UF" pra
+  // destino conhecido (lib/locations.ts); vazio/"OUTRO" usa o texto livre.
+  const locationChoice = optionalText(formData, "locationChoice");
+  const known = locationChoice && locationChoice !== "OUTRO";
+  const [code, city, state] = known ? locationChoice.split("|") : [null, null, null];
+
+  await db
+    .update(processes)
+    .set({
+      modal: optionalText(formData, "modal") as (typeof processes.$inferInsert)["modal"],
+      agentId: optionalText(formData, "agentId"),
+      etd: optionalDate(formData, "etd"),
+      etaEstimated: optionalDate(formData, "etaEstimated"),
+      etaActual: optionalDate(formData, "etaActual"),
+      destination: known ? null : optionalText(formData, "destination"),
+      destinationCode: code ?? null,
+      destinationCity: city ?? null,
+      destinationState: state ?? null,
+      weightKg: optionalNumber(formData, "weightKg"),
+      volumeM3: optionalNumber(formData, "volumeM3"),
+      notes: optionalText(formData, "notes"),
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  revalidatePath("/");
+  redirect(withFlash(`/processos/${processId}`, "Dados do processo atualizados."));
+}
+
+// Quantidade e reserva (texto legado) sempre editáveis; descrição/SKU só
+// nos itens avulsos — nos do catálogo vêm do cadastro do produto.
+export async function updateProcessItem(itemId: string, processId: string, formData: FormData) {
+  const [item] = await db
+    .select({ productId: processItems.productId })
+    .from(processItems)
+    .where(and(eq(processItems.id, itemId), eq(processItems.processId, processId)));
+  if (!item) throw new Error("Item não encontrado.");
+
+  const values: Partial<typeof processItems.$inferInsert> = {
+    quantity: optionalNumber(formData, "quantity"),
+    reservedTo: optionalText(formData, "reservedTo"),
+  };
+  if (!item.productId) {
+    const description = optionalText(formData, "description");
+    if (!description) throw new Error("Descrição é obrigatória.");
+    values.description = description;
+    values.sku = optionalText(formData, "sku");
+  }
+
+  await db.update(processItems).set(values).where(eq(processItems.id, itemId));
+
+  revalidatePath(`/processos/${processId}`);
+  redirect(withFlash(`/processos/${processId}`, "Item atualizado."));
+}
+
+// As reservas do item saem junto (FK com cascade).
+export async function removeProcessItem(itemId: string, processId: string) {
+  await db
+    .delete(processItems)
+    .where(and(eq(processItems.id, itemId), eq(processItems.processId, processId)));
+
+  revalidatePath(`/processos/${processId}`);
+  redirect(withFlash(`/processos/${processId}`, "Item removido."));
 }
 
 // Valor unitário manual pra ratear custo pousado/imposto — só precisa ser

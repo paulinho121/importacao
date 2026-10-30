@@ -3,19 +3,10 @@ import { db } from "@/db/client";
 import { suppliers, processes, freightAgents } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { LOCATIONS, locationLabel } from "@/lib/locations";
+import { MODAIS } from "@/lib/modais";
 
 export const dynamic = "force-dynamic";
 
-const MODAIS = [
-  { value: "", label: "Selecione o modal" },
-  { value: "AIR", label: "Aéreo" },
-  { value: "SEA_FCL", label: "Marítimo FCL" },
-  { value: "SEA_LCL", label: "Marítimo LCL" },
-  { value: "SEA_BREAK_BULK", label: "Marítimo Break Bulk" },
-  { value: "SEA_RORO", label: "Marítimo RORO" },
-  { value: "COURIER", label: "Courier" },
-  { value: "ROAD", label: "Rodoviário" },
-];
 
 async function suggestProcessNumber(): Promise<string> {
   const year = new Date().getFullYear();

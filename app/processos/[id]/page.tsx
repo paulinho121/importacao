@@ -4,6 +4,10 @@ import AddItemForm from "@/components/AddItemForm";
 import AbandonProcessButton from "@/components/AbandonProcessButton";
 import ProcessShipmentInfo from "@/components/ProcessShipmentInfo";
 import ProcessFollowUpForm from "@/components/ProcessFollowUpForm";
+import ProcessEditDetails from "@/components/ProcessEditDetails";
+// Confirmação "Excluir o item … não pode ser desfeita" — genérico, serve também
+// pro item do processo apesar do nome.
+import DeleteExternalImportItemButton from "@/components/DeleteExternalImportItemButton";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import ProcessCompliance from "@/components/ProcessCompliance";
@@ -41,6 +45,8 @@ import {
   updateProcessNumber,
   abandonProcess,
   removeProcessFollowUp,
+  updateProcessItem,
+  removeProcessItem,
   addProcessItem,
   addProcessInvoice,
   addItemReservation,
@@ -78,6 +84,7 @@ export default async function ProcessDetailPage({
       etaEstimated: processes.etaEstimated,
       etaActual: processes.etaActual,
       agentName: freightAgents.name,
+      agentId: processes.agentId,
       destination: processes.destination,
       destinationCode: processes.destinationCode,
       destinationCity: processes.destinationCity,
@@ -118,7 +125,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, productRows, invoices, lpcos, payables, supplierOptions] = await Promise.all([
+  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions] = await Promise.all([
     db
       .select({
         id: processItems.id,
@@ -145,10 +152,6 @@ export default async function ProcessDetailPage({
       .orderBy(desc(processEvents.eventDate)),
     db.select().from(processDocuments).where(eq(processDocuments.processId, id)),
     db
-      .select({ id: products.id, sku: products.sku, description: products.description })
-      .from(products)
-      .orderBy(products.sku),
-    db
       .select({ ...getTableColumns(processInvoices), supplierName: suppliers.name })
       .from(processInvoices)
       .leftJoin(suppliers, eq(processInvoices.supplierId, suppliers.id))
@@ -160,6 +163,7 @@ export default async function ProcessDetailPage({
       .where(eq(processPayables.processId, id))
       .orderBy(processPayables.dueDate),
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
+    db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
   ]);
 
   const itemIds = items.map((item) => item.id);
@@ -421,9 +425,29 @@ export default async function ProcessDetailPage({
                 />
                 <Field label="ETA Real" value={formatDate(process.etaActual)} />
                 <Field label="Agente" value={process.agentName ?? "—"} />
+                <Field label="Destino" value={destinationLabel ?? process.destination ?? "—"} />
                 <Field label="Peso" value={process.weightKg ? `${process.weightKg} kg` : "—"} />
                 <Field label="Volume" value={process.volumeM3 ? `${process.volumeM3} m³` : "—"} />
               </dl>
+
+              <ProcessEditDetails
+                processId={id}
+                agents={agentOptions}
+                defaults={{
+                  modal: process.modal,
+                  agentId: process.agentId,
+                  etd: process.etd,
+                  etaEstimated: process.etaEstimated,
+                  etaActual: process.etaActual,
+                  destination: process.destination,
+                  destinationCode: process.destinationCode,
+                  destinationCity: process.destinationCity,
+                  destinationState: process.destinationState,
+                  weightKg: process.weightKg,
+                  volumeM3: process.volumeM3,
+                  notes: process.notes,
+                }}
+              />
 
               <div className="mt-4 pt-4 border-t border-outline-variant">
                 <span className="font-label-md text-label-md text-outline block mb-2">
@@ -551,6 +575,67 @@ export default async function ProcessDetailPage({
                             </button>
                           </form>
                         </details>
+                        <details className="mt-1">
+                          <summary className="cursor-pointer text-xs text-secondary hover:underline list-none inline-flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px]">edit_note</span>
+                            Editar item
+                          </summary>
+                          <form
+                            action={updateProcessItem.bind(null, item.id, id)}
+                            className="grid grid-cols-2 gap-1.5 mt-1.5"
+                          >
+                            {!item.productId && (
+                              <>
+                                <input
+                                  className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                                  type="text"
+                                  name="description"
+                                  defaultValue={item.description}
+                                  aria-label="Descrição"
+                                  required
+                                />
+                                <input
+                                  className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs font-mono-data focus:outline-none focus:border-secondary transition-all"
+                                  type="text"
+                                  name="sku"
+                                  defaultValue={item.sku ?? ""}
+                                  placeholder="SKU"
+                                  aria-label="SKU"
+                                />
+                              </>
+                            )}
+                            <input
+                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                              type="number"
+                              step="0.01"
+                              name="quantity"
+                              defaultValue={item.quantity ?? ""}
+                              placeholder="Quantidade"
+                              aria-label="Quantidade"
+                            />
+                            <input
+                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
+                              type="text"
+                              name="reservedTo"
+                              defaultValue={item.reservedTo ?? ""}
+                              placeholder="Reserva (planilha)"
+                              aria-label="Reserva"
+                            />
+                            <button
+                              type="submit"
+                              className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
+                            >
+                              Salvar item
+                            </button>
+                          </form>
+                          <div className="mt-1.5">
+                            <DeleteExternalImportItemButton
+                              action={removeProcessItem.bind(null, item.id, id)}
+                              description={item.description}
+                              compact
+                            />
+                          </div>
+                        </details>
                         {total > 0 && (
                           <>
                             <div className="flex items-center gap-3 mt-2 text-xs">
@@ -607,7 +692,7 @@ export default async function ProcessDetailPage({
                   })}
                 </ul>
               )}
-              <AddItemForm action={boundAddItem} products={productRows} />
+              <AddItemForm action={boundAddItem} />
             </section>
           </div>
 
