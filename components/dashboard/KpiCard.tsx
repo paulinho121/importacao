@@ -46,56 +46,61 @@ export function KpiCard({
   const content = (
     <BorderRotate
       animationMode="rotate-on-hover"
-      borderWidth={1.5}
-      borderRadius={16}
-      className="h-full p-3.5 shadow-sm transition-shadow group-hover:shadow-md"
+      borderWidth={1}
+      borderRadius={12}
+      className="h-full px-3 py-2 shadow-sm transition-shadow group-hover:shadow-md"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-1.5">
         <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded [&>svg]:h-3 [&>svg]:w-3"
           style={{ backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
         >
           {icon}
         </div>
-        {trend && (
-          <span
-            className={cn(
-              "flex items-center gap-0.5 text-[11px] font-medium",
-              trend.direction === "flat"
-                ? "text-muted-foreground"
-                : trendGood
-                  ? "text-success"
-                  : "text-destructive",
-            )}
-          >
-            {trend.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
-            {trend.direction === "down" && <ArrowDownRight className="h-3 w-3" />}
-            {trend.direction === "flat" ? (
-              <>
-                <Minus className="h-3 w-3" />
-                Estável
-              </>
-            ) : (
-              `${trend.value}%`
-            )}
-          </span>
+        <p className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground" title={label}>
+          {label}
+        </p>
+        {href && (
+          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         )}
       </div>
 
-      <p className="mt-2.5 text-xl font-bold tracking-tight text-on-surface truncate" title={value}>
-        {value}
-      </p>
-      <p className="mt-0.5 text-xs text-muted-foreground truncate">{label}</p>
-
-      {sparklineData && sparklineData.length > 1 && (
-        <div className="mt-2 -mx-1">
-          <Sparkline data={sparklineData} color={accent} height={24} />
+      <div className="mt-1 flex items-end justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold leading-tight tracking-tight text-on-surface" title={value}>
+            {value}
+          </p>
+          {trend && (
+            <span
+              className={cn(
+                "flex items-center gap-0.5 text-[10px] font-medium leading-none",
+                trend.direction === "flat"
+                  ? "text-muted-foreground"
+                  : trendGood
+                    ? "text-success"
+                    : "text-destructive",
+              )}
+            >
+              {trend.direction === "up" && <ArrowUpRight className="h-2.5 w-2.5" />}
+              {trend.direction === "down" && <ArrowDownRight className="h-2.5 w-2.5" />}
+              {trend.direction === "flat" ? (
+                <>
+                  <Minus className="h-2.5 w-2.5" />
+                  Estável
+                </>
+              ) : (
+                `${trend.value}%`
+              )}
+            </span>
+          )}
         </div>
-      )}
 
-      {href && (
-        <ChevronRight className="absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-      )}
+        {sparklineData && sparklineData.length > 1 && (
+          <div className="hidden w-14 shrink-0 sm:block 2xl:hidden">
+            <Sparkline data={sparklineData} color={accent} height={22} />
+          </div>
+        )}
+      </div>
     </BorderRotate>
   );
 

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionHeader } from "@/components/shared/SectionHeader";
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
     <div className="space-y-6 pb-12">
       <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
 
-      <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
+      <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-3 lg:grid-cols-5 lg:px-6 2xl:grid-cols-9">
         <KpiCard
           icon={<ClipboardList className="h-4 w-4" />}
           label="Pedidos em Aberto"
@@ -119,6 +120,19 @@ export default async function DashboardPage() {
           accent="var(--chart-1)"
           href="/processos"
         />
+      </div>
+
+      <div className="px-4 lg:px-6">
+        <div className="relative aspect-[2/1] overflow-hidden rounded-card border border-border sm:aspect-[3/1]">
+          <Image
+            src="/banner-dashboard.png"
+            alt="Sistema Integrado de Importação — conectando o mundo por mar e ar"
+            fill
+            priority
+            sizes="(min-width: 1024px) 80vw, 100vw"
+            className="object-cover object-center"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
