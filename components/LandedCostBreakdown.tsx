@@ -11,7 +11,7 @@ export default function LandedCostBreakdown({
   usedFallbackQuantity: boolean;
 }) {
   return (
-    <div className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <div className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Custo Pousado</h3>
       <p className="text-xs text-on-surface-variant mb-4">
         Rateio do Valor Aduaneiro + contas a pagar + tributos por item — calculado a cada

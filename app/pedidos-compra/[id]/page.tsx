@@ -263,7 +263,7 @@ export default async function PedidoCompraDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-md">
         <div className="lg:col-span-8 space-y-stack-md">
-          <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+          <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
             <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">Itens do Pedido</h3>
             {items.length === 0 ? (
               <p className="text-on-surface-variant font-body-sm text-body-sm">Nenhum item adicionado ainda.</p>
@@ -333,7 +333,7 @@ export default async function PedidoCompraDetailPage({
           <ContainerEstimate items={containerEstimateItems} />
 
           {po.notes && (
-            <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+            <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
               <h3 className="font-headline-sm text-headline-sm text-primary mb-2">Observações</h3>
               <p className="text-body-sm font-body-sm text-on-surface-variant whitespace-pre-wrap">{po.notes}</p>
             </section>
@@ -341,7 +341,7 @@ export default async function PedidoCompraDetailPage({
         </div>
 
         <div className="lg:col-span-4">
-          <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm space-y-4">
+          <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm space-y-4">
             <h3 className="font-headline-sm text-headline-sm text-primary">Status</h3>
 
             {po.status === "RASCUNHO" && (

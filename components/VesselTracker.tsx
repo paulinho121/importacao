@@ -51,7 +51,7 @@ export default function VesselTracker({
   const hasPosition = Boolean(vessel.vesselLat && vessel.vesselLon);
 
   return (
-    <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <div className="flex items-center justify-between mb-stack-md">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">directions_boat</span>

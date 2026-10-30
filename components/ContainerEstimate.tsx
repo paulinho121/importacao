@@ -14,7 +14,7 @@ export default function ContainerEstimate({ items }: { items: ItemEstimateInput[
   const suggestions = totalCbm > 0 ? suggestContainers(totalCbm, totalWeightKg) : [];
 
   return (
-    <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Estimativa de Container</h3>
       <p className="text-xs text-on-surface-variant mb-4">
         Calculado a partir da cubagem de carton cadastrada no catálogo (Produtos → Especificações de

@@ -338,7 +338,7 @@ export default async function ProcessDetailPage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
-        <div className="lg:col-span-4 bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+        <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-stack-md">
             <h3 className="font-headline-sm text-headline-sm text-primary">Workflow</h3>
             <span className="text-xs text-on-surface-variant font-medium">
@@ -361,8 +361,8 @@ export default async function ProcessDetailPage({
                       state === "done"
                         ? "bg-secondary text-white"
                         : state === "active"
-                          ? "border-2 border-secondary bg-white text-secondary"
-                          : "border-2 border-outline-variant bg-white text-outline"
+                          ? "border-2 border-secondary bg-surface-container-lowest text-secondary"
+                          : "border-2 border-outline-variant bg-surface-container-lowest text-outline"
                     }`}
                   >
                     {state === "done" ? (
@@ -409,7 +409,7 @@ export default async function ProcessDetailPage({
 
         <div className="lg:col-span-8 space-y-stack-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
-            <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+            <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
               <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
                 Dados do Processo
               </h3>
@@ -514,7 +514,7 @@ export default async function ProcessDetailPage({
               )}
             </section>
 
-            <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+            <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
               <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
                 Itens do Processo
               </h3>
@@ -776,7 +776,7 @@ export default async function ProcessDetailPage({
             />
           )}
 
-          <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+          <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-stack-md">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">description</span>
@@ -839,7 +839,7 @@ export default async function ProcessDetailPage({
             </div>
           </section>
 
-          <section className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+          <section className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div className="px-gutter py-4 bg-surface-container flex items-center justify-between">
               <h3 className="font-label-md text-label-md text-primary uppercase tracking-wider">
                 Follow-up e Histórico

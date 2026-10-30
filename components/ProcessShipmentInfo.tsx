@@ -37,7 +37,7 @@ export default function ProcessShipmentInfo({
   const boundUpdate = updateShipmentInfo.bind(null, processId);
 
   return (
-    <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <div className="flex items-center justify-between mb-stack-md gap-3">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">local_shipping</span>

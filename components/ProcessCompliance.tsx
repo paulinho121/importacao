@@ -50,7 +50,7 @@ export default function ProcessCompliance({
   const boundAddLpco = addProcessLpco.bind(null, processId);
 
   return (
-    <section className="bg-white border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
         Compliance / LPCOs
       </h3>
