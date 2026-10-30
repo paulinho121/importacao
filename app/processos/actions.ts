@@ -25,6 +25,7 @@ import {
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 import { fetchVesselPosition } from "@/lib/datalastic";
 import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
+import { getCurrentUser } from "@/lib/supabase-server";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -141,8 +142,78 @@ export async function addProcessInvoice(processId: string, formData: FormData) {
   const invoiceNumber = optionalText(formData, "invoiceNumber");
   if (!invoiceNumber) throw new Error("Número da invoice é obrigatório.");
 
-  await db.insert(processInvoices).values({ processId, invoiceNumber });
+  // Opcional — vazio = invoice do fornecedor do próprio processo.
+  const supplierId = optionalText(formData, "supplierId");
+
+  await db.insert(processInvoices).values({ processId, invoiceNumber, supplierId });
   revalidatePath(`/processos/${processId}`);
+}
+
+// Dados de embarque que a planilha do time acompanhava em colunas soltas
+// (Tipo de Embarque, Referência do Agente, Rastreio, Fechamento, DUIMP).
+export async function updateShipmentInfo(processId: string, formData: FormData) {
+  const trackingUrl = optionalText(formData, "trackingUrl");
+  if (trackingUrl && !/^https?:\/\//i.test(trackingUrl)) {
+    throw new Error("O link de rastreio precisa começar com http:// ou https://.");
+  }
+
+  await db
+    .update(processes)
+    .set({
+      externalReference: optionalText(formData, "externalReference"),
+      containerType: optionalText(formData, "containerType"),
+      trackingNumber: optionalText(formData, "trackingNumber"),
+      trackingUrl,
+      closedAt: optionalDate(formData, "closedAt"),
+      customsDeclarationNumber: optionalText(formData, "customsDeclarationNumber"),
+      updatedAt: new Date(),
+    })
+    .where(eq(processes.id, processId));
+
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  redirect(withFlash(`/processos/${processId}`, "Dados do embarque salvos."));
+}
+
+// Follow-up: andamento digitado à mão (substitui as colunas de texto solto
+// da planilha). Gravado em process_events com origin "Manual · nome" — é
+// essa marca que libera a exclusão (eventos automáticos de status/etapa
+// não podem ser apagados por aqui). Data guardada ao meio-dia UTC pra o
+// dia não "virar" ao exibir no fuso do Brasil.
+export async function addProcessFollowUp(processId: string, formData: FormData) {
+  const text = optionalText(formData, "text");
+  if (!text) throw new Error("Descreva o andamento antes de registrar.");
+
+  const date = optionalDate(formData, "date");
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Data inválida.");
+
+  const user = await getCurrentUser();
+  const author = user?.name || user?.email || "usuário";
+
+  await db.insert(processEvents).values({
+    processId,
+    eventDate: date ? new Date(`${date}T12:00:00Z`) : new Date(),
+    eventType: text,
+    origin: `Manual · ${author}`,
+  });
+
+  revalidatePath(`/processos/${processId}`);
+  redirect(withFlash(`/processos/${processId}`, "Andamento registrado."));
+}
+
+export async function removeProcessFollowUp(eventId: string, processId: string) {
+  const [ev] = await db
+    .select({ origin: processEvents.origin })
+    .from(processEvents)
+    .where(and(eq(processEvents.id, eventId), eq(processEvents.processId, processId)));
+  if (!ev?.origin?.startsWith("Manual")) {
+    throw new Error("Só é possível remover andamentos registrados manualmente.");
+  }
+
+  await db.delete(processEvents).where(eq(processEvents.id, eventId));
+
+  revalidatePath(`/processos/${processId}`);
+  redirect(withFlash(`/processos/${processId}`, "Andamento removido."));
 }
 
 export async function updateProcessInvoiceValue(

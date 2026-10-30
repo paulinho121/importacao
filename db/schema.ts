@@ -282,6 +282,20 @@ export const processes = pgTable("processes", {
   currentStep: integer("current_step").notNull().default(1),
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
   volumeM3: numeric("volume_m3", { precision: 10, scale: 2 }),
+  // Dados de embarque vistos na planilha "Fluxo de Importação" do time —
+  // todos opcionais, preenchidos conforme o processo avança.
+  // containerType: "Tipo de Embarque" (ex: FCL 40' HC, 40' NOR, Consolidated,
+  // Courier) — texto livre porque a planilha mistura tipo de container com
+  // tipo de carga aérea; `modal` continua sendo a classificação estruturada.
+  containerType: text("container_type"),
+  // Nº de rastreio: B/L ou AWB (a coluna "IMO" da planilha misturava isso
+  // com IMO de navio; o IMO continua em vesselImo) ou código courier.
+  trackingNumber: text("tracking_number"),
+  trackingUrl: text("tracking_url"),
+  // Data de fechamento do processo (coluna "FECHAMENTO" da planilha).
+  closedAt: date("closed_at"),
+  // Nº da DUIMP/DI registrada.
+  customsDeclarationNumber: text("customs_declaration_number"),
   notes: text("notes"),
   // Rastreamento AIS (só relevante para modal marítimo). vesselImo/Mmsi são
   // identificadores digitados manualmente — a API de rastreamento não
@@ -333,6 +347,11 @@ export const processInvoices = pgTable("process_invoices", {
     .notNull()
     .references(() => processes.id, { onDelete: "cascade" }),
   invoiceNumber: text("invoice_number").notNull(),
+  // Embarque consolidado (ex: Swit + Aputure no mesmo processo) tem uma
+  // invoice por fornecedor — processes.supplierId continua sendo o
+  // fornecedor principal; aqui fica o dono real de cada invoice. Opcional:
+  // vazio = fornecedor do processo.
+  supplierId: uuid("supplier_id").references(() => suppliers.id, { onDelete: "set null" }),
   // Valor FOB declarado desta invoice, na moeda de processes.currency.
   value: numeric("value", { precision: 12, scale: 2 }),
   createdAt: timestamp("created_at", { withTimezone: true })

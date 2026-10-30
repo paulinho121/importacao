@@ -11,8 +11,15 @@ export const LOCATIONS = [
   { code: "BRIOA", city: "Itapoá", state: "SC" },
   { code: "BRSFS", city: "São Francisco do Sul", state: "SC" },
   { code: "BRPEC", city: "Pecém", state: "CE" },
+  { code: "VCP", city: "Viracopos - Campinas", state: "SP" },
+  // Entrega direta na filial (courier/consolidado que não passa pelo
+  // armazém do porto/aeroporto) — a planilha do time usa "🚚 MCI Filial
+  // SP/SC" na mesma coluna de destino.
+  { code: "FIL-SP", city: "MCI Filial SP", state: "SP" },
+  { code: "FIL-SC", city: "MCI Filial SC", state: "SC" },
 ] as const;
 
 export function locationLabel(code: string, city: string, state: string): string {
+  if (code.startsWith("FIL-")) return city;
   return `${code} - ${city} (${state})`;
 }

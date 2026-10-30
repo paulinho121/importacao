@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddItemForm from "@/components/AddItemForm";
 import AbandonProcessButton from "@/components/AbandonProcessButton";
+import ProcessShipmentInfo from "@/components/ProcessShipmentInfo";
+import ProcessFollowUpForm from "@/components/ProcessFollowUpForm";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import ProcessCompliance from "@/components/ProcessCompliance";
@@ -22,7 +24,7 @@ import {
   freightAgents,
   itemReservations,
 } from "@/db/schema";
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, getTableColumns, inArray } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
   STATUS_LABEL,
@@ -38,6 +40,7 @@ import {
   updateProcessStatus,
   updateProcessNumber,
   abandonProcess,
+  removeProcessFollowUp,
   addProcessItem,
   addProcessInvoice,
   addItemReservation,
@@ -90,6 +93,11 @@ export default async function ProcessDetailPage({
       exchangeRate: processes.exchangeRate,
       exchangeRateDate: processes.exchangeRateDate,
       customsChannel: processes.customsChannel,
+      containerType: processes.containerType,
+      trackingNumber: processes.trackingNumber,
+      trackingUrl: processes.trackingUrl,
+      closedAt: processes.closedAt,
+      customsDeclarationNumber: processes.customsDeclarationNumber,
       vesselName: processes.vesselName,
       vesselImo: processes.vesselImo,
       vesselMmsi: processes.vesselMmsi,
@@ -110,7 +118,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, productRows, invoices, lpcos, payables] = await Promise.all([
+  const [items, events, documents, productRows, invoices, lpcos, payables, supplierOptions] = await Promise.all([
     db
       .select({
         id: processItems.id,
@@ -140,13 +148,18 @@ export default async function ProcessDetailPage({
       .select({ id: products.id, sku: products.sku, description: products.description })
       .from(products)
       .orderBy(products.sku),
-    db.select().from(processInvoices).where(eq(processInvoices.processId, id)),
+    db
+      .select({ ...getTableColumns(processInvoices), supplierName: suppliers.name })
+      .from(processInvoices)
+      .leftJoin(suppliers, eq(processInvoices.supplierId, suppliers.id))
+      .where(eq(processInvoices.processId, id)),
     db.select().from(processLpcos).where(eq(processLpcos.processId, id)),
     db
       .select()
       .from(processPayables)
       .where(eq(processPayables.processId, id))
       .orderBy(processPayables.dueDate),
+    db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
   ]);
 
   const itemIds = items.map((item) => item.id);
@@ -428,18 +441,34 @@ export default async function ProcessDetailPage({
                         className="px-2 py-1 rounded bg-surface-container-low font-mono-data text-xs"
                       >
                         {inv.invoiceNumber}
+                        {inv.supplierName && inv.supplierId !== process.supplierId && (
+                          <span className="ml-1.5 font-body-sm text-outline">· {inv.supplierName}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
                 )}
-                <form action={boundAddInvoice} className="flex gap-2">
+                <form action={boundAddInvoice} className="flex flex-wrap gap-2">
                   <input
-                    className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm font-mono-data focus:outline-none focus:border-secondary transition-all"
+                    className="flex-1 min-w-[160px] bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm font-mono-data focus:outline-none focus:border-secondary transition-all"
                     placeholder="Nova invoice"
                     type="text"
                     name="invoiceNumber"
                     required
                   />
+                  <select
+                    name="supplierId"
+                    defaultValue=""
+                    aria-label="Fornecedor da invoice"
+                    className="bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+                  >
+                    <option value="">Fornecedor do processo</option>
+                    {supplierOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="submit"
                     className="px-3 py-2 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
@@ -630,6 +659,18 @@ export default async function ProcessDetailPage({
             }))}
           />
 
+          <ProcessShipmentInfo
+            processId={id}
+            shipment={{
+              externalReference: process.externalReference,
+              containerType: process.containerType,
+              trackingNumber: process.trackingNumber,
+              trackingUrl: process.trackingUrl,
+              closedAt: process.closedAt,
+              customsDeclarationNumber: process.customsDeclarationNumber,
+            }}
+          />
+
           {(process.modal === "SEA_FCL" || process.modal === "SEA_LCL") && (
             <VesselTracker
               processId={id}
@@ -715,9 +756,10 @@ export default async function ProcessDetailPage({
           <section className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div className="px-gutter py-4 bg-surface-container flex items-center justify-between">
               <h3 className="font-label-md text-label-md text-primary uppercase tracking-wider">
-                Histórico de Eventos
+                Follow-up e Histórico
               </h3>
             </div>
+            <ProcessFollowUpForm processId={id} />
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -726,28 +768,49 @@ export default async function ProcessDetailPage({
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">EVENTO</th>
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">ORIGEM</th>
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">STATUS</th>
+                    <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">
+                      <span className="sr-only">Ações</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
                   {events.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-on-surface-variant">
+                      <td colSpan={5} className="px-6 py-4 text-on-surface-variant">
                         Nenhum evento registrado.
                       </td>
                     </tr>
                   )}
-                  {events.map((ev) => (
-                    <tr key={ev.id} className="hover:bg-surface-container-high transition-colors">
-                      <td className="px-6 py-3 font-mono-data">
-                        {new Date(ev.eventDate).toLocaleString("pt-BR")}
-                      </td>
-                      <td className="px-6 py-3 font-medium">{ev.eventType}</td>
-                      <td className="px-6 py-3">{ev.origin ?? "—"}</td>
-                      <td className="px-6 py-3">
-                        {ev.statusAtEvent ? STATUS_LABEL[ev.statusAtEvent as ProcessStatus] : "—"}
-                      </td>
-                    </tr>
-                  ))}
+                  {events.map((ev) => {
+                    const isManual = ev.origin?.startsWith("Manual") ?? false;
+                    return (
+                      <tr key={ev.id} className="hover:bg-surface-container-high transition-colors">
+                        <td className="px-6 py-3 font-mono-data whitespace-nowrap">
+                          {isManual
+                            ? new Date(ev.eventDate).toLocaleDateString("pt-BR", { timeZone: "UTC" })
+                            : new Date(ev.eventDate).toLocaleString("pt-BR")}
+                        </td>
+                        <td className="px-6 py-3 font-medium">{ev.eventType}</td>
+                        <td className="px-6 py-3">{ev.origin ?? "—"}</td>
+                        <td className="px-6 py-3">
+                          {ev.statusAtEvent ? STATUS_LABEL[ev.statusAtEvent as ProcessStatus] : "—"}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          {isManual && (
+                            <form action={removeProcessFollowUp.bind(null, ev.id, id)}>
+                              <button
+                                type="submit"
+                                className="text-error hover:underline text-xs"
+                                aria-label="Remover andamento"
+                              >
+                                Remover
+                              </button>
+                            </form>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
