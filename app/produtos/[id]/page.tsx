@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/ProductForm";
+import ProductLpcoPanel from "@/components/ProductLpcoPanel";
 import { updateProduct, resolveNcmDivergence, addPriceTier, removePriceTier } from "@/app/produtos/actions";
 import { db } from "@/db/client";
-import { products, suppliers, productPriceTiers } from "@/db/schema";
+import { products, suppliers, productPriceTiers, productLpcos } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { formatDate } from "@/lib/status";
 
@@ -18,13 +19,14 @@ export default async function EditProdutoPage({
 
   if (!product) notFound();
 
-  const [supplierRows, tiers] = await Promise.all([
+  const [supplierRows, tiers, lpcos] = await Promise.all([
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
     db
       .select()
       .from(productPriceTiers)
       .where(eq(productPriceTiers.productId, id))
       .orderBy(asc(productPriceTiers.minQuantity)),
+    db.select().from(productLpcos).where(eq(productLpcos.productId, id)),
   ]);
 
   const boundUpdate = updateProduct.bind(null, id);
@@ -152,6 +154,8 @@ export default async function EditProdutoPage({
         </form>
       </div>
 
+      <ProductLpcoPanel productId={id} lpcos={lpcos} />
+
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
         <ProductForm
           action={boundUpdate}
@@ -160,6 +164,9 @@ export default async function EditProdutoPage({
             manufacturerSku: product.manufacturerSku,
             ncm: product.ncm,
             description: product.description,
+            longDescription: product.longDescription,
+            publicConsultationDate: product.publicConsultationDate,
+            hasPublicConsultation: product.hasPublicConsultation,
             defaultSupplierId: product.defaultSupplierId,
             costPrice: product.costPrice,
             costCurrency: product.costCurrency,

@@ -32,6 +32,7 @@ export const LANDING_LOCATIONS = LOCATIONS.filter((l) => !l.code.startsWith("FIL
 export const BRANCHES = [
   { code: "SP", label: "MCI Filial SP" },
   { code: "SC", label: "MCI Filial SC" },
+  { code: "CE", label: "MCI Filial CE" },
 ] as const;
 
 export function branchLabel(code: string | null | undefined): string {

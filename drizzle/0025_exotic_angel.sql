@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "long_description" text;

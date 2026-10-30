@@ -15,6 +15,7 @@ export type ProductFormValues = {
   manufacturerSku?: string | null;
   ncm?: string | null;
   description?: string | null;
+  longDescription?: string | null;
   defaultSupplierId?: string | null;
   costPrice?: string | null;
   costCurrency?: string | null;
@@ -26,6 +27,8 @@ export type ProductFormValues = {
   licenseRegisteredAt?: string | null;
   licenseStatus?: string | null;
   publicConsultationRef?: string | null;
+  publicConsultationDate?: string | null;
+  hasPublicConsultation?: boolean | null;
   licenseApprovedAt?: string | null;
   customsBrokerRef?: string | null;
   active?: boolean | null;
@@ -57,7 +60,7 @@ export default function ProductForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="sm:col-span-2">
           <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-            Descrição do Produto
+            Nome do Produto
           </label>
           <input
             className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
@@ -123,9 +126,23 @@ export default function ProductForm({
             ))}
           </select>
         </div>
+        <div className="sm:col-span-2">
+          <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+            Descrição do Produto
+          </label>
+          <textarea
+            className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
+            placeholder="Descrição detalhada do produto (opcional)"
+            name="longDescription"
+            rows={4}
+            defaultValue={defaultValues?.longDescription ?? ""}
+          />
+        </div>
       </div>
 
-      <div className="pt-6 border-t border-outline-variant">
+      {/* Ocultos por enquanto: continuam no formulário (só escondidos) pra os
+          valores já cadastrados não serem apagados ao salvar o produto. */}
+      <div className="hidden pt-6 border-t border-outline-variant" aria-hidden>
         <h3 className="font-headline-sm text-headline-sm text-primary mb-1">
           Preço de Compra e Markup
         </h3>
@@ -190,7 +207,7 @@ export default function ProductForm({
         )}
       </div>
 
-      <div className="pt-6 border-t border-outline-variant">
+      <div className="hidden pt-6 border-t border-outline-variant" aria-hidden>
         <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Tributos (NCM)</h3>
         <p className="text-xs text-on-surface-variant mb-4">
           Alíquotas de importação cadastradas manualmente (sem integração com a tabela TEC) — usadas
@@ -444,6 +461,33 @@ export default function ProductForm({
               name="publicConsultationRef"
               defaultValue={defaultValues?.publicConsultationRef ?? ""}
             />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Data da CP
+            </label>
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
+              type="date"
+              name="publicConsultationDate"
+              defaultValue={defaultValues?.publicConsultationDate ?? ""}
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+              Status da CP
+            </label>
+            <select
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+              name="hasPublicConsultation"
+              defaultValue={
+                defaultValues?.hasPublicConsultation == null ? "" : defaultValues.hasPublicConsultation ? "sim" : "nao"
+              }
+            >
+              <option value="">Não informado</option>
+              <option value="sim">Já possui</option>
+              <option value="nao">Não possui</option>
+            </select>
           </div>
           <div>
             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">

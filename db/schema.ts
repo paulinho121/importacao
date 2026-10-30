@@ -427,6 +427,15 @@ export const products = pgTable("products", {
   id: uuid("id").primaryKey().defaultRandom(),
   sku: text("sku").notNull().unique(),
   manufacturerSku: text("manufacturer_sku"),
+  // `description` é o NOME do produto (usado em listas, buscas e itens);
+  // longDescription é a descrição detalhada, texto livre opcional.
+  longDescription: text("long_description"),
+  // Consulta Pública (CP): data, e se o produto já possui licença aprovada
+  // identificada na consulta (null = não informado). A identificação da CP
+  // fica em publicConsultationRef. As solicitações de LPCO (por filial, com
+  // histórico) ficam em productLpcos.
+  publicConsultationDate: date("public_consultation_date"),
+  hasPublicConsultation: boolean("has_public_consultation"),
   ncm: text("ncm"),
   // Licenciamento de importação ("Inciso V") — visto na aba "BD Itens
   // Amparados Inciso V" da planilha. Todos opcionais: nem todo produto
@@ -724,3 +733,27 @@ export const locations = pgTable(
   },
   (t) => [unique("locations_code_kind_unique").on(t.code, t.kind)],
 );
+
+// Solicitações de LPCO de um produto, separadas por filial MCI (SP/SC/CE) e
+// com histórico — novas solicitações viram novas linhas, nunca sobrescrevem
+// as anteriores. O deferimento vale por LPCO_REUSE_DAYS (lib/lpco.ts) a
+// partir de approvedAt, contado individualmente em cada filial.
+export const productLpcos = pgTable("product_lpcos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  branch: text("branch").notNull(), // SP | SC | CE
+  status: text("status").notNull().default("NAO_SOLICITADO"), // NAO_SOLICITADO | EM_ANALISE | DEFERIDO | INDEFERIDO
+  requestedAt: date("requested_at"),
+  approvedAt: date("approved_at"),
+  lpcoNumber: text("lpco_number"),
+  technicalSheet: boolean("technical_sheet"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});

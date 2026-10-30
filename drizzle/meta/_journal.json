@@ -176,6 +176,20 @@
       "when": 1793384111860,
       "tag": "0024_lyrical_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793390164264,
+      "tag": "0025_exotic_angel",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793390367703,
+      "tag": "0026_thin_liz_osborn",
+      "breakpoints": true
     }
   ]
 }

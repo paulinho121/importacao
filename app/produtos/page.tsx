@@ -1,8 +1,11 @@
 import Link from "next/link";
 import SupplierFilterSelect from "@/components/SupplierFilterSelect";
 import { db } from "@/db/client";
-import { products, suppliers, processItems } from "@/db/schema";
-import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { products, suppliers, processItems, productLpcos } from "@/db/schema";
+import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { BRANCHES } from "@/lib/locations";
+import { LPCO_TONE_CLASS, lpcoTone, lpcoValidUntil, productLpcoStatusLabel } from "@/lib/lpco";
+import { formatDate } from "@/lib/status";
 import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +61,7 @@ export default async function ProdutosPage({
         ncmOfficialSuggested: products.ncmOfficialSuggested,
         description: products.description,
         licenseStatus: products.licenseStatus,
+        hasPublicConsultation: products.hasPublicConsultation,
         costPrice: products.costPrice,
         costCurrency: products.costCurrency,
         markupPercent: products.markupPercent,
@@ -89,6 +93,27 @@ export default async function ProdutosPage({
       .groupBy(suppliers.id, suppliers.name)
       .orderBy(suppliers.name),
   ]);
+
+  // Solicitações de LPCO dos produtos listados, agrupadas por produto pra
+  // mostrar o indicador por filial (a mais recente de cada filial).
+  const lpcoRows = rows.length
+    ? await db
+        .select()
+        .from(productLpcos)
+        .where(
+          inArray(
+            productLpcos.productId,
+            rows.map((r) => r.id),
+          ),
+        )
+    : [];
+  const latestLpco = new Map<string, (typeof lpcoRows)[number]>();
+  for (const l of lpcoRows) {
+    const key = `${l.productId}:${l.branch}`;
+    const cur = latestLpco.get(key);
+    const stamp = l.requestedAt ?? l.approvedAt ?? "";
+    if (!cur || stamp > (cur.requestedAt ?? cur.approvedAt ?? "")) latestLpco.set(key, l);
+  }
 
   return (
     <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
@@ -165,8 +190,10 @@ export default async function ProdutosPage({
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SKU INTERNO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SKU FABRICANTE</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NCM</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DESCRIÇÃO</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NOME</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CP</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PREÇO SUGERIDO</th>
@@ -177,7 +204,7 @@ export default async function ProdutosPage({
             <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-6 py-6 text-on-surface-variant text-center">
+                  <td colSpan={12} className="px-6 py-6 text-on-surface-variant text-center">
                     {q
                       ? "Nenhum produto encontrado para essa busca."
                       : onlyDivergent
@@ -213,6 +240,40 @@ export default async function ProdutosPage({
                   </td>
                   <td className="px-6 py-3 font-medium">{p.description}</td>
                   <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
+                  <td className="px-6 py-3">
+                    {p.hasPublicConsultation === null ? (
+                      "—"
+                    ) : (
+                      <span
+                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${
+                          p.hasPublicConsultation ? LPCO_TONE_CLASS.ok : LPCO_TONE_CLASS.none
+                        }`}
+                      >
+                        {p.hasPublicConsultation ? "Já possui" : "Não possui"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-3">
+                    <Link href={`/produtos/${p.id}`} className="flex gap-1.5">
+                      {BRANCHES.map((b) => {
+                        const l = latestLpco.get(`${p.id}:${b.code}`);
+                        const tone = l ? lpcoTone(l) : "none";
+                        const until = l?.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt) : null;
+                        const title = l
+                          ? `${b.label}: ${productLpcoStatusLabel(l.status)}${until ? ` (até ${formatDate(until)})` : ""}`
+                          : `${b.label}: sem solicitação`;
+                        return (
+                          <span
+                            key={b.code}
+                            title={title}
+                            className={`px-1.5 py-0.5 rounded font-label-md text-label-md ${LPCO_TONE_CLASS[tone]}`}
+                          >
+                            {b.code}
+                          </span>
+                        );
+                      })}
+                    </Link>
+                  </td>
                   <td className="px-6 py-3">
                     {p.licenseStatus ? (
                       <span

@@ -1,11 +1,13 @@
 "use server";
 
 import { db } from "@/db/client";
-import { products, productPriceTiers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { products, productPriceTiers, productLpcos } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
+import { BRANCHES } from "@/lib/locations";
+import { PRODUCT_LPCO_STATUSES } from "@/lib/lpco";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -16,15 +18,66 @@ function optionalNumber(formData: FormData, key: string) {
   return raw ? raw : null;
 }
 
+function optionalBool(formData: FormData, key: string): boolean | null {
+  const raw = String(formData.get(key) ?? "").trim();
+  if (raw === "sim") return true;
+  if (raw === "nao") return false;
+  return null;
+}
+
+function readLpcoForm(formData: FormData) {
+  const branch = String(formData.get("branch") ?? "").trim();
+  if (!BRANCHES.some((b) => b.code === branch)) throw new Error("Escolha a filial da solicitação.");
+  const status = String(formData.get("status") ?? "").trim();
+  if (!PRODUCT_LPCO_STATUSES.some((s) => s.value === status)) throw new Error("Status do LPCO inválido.");
+  const requestedAt = optionalText(formData, "requestedAt");
+  const approvedAt = optionalText(formData, "approvedAt");
+  if (status === "DEFERIDO" && !approvedAt) throw new Error("Informe a data de deferimento do LPCO.");
+  return {
+    branch,
+    status,
+    requestedAt,
+    approvedAt,
+    lpcoNumber: optionalText(formData, "lpcoNumber"),
+    technicalSheet: optionalBool(formData, "technicalSheet"),
+    notes: optionalText(formData, "notes"),
+  };
+}
+
+export async function addProductLpco(productId: string, formData: FormData) {
+  await db.insert(productLpcos).values({ productId, ...readLpcoForm(formData) });
+  revalidatePath(`/produtos/${productId}`);
+  revalidatePath("/produtos");
+  redirect(withFlash(`/produtos/${productId}`, "Solicitação de LPCO registrada."));
+}
+
+export async function updateProductLpco(lpcoId: string, productId: string, formData: FormData) {
+  await db
+    .update(productLpcos)
+    .set({ ...readLpcoForm(formData), updatedAt: new Date() })
+    .where(and(eq(productLpcos.id, lpcoId), eq(productLpcos.productId, productId)));
+  revalidatePath(`/produtos/${productId}`);
+  revalidatePath("/produtos");
+  redirect(withFlash(`/produtos/${productId}`, "Solicitação de LPCO atualizada."));
+}
+
+export async function removeProductLpco(lpcoId: string, productId: string) {
+  await db.delete(productLpcos).where(and(eq(productLpcos.id, lpcoId), eq(productLpcos.productId, productId)));
+  revalidatePath(`/produtos/${productId}`);
+  revalidatePath("/produtos");
+  redirect(withFlash(`/produtos/${productId}`, "Solicitação de LPCO removida."));
+}
+
 function readProductForm(formData: FormData) {
   const sku = String(formData.get("sku") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   if (!sku) throw new Error("SKU interno é obrigatório.");
-  if (!description) throw new Error("Descrição é obrigatória.");
+  if (!description) throw new Error("Nome do produto é obrigatório.");
   return {
     sku,
     description,
     manufacturerSku: optionalText(formData, "manufacturerSku"),
+    longDescription: optionalText(formData, "longDescription"),
     ncm: optionalText(formData, "ncm"),
     defaultSupplierId: optionalText(formData, "defaultSupplierId"),
     costPrice: optionalNumber(formData, "costPrice"),
@@ -42,6 +95,8 @@ function readProductForm(formData: FormData) {
       | (typeof products.$inferInsert)["licenseStatus"]
       | null,
     publicConsultationRef: optionalText(formData, "publicConsultationRef"),
+    publicConsultationDate: optionalText(formData, "publicConsultationDate"),
+    hasPublicConsultation: optionalBool(formData, "hasPublicConsultation"),
     licenseApprovedAt: optionalText(formData, "licenseApprovedAt"),
     customsBrokerRef: optionalText(formData, "customsBrokerRef"),
     active: formData.get("active") === "on",
