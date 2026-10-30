@@ -190,6 +190,13 @@
       "when": 1793390367703,
       "tag": "0026_thin_liz_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793391792218,
+      "tag": "0027_classy_living_lightning",
+      "breakpoints": true
     }
   ]
 }

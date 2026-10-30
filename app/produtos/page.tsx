@@ -1,5 +1,7 @@
 import Link from "next/link";
 import SupplierFilterSelect from "@/components/SupplierFilterSelect";
+import CpListUpload from "@/components/CpListUpload";
+import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import { db } from "@/db/client";
 import { products, suppliers, processItems, productLpcos } from "@/db/schema";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
@@ -13,9 +15,9 @@ export const dynamic = "force-dynamic";
 export default async function ProdutosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; divergente?: string; semPreco?: string; fornecedor?: string }>;
+  searchParams: Promise<{ q?: string; divergente?: string; semPreco?: string; fornecedor?: string; lista?: string }>;
 }) {
-  const { q = "", divergente = "", semPreco = "", fornecedor = "" } = await searchParams;
+  const { q = "", divergente = "", semPreco = "", fornecedor = "", lista = "" } = await searchParams;
   const onlyDivergent = divergente === "1";
   const onlyNoPrice = semPreco === "1";
 
@@ -26,12 +28,14 @@ export default async function ProdutosPage({
       divergente: onlyDivergent ? "1" : "",
       semPreco: onlyNoPrice ? "1" : "",
       fornecedor,
+      lista,
       ...overrides,
     };
     if (merged.q) params.set("q", merged.q);
     if (merged.divergente === "1") params.set("divergente", "1");
     if (merged.semPreco === "1") params.set("semPreco", "1");
     if (merged.fornecedor) params.set("fornecedor", merged.fornecedor);
+    if (merged.lista) params.set("lista", merged.lista);
     const qs = params.toString();
     return qs ? `/produtos?${qs}` : "/produtos";
   }
@@ -48,9 +52,11 @@ export default async function ProdutosPage({
     onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
     onlyNoPrice ? isNull(products.costPrice) : undefined,
     fornecedor ? eq(products.defaultSupplierId, fornecedor) : undefined,
+    lista === "deferido" ? inArray(products.cpListResult, ["FOUND", "FOUND_NATIONAL"]) : undefined,
+    lista === "nao" ? eq(products.cpListResult, "NOT_FOUND") : undefined,
   ].filter((c) => c !== undefined);
 
-  const [rows, [{ divergentCount }], [{ noPriceCount }], supplierOptions] = await Promise.all([
+  const [rows, [{ divergentCount }], [{ noPriceCount }], supplierOptions, [cpSummary]] = await Promise.all([
     db
       .select({
         id: products.id,
@@ -62,6 +68,8 @@ export default async function ProdutosPage({
         description: products.description,
         licenseStatus: products.licenseStatus,
         hasPublicConsultation: products.hasPublicConsultation,
+        cpListResult: products.cpListResult,
+        cpListRef: products.cpListRef,
         costPrice: products.costPrice,
         costCurrency: products.costCurrency,
         markupPercent: products.markupPercent,
@@ -92,6 +100,15 @@ export default async function ProdutosPage({
       .innerJoin(products, eq(products.defaultSupplierId, suppliers.id))
       .groupBy(suppliers.id, suppliers.name)
       .orderBy(suppliers.name),
+    db
+      .select({
+        found: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND')`.mapWith(Number),
+        foundNational: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND_NATIONAL')`.mapWith(Number),
+        notFound: sql<number>`count(*) filter (where ${products.cpListResult} = 'NOT_FOUND')`.mapWith(Number),
+        checkedAt: sql<Date | null>`max(${products.cpListCheckedAt})`,
+        source: sql<string | null>`max(${products.cpListSource})`,
+      })
+      .from(products),
   ]);
 
   // Solicitações de LPCO dos produtos listados, agrupadas por produto pra
@@ -182,6 +199,39 @@ export default async function ProdutosPage({
         )}
       </div>
 
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 space-y-3">
+        <div>
+          <h3 className="font-headline-sm text-headline-sm text-primary">Lista pública de apurações (Decex)</h3>
+          <p className="text-on-surface-variant font-body-sm text-body-sm">
+            Envie a planilha .ods &quot;Relação dos resultados das apurações de produção nacional&quot; baixada do site do
+            governo. O sistema confere cada produto pelo SKU do fabricante (ou SKU interno) e marca quem já consta como
+            deferido.
+          </p>
+        </div>
+        <CpListUpload />
+        {cpSummary.checkedAt ? (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-on-surface-variant">
+            <span>
+              Última conferência: {new Date(cpSummary.checkedAt).toLocaleString("pt-BR")} — {cpSummary.source}
+            </span>
+            <Link
+              href={buildQuery({ lista: lista === "deferido" ? "" : "deferido" })}
+              className={`px-2 py-0.5 rounded-full font-bold ${CP_LIST_RESULT_CLASS.FOUND} ${lista === "deferido" ? "ring-2 ring-secondary" : ""}`}
+            >
+              Constam: {cpSummary.found + cpSummary.foundNational}
+            </Link>
+            <Link
+              href={buildQuery({ lista: lista === "nao" ? "" : "nao" })}
+              className={`px-2 py-0.5 rounded-full font-bold ${CP_LIST_RESULT_CLASS.NOT_FOUND} ${lista === "nao" ? "ring-2 ring-secondary" : ""}`}
+            >
+              Não constam: {cpSummary.notFound}
+            </Link>
+          </div>
+        ) : (
+          <p className="text-xs text-on-surface-variant">Nenhuma conferência feita ainda.</p>
+        )}
+      </section>
+
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -193,6 +243,7 @@ export default async function ProdutosPage({
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NOME</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CP</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LISTA DECEX</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
@@ -204,7 +255,7 @@ export default async function ProdutosPage({
             <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="px-6 py-6 text-on-surface-variant text-center">
+                  <td colSpan={13} className="px-6 py-6 text-on-surface-variant text-center">
                     {q
                       ? "Nenhum produto encontrado para essa busca."
                       : onlyDivergent
@@ -251,6 +302,19 @@ export default async function ProdutosPage({
                       >
                         {p.hasPublicConsultation ? "Já possui" : "Não possui"}
                       </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-3">
+                    {p.cpListResult ? (
+                      <span
+                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS[p.cpListResult as CpListResult]}`}
+                        title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}
+                      >
+                        {CP_LIST_RESULT_LABEL[p.cpListResult as CpListResult]}
+                        {p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : ""}
+                      </span>
+                    ) : (
+                      "—"
                     )}
                   </td>
                   <td className="px-6 py-3">

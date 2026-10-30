@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/ProductForm";
 import ProductLpcoPanel from "@/components/ProductLpcoPanel";
+import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import { updateProduct, resolveNcmDivergence, addPriceTier, removePriceTier } from "@/app/produtos/actions";
 import { db } from "@/db/client";
 import { products, suppliers, productPriceTiers, productLpcos } from "@/db/schema";
@@ -153,6 +154,23 @@ export default async function EditProdutoPage({
           </button>
         </form>
       </div>
+
+      {product.cpListResult && (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-6 flex flex-wrap items-center gap-3">
+          <span
+            className={`px-2.5 py-1 rounded-full font-label-md text-label-md ${CP_LIST_RESULT_CLASS[product.cpListResult as CpListResult]}`}
+          >
+            {CP_LIST_RESULT_LABEL[product.cpListResult as CpListResult]}
+          </span>
+          <span className="text-body-sm font-body-sm text-on-surface-variant">
+            Lista pública do governo
+            {product.cpListRef ? ` · CP ${product.cpListRef}` : ""}
+            {product.cpListNcm ? ` · NCM ${product.cpListNcm}` : ""}
+            {product.cpListCheckedAt ? ` · conferido em ${new Date(product.cpListCheckedAt).toLocaleDateString("pt-BR")}` : ""}
+            {product.cpListSource ? ` (${product.cpListSource})` : ""}
+          </span>
+        </div>
+      )}
 
       <ProductLpcoPanel productId={id} lpcos={lpcos} />
 

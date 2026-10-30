@@ -436,6 +436,15 @@ export const products = pgTable("products", {
   // histórico) ficam em productLpcos.
   publicConsultationDate: date("public_consultation_date"),
   hasPublicConsultation: boolean("has_public_consultation"),
+  // Resultado da última varredura contra a lista pública do governo
+  // ("Relação dos resultados das apurações de produção nacional", enviada
+  // manualmente em .ods): FOUND (consta = deferido), FOUND_NATIONAL (consta,
+  // mas com fabricante nacional informado) ou NOT_FOUND (não consta ainda).
+  cpListResult: text("cp_list_result"),
+  cpListRef: text("cp_list_ref"), // CP(s) em que o item aparece na lista (ex: "35/26")
+  cpListNcm: text("cp_list_ncm"), // NCM informada na lista
+  cpListCheckedAt: timestamp("cp_list_checked_at", { withTimezone: true }),
+  cpListSource: text("cp_list_source"), // nome do arquivo conferido
   ncm: text("ncm"),
   // Licenciamento de importação ("Inciso V") — visto na aba "BD Itens
   // Amparados Inciso V" da planilha. Todos opcionais: nem todo produto

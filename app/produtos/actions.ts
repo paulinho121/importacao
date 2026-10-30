@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { products, productPriceTiers, productLpcos } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
@@ -178,4 +178,59 @@ export async function addPriceTier(productId: string, formData: FormData) {
 export async function removePriceTier(tierId: string, productId: string) {
   await db.delete(productPriceTiers).where(eq(productPriceTiers.id, tierId));
   revalidatePath(`/produtos/${productId}`);
+}
+
+// ---- Varredura da lista pública do governo (ver lib/cp-list.ts) -----------
+
+// Catálogo enxuto que o navegador usa pra conferir a planilha localmente.
+export async function getProductsForCpList() {
+  return db
+    .select({ id: products.id, sku: products.sku, manufacturerSku: products.manufacturerSku })
+    .from(products);
+}
+
+type CpListPayload = {
+  source: string;
+  listDate: string | null;
+  matches: { productId: string; result: "FOUND" | "FOUND_NATIONAL"; ref: string; ncm: string | null }[];
+};
+
+// Grava o resultado da conferência: todo produto é marcado como conferido
+// (NOT_FOUND por padrão) e os que aparecem na lista recebem o resultado, a(s)
+// CP(s) e a NCM da lista. Quem consta como deferido (FOUND) passa a ter
+// "Status da CP = Já possui" e, se estava vazia, a Ref. Consulta Pública.
+export async function applyCpListResults(payload: CpListPayload) {
+  const now = new Date();
+  const source = payload.listDate ? `${payload.source} (atualizada em ${payload.listDate})` : payload.source;
+  const validMatches = payload.matches.filter((m) => /^[0-9a-f-]{36}$/i.test(m.productId));
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(products)
+      .set({ cpListResult: "NOT_FOUND", cpListRef: null, cpListNcm: null, cpListCheckedAt: now, cpListSource: source });
+
+    for (const m of validMatches) {
+      await tx
+        .update(products)
+        .set({
+          cpListResult: m.result,
+          cpListRef: m.ref || null,
+          cpListNcm: m.ncm,
+          ...(m.result === "FOUND" ? { hasPublicConsultation: true } : {}),
+        })
+        .where(eq(products.id, m.productId));
+      if (m.result === "FOUND" && m.ref) {
+        await tx
+          .update(products)
+          .set({ publicConsultationRef: `Consulta Pública nº ${m.ref.split(", ")[0]}` })
+          .where(and(eq(products.id, m.productId), or(isNull(products.publicConsultationRef), eq(products.publicConsultationRef, ""))));
+      }
+    }
+  });
+
+  revalidatePath("/produtos");
+  return {
+    found: validMatches.filter((m) => m.result === "FOUND").length,
+    foundNational: validMatches.filter((m) => m.result === "FOUND_NATIONAL").length,
+  };
 }
