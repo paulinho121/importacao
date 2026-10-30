@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Fragment } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -19,24 +18,6 @@ import {
 import { DOC_TYPES_PER_PROCESS } from "@/lib/dashboard-metrics";
 
 export const dynamic = "force-dynamic";
-
-// Ordem de exibição dos grupos por status quando a lista não está filtrada
-// por um único status — atrasados primeiro (precisam de atenção), depois a
-// ordem natural do fluxo, finalizados e abandonados por último (encerrados,
-// não precisam mais de atenção).
-const STATUS_GROUP_ORDER: ProcessStatus[] = [
-  "ATRASADO",
-  "AGUARDANDO_EMBARQUE",
-  "PEDIDO",
-  "PRODUCAO",
-  "EMBARCADO",
-  "EM_TRANSITO",
-  "EM_DESEMBARACO",
-  "TRANSPORTE_NACIONAL",
-  "RECEBIDO",
-  "CONCLUIDO",
-  "ABANDONADO",
-];
 
 const MODAL_FILTERS = [
   { value: "", label: "Todos", icon: "filter_list" },
@@ -140,21 +121,12 @@ export default async function ProcessosPage({
     .groupBy(processes.id, suppliers.name, suppliers.logoUrl)
     .orderBy(desc(processes.createdAt));
 
-  // Só agrupa por status quando a lista não já está filtrada por um único
-  // status (sub-links da sidebar) — nesse caso todo mundo tem o mesmo
-  // status e o agrupamento seria redundante.
-  const rowsByStatus = new Map<ProcessStatus, typeof rows>();
-  for (const row of rows) {
-    const list = rowsByStatus.get(row.status as ProcessStatus) ?? [];
-    list.push(row);
-    rowsByStatus.set(row.status as ProcessStatus, list);
-  }
-  const groupedRows = status
-    ? [{ status: status as ProcessStatus, items: rows }]
-    : STATUS_GROUP_ORDER.filter((s) => rowsByStatus.has(s)).map((s) => ({
-        status: s,
-        items: rowsByStatus.get(s)!,
-      }));
+  // Lista única, sem faixas de status — o status aparece só na coluna
+  // Status (ou no selo do card). Ordem: número do processo, do maior pro
+  // menor, comparando a parte numérica como número (FIRST29 antes de FIRST04).
+  const sortedRows = [...rows].sort((a, b) =>
+    b.processNumber.localeCompare(a.processNumber, "pt-BR", { numeric: true }),
+  );
 
   return (
     <>
@@ -288,21 +260,7 @@ export default async function ProcessosPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {groupedRows.map((group) => (
-                <Fragment key={group.status}>
-                  {!status && (
-                    <TableRow className="hover:bg-transparent border-b-0">
-                      <TableCell colSpan={8} className="bg-muted/50 py-2.5">
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={group.status} />
-                          <span className="text-xs text-muted-foreground">
-                            {group.items.length} {group.items.length === 1 ? "processo" : "processos"}
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {group.items.map((p) => {
+              {sortedRows.map((p) => {
                     const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
                     return (
                       <TableRow key={p.id} className="cursor-pointer">
@@ -338,27 +296,15 @@ export default async function ProcessosPage({
                       </TableRow>
                     );
                   })}
-                </Fragment>
-              ))}
             </TableBody>
           </Table>
         </div>
       )}
 
       {rows.length > 0 && view !== "list" && (
-      <div className="space-y-8">
-        {groupedRows.map((group) => (
-          <div key={group.status}>
-            {!status && (
-              <div className="mb-3 flex items-center gap-2">
-                <StatusBadge status={group.status} />
-                <span className="text-xs text-muted-foreground">
-                  {group.items.length} {group.items.length === 1 ? "processo" : "processos"}
-                </span>
-              </div>
-            )}
+      <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {group.items.map((p) => {
+        {sortedRows.map((p) => {
           const progress = Math.round((p.currentStep / WORKFLOW_STEPS.length) * 100);
           const badgeClass = STATUS_BADGE_CLASS[p.status as ProcessStatus];
           return (
@@ -439,8 +385,6 @@ export default async function ProcessosPage({
           );
         })}
             </div>
-          </div>
-        ))}
       </div>
       )}
     </div>
