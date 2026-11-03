@@ -228,11 +228,14 @@ export default async function ProdutosPage({
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 space-y-3">
         <div>
-          <h3 className="font-headline-sm text-headline-sm text-primary">Lista pública de apurações (Decex)</h3>
+          <h3 className="font-headline-sm text-headline-sm text-primary">Importar planilhas (CP e LPCO)</h3>
           <p className="text-on-surface-variant font-body-sm text-body-sm">
-            Envie a planilha .ods &quot;Relação dos resultados das apurações de produção nacional&quot; baixada do site do
-            governo. O sistema confere cada produto pelo SKU do fabricante (ou SKU interno) e marca quem já consta como
-            deferido.
+            Aceita dois formatos, reconhecidos automaticamente: a lista pública do governo (.ods, &quot;Relação dos
+            resultados das apurações de produção nacional&quot;), que marca quem já consta como deferido pelo SKU do
+            fabricante (ou SKU interno); e a planilha de controle de LPCOs (.xlsx, colunas LPCO, Produto, Situação,
+            Registro, Deferimento, Validade e UF), que registra os LPCOs de cada produto por estado; e a base de itens
+            do Inciso V (.xlsx, &quot;BD Itens Amparados Inciso V&quot;), que completa NCM, fabricante, exportador,
+            licença e consulta pública dos produtos, sem sobrescrever o que já foi preenchido.
           </p>
         </div>
         <CpListUpload />
@@ -346,8 +349,8 @@ export default async function ProdutosPage({
                       {BRANCHES.map((b) => {
                         const l = latestLpco.get(`${p.id}:${b.code}`);
                         const tone = l ? lpcoTone(l) : "none";
-                        const until = l?.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt) : null;
-                        const countdown = l?.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt) : null;
+                        const until = l?.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt, l.validUntil) : null;
+                        const countdown = l?.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt, undefined, l.validUntil) : null;
                         const title = l
                           ? `${b.label}: ${productLpcoStatusLabel(l.status)}${until ? ` (até ${formatDate(until)})` : ""}`
                           : `${b.label}: sem solicitação`;

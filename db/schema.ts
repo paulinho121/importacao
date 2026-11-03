@@ -765,6 +765,9 @@ export const productLpcos = pgTable("product_lpcos", {
   status: text("status").notNull().default("NAO_SOLICITADO"), // NAO_SOLICITADO | EM_ANALISE | DEFERIDO | INDEFERIDO
   requestedAt: date("requested_at"),
   approvedAt: date("approved_at"),
+  // Validade informada (ex: coluna "Validade" da planilha de controle). Vazia =
+  // approvedAt + LPCO_REUSE_DAYS.
+  validUntil: date("valid_until"),
   lpcoNumber: text("lpco_number"),
   technicalSheet: boolean("technical_sheet"),
   notes: text("notes"),

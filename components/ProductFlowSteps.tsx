@@ -3,7 +3,7 @@ import { LPCO_COUNTDOWN_BAR, LPCO_REUSE_DAYS, lpcoCountdown } from "@/lib/lpco";
 import { hasPublicConsultation, missingRegistrationItems, type ProductFlowInput } from "@/lib/product-flow";
 import { formatDate } from "@/lib/status";
 
-type Lpco = { branch: string; status: string; approvedAt: string | null };
+type Lpco = { branch: string; status: string; approvedAt: string | null; validUntil: string | null };
 type Tone = "done" | "doing" | "todo";
 
 const TONE_CLASS: Record<Tone, string> = {
@@ -63,7 +63,7 @@ export default function ProductFlowSteps({
     const list = lpcos.filter((l) => l.branch === b.code);
     const active = list
       .filter((l) => l.status === "DEFERIDO")
-      .map((l) => ({ l, c: lpcoCountdown(l.approvedAt) }))
+      .map((l) => ({ l, c: lpcoCountdown(l.approvedAt, undefined, l.validUntil) }))
       .filter((x) => x.c !== null)
       .sort((x, y) => y.c!.daysLeft - x.c!.daysLeft)[0];
     const pending = list.some((l) => l.status === "EM_ANALISE");

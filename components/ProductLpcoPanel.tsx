@@ -27,6 +27,7 @@ export type ProductLpcoRow = {
   status: string;
   requestedAt: string | null;
   approvedAt: string | null;
+  validUntil: string | null;
   lpcoNumber: string | null;
   technicalSheet: boolean | null;
   notes: string | null;
@@ -63,6 +64,10 @@ function LpcoFields({ lpco, defaultBranch }: { lpco?: ProductLpcoRow; defaultBra
       <div>
         <label className={LABEL_CLASS}>Data do deferimento</label>
         <input className={INPUT_CLASS} type="date" name="approvedAt" defaultValue={lpco?.approvedAt ?? ""} />
+      </div>
+      <div>
+        <label className={LABEL_CLASS}>Validade (opcional)</label>
+        <input className={INPUT_CLASS} type="date" name="validUntil" defaultValue={lpco?.validUntil ?? ""} />
       </div>
       <div>
         <label className={LABEL_CLASS}>Nº do LPCO</label>
@@ -117,8 +122,8 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
                 <ul className="space-y-3">
                   {list.map((l) => {
                     const tone = lpcoTone(l);
-                    const until = l.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt) : null;
-                    const countdown = l.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt) : null;
+                    const until = l.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt, l.validUntil) : null;
+                    const countdown = l.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt, undefined, l.validUntil) : null;
                     return (
                       <li key={l.id} className="text-body-sm font-body-sm border-b border-outline-variant/50 pb-3 last:border-0 last:pb-0">
                         <div className="flex flex-wrap items-center gap-2">

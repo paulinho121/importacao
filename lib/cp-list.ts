@@ -4,6 +4,9 @@
 // navegador de quem faz o upload — só o resultado da conferência (dezenas
 // de linhas) vai pro servidor, em vez do arquivo inteiro.
 
+import { matchLpcoSheet, parseLpcoSheet, type LpcoSheetImport } from "@/lib/lpco-sheet";
+import { matchIncisoBase, parseIncisoSheet, type IncisoImport } from "@/lib/inciso-base";
+
 export type CpListResult = "FOUND" | "FOUND_NATIONAL" | "FOUND_APPROX" | "NOT_FOUND";
 
 export const CP_LIST_RESULT_LABEL: Record<CpListResult, string> = {
@@ -20,7 +23,7 @@ export const CP_LIST_RESULT_CLASS: Record<CpListResult, string> = {
   NOT_FOUND: "bg-surface-container-high text-on-surface-variant",
 };
 
-export type CpListProduct = { id: string; sku: string; manufacturerSku: string | null };
+export type CpListProduct = { id: string; sku: string; manufacturerSku: string | null; description?: string };
 
 export type CpListMatch = {
   productId: string;
@@ -52,6 +55,52 @@ function cpSortKey(cp: string) {
   return `${(y ?? "").padStart(2, "0")}${(n ?? "").padStart(3, "0")}`;
 }
 
+// Aceita os dois formatos de planilha pelo cabeçalho: a lista pública do
+// governo (.ods) ou a planilha de controle de LPCOs da MCI (.xlsx).
+export type UploadScan =
+  | { kind: "decex"; matches: CpListMatch[] }
+  | { kind: "lpco"; import: LpcoSheetImport }
+  | { kind: "inciso"; import: IncisoImport };
+
+export async function scanUpload(file: File, products: CpListProduct[]): Promise<UploadScan> {
+  const { read, utils } = await import("xlsx");
+  const wb = read(new Uint8Array(await file.arrayBuffer()), { type: "array" });
+
+  // 0) base de itens do Inciso V (cabeçalho "Importador/Solicitante … Modelo …").
+  // Quando há mais de uma aba com o formato, usa a que tem mais itens.
+  const incisoSets = wb.SheetNames.map((name) =>
+    parseIncisoSheet(utils.sheet_to_json<unknown[]>(wb.Sheets[name], { header: 1, defval: "" })),
+  ).filter((r) => r.length > 0);
+  if (incisoSets.length > 0) {
+    const best = incisoSets.sort((a, b) => b.length - a.length)[0];
+    return {
+      kind: "inciso",
+      import: matchIncisoBase(
+        best,
+        products.map((p) => ({ id: p.id, sku: p.sku, manufacturerSku: p.manufacturerSku, description: p.description ?? "" })),
+      ),
+    };
+  }
+
+  // 1) planilha de controle de LPCOs (cabeçalho "LPCO | Produto …")
+  for (const name of wb.SheetNames) {
+    const rows = utils.sheet_to_json<unknown[]>(wb.Sheets[name], { header: 1, defval: "" });
+    const records = parseLpcoSheet(rows);
+    if (records.length > 0) {
+      return {
+        kind: "lpco",
+        import: matchLpcoSheet(
+          records,
+          products.map((p) => ({ id: p.id, sku: p.sku, manufacturerSku: p.manufacturerSku, description: p.description ?? "" })),
+        ),
+      };
+    }
+  }
+
+  // 2) lista pública do governo (cabeçalho "NCM … Modelo / Identificador Decex")
+  return { kind: "decex", matches: scanCpRows(wb, utils, products) };
+}
+
 // Lê o .ods/.xlsx e devolve os produtos do catálogo que aparecem na lista.
 // O casamento é pelo "Modelo / Identificador Decex" (nunca pela descrição, que
 // é texto livre longo) contra o SKU do fabricante ou o SKU interno — o do
@@ -62,13 +111,21 @@ function cpSortKey(cp: string) {
 export async function scanCpList(file: File, products: CpListProduct[]): Promise<CpListMatch[]> {
   const { read, utils } = await import("xlsx");
   const wb = read(new Uint8Array(await file.arrayBuffer()), { type: "array" });
+  return scanCpRows(wb, utils, products);
+}
+
+function scanCpRows(
+  wb: import("xlsx").WorkBook,
+  utils: typeof import("xlsx").utils,
+  products: CpListProduct[],
+): CpListMatch[] {
   const sheetName = wb.SheetNames.find((n) => n.toLowerCase().includes("consolidada")) ?? wb.SheetNames[0];
   const rows = utils.sheet_to_json<unknown[]>(wb.Sheets[sheetName], { header: 1 });
 
   const headerIdx = rows.findIndex((r) => norm(r[0]) === "ncm" && norm(r[4]).startsWith("modelo"));
   if (headerIdx < 0) {
     throw new Error(
-      'Não achei o cabeçalho da lista (NCM … "Modelo / Identificador Decex"). Confira se é o arquivo "Relação dos resultados das apurações de produção nacional".',
+      'Não reconheci a planilha. Formatos aceitos: lista pública do governo (NCM … "Modelo / Identificador Decex"), controle de LPCOs (LPCO, Produto, Situação, Registro, Deferimento, Validade, UF) ou a base de itens do Inciso V (Importador/Solicitante … Modelo).',
     );
   }
 

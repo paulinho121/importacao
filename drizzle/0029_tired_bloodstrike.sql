@@ -1,0 +1,1 @@
+ALTER TABLE "product_lpcos" ADD COLUMN "valid_until" date;

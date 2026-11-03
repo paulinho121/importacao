@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { products, productPriceTiers, productLpcos } from "@/db/schema";
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
@@ -40,6 +40,7 @@ function readLpcoForm(formData: FormData) {
     status,
     requestedAt,
     approvedAt,
+    validUntil: optionalText(formData, "validUntil"),
     lpcoNumber: optionalText(formData, "lpcoNumber"),
     technicalSheet: optionalBool(formData, "technicalSheet"),
     notes: optionalText(formData, "notes"),
@@ -213,7 +214,12 @@ export async function removePriceTier(tierId: string, productId: string) {
 // Catálogo enxuto que o navegador usa pra conferir a planilha localmente.
 export async function getProductsForCpList() {
   return db
-    .select({ id: products.id, sku: products.sku, manufacturerSku: products.manufacturerSku })
+    .select({
+      id: products.id,
+      sku: products.sku,
+      manufacturerSku: products.manufacturerSku,
+      description: products.description,
+    })
     .from(products);
 }
 
@@ -262,4 +268,149 @@ export async function applyCpListResults(payload: CpListPayload) {
     foundNational: validMatches.filter((m) => m.result === "FOUND_NATIONAL").length,
     foundApprox: validMatches.filter((m) => m.result === "FOUND_APPROX").length,
   };
+}
+
+type LpcoSheetPayload = {
+  records: {
+    productId: string;
+    branch: string;
+    status: string;
+    lpcoNumber: string | null;
+    requestedAt: string | null;
+    approvedAt: string | null;
+    validUntil: string | null;
+    notes: string | null;
+  }[];
+};
+
+// Importa as linhas da planilha de controle de LPCOs: cada uma vira (ou
+// atualiza) uma solicitação do produto no estado. O Nº do LPCO identifica a
+// solicitação, então reenviar a mesma planilha atualiza em vez de duplicar.
+export async function applyLpcoSheet(payload: LpcoSheetPayload) {
+  let inserted = 0;
+  let updated = 0;
+  const valid = payload.records.filter(
+    (r) =>
+      /^[0-9a-f-]{36}$/i.test(r.productId) &&
+      BRANCHES.some((b) => b.code === r.branch) &&
+      PRODUCT_LPCO_STATUSES.some((s) => s.value === r.status),
+  );
+
+  await db.transaction(async (tx) => {
+    for (const r of valid) {
+      const values = {
+        branch: r.branch,
+        status: r.status,
+        requestedAt: r.requestedAt,
+        approvedAt: r.approvedAt,
+        validUntil: r.validUntil,
+        lpcoNumber: r.lpcoNumber,
+        notes: r.notes,
+      };
+      const [existing] = r.lpcoNumber
+        ? await tx
+            .select({ id: productLpcos.id })
+            .from(productLpcos)
+            .where(and(eq(productLpcos.productId, r.productId), eq(productLpcos.lpcoNumber, r.lpcoNumber)))
+        : [];
+      if (existing) {
+        await tx.update(productLpcos).set({ ...values, updatedAt: new Date() }).where(eq(productLpcos.id, existing.id));
+        updated++;
+      } else {
+        await tx.insert(productLpcos).values({ productId: r.productId, ...values });
+        inserted++;
+      }
+    }
+  });
+
+  revalidatePath("/produtos");
+  return { inserted, updated };
+}
+
+type IncisoPayloadRecord = {
+  model: string;
+  manufacturerName: string | null;
+  exporterName: string | null;
+  ncmAnterior: string | null;
+  ncm: string | null;
+  longDescription: string | null;
+  publicConsultationRef: string | null;
+  licenseNumber: string | null;
+  licenseRegisteredAt: string | null;
+  licenseApprovedAt: string | null;
+  licenseStatus: string | null;
+  customsBrokerRef: string | null;
+};
+
+const LICENSE_STATUSES = ["A_REGISTRAR", "PARA_ANALISE", "EM_CONSULTA_PUBLICA", "EM_EXIGENCIA", "DEFERIDA", "CANCELADA_INDEFERIDA"] as const;
+type LicenseStatusValue = (typeof LICENSE_STATUSES)[number];
+const asLicenseStatus = (v: string | null): LicenseStatusValue | null =>
+  LICENSE_STATUSES.find((s) => s === v) ?? null;
+
+// Importa a base de itens do Inciso V. Nos produtos que já existem só
+// PREENCHE o que está vazio (nunca sobrescreve o que foi digitado aqui); os
+// itens que não estão no catálogo só são cadastrados se createMissing = true.
+// Item deferido com consulta pública informada passa a "Já possui" na CP.
+export async function applyIncisoBase(payload: {
+  matched: { productId: string; record: IncisoPayloadRecord }[];
+  create: IncisoPayloadRecord[];
+}) {
+  const ids = payload.matched.map((m) => m.productId).filter((id) => /^[0-9a-f-]{36}$/i.test(id));
+  const existing = ids.length ? await db.select().from(products).where(inArray(products.id, ids)) : [];
+  const byId = new Map(existing.map((p) => [p.id, p]));
+  let updated = 0;
+  let created = 0;
+
+  await db.transaction(async (tx) => {
+    for (const { productId, record: r } of payload.matched) {
+      const p = byId.get(productId);
+      if (!p) continue;
+      const set: Partial<typeof products.$inferInsert> = {};
+      if (!p.ncm && r.ncm) set.ncm = r.ncm;
+      if (!p.ncmAnterior && r.ncmAnterior) set.ncmAnterior = r.ncmAnterior;
+      if (!p.manufacturerName && r.manufacturerName) set.manufacturerName = r.manufacturerName;
+      if (!p.exporterName && r.exporterName) set.exporterName = r.exporterName;
+      if (!p.longDescription && r.longDescription) set.longDescription = r.longDescription;
+      if (!p.licenseNumber && r.licenseNumber) set.licenseNumber = r.licenseNumber;
+      if (!p.licenseRegisteredAt && r.licenseRegisteredAt) set.licenseRegisteredAt = r.licenseRegisteredAt;
+      if (!p.licenseApprovedAt && r.licenseApprovedAt) set.licenseApprovedAt = r.licenseApprovedAt;
+      if (!p.licenseStatus && asLicenseStatus(r.licenseStatus)) set.licenseStatus = asLicenseStatus(r.licenseStatus);
+      if (!p.publicConsultationRef && r.publicConsultationRef) set.publicConsultationRef = r.publicConsultationRef;
+      if (!p.customsBrokerRef && r.customsBrokerRef) set.customsBrokerRef = r.customsBrokerRef;
+      if (!p.cpStatus && r.licenseStatus === "DEFERIDA" && r.publicConsultationRef) set.cpStatus = "POSSUI";
+      if (Object.keys(set).length === 0) continue;
+      await tx.update(products).set({ ...set, updatedAt: new Date() }).where(eq(products.id, productId));
+      updated++;
+    }
+
+    if (payload.create.length > 0) {
+      const taken = new Set((await tx.select({ sku: products.sku }).from(products)).map((p) => p.sku.toLowerCase()));
+      for (const r of payload.create) {
+        const sku = r.model.trim();
+        if (!sku || taken.has(sku.toLowerCase())) continue;
+        taken.add(sku.toLowerCase());
+        await tx.insert(products).values({
+          sku,
+          manufacturerSku: sku,
+          description: sku,
+          longDescription: r.longDescription,
+          ncm: r.ncm,
+          ncmAnterior: r.ncmAnterior,
+          manufacturerName: r.manufacturerName,
+          exporterName: r.exporterName,
+          licenseNumber: r.licenseNumber,
+          licenseRegisteredAt: r.licenseRegisteredAt,
+          licenseApprovedAt: r.licenseApprovedAt,
+          licenseStatus: asLicenseStatus(r.licenseStatus),
+          publicConsultationRef: r.publicConsultationRef,
+          customsBrokerRef: r.customsBrokerRef,
+          cpStatus: r.licenseStatus === "DEFERIDA" && r.publicConsultationRef ? "POSSUI" : null,
+        });
+        created++;
+      }
+    }
+  });
+
+  revalidatePath("/produtos");
+  return { updated, created };
 }
