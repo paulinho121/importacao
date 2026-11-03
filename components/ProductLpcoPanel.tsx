@@ -6,8 +6,10 @@ import {
 import DeleteExternalImportItemButton from "@/components/DeleteExternalImportItemButton";
 import { BRANCHES } from "@/lib/locations";
 import {
+  LPCO_COUNTDOWN_BAR,
   LPCO_REUSE_DAYS,
   LPCO_TONE_CLASS,
+  lpcoCountdown,
   PRODUCT_LPCO_STATUSES,
   lpcoTone,
   lpcoValidUntil,
@@ -94,10 +96,11 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
 
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
-      <h3 className="font-headline-sm text-headline-sm text-primary mb-1">LPCO por Filial</h3>
+      <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Benefício por Estado (LPCO)</h3>
       <p className="text-on-surface-variant font-body-sm text-body-sm mb-4">
-        Solicitações independentes por filial, com histórico. Um LPCO deferido pode ser reutilizado por{" "}
-        {LPCO_REUSE_DAYS} dias a partir da data de deferimento (contado em cada filial).
+        Peça o benefício para o estado (filial) em que o pedido vai seguir — SP, SC ou CE. Cada solicitação é
+        independente e fica no histórico. O benefício deferido vale {LPCO_REUSE_DAYS} dias a partir da data de
+        deferimento (contagem separada em cada estado).
       </p>
 
       <div className="space-y-4">
@@ -115,6 +118,7 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
                   {list.map((l) => {
                     const tone = lpcoTone(l);
                     const until = l.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt) : null;
+                    const countdown = l.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt) : null;
                     return (
                       <li key={l.id} className="text-body-sm font-body-sm border-b border-outline-variant/50 pb-3 last:border-0 last:pb-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -133,6 +137,21 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
                           {" · "}Deferimento: {l.status === "DEFERIDO" ? formatDate(l.approvedAt) : "aguardando"}
                           {until && ` · Reutilizável até ${formatDate(until)}`}
                         </p>
+                        {countdown && (
+                          <div className="mt-1.5">
+                            <div className="h-2 rounded-full bg-surface-container-high overflow-hidden">
+                              <div
+                                className={`h-full ${LPCO_COUNTDOWN_BAR[countdown.level]}`}
+                                style={{ width: `${countdown.pctLeft}%` }}
+                              />
+                            </div>
+                            <p className="mt-0.5 text-xs font-medium">
+                              {countdown.expired
+                                ? `Benefício vencido há ${Math.abs(countdown.daysLeft)} dias`
+                                : `Faltam ${countdown.daysLeft} de ${countdown.total} dias`}
+                            </p>
+                          </div>
+                        )}
                         {l.notes && <p className="mt-0.5 text-xs text-on-surface-variant">{l.notes}</p>}
                         <details className="mt-1.5">
                           <summary className="cursor-pointer text-xs text-secondary hover:underline list-none inline-flex items-center gap-1">

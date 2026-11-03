@@ -6,7 +6,7 @@ import { db } from "@/db/client";
 import { products, suppliers, processItems, productLpcos } from "@/db/schema";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { BRANCHES } from "@/lib/locations";
-import { LPCO_TONE_CLASS, lpcoTone, lpcoValidUntil, productLpcoStatusLabel } from "@/lib/lpco";
+import { LPCO_TONE_CLASS, lpcoCountdown, lpcoTone, lpcoValidUntil, productLpcoStatusLabel } from "@/lib/lpco";
 import { formatDate } from "@/lib/status";
 import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
@@ -67,7 +67,7 @@ export default async function ProdutosPage({
         ncmOfficialSuggested: products.ncmOfficialSuggested,
         description: products.description,
         licenseStatus: products.licenseStatus,
-        hasPublicConsultation: products.hasPublicConsultation,
+        photoUrl: products.photoUrl,
         cpListResult: products.cpListResult,
         cpListRef: products.cpListRef,
         costPrice: products.costPrice,
@@ -288,7 +288,19 @@ export default async function ProdutosPage({
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-3 font-medium">{p.description}</td>
+                  <td className="px-6 py-3 font-medium">
+                    <div className="flex items-center gap-3">
+                      {p.photoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element -- foto pode vir de qualquer link externo
+                        <img
+                          src={p.photoUrl}
+                          alt=""
+                          className="h-9 w-9 shrink-0 rounded border border-outline-variant object-contain bg-white"
+                        />
+                      )}
+                      {p.description}
+                    </div>
+                  </td>
                   <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
                   <td className="px-6 py-3">
                     {p.licenseStatus ? (
@@ -320,13 +332,18 @@ export default async function ProdutosPage({
                         const l = latestLpco.get(`${p.id}:${b.code}`);
                         const tone = l ? lpcoTone(l) : "none";
                         const until = l?.status === "DEFERIDO" ? lpcoValidUntil(l.approvedAt) : null;
+                        const countdown = l?.status === "DEFERIDO" ? lpcoCountdown(l.approvedAt) : null;
                         const title = l
                           ? `${b.label}: ${productLpcoStatusLabel(l.status)}${until ? ` (até ${formatDate(until)})` : ""}`
                           : `${b.label}: sem solicitação`;
                         return (
                           <span key={b.code} title={title} className="flex flex-col items-center gap-0.5">
                             <span className="h-3 text-[10px] leading-3 text-on-surface-variant whitespace-nowrap">
-                              {tone === "wait" ? "em análise" : ""}
+                              {tone === "wait"
+                                ? "em análise"
+                                : countdown && !countdown.expired
+                                  ? `${countdown.daysLeft}d`
+                                  : ""}
                             </span>
                             <span className={`px-1.5 py-0.5 rounded font-label-md text-label-md ${LPCO_TONE_CLASS[tone]}`}>
                               {b.code}

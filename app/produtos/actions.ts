@@ -8,6 +8,8 @@ import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
 import { BRANCHES } from "@/lib/locations";
 import { PRODUCT_LPCO_STATUSES } from "@/lib/lpco";
+import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
+import { supabaseAdmin, LOGOS_BUCKET } from "@/lib/supabase-admin";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -68,6 +70,28 @@ export async function removeProductLpco(lpcoId: string, productId: string) {
   redirect(withFlash(`/produtos/${productId}`, "Solicitação de LPCO removida."));
 }
 
+// Foto do produto: arquivo enviado (PNG/JPEG/WebP, vai pro Storage) ou link
+// externo. Devolve só o que mudou — {} deixa a foto atual como está.
+async function resolvePhoto(formData: FormData): Promise<{ photoUrl?: string | null }> {
+  const file = formData.get("photoFile");
+  if (file instanceof File && file.size > 0) {
+    const ext = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" }[file.type];
+    if (!ext) throw new Error("A foto precisa ser PNG, JPEG ou WebP (ou cole um link).");
+    if (file.size > 4 * 1024 * 1024) throw new Error("A foto passa de 4 MB — reduza o tamanho ou use um link.");
+    const path = `produtos/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabaseAdmin.storage.from(LOGOS_BUCKET).upload(path, file, { contentType: file.type });
+    if (error) throw new Error(`Falha no upload da foto: ${error.message}`);
+    return { photoUrl: supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl };
+  }
+  const link = optionalText(formData, "photoUrl");
+  if (link) {
+    if (!/^https?:\/\//i.test(link)) throw new Error("O link da foto precisa começar com http:// ou https://.");
+    return { photoUrl: link };
+  }
+  if (formData.get("removePhoto") === "on") return { photoUrl: null };
+  return {};
+}
+
 function readProductForm(formData: FormData) {
   const sku = String(formData.get("sku") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -96,7 +120,11 @@ function readProductForm(formData: FormData) {
       | null,
     publicConsultationRef: optionalText(formData, "publicConsultationRef"),
     publicConsultationDate: optionalText(formData, "publicConsultationDate"),
-    hasPublicConsultation: optionalBool(formData, "hasPublicConsultation"),
+    cpStatus: (() => {
+      const v = optionalText(formData, "cpStatus");
+      return v && CP_STATUS_OPTIONS.some((o) => o.value === v) ? v : null;
+    })(),
+    cpRequestedAt: optionalText(formData, "cpRequestedAt"),
     licenseApprovedAt: optionalText(formData, "licenseApprovedAt"),
     customsBrokerRef: optionalText(formData, "customsBrokerRef"),
     active: formData.get("active") === "on",
@@ -118,14 +146,14 @@ function readProductForm(formData: FormData) {
 }
 
 export async function createProduct(formData: FormData) {
-  const values = readProductForm(formData);
+  const values = { ...readProductForm(formData), ...(await resolvePhoto(formData)) };
   const [created] = await db.insert(products).values(values).returning({ id: products.id });
   revalidatePath("/produtos");
   redirect(withFlash(`/produtos/${created.id}`, "Produto cadastrado."));
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const values = readProductForm(formData);
+  const values = { ...readProductForm(formData), ...(await resolvePhoto(formData)) };
   await db
     .update(products)
     .set({ ...values, updatedAt: new Date() })
@@ -216,7 +244,7 @@ export async function applyCpListResults(payload: CpListPayload) {
           cpListResult: m.result,
           cpListRef: m.ref || null,
           cpListNcm: m.ncm,
-          ...(m.result === "FOUND" ? { hasPublicConsultation: true } : {}),
+          ...(m.result === "FOUND" ? { hasPublicConsultation: true, cpStatus: "POSSUI" } : {}),
         })
         .where(eq(products.id, m.productId));
       if (m.result === "FOUND" && m.ref) {

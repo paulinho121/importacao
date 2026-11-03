@@ -1,4 +1,9 @@
 import { CURRENCIES } from "@/lib/currencies";
+import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
+
+const FIELD_INPUT =
+  "w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all";
+const FIELD_LABEL = "block font-label-md text-label-md text-on-surface-variant mb-2";
 
 const LICENSE_STATUS_OPTIONS = [
   { value: "", label: "Sem licença / não se aplica" },
@@ -28,7 +33,9 @@ export type ProductFormValues = {
   licenseStatus?: string | null;
   publicConsultationRef?: string | null;
   publicConsultationDate?: string | null;
-  hasPublicConsultation?: boolean | null;
+  photoUrl?: string | null;
+  cpStatus?: string | null;
+  cpRequestedAt?: string | null;
   licenseApprovedAt?: string | null;
   customsBrokerRef?: string | null;
   active?: boolean | null;
@@ -127,6 +134,40 @@ export default function ProductForm({
           </select>
         </div>
         <div className="sm:col-span-2">
+          <label className={FIELD_LABEL}>Foto do produto</label>
+          <div className="flex flex-col sm:flex-row gap-4">
+            {defaultValues?.photoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- foto pode vir de qualquer link externo
+              <img
+                src={defaultValues.photoUrl}
+                alt="Foto do produto"
+                className="h-28 w-28 shrink-0 rounded-lg border border-outline-variant object-contain bg-white"
+              />
+            )}
+            <div className="flex-1 space-y-2">
+              <input
+                type="file"
+                name="photoFile"
+                accept="image/png,image/jpeg,image/webp"
+                className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
+              />
+              <input
+                className={FIELD_INPUT}
+                type="url"
+                name="photoUrl"
+                placeholder="…ou cole o link da imagem (https://…)"
+              />
+              <p className="text-xs text-on-surface-variant">PNG, JPEG ou WebP, até 4 MB — ou um link.</p>
+              {defaultValues?.photoUrl && (
+                <label className="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+                  <input type="checkbox" name="removePhoto" className="rounded border-outline-variant" />
+                  Remover a foto atual
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="sm:col-span-2">
           <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
             Descrição do Produto
           </label>
@@ -137,6 +178,59 @@ export default function ProductForm({
             rows={4}
             defaultValue={defaultValues?.longDescription ?? ""}
           />
+        </div>
+      </div>
+
+      <div className="pt-6 border-t border-outline-variant">
+        <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Consulta Pública (CP)</h3>
+        <p className="text-xs text-on-surface-variant mb-4">
+          Confira se o item já tem consulta pública (a varredura da lista do governo em Produtos faz isso). Se não
+          tiver, solicite e acompanhe por aqui.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label className={FIELD_LABEL}>Situação da CP</label>
+            <select
+              className={`${FIELD_INPUT} appearance-none`}
+              name="cpStatus"
+              defaultValue={defaultValues?.cpStatus ?? ""}
+            >
+              <option value="">Ainda não verificado</option>
+              {CP_STATUS_OPTIONS.filter((o) => o.value !== "NAO_VERIFICADO").map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={FIELD_LABEL}>Ref. Consulta Pública</label>
+            <input
+              className={FIELD_INPUT}
+              placeholder="ex: Consulta Pública nº 17/21"
+              type="text"
+              name="publicConsultationRef"
+              defaultValue={defaultValues?.publicConsultationRef ?? ""}
+            />
+          </div>
+          <div>
+            <label className={FIELD_LABEL}>Data da solicitação da CP</label>
+            <input
+              className={FIELD_INPUT}
+              type="date"
+              name="cpRequestedAt"
+              defaultValue={defaultValues?.cpRequestedAt ?? ""}
+            />
+          </div>
+          <div>
+            <label className={FIELD_LABEL}>Data da CP (resultado)</label>
+            <input
+              className={FIELD_INPUT}
+              type="date"
+              name="publicConsultationDate"
+              defaultValue={defaultValues?.publicConsultationDate ?? ""}
+            />
+          </div>
         </div>
       </div>
 
@@ -449,45 +543,6 @@ export default function ProductForm({
               name="licenseRegisteredAt"
               defaultValue={defaultValues?.licenseRegisteredAt ?? ""}
             />
-          </div>
-          <div>
-            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-              Ref. Consulta Pública
-            </label>
-            <input
-              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
-              placeholder="ex: Consulta Pública nº 17/21"
-              type="text"
-              name="publicConsultationRef"
-              defaultValue={defaultValues?.publicConsultationRef ?? ""}
-            />
-          </div>
-          <div>
-            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-              Data da CP
-            </label>
-            <input
-              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
-              type="date"
-              name="publicConsultationDate"
-              defaultValue={defaultValues?.publicConsultationDate ?? ""}
-            />
-          </div>
-          <div>
-            <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-              Status da CP
-            </label>
-            <select
-              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
-              name="hasPublicConsultation"
-              defaultValue={
-                defaultValues?.hasPublicConsultation == null ? "" : defaultValues.hasPublicConsultation ? "sim" : "nao"
-              }
-            >
-              <option value="">Não informado</option>
-              <option value="sim">Já possui</option>
-              <option value="nao">Não possui</option>
-            </select>
           </div>
           <div>
             <label className="block font-label-md text-label-md text-on-surface-variant mb-2">

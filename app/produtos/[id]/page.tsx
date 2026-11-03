@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/ProductForm";
 import ProductLpcoPanel from "@/components/ProductLpcoPanel";
+import ProductFlowSteps from "@/components/ProductFlowSteps";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import { updateProduct, resolveNcmDivergence, addPriceTier, removePriceTier } from "@/app/produtos/actions";
 import { db } from "@/db/client";
@@ -42,6 +43,7 @@ export default async function EditProdutoPage({
           Editar dados do produto.
         </p>
       </div>
+      <ProductFlowSteps product={product} lpcos={lpcos} />
       {product.ncmDivergent && (
         <div className="bg-warning/10 border border-warning/30 rounded-xl p-6 mb-6 flex gap-4">
           <span className="material-symbols-outlined text-warning text-[24px] shrink-0">warning</span>
@@ -87,7 +89,9 @@ export default async function EditProdutoPage({
             description: product.description,
             longDescription: product.longDescription,
             publicConsultationDate: product.publicConsultationDate,
-            hasPublicConsultation: product.hasPublicConsultation,
+            photoUrl: product.photoUrl,
+            cpStatus: product.cpStatus,
+            cpRequestedAt: product.cpRequestedAt,
             defaultSupplierId: product.defaultSupplierId,
             costPrice: product.costPrice,
             costCurrency: product.costCurrency,

@@ -435,6 +435,15 @@ export const products = pgTable("products", {
   // fica em publicConsultationRef. As solicitações de LPCO (por filial, com
   // histórico) ficam em productLpcos.
   publicConsultationDate: date("public_consultation_date"),
+  // Foto do produto: link externo ou arquivo enviado (png/jpeg/webp) — ver
+  // app/produtos/actions.ts.
+  photoUrl: text("photo_url"),
+  // Etapa "Consulta Pública" do fluxo do produto (lib/product-flow.ts):
+  // NAO_VERIFICADO | POSSUI | NAO_POSSUI | SOLICITADA (em acompanhamento).
+  // Substitui o antigo hasPublicConsultation (boolean), que não expressa
+  // "solicitada"; o boolean continua na tabela mas deixou de ser usado.
+  cpStatus: text("cp_status"),
+  cpRequestedAt: date("cp_requested_at"),
   hasPublicConsultation: boolean("has_public_consultation"),
   // Resultado da última varredura contra a lista pública do governo
   // ("Relação dos resultados das apurações de produção nacional", enviada

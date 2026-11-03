@@ -47,3 +47,36 @@ export const LPCO_TONE_CLASS: Record<LpcoTone, string> = {
   expired: "bg-warning/20 text-warning",
   none: "bg-surface-container-high text-on-surface-variant",
 };
+
+export type LpcoCountdown = {
+  total: number; // duração do benefício (LPCO_REUSE_DAYS)
+  daysLeft: number; // negativo = vencido há N dias
+  expired: boolean;
+  pctLeft: number; // 0-100, pra barra de progresso
+  level: "ok" | "warn" | "danger";
+};
+
+// Contagem do tempo que falta de um LPCO deferido: dias restantes dos
+// LPCO_REUSE_DAYS contados a partir da data de deferimento. Amarelo quando
+// faltam 60 dias ou menos e vermelho com 30 ou menos (ou vencido).
+export function lpcoCountdown(approvedAt: string | null, today = new Date()): LpcoCountdown | null {
+  const until = lpcoValidUntil(approvedAt);
+  if (!until) return null;
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(`${until}T00:00:00Z`).getTime();
+  const daysLeft = Math.round((end - todayUtc) / 86_400_000);
+  const pctLeft = Math.max(0, Math.min(100, (daysLeft / LPCO_REUSE_DAYS) * 100));
+  return {
+    total: LPCO_REUSE_DAYS,
+    daysLeft,
+    expired: daysLeft < 0,
+    pctLeft,
+    level: daysLeft <= 30 ? "danger" : daysLeft <= 60 ? "warn" : "ok",
+  };
+}
+
+export const LPCO_COUNTDOWN_BAR: Record<LpcoCountdown["level"], string> = {
+  ok: "bg-secondary",
+  warn: "bg-warning",
+  danger: "bg-error",
+};
