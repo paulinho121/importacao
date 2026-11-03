@@ -220,7 +220,7 @@ export async function getProductsForCpList() {
 type CpListPayload = {
   source: string;
   listDate: string | null;
-  matches: { productId: string; result: "FOUND" | "FOUND_NATIONAL"; ref: string; ncm: string | null }[];
+  matches: { productId: string; result: "FOUND" | "FOUND_NATIONAL" | "FOUND_APPROX"; ref: string; ncm: string | null }[];
 };
 
 // Grava o resultado da conferência: todo produto é marcado como conferido
@@ -260,5 +260,6 @@ export async function applyCpListResults(payload: CpListPayload) {
   return {
     found: validMatches.filter((m) => m.result === "FOUND").length,
     foundNational: validMatches.filter((m) => m.result === "FOUND_NATIONAL").length,
+    foundApprox: validMatches.filter((m) => m.result === "FOUND_APPROX").length,
   };
 }

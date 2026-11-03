@@ -32,8 +32,8 @@ export default function CpListUpload() {
       });
       toast.success(
         `Varredura concluída: ${res.found} deferido(s), ${res.foundNational} com fabricante nacional, ${
-          catalog.length - res.found - res.foundNational
-        } não constam.`,
+          res.foundApprox
+        } para conferir, ${catalog.length - res.found - res.foundNational - res.foundApprox} não constam.`,
       );
       setMessage("");
       setFileName("");

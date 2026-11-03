@@ -52,7 +52,9 @@ export default async function ProdutosPage({
     onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
     onlyNoPrice ? isNull(products.costPrice) : undefined,
     fornecedor ? eq(products.defaultSupplierId, fornecedor) : undefined,
-    lista === "deferido" ? inArray(products.cpListResult, ["FOUND", "FOUND_NATIONAL"]) : undefined,
+    lista === "deferido" ? eq(products.cpListResult, "FOUND") : undefined,
+    lista === "nacional" ? eq(products.cpListResult, "FOUND_NATIONAL") : undefined,
+    lista === "aprox" ? eq(products.cpListResult, "FOUND_APPROX") : undefined,
     lista === "nao" ? eq(products.cpListResult, "NOT_FOUND") : undefined,
   ].filter((c) => c !== undefined);
 
@@ -104,6 +106,7 @@ export default async function ProdutosPage({
       .select({
         found: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND')`.mapWith(Number),
         foundNational: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND_NATIONAL')`.mapWith(Number),
+        foundApprox: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND_APPROX')`.mapWith(Number),
         notFound: sql<number>`count(*) filter (where ${products.cpListResult} = 'NOT_FOUND')`.mapWith(Number),
         checkedAt: sql<Date | null>`max(${products.cpListCheckedAt})`,
         source: sql<string | null>`max(${products.cpListSource})`,
@@ -156,6 +159,7 @@ export default async function ProdutosPage({
           {onlyDivergent && <input type="hidden" name="divergente" value="1" />}
           {onlyNoPrice && <input type="hidden" name="semPreco" value="1" />}
           {fornecedor && <input type="hidden" name="fornecedor" value={fornecedor} />}
+          {lista && <input type="hidden" name="lista" value={lista} />}
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
             search
           </span>
@@ -197,6 +201,29 @@ export default async function ProdutosPage({
             {onlyNoPrice ? "Mostrando só sem preço — ver todos" : `Sem preço cadastrado (${noPriceCount})`}
           </Link>
         )}
+
+        {cpSummary.checkedAt &&
+          (
+            [
+              { value: "deferido", label: "Deferidos", count: cpSummary.found, on: "bg-secondary text-white border-secondary", off: "bg-tertiary-fixed/40 text-on-tertiary-fixed-variant border-tertiary-fixed hover:bg-tertiary-fixed/70", icon: "verified" },
+              { value: "nacional", label: "Com fabricante nacional", count: cpSummary.foundNational, on: "bg-warning text-warning-foreground border-warning", off: "bg-warning/10 text-warning border-warning/30 hover:bg-warning/20", icon: "factory" },
+              { value: "aprox", label: "Possíveis (conferir)", count: cpSummary.foundApprox, on: "bg-secondary text-white border-secondary", off: "bg-secondary-fixed/40 text-on-secondary-fixed-variant border-secondary-fixed hover:bg-secondary-fixed/70", icon: "help" },
+              { value: "nao", label: "Não constam na lista", count: cpSummary.notFound, on: "bg-secondary text-white border-secondary", off: "bg-surface-container-high text-on-surface-variant border-outline-variant hover:bg-surface-container-highest", icon: "schedule" },
+            ] as const
+          )
+            .filter((c) => c.count > 0)
+            .map((c) => (
+              <Link
+                key={c.value}
+                href={buildQuery({ lista: lista === c.value ? "" : c.value })}
+                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-label-md text-label-md border transition-colors ${
+                  lista === c.value ? c.on : c.off
+                }`}
+              >
+                <span className="material-symbols-outlined text-[18px]">{c.icon}</span>
+                {lista === c.value ? `Mostrando só ${c.label.toLowerCase()} — ver todos` : `${c.label} (${c.count})`}
+              </Link>
+            ))}
       </div>
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 space-y-3">
@@ -214,18 +241,6 @@ export default async function ProdutosPage({
             <span>
               Última conferência: {new Date(cpSummary.checkedAt).toLocaleString("pt-BR")} — {cpSummary.source}
             </span>
-            <Link
-              href={buildQuery({ lista: lista === "deferido" ? "" : "deferido" })}
-              className={`px-2 py-0.5 rounded-full font-bold ${CP_LIST_RESULT_CLASS.FOUND} ${lista === "deferido" ? "ring-2 ring-secondary" : ""}`}
-            >
-              Constam: {cpSummary.found + cpSummary.foundNational}
-            </Link>
-            <Link
-              href={buildQuery({ lista: lista === "nao" ? "" : "nao" })}
-              className={`px-2 py-0.5 rounded-full font-bold ${CP_LIST_RESULT_CLASS.NOT_FOUND} ${lista === "nao" ? "ring-2 ring-secondary" : ""}`}
-            >
-              Não constam: {cpSummary.notFound}
-            </Link>
           </div>
         ) : (
           <p className="text-xs text-on-surface-variant">Nenhuma conferência feita ainda.</p>
