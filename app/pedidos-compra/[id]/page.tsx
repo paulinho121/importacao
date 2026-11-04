@@ -4,6 +4,7 @@ import AddPurchaseOrderItemForm from "@/components/AddPurchaseOrderItemForm";
 import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import ContainerEstimate from "@/components/ContainerEstimate";
 import PurchaseOrderPackingList from "@/components/PurchaseOrderPackingList";
+import PurchaseOrderHistory from "@/components/PurchaseOrderHistory";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, processes, companyBranches } from "@/db/schema";
 import { eq, sql, desc, notInArray } from "drizzle-orm";
@@ -16,6 +17,7 @@ import {
 import {
   addPurchaseOrderItem,
   removePurchaseOrderItem,
+  updatePurchaseOrderItem,
   updatePurchaseOrderStatus,
   updatePurchaseOrder,
   deletePurchaseOrder,
@@ -116,7 +118,10 @@ export default async function PedidoCompraDetailPage({
       cartonWeightKg: item.cartonWeightKg !== null ? Number(item.cartonWeightKg) : null,
     },
   }));
-  const isRascunho = po.status === "RASCUNHO";
+  // Edita em qualquer status, menos Cancelado. Os itens só mudam enquanto o pedido
+  // não está em processo (os itens já foram copiados pra lá).
+  const canEdit = po.status !== "CANCELADO";
+  const canEditItems = canEdit && !po.processId;
   const boundAddItem = addPurchaseOrderItem.bind(null, id);
   const boundUpdateStatus = updatePurchaseOrderStatus.bind(null, id);
   const boundUpdatePo = updatePurchaseOrder.bind(null, id);
@@ -153,7 +158,7 @@ export default async function PedidoCompraDetailPage({
         >
           {PURCHASE_ORDER_STATUS_LABEL[po.status as PurchaseOrderStatus]}
         </span>
-        {isRascunho && (
+        {canEdit && (
           <details className="relative">
             <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
               <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -289,13 +294,15 @@ export default async function PedidoCompraDetailPage({
                       <th className="py-2 pr-3 font-label-md text-right">QTD</th>
                       <th className="py-2 pr-3 font-label-md text-right">PREÇO UNIT.</th>
                       <th className="py-2 pr-3 font-label-md text-right">SUBTOTAL</th>
-                      {isRascunho && <th className="py-2 font-label-md text-right">​</th>}
+                      {canEditItems && <th className="py-2 font-label-md text-right">​</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/50 font-mono-data">
                     {items.map((item) => {
                       const subtotal = Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0);
                       const boundRemove = removePurchaseOrderItem.bind(null, item.id, id);
+                      const boundEditItem = updatePurchaseOrderItem.bind(null, item.id, id);
+                      const editFormId = `edit-item-${item.id}`;
                       return (
                         <tr key={item.id}>
                           <td className="py-2 pr-3 font-body-sm">
@@ -306,12 +313,47 @@ export default async function PedidoCompraDetailPage({
                               </span>
                             )}
                           </td>
-                          <td className="py-2 pr-3 text-right">{item.quantity ?? "—"}</td>
-                          <td className="py-2 pr-3 text-right">{Number(item.unitPrice ?? 0).toFixed(2)}</td>
+                          <td className="py-2 pr-3 text-right">
+                            {canEditItems ? (
+                              <input
+                                form={editFormId}
+                                name="quantity"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue={item.quantity ?? ""}
+                                aria-label="Quantidade"
+                                className="w-20 rounded-md border border-outline-variant bg-surface-container-low px-2 py-1 text-right text-sm focus:border-secondary focus:outline-none"
+                              />
+                            ) : (
+                              (item.quantity ?? "—")
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 text-right">
+                            {canEditItems ? (
+                              <input
+                                form={editFormId}
+                                name="unitPrice"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue={item.unitPrice ?? ""}
+                                aria-label="Preço unitário"
+                                className="w-24 rounded-md border border-outline-variant bg-surface-container-low px-2 py-1 text-right text-sm focus:border-secondary focus:outline-none"
+                              />
+                            ) : (
+                              Number(item.unitPrice ?? 0).toFixed(2)
+                            )}
+                          </td>
                           <td className="py-2 pr-3 text-right font-bold text-primary">{subtotal.toFixed(2)}</td>
-                          {isRascunho && (
-                            <td className="py-2 text-right">
-                              <form action={boundRemove}>
+                          {canEditItems && (
+                            <td className="py-2 whitespace-nowrap text-right">
+                              <form id={editFormId} action={boundEditItem} className="inline">
+                                <button type="submit" className="mr-3 text-xs font-bold text-secondary hover:underline">
+                                  Salvar
+                                </button>
+                              </form>
+                              <form action={boundRemove} className="inline">
                                 <button
                                   type="submit"
                                   className="text-error hover:underline text-xs"
@@ -333,13 +375,20 @@ export default async function PedidoCompraDetailPage({
               </div>
             )}
 
-            {isRascunho && (
+            {canEditItems && (
               <AddPurchaseOrderItemForm
                 action={boundAddItem}
                 supplierId={po.supplierId}
                 supplierName={po.supplierName}
                 hasProducts={catalogCount > 0}
               />
+            )}
+            {canEdit && po.processId && (
+              <p className="mt-3 rounded-lg bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant">
+                Este pedido já está em um processo, então os itens não podem ser alterados aqui. Para mudar os itens,
+                retire o pedido do processo, edite e coloque de novo. Os dados do pedido (número, moeda, incoterm,
+                entrega…) continuam editáveis.
+              </p>
             )}
           </section>
 
@@ -355,7 +404,7 @@ export default async function PedidoCompraDetailPage({
           )}
         </div>
 
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 space-y-stack-md">
           <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm space-y-4">
             <h3 className="font-headline-sm text-headline-sm text-primary">Status</h3>
 
@@ -470,6 +519,8 @@ export default async function PedidoCompraDetailPage({
               </div>
             )}
           </section>
+
+          <PurchaseOrderHistory poId={id} status={po.status} inProcess={Boolean(po.processId)} />
         </div>
       </div>
     </div>

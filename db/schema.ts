@@ -9,6 +9,7 @@ import {
   timestamp,
   boolean,
   unique,
+  index,
 } from "drizzle-orm/pg-core";
 
 // SEA_BREAK_BULK/SEA_RORO adicionados para cobrir os tipos de embarque
@@ -631,6 +632,26 @@ export const purchaseOrderItems = pgTable("purchase_order_items", {
     .notNull()
     .defaultNow(),
 });
+
+// Histórico do pedido de compra: cada passo (criação, edição, itens, status,
+// packing list, entrada no processo) vira uma linha, com quem fez e quando.
+// `eventType` é uma chave fixa (ver lib/purchase-order-events.ts) e
+// `description` o detalhe em texto (ex.: "Moeda: USD → EUR").
+export const purchaseOrderEvents = pgTable(
+  "purchase_order_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    purchaseOrderId: uuid("purchase_order_id")
+      .notNull()
+      .references(() => purchaseOrders.id, { onDelete: "cascade" }),
+    eventType: text("event_type").notNull(),
+    description: text("description"),
+    // nome/e-mail de quem fez, copiado na hora (o histórico não muda se o perfil mudar)
+    userName: text("user_name"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("purchase_order_events_po_idx").on(t.purchaseOrderId, t.createdAt)],
+);
 
 // Arquivos anexados ao pedido de compra — hoje, a Packing List que o fornecedor
 // manda. Quando o pedido entra num processo, a packing list vai junto

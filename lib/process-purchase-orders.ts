@@ -10,6 +10,7 @@ import {
   suppliers,
 } from "@/db/schema";
 import { CLOSED_PROCESS_STATUSES } from "@/lib/status";
+import { logPurchaseOrderEvent } from "@/lib/purchase-order-events";
 
 // Um processo é uma importação (ex.: um contêiner vindo da China) que reúne
 // vários pedidos de compra, de fornecedores diferentes (Aputure, Swit, DZO…).
@@ -60,6 +61,7 @@ export async function linkPurchaseOrderToProcess(tx: Tx, poId: string, processId
     await tx.update(processes).set({ ...patch, updatedAt: new Date() }).where(eq(processes.id, processId));
   }
   await syncPackingListToProcess(tx, processId);
+  await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `Processo ${process.processNumber} · ${items.length} ${items.length === 1 ? "item" : "itens"}`);
   return { itemCount: items.length };
 }
 
@@ -112,6 +114,8 @@ export async function unlinkPurchaseOrderFromProcess(tx: Tx, poId: string, proce
     .delete(processDocuments)
     .where(and(eq(processDocuments.processId, processId), eq(processDocuments.purchaseOrderId, poId)));
   await syncPackingListToProcess(tx, processId);
+  const [process] = await tx.select({ processNumber: processes.processNumber }).from(processes).where(eq(processes.id, processId));
+  await logPurchaseOrderEvent(tx, poId, "PROCESSO_REMOVIDO", process ? `Processo ${process.processNumber}` : null);
 }
 
 export type ProcessSupplier = { id: string; name: string; logoUrl: string | null };
