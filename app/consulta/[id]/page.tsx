@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { products, suppliers, productLpcos, processItems, processes } from "@/db/schema";
-import { CpBadge, ItemPhoto, ListBadge } from "@/components/ItemStatus";
+import { products, suppliers, productLpcos, processItems, processes, productPhotos } from "@/db/schema";
+import { CpBadge, ListBadge } from "@/components/ItemStatus";
+import PhotoGallery from "@/components/PhotoGallery";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { BRANCHES } from "@/lib/locations";
 import {
@@ -51,7 +52,7 @@ export default async function ItemFichaPage({ params }: { params: Promise<{ id: 
   if (!item) notFound();
   const p = item.p;
 
-  const [lpcos, usage] = await Promise.all([
+  const [lpcos, usage, photoRows] = await Promise.all([
     db.select().from(productLpcos).where(eq(productLpcos.productId, id)),
     db
       .select({
@@ -66,7 +67,13 @@ export default async function ItemFichaPage({ params }: { params: Promise<{ id: 
       .where(eq(processItems.productId, id))
       .orderBy(desc(processes.createdAt))
       .limit(15),
+    db
+      .select({ url: productPhotos.url })
+      .from(productPhotos)
+      .where(eq(productPhotos.productId, id))
+      .orderBy(productPhotos.position, productPhotos.createdAt),
   ]);
+  const photos = photoRows.map((r) => r.url);
 
   const carton =
     p.cartonLengthCm && p.cartonWidthCm && p.cartonHeightCm
@@ -92,18 +99,8 @@ export default async function ItemFichaPage({ params }: { params: Promise<{ id: 
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(260px,380px)_1fr]">
         <div>
-          {p.photoUrl ? (
-            <a href={p.photoUrl} target="_blank" rel="noopener noreferrer" title="Abrir a imagem em tamanho original">
-              <ItemPhoto
-                url={p.photoUrl}
-                alt={p.description}
-                className="aspect-square rounded-xl border border-outline-variant"
-              />
-            </a>
-          ) : (
-            <ItemPhoto url={null} alt={p.description} className="aspect-square rounded-xl border border-dashed border-outline-variant" />
-          )}
-          {!p.photoUrl && (
+          <PhotoGallery photos={photos} alt={p.description} />
+          {photos.length === 0 && (
             <p className="mt-2 text-xs text-on-surface-variant">
               Sem foto —{" "}
               <Link href={`/produtos/${p.id}`} className="text-secondary hover:underline">

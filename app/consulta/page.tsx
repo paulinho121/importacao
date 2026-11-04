@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { and, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { products, suppliers, productLpcos } from "@/db/schema";
+import { products, suppliers, productLpcos, productPhotos } from "@/db/schema";
 import ItemSearchBox from "@/components/ItemSearchBox";
 import { CpBadge, ItemPhoto, ListBadge, LpcoUfChips } from "@/components/ItemStatus";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -78,6 +78,19 @@ export default async function ConsultaPage({
           ),
         )
     : [];
+  const photoCountRows = rows.length
+    ? await db
+        .select({ productId: productPhotos.productId, n: sql<number>`count(*)`.mapWith(Number) })
+        .from(productPhotos)
+        .where(
+          inArray(
+            productPhotos.productId,
+            rows.map((r) => r.id),
+          ),
+        )
+        .groupBy(productPhotos.productId)
+    : [];
+  const photoCount = new Map(photoCountRows.map((r) => [r.productId, r.n]));
   const lpcosByProduct = new Map<string, typeof lpcoRows>();
   for (const l of lpcoRows) lpcosByProduct.set(l.productId, [...(lpcosByProduct.get(l.productId) ?? []), l]);
 
@@ -139,7 +152,14 @@ export default async function ConsultaPage({
                   href={`/consulta/${p.id}`}
                   className="group flex h-full flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <ItemPhoto url={p.photoUrl} alt={p.description} className="aspect-[4/3] border-b border-outline-variant" />
+                  <div className="relative">
+                    <ItemPhoto url={p.photoUrl} alt={p.description} className="aspect-[4/3] border-b border-outline-variant" />
+                    {(photoCount.get(p.id) ?? 0) > 1 && (
+                      <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white">
+                        {photoCount.get(p.id)} fotos
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-1 flex-col gap-2 p-4">
                     <h3 className="line-clamp-2 font-semibold text-primary group-hover:text-secondary">{p.description}</h3>
                     <p className="font-mono-data text-xs text-on-surface-variant">

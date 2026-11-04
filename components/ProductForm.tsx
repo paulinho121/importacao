@@ -33,7 +33,6 @@ export type ProductFormValues = {
   licenseStatus?: string | null;
   publicConsultationRef?: string | null;
   publicConsultationDate?: string | null;
-  photoUrl?: string | null;
   cpStatus?: string | null;
   cpRequestedAt?: string | null;
   licenseApprovedAt?: string | null;
@@ -51,16 +50,20 @@ export type ProductFormValues = {
   cartonWeightKg?: string | null;
 };
 
+export type ProductFormPhoto = { id: string; url: string };
+
 export default function ProductForm({
   action,
   defaultValues,
   submitLabel,
   suppliers,
+  photos = [],
 }: {
   action: (formData: FormData) => void;
   defaultValues?: ProductFormValues;
   submitLabel: string;
   suppliers: { id: string; name: string }[];
+  photos?: ProductFormPhoto[];
 }) {
   return (
     <form action={action} className="space-y-6">
@@ -134,37 +137,43 @@ export default function ProductForm({
           </select>
         </div>
         <div className="sm:col-span-2">
-          <label className={FIELD_LABEL}>Foto do produto</label>
-          <div className="flex flex-col sm:flex-row gap-4">
-            {defaultValues?.photoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element -- foto pode vir de qualquer link externo
-              <img
-                src={defaultValues.photoUrl}
-                alt="Foto do produto"
-                className="h-28 w-28 shrink-0 rounded-lg border border-outline-variant object-contain bg-white"
-              />
-            )}
-            <div className="flex-1 space-y-2">
-              <input
-                type="file"
-                name="photoFile"
-                accept="image/png,image/jpeg,image/webp"
-                className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
-              />
-              <input
-                className={FIELD_INPUT}
-                type="url"
-                name="photoUrl"
-                placeholder="…ou cole o link da imagem (https://…)"
-              />
-              <p className="text-xs text-on-surface-variant">PNG, JPEG ou WebP, até 4 MB — ou um link.</p>
-              {defaultValues?.photoUrl && (
-                <label className="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
-                  <input type="checkbox" name="removePhoto" className="rounded border-outline-variant" />
-                  Remover a foto atual
-                </label>
-              )}
-            </div>
+          <label className={FIELD_LABEL}>Fotos do produto</label>
+          {photos.length > 0 && (
+            <ul className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {photos.map((photo, i) => (
+                <li key={photo.id} className="rounded-lg border border-outline-variant p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- foto pode vir de qualquer link externo */}
+                  <img src={photo.url} alt={`Foto ${i + 1}`} className="aspect-square w-full rounded bg-white object-contain" loading="lazy" />
+                  <label className="mt-2 flex items-center gap-1.5 text-xs text-on-surface-variant">
+                    <input type="radio" name="coverPhotoId" value={photo.id} defaultChecked={i === 0} />
+                    Principal
+                  </label>
+                  <label className="mt-1 flex items-center gap-1.5 text-xs text-error">
+                    <input type="checkbox" name="removePhotoId" value={photo.id} className="rounded border-outline-variant" />
+                    Remover
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="space-y-2">
+            <input
+              type="file"
+              name="photoFile"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
+            />
+            <textarea
+              className={FIELD_INPUT}
+              name="photoLinks"
+              rows={2}
+              placeholder="…ou cole links de imagens (https://…), um por linha"
+            />
+            <p className="text-xs text-on-surface-variant">
+              Pode adicionar várias fotos: PNG, JPEG ou WebP, até 4 MB no total por envio — ou links. A foto marcada como
+              &quot;Principal&quot; aparece nas listas.
+            </p>
           </div>
         </div>
         <div className="sm:col-span-2">

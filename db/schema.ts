@@ -778,3 +778,25 @@ export const productLpcos = pgTable("product_lpcos", {
     .notNull()
     .defaultNow(),
 });
+
+// Galeria de fotos do produto (pode haver várias). products.photo_url guarda
+// a foto principal (a primeira por position) — mantida em sincronia pelas
+// actions de produto — pra listas e telas que só precisam de uma imagem.
+// sourceUrl: endereço de origem (sem parâmetros) quando a foto veio do site do
+// fabricante, pra não baixar a mesma imagem duas vezes.
+export const productPhotos = pgTable(
+  "product_photos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    position: integer("position").notNull().default(0),
+    sourceUrl: text("source_url"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [unique("product_photos_product_url_unique").on(t.productId, t.url)],
+);

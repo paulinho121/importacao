@@ -5,7 +5,7 @@ import ProductFlowSteps from "@/components/ProductFlowSteps";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import { updateProduct, resolveNcmDivergence, addPriceTier, removePriceTier } from "@/app/produtos/actions";
 import { db } from "@/db/client";
-import { products, suppliers, productPriceTiers, productLpcos } from "@/db/schema";
+import { products, suppliers, productPriceTiers, productLpcos, productPhotos } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { formatDate } from "@/lib/status";
 
@@ -21,7 +21,7 @@ export default async function EditProdutoPage({
 
   if (!product) notFound();
 
-  const [supplierRows, tiers, lpcos] = await Promise.all([
+  const [supplierRows, tiers, lpcos, photos] = await Promise.all([
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
     db
       .select()
@@ -29,6 +29,11 @@ export default async function EditProdutoPage({
       .where(eq(productPriceTiers.productId, id))
       .orderBy(asc(productPriceTiers.minQuantity)),
     db.select().from(productLpcos).where(eq(productLpcos.productId, id)),
+    db
+      .select({ id: productPhotos.id, url: productPhotos.url })
+      .from(productPhotos)
+      .where(eq(productPhotos.productId, id))
+      .orderBy(productPhotos.position, productPhotos.createdAt),
   ]);
 
   const boundUpdate = updateProduct.bind(null, id);
@@ -89,7 +94,6 @@ export default async function EditProdutoPage({
             description: product.description,
             longDescription: product.longDescription,
             publicConsultationDate: product.publicConsultationDate,
-            photoUrl: product.photoUrl,
             cpStatus: product.cpStatus,
             cpRequestedAt: product.cpRequestedAt,
             defaultSupplierId: product.defaultSupplierId,
@@ -118,6 +122,7 @@ export default async function EditProdutoPage({
             cartonWeightKg: product.cartonWeightKg,
           }}
           submitLabel="Salvar Alterações"
+          photos={photos}
           suppliers={supplierRows}
         />
       </div>

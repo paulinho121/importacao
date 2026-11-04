@@ -211,6 +211,13 @@
       "when": 1793749541541,
       "tag": "0029_tired_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793752046865,
+      "tag": "0030_square_wrecker",
+      "breakpoints": true
     }
   ]
 }

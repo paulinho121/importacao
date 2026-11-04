@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { products, productPriceTiers, productLpcos } from "@/db/schema";
+import { products, productPriceTiers, productLpcos, productPhotos } from "@/db/schema";
 import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -71,26 +71,56 @@ export async function removeProductLpco(lpcoId: string, productId: string) {
   redirect(withFlash(`/produtos/${productId}`, "Solicitação de LPCO removida."));
 }
 
-// Foto do produto: arquivo enviado (PNG/JPEG/WebP, vai pro Storage) ou link
-// externo. Devolve só o que mudou — {} deixa a foto atual como está.
-async function resolvePhoto(formData: FormData): Promise<{ photoUrl?: string | null }> {
-  const file = formData.get("photoFile");
-  if (file instanceof File && file.size > 0) {
-    const ext = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" }[file.type];
-    if (!ext) throw new Error("A foto precisa ser PNG, JPEG ou WebP (ou cole um link).");
-    if (file.size > 4 * 1024 * 1024) throw new Error("A foto passa de 4 MB — reduza o tamanho ou use um link.");
-    const path = `produtos/${crypto.randomUUID()}.${ext}`;
+const PHOTO_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const MAX_UPLOAD_TOTAL = 4 * 1024 * 1024; // limite do corpo da requisição (ver next.config.ts)
+
+// Galeria de fotos do produto (várias): arquivos enviados (PNG/JPEG/WebP, vão
+// pro Storage) e/ou links (um por linha), remoção das marcadas e escolha da
+// foto principal. products.photo_url acompanha sempre a primeira da galeria.
+async function savePhotos(productId: string, formData: FormData) {
+  const removeIds = formData.getAll("removePhotoId").map(String).filter((v) => /^[0-9a-f-]{36}$/i.test(v));
+  if (removeIds.length > 0) {
+    await db.delete(productPhotos).where(and(eq(productPhotos.productId, productId), inArray(productPhotos.id, removeIds)));
+  }
+
+  const files = formData.getAll("photoFile").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.reduce((sum, f) => sum + f.size, 0) > MAX_UPLOAD_TOTAL) {
+    throw new Error("As fotos enviadas passam de 4 MB no total — envie menos fotos por vez, reduza o tamanho ou use links.");
+  }
+  const toAdd: string[] = [];
+  for (const file of files) {
+    const ext = PHOTO_TYPES[file.type];
+    if (!ext) throw new Error("As fotos precisam ser PNG, JPEG ou WebP (ou cole links).");
+    const path = `produtos/${productId}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
     const { error } = await supabaseAdmin.storage.from(LOGOS_BUCKET).upload(path, file, { contentType: file.type });
     if (error) throw new Error(`Falha no upload da foto: ${error.message}`);
-    return { photoUrl: supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl };
+    toAdd.push(supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl);
   }
-  const link = optionalText(formData, "photoUrl");
-  if (link) {
-    if (!/^https?:\/\//i.test(link)) throw new Error("O link da foto precisa começar com http:// ou https://.");
-    return { photoUrl: link };
+  for (const line of String(formData.get("photoLinks") ?? "").split(/\r?\n/)) {
+    const link = line.trim();
+    if (!link) continue;
+    if (!/^https?:\/\//i.test(link)) throw new Error("Os links das fotos precisam começar com http:// ou https://.");
+    toAdd.push(link);
   }
-  if (formData.get("removePhoto") === "on") return { photoUrl: null };
-  return {};
+  if (toAdd.length > 0) {
+    await db
+      .insert(productPhotos)
+      .values(toAdd.map((url, i) => ({ productId, url, position: 1000 + i })))
+      .onConflictDoNothing();
+  }
+
+  // Reordena: a escolhida como principal vai pra frente; as demais mantêm a ordem.
+  const all = await db
+    .select({ id: productPhotos.id, url: productPhotos.url })
+    .from(productPhotos)
+    .where(eq(productPhotos.productId, productId))
+    .orderBy(productPhotos.position, productPhotos.createdAt);
+  const coverId = String(formData.get("coverPhotoId") ?? "");
+  const ordered = [...all.filter((p) => p.id === coverId), ...all.filter((p) => p.id !== coverId)];
+  for (const [i, p] of ordered.entries()) {
+    await db.update(productPhotos).set({ position: i }).where(eq(productPhotos.id, p.id));
+  }
+  await db.update(products).set({ photoUrl: ordered[0]?.url ?? null }).where(eq(products.id, productId));
 }
 
 function readProductForm(formData: FormData) {
@@ -147,18 +177,18 @@ function readProductForm(formData: FormData) {
 }
 
 export async function createProduct(formData: FormData) {
-  const values = { ...readProductForm(formData), ...(await resolvePhoto(formData)) };
-  const [created] = await db.insert(products).values(values).returning({ id: products.id });
+  const [created] = await db.insert(products).values(readProductForm(formData)).returning({ id: products.id });
+  await savePhotos(created.id, formData);
   revalidatePath("/produtos");
   redirect(withFlash(`/produtos/${created.id}`, "Produto cadastrado."));
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const values = { ...readProductForm(formData), ...(await resolvePhoto(formData)) };
   await db
     .update(products)
-    .set({ ...values, updatedAt: new Date() })
+    .set({ ...readProductForm(formData), updatedAt: new Date() })
     .where(eq(products.id, id));
+  await savePhotos(id, formData);
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   redirect(withFlash("/produtos", "Alterações salvas."));
