@@ -13,6 +13,7 @@ import {
   Settings,
   Warehouse,
   Archive,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,7 +31,10 @@ export interface NavGroup {
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: null,
-    items: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
+    items: [
+      { label: "Dashboard", href: "/", icon: LayoutDashboard },
+      { label: "Consulta de Itens", href: "/consulta", icon: Search },
+    ],
   },
   {
     label: "Operações",

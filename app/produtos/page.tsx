@@ -12,6 +12,12 @@ import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } 
 
 export const dynamic = "force-dynamic";
 
+// "Deferido" = há prova de deferimento em qualquer origem: constou na lista do
+// governo, a CP está marcada como "já possui" (inclusive a vinda da base do
+// Inciso V) ou a licença do Inciso V está deferida. Calculado na hora, então
+// o contador acompanha qualquer importação ou edição.
+const deferidoExpr = sql`coalesce(${products.cpListResult} = 'FOUND' or ${products.cpStatus} = 'POSSUI' or ${products.licenseStatus} = 'DEFERIDA', false)`;
+
 export default async function ProdutosPage({
   searchParams,
 }: {
@@ -52,10 +58,10 @@ export default async function ProdutosPage({
     onlyDivergent ? eq(products.ncmDivergent, true) : undefined,
     onlyNoPrice ? isNull(products.costPrice) : undefined,
     fornecedor ? eq(products.defaultSupplierId, fornecedor) : undefined,
-    lista === "deferido" ? eq(products.cpListResult, "FOUND") : undefined,
+    lista === "deferido" ? deferidoExpr : undefined,
     lista === "nacional" ? eq(products.cpListResult, "FOUND_NATIONAL") : undefined,
     lista === "aprox" ? eq(products.cpListResult, "FOUND_APPROX") : undefined,
-    lista === "nao" ? eq(products.cpListResult, "NOT_FOUND") : undefined,
+    lista === "nao" ? sql`not ${deferidoExpr}` : undefined,
   ].filter((c) => c !== undefined);
 
   const [rows, [{ divergentCount }], [{ noPriceCount }], supplierOptions, [cpSummary]] = await Promise.all([
@@ -71,6 +77,7 @@ export default async function ProdutosPage({
         licenseStatus: products.licenseStatus,
         photoUrl: products.photoUrl,
         cpListResult: products.cpListResult,
+        cpStatus: products.cpStatus,
         cpListRef: products.cpListRef,
         costPrice: products.costPrice,
         costCurrency: products.costCurrency,
@@ -104,10 +111,10 @@ export default async function ProdutosPage({
       .orderBy(suppliers.name),
     db
       .select({
-        found: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND')`.mapWith(Number),
+        found: sql<number>`count(*) filter (where ${deferidoExpr})`.mapWith(Number),
         foundNational: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND_NATIONAL')`.mapWith(Number),
         foundApprox: sql<number>`count(*) filter (where ${products.cpListResult} = 'FOUND_APPROX')`.mapWith(Number),
-        notFound: sql<number>`count(*) filter (where ${products.cpListResult} = 'NOT_FOUND')`.mapWith(Number),
+        notFound: sql<number>`count(*) filter (where not ${deferidoExpr})`.mapWith(Number),
         checkedAt: sql<Date | null>`max(${products.cpListCheckedAt})`,
         source: sql<string | null>`max(${products.cpListSource})`,
       })
@@ -202,16 +209,13 @@ export default async function ProdutosPage({
           </Link>
         )}
 
-        {cpSummary.checkedAt &&
-          (
-            [
+        {[
               { value: "deferido", label: "Deferidos", count: cpSummary.found, on: "bg-secondary text-white border-secondary", off: "bg-tertiary-fixed/40 text-on-tertiary-fixed-variant border-tertiary-fixed hover:bg-tertiary-fixed/70", icon: "verified" },
               { value: "nacional", label: "Com fabricante nacional", count: cpSummary.foundNational, on: "bg-warning text-warning-foreground border-warning", off: "bg-warning/10 text-warning border-warning/30 hover:bg-warning/20", icon: "factory" },
               { value: "aprox", label: "Possíveis (conferir)", count: cpSummary.foundApprox, on: "bg-secondary text-white border-secondary", off: "bg-secondary-fixed/40 text-on-secondary-fixed-variant border-secondary-fixed hover:bg-secondary-fixed/70", icon: "help" },
-              { value: "nao", label: "Não constam na lista", count: cpSummary.notFound, on: "bg-secondary text-white border-secondary", off: "bg-surface-container-high text-on-surface-variant border-outline-variant hover:bg-surface-container-highest", icon: "schedule" },
-            ] as const
-          )
-            .filter((c) => c.count > 0)
+              { value: "nao", label: "Sem deferimento", count: cpSummary.notFound, on: "bg-secondary text-white border-secondary", off: "bg-surface-container-high text-on-surface-variant border-outline-variant hover:bg-surface-container-highest", icon: "schedule" },
+            ]
+          .filter((c) => c.count > 0)
             .map((c) => (
               <Link
                 key={c.value}
@@ -261,7 +265,7 @@ export default async function ProdutosPage({
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NOME</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LISTA DECEX</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SITUAÇÃO DA CP</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PREÇO SUGERIDO</th>
@@ -332,17 +336,36 @@ export default async function ProdutosPage({
                     )}
                   </td>
                   <td className="px-6 py-3">
-                    {p.cpListResult ? (
-                      <span
-                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS[p.cpListResult as CpListResult]}`}
-                        title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}
-                      >
-                        {CP_LIST_RESULT_LABEL[p.cpListResult as CpListResult]}
-                        {p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : ""}
-                      </span>
-                    ) : (
-                      "—"
-                    )}
+                    {(() => {
+                      // Resultado da lista do governo; sem ele, a CP/licença cadastradas.
+                      if (p.cpListResult && p.cpListResult !== "NOT_FOUND") {
+                        return (
+                          <span
+                            className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS[p.cpListResult as CpListResult]}`}
+                            title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}
+                          >
+                            {CP_LIST_RESULT_LABEL[p.cpListResult as CpListResult]}
+                            {p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : ""}
+                          </span>
+                        );
+                      }
+                      const registered =
+                        p.cpStatus === "POSSUI" ? "Já possui CP" : p.licenseStatus === "DEFERIDA" ? "Licença deferida" : null;
+                      if (registered) {
+                        return (
+                          <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.FOUND}`}>
+                            {registered}
+                          </span>
+                        );
+                      }
+                      return p.cpListResult ? (
+                        <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.NOT_FOUND}`}>
+                          {CP_LIST_RESULT_LABEL.NOT_FOUND}
+                        </span>
+                      ) : (
+                        "—"
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-3">
                     <Link href={`/produtos/${p.id}`} className="flex gap-1.5">
