@@ -86,13 +86,18 @@ export default async function PurchaseOrderHistory({
         <ul className="space-y-3 border-l border-outline-variant pl-4">
           {events.map((e) => {
             const meta = PO_EVENT_META[e.eventType] ?? { label: e.eventType, icon: "circle" };
+            // eventos de processo: o número vem no título ("Incluído no processo PRC-2026-001")
+            const isProcessEvent = e.eventType === "PROCESSO_VINCULADO" || e.eventType === "PROCESSO_REMOVIDO";
+            const [processNumber, ...rest] = isProcessEvent ? (e.description ?? "").split(" · ") : [];
+            const title = isProcessEvent && processNumber ? `${meta.label} ${processNumber}` : meta.label;
+            const detail = isProcessEvent ? rest.join(" · ") || null : e.description;
             return (
               <li key={e.id} className="relative">
                 <span className="absolute -left-[26px] top-0 flex h-5 w-5 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant">
                   <span className="material-symbols-outlined text-[13px]">{meta.icon}</span>
                 </span>
-                <p className="text-sm font-bold text-primary">{meta.label}</p>
-                {e.description && <p className="break-words text-xs text-on-surface-variant">{e.description}</p>}
+                <p className="text-sm font-bold text-primary">{title}</p>
+                {detail && <p className="break-words text-xs text-on-surface-variant">{detail}</p>}
                 <p className="mt-0.5 text-[11px] text-outline">
                   {fmtDateTime(e.createdAt)}
                   {e.userName ? ` · ${e.userName}` : ""}

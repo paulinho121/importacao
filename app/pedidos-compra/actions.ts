@@ -372,7 +372,7 @@ export async function convertToProcess(poId: string, formData: FormData) {
     .set({ processId: createdProcess.id, updatedAt: new Date() })
     .where(eq(purchaseOrders.id, poId));
 
-  await logPurchaseOrderEvent(db, poId, "PROCESSO_VINCULADO", `Processo ${processNumber} criado a partir deste pedido`);
+  await logPurchaseOrderEvent(db, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`);
 
   revalidatePath("/pedidos-compra");
   revalidatePath(`/pedidos-compra/${poId}`);

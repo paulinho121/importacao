@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/supabase-server";
 
 type DbLike = Pick<typeof db, "insert">;
 
+// Para os eventos de processo a descrição começa com o número do processo
+// ("PRC-2026-001 · 4 itens") e o título mostra "Incluído no processo PRC-2026-001".
 // Rótulo e ícone de cada tipo de evento do histórico do pedido.
 export const PO_EVENT_META: Record<string, { label: string; icon: string }> = {
   CRIADO: { label: "Pedido criado", icon: "add_circle" },
@@ -11,12 +13,12 @@ export const PO_EVENT_META: Record<string, { label: string; icon: string }> = {
   ITEM_ADICIONADO: { label: "Item adicionado", icon: "playlist_add" },
   ITEM_EDITADO: { label: "Item alterado", icon: "edit_note" },
   ITEM_REMOVIDO: { label: "Item removido", icon: "playlist_remove" },
-  ENVIADO: { label: "Enviado ao fornecedor", icon: "send" },
+  ENVIADO: { label: "Marcado como Enviado", icon: "send" },
   CONFIRMADO: { label: "Confirmado pelo fornecedor", icon: "check_circle" },
   CANCELADO: { label: "Pedido cancelado", icon: "cancel" },
   PACKING_LIST_ANEXADA: { label: "Packing list anexada", icon: "inventory" },
   PACKING_LIST_REMOVIDA: { label: "Packing list removida", icon: "folder_delete" },
-  PROCESSO_VINCULADO: { label: "Colocado em processo", icon: "local_shipping" },
+  PROCESSO_VINCULADO: { label: "Incluído no processo", icon: "local_shipping" },
   PROCESSO_REMOVIDO: { label: "Retirado do processo", icon: "undo" },
 };
 

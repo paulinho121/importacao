@@ -394,14 +394,15 @@ export default async function PedidoCompraDetailPage({
 
           <PurchaseOrderPackingList poId={id} processId={po.processId} canEdit={po.status !== "CANCELADO"} />
 
-          <ContainerEstimate items={containerEstimateItems} />
-
+          {/* as observações do pedido falam da packing list, então ficam logo abaixo dela */}
           {po.notes && (
             <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
               <h3 className="font-headline-sm text-headline-sm text-primary mb-2">Observações</h3>
               <p className="text-body-sm font-body-sm text-on-surface-variant whitespace-pre-wrap">{po.notes}</p>
             </section>
           )}
+
+          <ContainerEstimate items={containerEstimateItems} />
         </div>
 
         <div className="lg:col-span-4 space-y-stack-md">
