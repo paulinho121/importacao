@@ -5,7 +5,7 @@ import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import ContainerEstimate from "@/components/ContainerEstimate";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, processes, companyBranches } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, notInArray } from "drizzle-orm";
 import {
   PURCHASE_ORDER_STATUS_LABEL,
   PURCHASE_ORDER_STATUS_BADGE_CLASS,
@@ -19,6 +19,7 @@ import {
   updatePurchaseOrder,
   deletePurchaseOrder,
   convertToProcess,
+  addToExistingProcess,
 } from "@/app/pedidos-compra/actions";
 import { CURRENCIES } from "@/lib/currencies";
 import { INCOTERMS } from "@/lib/incoterms";
@@ -65,7 +66,7 @@ export default async function PedidoCompraDetailPage({
 
   if (!po) notFound();
 
-  const [items, [{ catalogCount }], suggestedProcessNumber, branchRows] = await Promise.all([
+  const [items, [{ catalogCount }], suggestedProcessNumber, branchRows, openProcesses] = await Promise.all([
     db
       .select({
         id: purchaseOrderItems.id,
@@ -89,6 +90,16 @@ export default async function PedidoCompraDetailPage({
       .where(eq(products.defaultSupplierId, po.supplierId)),
     po.status === "CONFIRMADO" && !po.processId ? suggestProcessNumber() : Promise.resolve(""),
     db.select().from(companyBranches).orderBy(desc(companyBranches.isDefault), companyBranches.name),
+    // Processos em andamento que podem receber este pedido (o contêiner que já
+    // reúne pedidos de outros fornecedores).
+    po.status === "CONFIRMADO" && !po.processId
+      ? db
+          .select({ id: processes.id, processNumber: processes.processNumber, supplierName: suppliers.name })
+          .from(processes)
+          .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
+          .where(notInArray(processes.status, ["CONCLUIDO", "ABANDONADO"]))
+          .orderBy(desc(processes.processNumber))
+      : Promise.resolve([]),
   ]);
 
   const total = items.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0), 0);
@@ -110,6 +121,7 @@ export default async function PedidoCompraDetailPage({
   const boundUpdatePo = updatePurchaseOrder.bind(null, id);
   const boundDelete = deletePurchaseOrder.bind(null, id);
   const boundConvert = convertToProcess.bind(null, id);
+  const boundAddToProcess = addToExistingProcess.bind(null, id);
 
   return (
     <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
@@ -403,6 +415,35 @@ export default async function PedidoCompraDetailPage({
                   className="w-full px-4 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
                 >
                   Criar Processo de Importação
+                </button>
+              </form>
+            )}
+
+            {po.status === "CONFIRMADO" && !po.processId && (
+              <form action={boundAddToProcess} className="space-y-3 border-t border-outline-variant pt-4">
+                <p className="text-body-sm font-body-sm text-on-surface-variant">
+                  Ou coloque este pedido em um processo que já existe (por exemplo, o contêiner que reúne pedidos de
+                  vários fornecedores).
+                </p>
+                <select
+                  name="processId"
+                  required
+                  defaultValue=""
+                  className="w-full appearance-none rounded-lg border border-outline-variant bg-surface-container-low p-2.5 text-body-sm font-body-sm focus:border-secondary focus:outline-none"
+                >
+                  <option value="">{openProcesses.length === 0 ? "Nenhum processo em andamento" : "Escolha o processo…"}</option>
+                  {openProcesses.map((pr) => (
+                    <option key={pr.id} value={pr.id}>
+                      {pr.processNumber} — {pr.supplierName}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  disabled={openProcesses.length === 0}
+                  className="w-full px-4 py-2.5 rounded-lg border border-secondary text-secondary font-label-md text-label-md hover:bg-secondary/10 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Adicionar ao processo escolhido
                 </button>
               </form>
             )}

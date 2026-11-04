@@ -2,11 +2,12 @@ import { tipoEmbarqueLabel } from "@/lib/modais";
 import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
-import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/db/client";
-import { processes, suppliers, freightAgents, processItems, processInvoices } from "@/db/schema";
+import { processes, suppliers, freightAgents, processItems, processInvoices, purchaseOrders } from "@/db/schema";
+import ProcessSuppliersCell from "@/components/ProcessSuppliersCell";
+import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import { and, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { formatDate, type ProcessStatus } from "@/lib/status";
 import { MODAIS } from "@/lib/modais";
@@ -59,6 +60,11 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
       or(
         ilike(processes.processNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
+        sql`exists (
+          select 1 from ${purchaseOrders} po join ${suppliers} ps on ps.id = po.supplier_id
+          where po.process_id = ${processes.id}
+          and (po.po_number ilike ${`%${q}%`} or ps.name ilike ${`%${q}%`})
+        )`,
         sql`exists (
           select 1 from ${processInvoices}
           where ${processInvoices.processId} = ${processes.id}
@@ -123,6 +129,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
       .orderBy(freightAgents.name),
   ]);
 
+  const suppliersByProcess = await getSuppliersByProcess(rows.map((r) => r.id));
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasFilters = Boolean(q || fornecedor || agente || modal || status || de || ate);
 
@@ -287,8 +294,10 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
                 </TableCell>
                 <TableCell>
                   <Link href={`/processos/${p.id}`} className="flex items-center gap-2 whitespace-nowrap">
-                    <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={32} />
-                    <span className="text-sm">{p.supplierName}</span>
+                    <ProcessSuppliersCell
+                      suppliers={suppliersByProcess.get(p.id) ?? []}
+                      fallback={{ id: p.id, name: p.supplierName, logoUrl: p.supplierLogoUrl }}
+                    />
                   </Link>
                 </TableCell>
                 <TableCell className="text-sm">{p.agentName ?? "—"}</TableCell>

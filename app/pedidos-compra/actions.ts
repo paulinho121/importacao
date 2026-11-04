@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
 import { withFlash } from "@/lib/flash";
+import { LinkError, linkPurchaseOrderToProcess } from "@/lib/process-purchase-orders";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -222,6 +223,7 @@ export async function convertToProcess(poId: string, formData: FormData) {
         description: item.description,
         quantity: item.quantity,
         unitValueOverride: item.unitPrice,
+        purchaseOrderId: poId,
       })),
     );
   }
@@ -235,4 +237,22 @@ export async function convertToProcess(poId: string, formData: FormData) {
   revalidatePath(`/pedidos-compra/${poId}`);
   revalidatePath("/processos");
   redirect(withFlash(`/processos/${createdProcess.id}`, "Pedido convertido em Processo de Importação."));
+}
+
+// Coloca o pedido em um processo que já existe (ex.: o contêiner que já tem
+// pedidos de outros fornecedores).
+export async function addToExistingProcess(poId: string, formData: FormData) {
+  const processId = String(formData.get("processId") ?? "").trim();
+  if (!processId) throw new Error("Escolha o processo.");
+  try {
+    await db.transaction((tx) => linkPurchaseOrderToProcess(tx, poId, processId));
+  } catch (e) {
+    if (e instanceof LinkError) throw new Error(e.message);
+    throw e;
+  }
+  revalidatePath("/pedidos-compra");
+  revalidatePath(`/pedidos-compra/${poId}`);
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  redirect(withFlash(`/processos/${processId}`, "Pedido adicionado ao processo."));
 }

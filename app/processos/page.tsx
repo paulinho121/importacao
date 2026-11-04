@@ -4,11 +4,12 @@ import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import SupplierLogo from "@/components/SupplierLogo";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/db/client";
-import { processes, suppliers, processItems, processInvoices, processDocuments } from "@/db/schema";
+import { processes, suppliers, processItems, processInvoices, processDocuments, purchaseOrders, freightAgents } from "@/db/schema";
+import ProcessSuppliersCell from "@/components/ProcessSuppliersCell";
+import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import { and, desc, eq, ilike, inArray, notInArray, or, sql } from "drizzle-orm";
 import {
   STATUS_BADGE_CLASS,
@@ -16,6 +17,7 @@ import {
   STATUS_LABEL,
   WORKFLOW_STEPS,
   formatDate,
+  diasRestantes,
   type ProcessStatus,
 } from "@/lib/status";
 import { DOC_TYPES_PER_PROCESS } from "@/lib/dashboard-metrics";
@@ -83,6 +85,11 @@ export default async function ProcessosPage({
         ilike(processes.processNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
         sql`exists (
+          select 1 from ${purchaseOrders} po join ${suppliers} ps on ps.id = po.supplier_id
+          where po.process_id = ${processes.id}
+          and (po.po_number ilike ${`%${q}%`} or ps.name ilike ${`%${q}%`})
+        )`,
+        sql`exists (
           select 1 from ${processInvoices}
           where ${processInvoices.processId} = ${processes.id}
           and ${processInvoices.invoiceNumber} ilike ${`%${q}%`}
@@ -123,6 +130,8 @@ export default async function ProcessosPage({
       destinationState: processes.destinationState,
       destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
+      agentName: freightAgents.name,
+      externalReference: processes.externalReference,
       supplierName: suppliers.name,
       supplierLogoUrl: suppliers.logoUrl,
       itemCount: sql<number>`count(${processItems.id})`.mapWith(Number),
@@ -130,10 +139,24 @@ export default async function ProcessosPage({
     })
     .from(processes)
     .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
+    .leftJoin(freightAgents, eq(processes.agentId, freightAgents.id))
     .leftJoin(processItems, eq(processItems.processId, processes.id))
     .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(processes.id, suppliers.name, suppliers.logoUrl)
+    .groupBy(processes.id, suppliers.name, suppliers.logoUrl, freightAgents.name)
     .orderBy(desc(processes.createdAt));
+
+  const suppliersByProcess = await getSuppliersByProcess(rows.map((r) => r.id));
+  // Invoices de cada processo (a planilha mostra Invoice 1 a 4 na própria linha).
+  const invoiceRows = rows.length
+    ? await db
+        .select({ processId: processInvoices.processId, invoiceNumber: processInvoices.invoiceNumber })
+        .from(processInvoices)
+        .where(inArray(processInvoices.processId, rows.map((r) => r.id)))
+        .orderBy(processInvoices.createdAt)
+    : [];
+  const invoicesByProcess = new Map<string, string[]>();
+  for (const inv of invoiceRows) invoicesByProcess.set(inv.processId, [...(invoicesByProcess.get(inv.processId) ?? []), inv.invoiceNumber]);
+  const todayUtc = Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate());
 
   // Lista única, sem faixas de status — o status aparece só na coluna
   // Status (ou no selo do card). Ordem: número do processo, do maior pro
@@ -208,12 +231,17 @@ export default async function ProcessosPage({
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Modalidade</TableHead>
                 <TableHead>Tipo de embarque</TableHead>
+                <TableHead>Agente</TableHead>
+                <TableHead>Ref. do agente</TableHead>
                 <TableHead>ETD</TableHead>
                 <TableHead>ETA</TableHead>
+                <TableHead>Trânsito</TableHead>
+                <TableHead>Dias restantes</TableHead>
                 <TableHead>Desembarque</TableHead>
                 <TableHead>Filial destino</TableHead>
                 <TableHead>Progresso</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Invoices</TableHead>
                 <TableHead>Itens</TableHead>
               </TableRow>
             </TableHeader>
@@ -229,14 +257,42 @@ export default async function ProcessosPage({
                         </TableCell>
                         <TableCell>
                           <Link href={`/processos/${p.id}`} className="flex items-center gap-2">
-                            <SupplierLogo logoUrl={p.supplierLogoUrl} name={p.supplierName} size={32} />
-                            <span className="text-sm">{p.supplierName}</span>
+                            <ProcessSuppliersCell
+                              suppliers={suppliersByProcess.get(p.id) ?? []}
+                              fallback={{ id: p.id, name: p.supplierName, logoUrl: p.supplierLogoUrl }}
+                            />
                           </Link>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground"><ModalBadge modal={p.modal} /></TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{tipoEmbarqueLabel(p.modal, p.containerType)}</TableCell>
+                        <TableCell className="text-sm whitespace-nowrap">{p.agentName ?? "—"}</TableCell>
+                        <TableCell className="font-mono text-sm whitespace-nowrap">{p.externalReference ?? "—"}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etd)}</TableCell>
                         <TableCell className="font-mono text-sm">{formatDate(p.etaEstimated)}</TableCell>
+                        <TableCell>
+                          {p.status === "EM_TRANSITO" && p.etd && p.etaEstimated ? (
+                            (() => {
+                              const start = new Date(`${p.etd}T00:00:00Z`).getTime();
+                              const end = new Date(`${p.etaEstimated}T00:00:00Z`).getTime();
+                              const pct = end > start ? Math.max(0, Math.min(100, ((todayUtc - start) / (end - start)) * 100)) : 0;
+                              return (
+                                <div className="h-2 w-24 overflow-hidden rounded-full bg-muted" title={`${Math.round(pct)}% do trajeto`}>
+                                  <div className="h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm text-center">
+                          {(() => {
+                            if (p.status === "RECEBIDO") return <span className="text-muted-foreground">—</span>;
+                            const dias = diasRestantes(p.etaEstimated);
+                            if (dias === null) return <span className="text-muted-foreground">—</span>;
+                            return <span className={dias < 0 ? "font-bold text-destructive" : dias <= 7 ? "font-bold text-warning" : ""}>{dias}</span>;
+                          })()}
+                        </TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{landingLabel(p)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{branchLabel(p.destinationBranch)}</TableCell>
                         <TableCell>
@@ -249,6 +305,22 @@ export default async function ProcessosPage({
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={p.status as ProcessStatus} />
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {(() => {
+                            const invs = invoicesByProcess.get(p.id) ?? [];
+                            if (invs.length === 0) return <span className="text-muted-foreground">—</span>;
+                            return (
+                              <span className="flex flex-wrap gap-1" title={invs.join(", ")}>
+                                {invs.slice(0, 3).map((n) => (
+                                  <span key={n} className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                                    {n}
+                                  </span>
+                                ))}
+                                {invs.length > 3 && <span className="text-xs text-muted-foreground">+{invs.length - 3}</span>}
+                              </span>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {p.itemCount} {p.itemCount === 1 ? "item" : "itens"}

@@ -14,6 +14,9 @@ export type ProcessStatus =
 // Rótulos seguem a nomenclatura vista em "FLUXOGRAMA DE IMPORTAÇÃO.xlsx"
 // (aba TABELA AUXILIAR) — por isso EMBARCADO exibe "Embarque" e CONCLUIDO
 // exibe "Finalizado", sem precisar renomear o valor do enum no banco.
+// Processos encerrados: saem do fluxo e vão para /finalizados.
+export const CLOSED_PROCESS_STATUSES = ["CONCLUIDO", "ABANDONADO"] as const;
+
 export const STATUS_LABEL: Record<ProcessStatus, string> = {
   AGUARDANDO_EMBARQUE: "Aguardando Embarque",
   PEDIDO: "Pedido",

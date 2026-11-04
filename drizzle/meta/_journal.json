@@ -218,6 +218,13 @@
       "when": 1793752046865,
       "tag": "0030_square_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793804100839,
+      "tag": "0031_nostalgic_betty_ross",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,7 @@ import {
   processLpcos,
   itemReservations,
 } from "@/db/schema";
+import { LinkError, linkPurchaseOrderToProcess, unlinkPurchaseOrderFromProcess } from "@/lib/process-purchase-orders";
 import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -726,4 +727,37 @@ export async function refreshVesselPosition(
 
   revalidatePath(`/processos/${processId}`);
   return null;
+}
+
+// ---- Pedidos de compra dentro do processo (um processo = vários pedidos) ----
+
+export async function addPurchaseOrderToProcess(processId: string, formData: FormData) {
+  const poId = String(formData.get("purchaseOrderId") ?? "").trim();
+  if (!poId) throw new Error("Escolha o pedido de compra.");
+  let itemCount = 0;
+  try {
+    ({ itemCount } = await db.transaction((tx) => linkPurchaseOrderToProcess(tx, poId, processId)));
+  } catch (e) {
+    if (e instanceof LinkError) throw new Error(e.message);
+    throw e;
+  }
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  revalidatePath("/pedidos-compra");
+  revalidatePath(`/pedidos-compra/${poId}`);
+  redirect(withFlash(`/processos/${processId}`, `Pedido adicionado ao processo (${itemCount} ${itemCount === 1 ? "item" : "itens"}).`));
+}
+
+export async function removePurchaseOrderFromProcess(processId: string, poId: string) {
+  try {
+    await db.transaction((tx) => unlinkPurchaseOrderFromProcess(tx, poId, processId));
+  } catch (e) {
+    if (e instanceof LinkError) throw new Error(e.message);
+    throw e;
+  }
+  revalidatePath(`/processos/${processId}`);
+  revalidatePath("/processos");
+  revalidatePath("/pedidos-compra");
+  revalidatePath(`/pedidos-compra/${poId}`);
+  redirect(withFlash(`/processos/${processId}`, "Pedido removido do processo."));
 }

@@ -657,6 +657,10 @@ export const processItems = pgTable("process_items", {
   // Reservas novas usam itemReservations abaixo (permite múltiplas pessoas
   // reservando quantidades parciais do mesmo item, com disponível calculado).
   reservedTo: text("reserved_to"),
+  // Pedido de compra de onde o item veio (um processo/contêiner reúne itens de
+  // vários pedidos, de fornecedores diferentes). Vazio = item digitado no
+  // processo. Ao desvincular o pedido do processo, estes itens saem junto.
+  purchaseOrderId: uuid("purchase_order_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
   // Invoice (do próprio processo) em que o item vem — vazio = não informada.
   invoiceId: uuid("invoice_id").references(() => processInvoices.id, { onDelete: "set null" }),
   // Cobertura cambial do item (sim/não); null = ainda não informado.

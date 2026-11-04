@@ -4,6 +4,8 @@ import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddItemForm from "@/components/AddItemForm";
+import ProcessPurchaseOrders from "@/components/ProcessPurchaseOrders";
+import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import AbandonProcessButton from "@/components/AbandonProcessButton";
 import ProcessShipmentInfo from "@/components/ProcessShipmentInfo";
 import ProcessFollowUpForm from "@/components/ProcessFollowUpForm";
@@ -30,6 +32,7 @@ import {
   processPayables,
   freightAgents,
   itemReservations,
+  purchaseOrders,
 } from "@/db/schema";
 import { desc, eq, getTableColumns, inArray } from "drizzle-orm";
 import {
@@ -137,6 +140,7 @@ export default async function ProcessDetailPage({
         description: processItems.description,
         quantity: processItems.quantity,
         unitValueOverride: processItems.unitValueOverride,
+        purchaseOrderId: processItems.purchaseOrderId,
         reservedTo: processItems.reservedTo,
         invoiceId: processItems.invoiceId,
         exchangeCoverage: processItems.exchangeCoverage,
@@ -172,6 +176,18 @@ export default async function ProcessDetailPage({
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
     db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
   ]);
+
+  const [processSuppliers, linkedPos] = await Promise.all([
+    getSuppliersByProcess([id]),
+    db
+      .select({ id: purchaseOrders.id, poNumber: purchaseOrders.poNumber, supplierName: suppliers.name })
+      .from(purchaseOrders)
+      .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+      .where(eq(purchaseOrders.processId, id)),
+  ]);
+  const suppliersOfProcess = processSuppliers.get(id) ?? [];
+  const poById = new Map(linkedPos.map((po) => [po.id, po]));
+  const isClosed = process.status === "CONCLUIDO" || process.status === "ABANDONADO";
 
   const itemIds = items.map((item) => item.id);
   const reservations = itemIds.length
@@ -315,12 +331,13 @@ export default async function ProcessDetailPage({
             itens, invoices e documentos ficam associados ao processo, não ao número.
           </p>
           <p className="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md max-w-2xl">
-            <SupplierLogo
-              logoUrl={process.supplierLogoUrl}
-              name={process.supplierName}
-              size={32}
-            />
-            Fornecedor: {process.supplierName}
+            <span className="flex -space-x-2">
+              {(suppliersOfProcess.length > 0 ? suppliersOfProcess : [{ id: process.supplierId, name: process.supplierName, logoUrl: process.supplierLogoUrl }]).map((sp) => (
+                <SupplierLogo key={sp.id} logoUrl={sp.logoUrl} name={sp.name} size={32} />
+              ))}
+            </span>
+            {suppliersOfProcess.length > 1 ? "Fornecedores" : "Fornecedor"}:{" "}
+            {(suppliersOfProcess.length > 0 ? suppliersOfProcess.map((sp) => sp.name) : [process.supplierName]).join(", ")}
             {process.externalReference ? ` · Ref: ${process.externalReference}` : ""}
             {destinationLabel !== "—" ? ` · Desembarque: ${destinationLabel}` : ""}
             {process.destinationBranch ? ` · Filial: ${branchLabel(process.destinationBranch)}` : ""}
@@ -351,6 +368,8 @@ export default async function ProcessDetailPage({
           )}
         </div>
       </div>
+
+      <ProcessPurchaseOrders processId={id} closed={isClosed} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
         <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
@@ -562,6 +581,11 @@ export default async function ProcessDetailPage({
                         <div className="flex justify-between items-start gap-2">
                           <div>
                             <p className="font-medium text-primary">{item.description}</p>
+                            {item.purchaseOrderId && poById.get(item.purchaseOrderId) && (
+                              <p className="mt-0.5 inline-flex items-center rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold text-on-surface-variant">
+                                {poById.get(item.purchaseOrderId)!.supplierName} · {poById.get(item.purchaseOrderId)!.poNumber}
+                              </p>
+                            )}
                             {item.sku && (
                               <p className="text-xs text-outline font-mono-data">SKU: {item.sku}</p>
                             )}
