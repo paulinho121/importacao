@@ -5,7 +5,7 @@ import { purchaseOrders, purchaseOrderItems, purchaseOrderDocuments, suppliers }
 import { addPurchaseOrderToProcess, removePurchaseOrderFromProcess } from "@/app/processos/actions";
 import ConfirmActionButton from "@/components/ConfirmActionButton";
 import SupplierLogo from "@/components/SupplierLogo";
-import { getSignedDocumentUrl } from "@/lib/supabase-admin";
+import DocumentViewer from "@/components/DocumentViewer";
 import { PURCHASE_ORDER_STATUS_BADGE_CLASS, PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 
 function money(value: number, currency: string | null) {
@@ -75,11 +75,10 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
           .from(purchaseOrderDocuments)
           .where(inArray(purchaseOrderDocuments.purchaseOrderId, linked.map((l) => l.id)))
           .orderBy(asc(purchaseOrderDocuments.uploadedAt));
-  const packingUrls = await Promise.all(packingDocs.map((d) => getSignedDocumentUrl(d.storagePath, 3600)));
-  const packingByPo = new Map<string, { id: string; fileName: string; url: string | null }[]>();
-  packingDocs.forEach((d, i) => {
+  const packingByPo = new Map<string, { id: string; fileName: string }[]>();
+  packingDocs.forEach((d) => {
     const list = packingByPo.get(d.purchaseOrderId) ?? [];
-    list.push({ id: d.id, fileName: d.fileName, url: packingUrls[i] });
+    list.push({ id: d.id, fileName: d.fileName });
     packingByPo.set(d.purchaseOrderId, list);
   });
 
@@ -149,24 +148,16 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                       <span className="text-xs text-on-surface-variant">—</span>
                     ) : (
                       <ul className="space-y-0.5">
-                        {(packingByPo.get(l.id) ?? []).map((d) =>
-                          d.url ? (
-                            <li key={d.id}>
-                              <a
-                                href={d.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex max-w-[220px] items-center gap-1 truncate text-xs font-bold text-secondary hover:underline"
-                                title={d.fileName}
-                              >
-                                <span className="material-symbols-outlined text-[14px]">inventory</span>
-                                <span className="truncate">{d.fileName}</span>
-                              </a>
-                            </li>
-                          ) : (
-                            <li key={d.id} className="text-xs text-on-surface-variant">{d.fileName}</li>
-                          ),
-                        )}
+                        {(packingByPo.get(l.id) ?? []).map((d) => (
+                          <li key={d.id} className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px] text-on-surface-variant">inventory</span>
+                            <DocumentViewer
+                              src={`/api/pedidos-compra/documentos/${d.id}`}
+                              fileName={d.fileName}
+                              className="max-w-[220px] truncate text-xs font-bold text-secondary"
+                            />
+                          </li>
+                        ))}
                       </ul>
                     )}
                   </td>
