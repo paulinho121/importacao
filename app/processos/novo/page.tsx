@@ -73,23 +73,6 @@ export default async function NovoProcessoPage() {
         >
             <div className="sm:col-span-2">
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Referência Externa
-              </label>
-              <input
-                className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
-                placeholder="ex: referência do fornecedor/agente, se houver"
-                type="text"
-                name="externalReference"
-              />
-            </div>
-            <ModalidadeTipoFields
-              defaultModal={null}
-              defaultContainerType={null}
-              selectClassName="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
-              labelClassName="block font-label-md text-label-md text-on-surface-variant mb-2"
-            />
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                 Agente de Carga
               </label>
               <select
@@ -97,15 +80,25 @@ export default async function NovoProcessoPage() {
                 name="agentId"
                 defaultValue=""
               >
-                <option value="">Nenhum</option>
+                <option value="">Selecione o agente de carga</option>
                 {agentRows.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
                   </option>
                 ))}
               </select>
+              {agentRows.length === 0 && (
+                <p className="text-xs text-on-surface-variant mt-1">
+                  Nenhum agente cadastrado — cadastre em /agentes/novo primeiro.
+                </p>
+              )}
             </div>
-
+            <ModalidadeTipoFields
+              defaultModal={null}
+              defaultContainerType={null}
+              selectClassName="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
+              labelClassName="block font-label-md text-label-md text-on-surface-variant mb-2"
+            />
             <div className="sm:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="col-span-2 sm:col-span-4">
                 <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
