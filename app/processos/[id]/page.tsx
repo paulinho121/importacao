@@ -4,6 +4,7 @@ import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddItemForm from "@/components/AddItemForm";
+import ProcessItemsTable, { type ProcessItemRow } from "@/components/ProcessItemsTable";
 import ProcessPurchaseOrders from "@/components/ProcessPurchaseOrders";
 import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import AbandonProcessButton from "@/components/AbandonProcessButton";
@@ -12,7 +13,6 @@ import ProcessFollowUpForm from "@/components/ProcessFollowUpForm";
 import ProcessEditDetails from "@/components/ProcessEditDetails";
 // Confirmação "Excluir o item … não pode ser desfeita" — genérico, serve também
 // pro item do processo apesar do nome.
-import DeleteExternalImportItemButton from "@/components/DeleteExternalImportItemButton";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import ProcessCompliance from "@/components/ProcessCompliance";
@@ -21,6 +21,7 @@ import ProcessPayables from "@/components/ProcessPayables";
 import SupplierLogo from "@/components/SupplierLogo";
 import { db } from "@/db/client";
 import {
+  productLpcos,
   processes,
   suppliers,
   processItems,
@@ -41,7 +42,6 @@ import {
   WORKFLOW_STEPS,
   diasRestantes,
   formatDate,
-  stockStatus,
   type ProcessStatus,
 } from "@/lib/status";
 import {
@@ -50,12 +50,8 @@ import {
   updateProcessNumber,
   abandonProcess,
   removeProcessFollowUp,
-  updateProcessItem,
-  removeProcessItem,
   addProcessItem,
   addProcessInvoice,
-  addItemReservation,
-  updateProcessItemValue,
   uploadProcessDocument,
 } from "@/app/processos/actions";
 import { createPayable } from "@/app/financeiro/actions";
@@ -146,6 +142,12 @@ export default async function ProcessDetailPage({
         exchangeCoverage: processItems.exchangeCoverage,
         lpcoPublicConsultation: processItems.lpcoPublicConsultation,
         lpcoNumber: processItems.lpcoNumber,
+        productPhotoUrl: products.photoUrl,
+        productManufacturerSku: products.manufacturerSku,
+        productNcm: products.ncm,
+        productCpStatus: products.cpStatus,
+        productCpListResult: products.cpListResult,
+        productCpListRef: products.cpListRef,
         productCostPrice: products.costPrice,
         productTaxRateII: products.taxRateII,
         productTaxRateIPI: products.taxRateIPI,
@@ -199,6 +201,55 @@ export default async function ProcessDetailPage({
     list.push(r);
     reservationsByItemId.set(r.itemId, list);
   }
+
+  // LPCO por estado (SP/SC/CE) dos produtos dos itens
+  const productIds = [...new Set(items.map((i) => i.productId).filter((v): v is string => Boolean(v)))];
+  const lpcoRows = productIds.length
+    ? await db.select().from(productLpcos).where(inArray(productLpcos.productId, productIds))
+    : [];
+  const lpcosByProduct = new Map<string, typeof lpcoRows>();
+  for (const l of lpcoRows) {
+    const list = lpcosByProduct.get(l.productId) ?? [];
+    list.push(l);
+    lpcosByProduct.set(l.productId, list);
+  }
+  const itemRows: ProcessItemRow[] = items.map((item) => {
+    const po = item.purchaseOrderId ? poById.get(item.purchaseOrderId) : null;
+    return {
+      id: item.id,
+      productId: item.productId,
+      description: item.description,
+      sku: item.sku,
+      manufacturerSku: item.productManufacturerSku,
+      photoUrl: item.productPhotoUrl,
+      ncm: item.productNcm,
+      quantity: item.quantity,
+      unitValue: item.unitValueOverride,
+      invoiceId: item.invoiceId,
+      invoiceNumber: invoices.find((inv) => inv.id === item.invoiceId)?.invoiceNumber ?? null,
+      exchangeCoverage: item.exchangeCoverage,
+      lpcoPublicConsultation: item.lpcoPublicConsultation,
+      lpcoNumber: item.lpcoNumber,
+      reservedTo: item.reservedTo,
+      poLabel: po ? `${po.supplierName} · ${po.poNumber}` : null,
+      cpStatus: item.productCpStatus,
+      cpListResult: item.productCpListResult,
+      cpListRef: item.productCpListRef,
+      lpcos: (item.productId ? (lpcosByProduct.get(item.productId) ?? []) : []).map((l) => ({
+        branch: l.branch,
+        status: l.status,
+        approvedAt: l.approvedAt,
+        validUntil: l.validUntil,
+        requestedAt: l.requestedAt,
+      })),
+      reservations: (reservationsByItemId.get(item.id) ?? []).map((r) => ({
+        id: r.id,
+        personName: r.personName,
+        quantity: r.quantity,
+        observation: r.observation,
+      })),
+    };
+  });
 
   const dias = diasRestantes(process.etaEstimated);
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
@@ -371,6 +422,20 @@ export default async function ProcessDetailPage({
 
       <ProcessPurchaseOrders processId={id} closed={isClosed} />
 
+      <ProcessItemsTable
+        processId={id}
+        rows={itemRows}
+        invoices={invoices.map((inv) => ({ id: inv.id, invoiceNumber: inv.invoiceNumber }))}
+        currency={process.currency}
+        destinationBranch={process.destinationBranch}
+        addForm={
+          <AddItemForm
+            action={boundAddItem}
+            invoices={invoices.map((inv) => ({ id: inv.id, invoiceNumber: inv.invoiceNumber }))}
+          />
+        }
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
         <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-stack-md">
@@ -442,7 +507,7 @@ export default async function ProcessDetailPage({
         </div>
 
         <div className="lg:col-span-8 space-y-stack-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+          <div className="grid grid-cols-1 gap-stack-lg">
             <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
               <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
                 Dados do Processo
@@ -552,252 +617,6 @@ export default async function ProcessDetailPage({
               )}
             </section>
 
-            <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
-              <h3 className="font-headline-sm text-headline-sm text-primary mb-stack-md">
-                Itens do Processo
-              </h3>
-              {items.length === 0 ? (
-                <p className="text-on-surface-variant font-body-sm text-body-sm">
-                  Nenhum item registrado.
-                </p>
-              ) : (
-                <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                  {items.map((item) => {
-                    const itemReservationsList = reservationsByItemId.get(item.id) ?? [];
-                    const total = item.quantity ? Number(item.quantity) : 0;
-                    const reserved = itemReservationsList.reduce(
-                      (sum, r) => sum + Number(r.quantity),
-                      0,
-                    );
-                    const available = total - reserved;
-                    const badge = stockStatus(available, total);
-                    const boundReserve = addItemReservation.bind(null, id, item.id);
-                    const boundUpdateValue = updateProcessItemValue.bind(null, item.id, id);
-                    return (
-                      <li
-                        key={item.id}
-                        className="text-body-sm font-body-sm border-b border-outline-variant/50 pb-3"
-                      >
-                        <div className="flex justify-between items-start gap-2">
-                          <div>
-                            <p className="font-medium text-primary">{item.description}</p>
-                            {item.purchaseOrderId && poById.get(item.purchaseOrderId) && (
-                              <p className="mt-0.5 inline-flex items-center rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold text-on-surface-variant">
-                                {poById.get(item.purchaseOrderId)!.supplierName} · {poById.get(item.purchaseOrderId)!.poNumber}
-                              </p>
-                            )}
-                            {item.sku && (
-                              <p className="text-xs text-outline font-mono-data">SKU: {item.sku}</p>
-                            )}
-                            {item.reservedTo && (
-                              <p className="text-xs text-on-surface-variant">
-                                Reserva (planilha): {item.reservedTo}
-                              </p>
-                            )}
-                            <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-on-surface-variant">
-                              {item.invoiceId && (
-                                <span>
-                                  Invoice: {invoices.find((inv) => inv.id === item.invoiceId)?.invoiceNumber ?? "—"}
-                                </span>
-                              )}
-                              {item.exchangeCoverage !== null && (
-                                <span>Cobertura cambial: {item.exchangeCoverage ? "Sim" : "Não"}</span>
-                              )}
-                              {item.lpcoPublicConsultation !== null && (
-                                <span>LPCO consulta pública: {item.lpcoPublicConsultation ? "Sim" : "Não"}</span>
-                              )}
-                              {item.lpcoNumber && <span>LPCO: {item.lpcoNumber}</span>}
-                            </p>
-                          </div>
-                          <span className="font-bold text-primary shrink-0">{total || "—"}</span>
-                        </div>
-                        <details className="mt-1.5">
-                          <summary className="cursor-pointer text-xs text-secondary hover:underline list-none inline-flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[13px]">edit</span>
-                            Valor unitário{item.unitValueOverride ? `: ${item.unitValueOverride}` : ""}
-                          </summary>
-                          <form action={boundUpdateValue} className="flex gap-1.5 mt-1.5">
-                            <input
-                              className="w-28 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              placeholder="Valor unitário"
-                              type="number"
-                              step="0.01"
-                              name="unitValueOverride"
-                              defaultValue={item.unitValueOverride ?? ""}
-                            />
-                            <button
-                              type="submit"
-                              className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
-                            >
-                              Salvar
-                            </button>
-                          </form>
-                        </details>
-                        <details className="mt-1">
-                          <summary className="cursor-pointer text-xs text-secondary hover:underline list-none inline-flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[13px]">edit_note</span>
-                            Editar item
-                          </summary>
-                          <form
-                            action={updateProcessItem.bind(null, item.id, id)}
-                            className="grid grid-cols-2 gap-1.5 mt-1.5"
-                          >
-                            {!item.productId && (
-                              <>
-                                <input
-                                  className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                                  type="text"
-                                  name="description"
-                                  defaultValue={item.description}
-                                  aria-label="Descrição"
-                                  required
-                                />
-                                <input
-                                  className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs font-mono-data focus:outline-none focus:border-secondary transition-all"
-                                  type="text"
-                                  name="sku"
-                                  defaultValue={item.sku ?? ""}
-                                  placeholder="SKU"
-                                  aria-label="SKU"
-                                />
-                              </>
-                            )}
-                            <input
-                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              type="number"
-                              step="0.01"
-                              name="quantity"
-                              defaultValue={item.quantity ?? ""}
-                              placeholder="Quantidade"
-                              aria-label="Quantidade"
-                            />
-                            <input
-                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              type="text"
-                              name="reservedTo"
-                              defaultValue={item.reservedTo ?? ""}
-                              placeholder="Reserva (planilha)"
-                              aria-label="Reserva"
-                            />
-                            <select
-                              className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              name="invoiceId"
-                              defaultValue={item.invoiceId ?? ""}
-                              aria-label="Invoice"
-                            >
-                              <option value="">Sem invoice</option>
-                              {invoices.map((inv) => (
-                                <option key={inv.id} value={inv.id}>
-                                  Invoice {inv.invoiceNumber}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              name="exchangeCoverage"
-                              defaultValue={item.exchangeCoverage === null ? "" : item.exchangeCoverage ? "sim" : "nao"}
-                              aria-label="Cobertura cambial"
-                            >
-                              <option value="">Cobertura cambial?</option>
-                              <option value="sim">Cobertura cambial: Sim</option>
-                              <option value="nao">Cobertura cambial: Não</option>
-                            </select>
-                            <select
-                              className="bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                              name="lpcoPublicConsultation"
-                              defaultValue={
-                                item.lpcoPublicConsultation === null ? "" : item.lpcoPublicConsultation ? "sim" : "nao"
-                              }
-                              aria-label="LPCO em consulta pública"
-                            >
-                              <option value="">LPCO consulta pública?</option>
-                              <option value="sim">LPCO consulta pública: Sim</option>
-                              <option value="nao">LPCO consulta pública: Não</option>
-                            </select>
-                            <input
-                              className="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs font-mono-data focus:outline-none focus:border-secondary transition-all"
-                              type="text"
-                              name="lpcoNumber"
-                              defaultValue={item.lpcoNumber ?? ""}
-                              placeholder="LPCO do item (nº)"
-                              aria-label="LPCO do item"
-                            />
-                            <button
-                              type="submit"
-                              className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
-                            >
-                              Salvar item
-                            </button>
-                          </form>
-                          <div className="mt-1.5">
-                            <DeleteExternalImportItemButton
-                              action={removeProcessItem.bind(null, item.id, id)}
-                              description={item.description}
-                              compact
-                            />
-                          </div>
-                        </details>
-                        {total > 0 && (
-                          <>
-                            <div className="flex items-center gap-3 mt-2 text-xs">
-                              <span className={`px-2 py-0.5 rounded-full ${badge.className}`}>
-                                {badge.label}
-                              </span>
-                              <span className="text-on-surface-variant">
-                                Pedido: {total} · Reservado: {reserved} · Disponível: {available}
-                              </span>
-                            </div>
-                            {itemReservationsList.length > 0 && (
-                              <ul className="mt-2 space-y-1">
-                                {itemReservationsList.map((r) => (
-                                  <li key={r.id} className="text-xs text-on-surface-variant">
-                                    {r.personName} — {r.quantity}
-                                    {r.observation ? ` (${r.observation})` : ""}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                            <form action={boundReserve} className="flex gap-1.5 mt-2">
-                              <input
-                                className="w-24 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                                placeholder="Nome"
-                                type="text"
-                                name="personName"
-                                required
-                              />
-                              <input
-                                className="w-16 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                                placeholder="Qtd"
-                                type="number"
-                                step="0.01"
-                                name="quantity"
-                                required
-                              />
-                              <input
-                                className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-1.5 text-xs focus:outline-none focus:border-secondary transition-all"
-                                placeholder="Obs. (opcional)"
-                                type="text"
-                                name="observation"
-                              />
-                              <button
-                                type="submit"
-                                className="px-2 py-1 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all whitespace-nowrap"
-                              >
-                                Reservar
-                              </button>
-                            </form>
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <AddItemForm
-                action={boundAddItem}
-                invoices={invoices.map((inv) => ({ id: inv.id, invoiceNumber: inv.invoiceNumber }))}
-              />
-            </section>
           </div>
 
           <ProcessFinancials

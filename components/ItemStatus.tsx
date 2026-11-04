@@ -13,7 +13,8 @@ export type ItemLpco = {
 
 // LPCO mais recente de cada estado (SP/SC/CE) — verde só quando deferido e
 // dentro do prazo; "em análise" e os dias restantes aparecem acima do selo.
-export function LpcoUfChips({ lpcos }: { lpcos: ItemLpco[] }) {
+// `highlight` marca o estado de destino do processo com um contorno.
+export function LpcoUfChips({ lpcos, highlight = null }: { lpcos: ItemLpco[]; highlight?: string | null }) {
   return (
     <div className="flex gap-2">
       {BRANCHES.map((b) => {
@@ -30,7 +31,11 @@ export function LpcoUfChips({ lpcos }: { lpcos: ItemLpco[] }) {
             <span className="h-3 whitespace-nowrap text-[10px] leading-3 text-on-surface-variant">
               {tone === "wait" ? "em análise" : countdown ? (countdown.expired ? "vencido" : `${countdown.daysLeft}d`) : ""}
             </span>
-            <span className={`rounded px-2 py-0.5 text-xs font-bold ${LPCO_TONE_CLASS[tone]}`}>{b.code}</span>
+            <span
+              className={`rounded px-2 py-0.5 text-xs font-bold ${LPCO_TONE_CLASS[tone]} ${highlight === b.code ? "ring-2 ring-secondary ring-offset-1 ring-offset-surface-container-lowest" : ""}`}
+            >
+              {b.code}
+            </span>
           </span>
         );
       })}
