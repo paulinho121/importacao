@@ -225,6 +225,13 @@
       "when": 1793804100839,
       "tag": "0031_nostalgic_betty_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793821087776,
+      "tag": "0032_light_junta",
+      "breakpoints": true
     }
   ]
 }

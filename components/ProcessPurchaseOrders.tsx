@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { and, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, suppliers } from "@/db/schema";
+import { purchaseOrders, purchaseOrderItems, purchaseOrderDocuments, suppliers } from "@/db/schema";
 import { addPurchaseOrderToProcess, removePurchaseOrderFromProcess } from "@/app/processos/actions";
 import ConfirmActionButton from "@/components/ConfirmActionButton";
 import SupplierLogo from "@/components/SupplierLogo";
+import { getSignedDocumentUrl } from "@/lib/supabase-admin";
 import { PURCHASE_ORDER_STATUS_BADGE_CLASS, PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 
 function money(value: number, currency: string | null) {
@@ -65,6 +66,23 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
 
   ]);
 
+  // Packing lists anexadas a cada pedido do processo (vieram junto com o pedido).
+  const packingDocs =
+    linked.length === 0
+      ? []
+      : await db
+          .select()
+          .from(purchaseOrderDocuments)
+          .where(inArray(purchaseOrderDocuments.purchaseOrderId, linked.map((l) => l.id)))
+          .orderBy(asc(purchaseOrderDocuments.uploadedAt));
+  const packingUrls = await Promise.all(packingDocs.map((d) => getSignedDocumentUrl(d.storagePath, 3600)));
+  const packingByPo = new Map<string, { id: string; fileName: string; url: string | null }[]>();
+  packingDocs.forEach((d, i) => {
+    const list = packingByPo.get(d.purchaseOrderId) ?? [];
+    list.push({ id: d.id, fileName: d.fileName, url: packingUrls[i] });
+    packingByPo.set(d.purchaseOrderId, list);
+  });
+
   const currencies = [...new Set(linked.map((l) => l.currency).filter(Boolean))];
   const totalsByCurrency = new Map<string, number>();
   for (const l of linked) totalsByCurrency.set(l.currency ?? "—", (totalsByCurrency.get(l.currency ?? "—") ?? 0) + l.total);
@@ -98,6 +116,7 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                 <th className="py-2 pr-3 font-label-md text-right">ITENS</th>
                 <th className="py-2 pr-3 font-label-md text-right">QTD</th>
                 <th className="py-2 pr-3 font-label-md text-right">VALOR</th>
+                <th className="py-2 pr-3 font-label-md">PACKING LIST</th>
                 <th className="py-2" />
               </tr>
             </thead>
@@ -125,6 +144,32 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                   <td className="py-2 pr-3 text-right font-mono-data">{l.itemCount}</td>
                   <td className="py-2 pr-3 text-right font-mono-data">{l.quantity}</td>
                   <td className="py-2 pr-3 text-right font-mono-data whitespace-nowrap">{money(l.total, l.currency)}</td>
+                  <td className="py-2 pr-3">
+                    {(packingByPo.get(l.id) ?? []).length === 0 ? (
+                      <span className="text-xs text-on-surface-variant">—</span>
+                    ) : (
+                      <ul className="space-y-0.5">
+                        {(packingByPo.get(l.id) ?? []).map((d) =>
+                          d.url ? (
+                            <li key={d.id}>
+                              <a
+                                href={d.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex max-w-[220px] items-center gap-1 truncate text-xs font-bold text-secondary hover:underline"
+                                title={d.fileName}
+                              >
+                                <span className="material-symbols-outlined text-[14px]">inventory</span>
+                                <span className="truncate">{d.fileName}</span>
+                              </a>
+                            </li>
+                          ) : (
+                            <li key={d.id} className="text-xs text-on-surface-variant">{d.fileName}</li>
+                          ),
+                        )}
+                      </ul>
+                    )}
+                  </td>
                   <td className="py-2 text-right">
                     {!closed && (
                       <ConfirmActionButton
@@ -147,7 +192,7 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                     <div key={cur}>{money(v, cur === "—" ? null : cur)}</div>
                   ))}
                 </td>
-                <td />
+                <td colSpan={2} />
               </tr>
             </tfoot>
           </table>

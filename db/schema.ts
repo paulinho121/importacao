@@ -632,6 +632,20 @@ export const purchaseOrderItems = pgTable("purchase_order_items", {
     .defaultNow(),
 });
 
+// Arquivos anexados ao pedido de compra — hoje, a Packing List que o fornecedor
+// manda. Quando o pedido entra num processo, a packing list vai junto
+// (ver syncPackingListToProcess em lib/process-purchase-orders.ts).
+export const purchaseOrderDocuments = pgTable("purchase_order_documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  purchaseOrderId: uuid("purchase_order_id")
+    .notNull()
+    .references(() => purchaseOrders.id, { onDelete: "cascade" }),
+  docType: documentTypeEnum("doc_type").notNull().default("PACKING_LIST"),
+  fileName: text("file_name").notNull(),
+  storagePath: text("storage_path").notNull(),
+  uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // Itens/SKUs de cada processo. sku é sempre string — corrige a perda de
 // zero à esquerda observada na planilha quando o Excel converte código em número.
 // productId é opcional: item pode vir do catálogo (sku/description copiados
@@ -717,6 +731,9 @@ export const processDocuments = pgTable("process_documents", {
   storagePath: text("storage_path"),
   status: documentStatusEnum("status").notNull().default("PENDING"),
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }),
+  // Preenchido quando o documento veio de um pedido de compra (packing list
+  // anexada ao pedido); sai junto se o pedido for removido do processo.
+  purchaseOrderId: uuid("purchase_order_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
 });
 
 // Tipos de embarque (aba "Tipo de Embarques" da planilha FLUXOGRAMA DE

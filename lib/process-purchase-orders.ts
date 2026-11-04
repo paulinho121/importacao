@@ -1,6 +1,14 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db/client";
-import { processes, processItems, purchaseOrders, purchaseOrderItems, suppliers } from "@/db/schema";
+import {
+  processDocuments,
+  processes,
+  processItems,
+  purchaseOrderDocuments,
+  purchaseOrders,
+  purchaseOrderItems,
+  suppliers,
+} from "@/db/schema";
 import { CLOSED_PROCESS_STATUSES } from "@/lib/status";
 
 // Um processo é uma importação (ex.: um contêiner vindo da China) que reúne
@@ -51,7 +59,43 @@ export async function linkPurchaseOrderToProcess(tx: Tx, poId: string, processId
   if (Object.keys(patch).length > 0) {
     await tx.update(processes).set({ ...patch, updatedAt: new Date() }).where(eq(processes.id, processId));
   }
+  await syncPackingListToProcess(tx, processId);
   return { itemCount: items.length };
+}
+
+// A packing list anexada ao pedido vai junto pro processo: se o espaço "Packing
+// List" do processo ainda está vazio, ele é preenchido com a do primeiro pedido
+// que tiver uma (o arquivo é o mesmo, não é copiado). Um processo reúne vários
+// pedidos, então as packing lists de cada um continuam listadas por pedido.
+export async function syncPackingListToProcess(tx: Tx | typeof db, processId: string) {
+  const [slot] = await tx
+    .select()
+    .from(processDocuments)
+    .where(and(eq(processDocuments.processId, processId), eq(processDocuments.docType, "PACKING_LIST")));
+  if (slot?.status === "UPLOADED") return;
+
+  const [doc] = await tx
+    .select({
+      poId: purchaseOrders.id,
+      fileName: purchaseOrderDocuments.fileName,
+      storagePath: purchaseOrderDocuments.storagePath,
+    })
+    .from(purchaseOrderDocuments)
+    .innerJoin(purchaseOrders, eq(purchaseOrderDocuments.purchaseOrderId, purchaseOrders.id))
+    .where(and(eq(purchaseOrders.processId, processId), eq(purchaseOrderDocuments.docType, "PACKING_LIST")))
+    .orderBy(purchaseOrderDocuments.uploadedAt)
+    .limit(1);
+  if (!doc) return;
+
+  const values = {
+    fileName: doc.fileName,
+    storagePath: doc.storagePath,
+    status: "UPLOADED" as const,
+    uploadedAt: new Date(),
+    purchaseOrderId: doc.poId,
+  };
+  if (slot) await tx.update(processDocuments).set(values).where(eq(processDocuments.id, slot.id));
+  else await tx.insert(processDocuments).values({ processId, docType: "PACKING_LIST", ...values });
 }
 
 // Tira o pedido do processo e remove os itens que vieram dele (os itens
@@ -63,6 +107,11 @@ export async function unlinkPurchaseOrderFromProcess(tx: Tx, poId: string, proce
     .delete(processItems)
     .where(and(eq(processItems.processId, processId), eq(processItems.purchaseOrderId, poId)));
   await tx.update(purchaseOrders).set({ processId: null, updatedAt: new Date() }).where(eq(purchaseOrders.id, poId));
+  // a packing list que veio deste pedido sai do processo; outro pedido pode ocupar o lugar
+  await tx
+    .delete(processDocuments)
+    .where(and(eq(processDocuments.processId, processId), eq(processDocuments.purchaseOrderId, poId)));
+  await syncPackingListToProcess(tx, processId);
 }
 
 export type ProcessSupplier = { id: string; name: string; logoUrl: string | null };

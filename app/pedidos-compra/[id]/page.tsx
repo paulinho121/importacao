@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AddPurchaseOrderItemForm from "@/components/AddPurchaseOrderItemForm";
 import DeletePurchaseOrderButton from "@/components/DeletePurchaseOrderButton";
 import ContainerEstimate from "@/components/ContainerEstimate";
+import PurchaseOrderPackingList from "@/components/PurchaseOrderPackingList";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers, products, processes, companyBranches } from "@/db/schema";
 import { eq, sql, desc, notInArray } from "drizzle-orm";
@@ -341,6 +342,8 @@ export default async function PedidoCompraDetailPage({
               />
             )}
           </section>
+
+          <PurchaseOrderPackingList poId={id} processId={po.processId} canEdit={po.status !== "CANCELADO"} />
 
           <ContainerEstimate items={containerEstimateItems} />
 

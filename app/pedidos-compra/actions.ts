@@ -1,13 +1,23 @@
 "use server";
 
 import { db } from "@/db/client";
-import { purchaseOrders, purchaseOrderItems, products, processes, processItems, productPriceTiers } from "@/db/schema";
+import {
+  purchaseOrders,
+  purchaseOrderItems,
+  purchaseOrderDocuments,
+  processDocuments,
+  products,
+  processes,
+  processItems,
+  productPriceTiers,
+} from "@/db/schema";
 import { and, eq, ilike, inArray, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
 import { withFlash, withFlashError } from "@/lib/flash";
-import { LinkError, linkPurchaseOrderToProcess } from "@/lib/process-purchase-orders";
+import { LinkError, linkPurchaseOrderToProcess, syncPackingListToProcess } from "@/lib/process-purchase-orders";
+import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -288,4 +298,79 @@ export async function addToExistingProcess(poId: string, formData: FormData) {
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   redirect(withFlash(`/processos/${processId}`, "Pedido adicionado ao processo."));
+}
+
+// ---- Packing list do pedido ----
+
+// Nome seguro pro Storage (sem acento, espaço nem símbolos).
+function safeFileName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^A-Za-z0-9._-]+/g, "_");
+}
+
+// Anexa um ou mais arquivos de packing list ao pedido. Vale em qualquer status
+// (a packing list costuma chegar depois do pedido confirmado); se o pedido já
+// está num processo, ela também aparece lá.
+export async function addPurchaseOrderPackingList(poId: string, formData: FormData) {
+  const files = formData.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) {
+    redirect(withFlashError(`/pedidos-compra/${poId}`, "Selecione o arquivo da packing list."));
+  }
+
+  const [po] = await db
+    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.id, poId));
+  if (!po) throw new Error("Pedido de compra não encontrado.");
+  if (po.status === "CANCELADO") {
+    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido está cancelado."));
+  }
+
+  for (const file of files) {
+    const path = `pedidos/${poId}/PACKING_LIST-${Date.now()}-${safeFileName(file.name)}`;
+    const { error } = await supabaseAdmin.storage
+      .from(DOCUMENTS_BUCKET)
+      .upload(path, file, { contentType: file.type || "application/octet-stream" });
+    if (error) {
+      redirect(withFlashError(`/pedidos-compra/${poId}`, `Falha no upload de ${file.name}: ${error.message}`));
+    }
+    await db.insert(purchaseOrderDocuments).values({
+      purchaseOrderId: poId,
+      docType: "PACKING_LIST",
+      fileName: file.name,
+      storagePath: path,
+    });
+  }
+
+  if (po.processId) {
+    await syncPackingListToProcess(db, po.processId);
+    revalidatePath(`/processos/${po.processId}`);
+  }
+  revalidatePath(`/pedidos-compra/${poId}`);
+  redirect(withFlash(`/pedidos-compra/${poId}`, files.length === 1 ? "Packing list anexada." : `${files.length} arquivos anexados.`));
+}
+
+export async function removePurchaseOrderDocument(docId: string, poId: string) {
+  const [doc] = await db
+    .select()
+    .from(purchaseOrderDocuments)
+    .where(and(eq(purchaseOrderDocuments.id, docId), eq(purchaseOrderDocuments.purchaseOrderId, poId)));
+  if (!doc) throw new Error("Arquivo não encontrado.");
+  const [po] = await db.select({ processId: purchaseOrders.processId }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+
+  // sai também do espaço "Packing List" do processo, se foi esse arquivo que ocupou
+  await db
+    .delete(processDocuments)
+    .where(and(eq(processDocuments.purchaseOrderId, poId), eq(processDocuments.storagePath, doc.storagePath)));
+  await db.delete(purchaseOrderDocuments).where(eq(purchaseOrderDocuments.id, docId));
+  await supabaseAdmin.storage.from(DOCUMENTS_BUCKET).remove([doc.storagePath]);
+
+  if (po?.processId) {
+    await syncPackingListToProcess(db, po.processId);
+    revalidatePath(`/processos/${po.processId}`);
+  }
+  revalidatePath(`/pedidos-compra/${poId}`);
+  redirect(withFlash(`/pedidos-compra/${poId}`, "Arquivo removido."));
 }

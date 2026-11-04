@@ -713,7 +713,7 @@ export async function uploadProcessDocument(
   if (existing) {
     await db
       .update(processDocuments)
-      .set({ fileName: file.name, storagePath: path, status: "UPLOADED", uploadedAt: new Date() })
+      .set({ fileName: file.name, storagePath: path, status: "UPLOADED", uploadedAt: new Date(), purchaseOrderId: null })
       .where(eq(processDocuments.id, existing.id));
   } else {
     await db.insert(processDocuments).values({

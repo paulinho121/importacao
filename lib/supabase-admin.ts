@@ -35,10 +35,10 @@ export const supabaseAdmin: SupabaseClient = new Proxy({} as SupabaseClient, {
 
 // URL assinada de curta duração — nunca uma URL pública permanente, já que
 // o bucket é privado.
-export async function getSignedDocumentUrl(storagePath: string): Promise<string | null> {
+export async function getSignedDocumentUrl(storagePath: string, expiresInSeconds = 60): Promise<string | null> {
   const { data, error } = await supabaseAdmin.storage
     .from(DOCUMENTS_BUCKET)
-    .createSignedUrl(storagePath, 60);
+    .createSignedUrl(storagePath, expiresInSeconds);
   if (error || !data) return null;
   return data.signedUrl;
 }
