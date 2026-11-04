@@ -124,7 +124,9 @@ export async function createProcess(formData: FormData) {
     const [firstPo] = await db.select({ supplierId: purchaseOrders.supplierId }).from(purchaseOrders).where(eq(purchaseOrders.id, poIds[0]));
     if (firstPo) supplierId = firstPo.supplierId;
   }
-  if (!supplierId) throw new Error("Escolha o fornecedor ou adicione um pedido de compra.");
+  if (!supplierId) {
+    redirect(withFlashError("/processos/novo", "Escolha o fornecedor ou adicione um pedido de compra."));
+  }
 
   const modal = resolveModal(formData, null);
   const agentId = optionalText(formData, "agentId");

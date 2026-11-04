@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { createProcess } from "@/app/processos/actions";
 import SupplierLogo from "@/components/SupplierLogo";
@@ -37,6 +38,20 @@ function money(value: number, currency: string | null) {
     }
   }
   return `${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}${currency ? ` ${currency}` : ""}`;
+}
+
+function SaveButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex items-center gap-2 rounded-lg bg-secondary px-6 py-2.5 font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-95 disabled:cursor-wait disabled:opacity-60"
+    >
+      <span className="material-symbols-outlined text-[18px]">save</span>
+      {pending ? "Salvando…" : label}
+    </button>
+  );
 }
 
 // Cabeçalho da tela "Novo Processo": o campo Número do Processo é uma lista
@@ -246,13 +261,14 @@ export default function NewProcessForm({
         <div className={existing ? "hidden" : "contents"}>{children}</div>
       </div>
 
-      <div className="flex justify-end gap-4 pt-2">
-        <button
-          type="submit"
-          className="px-8 py-3 rounded-lg bg-secondary text-white font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
-        >
-          {existing ? "Adicionar ao processo" : "Criar Processo"}
-        </button>
+      {/* barra fixa no rodapé da tela: o botão fica sempre à mão, sem rolar até o fim */}
+      <div className="sticky bottom-0 z-10 -mx-2 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest/95 px-4 py-3 shadow-md backdrop-blur">
+        <p className="text-xs text-on-surface-variant">
+          {existing
+            ? "Os pedidos escolhidos entram no processo."
+            : "Salve agora e complete o resto depois, na tela do processo, conforme as informações chegarem."}
+        </p>
+        <SaveButton label={existing ? "Salvar e adicionar ao processo" : "Salvar processo"} />
       </div>
     </form>
   );
