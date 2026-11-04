@@ -100,11 +100,26 @@ export async function searchPurchaseOrderProducts(supplierId: string, query: str
   const q = query.trim();
 
   const rows = await db
-    .select({ id: products.id, sku: products.sku, description: products.description, costPrice: products.costPrice })
+    .select({
+      id: products.id,
+      sku: products.sku,
+      manufacturerSku: products.manufacturerSku,
+      description: products.description,
+      costPrice: products.costPrice,
+    })
     .from(products)
     .where(
       q
-        ? and(eq(products.defaultSupplierId, supplierId), or(ilike(products.sku, `%${q}%`), ilike(products.description, `%${q}%`)))
+        ? and(
+            eq(products.defaultSupplierId, supplierId),
+            // o código do fabricante (ex.: AP0701051U) costuma ser o que vem na
+            // invoice, então também vale na busca
+            or(
+              ilike(products.sku, `%${q}%`),
+              ilike(products.manufacturerSku, `%${q}%`),
+              ilike(products.description, `%${q}%`),
+            ),
+          )
         : eq(products.defaultSupplierId, supplierId),
     )
     .orderBy(products.sku)

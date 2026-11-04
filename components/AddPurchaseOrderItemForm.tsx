@@ -11,7 +11,14 @@ import {
   type ExternalImportItemStatus,
 } from "@/lib/status";
 
-type Product = { id: string; sku: string; description: string; costPrice: string | null; priceTiers: PriceTier[] };
+type Product = {
+  id: string;
+  sku: string;
+  manufacturerSku: string | null;
+  description: string;
+  costPrice: string | null;
+  priceTiers: PriceTier[];
+};
 
 type ExternalMatch = {
   id: string;
@@ -251,6 +258,9 @@ export default function AddPurchaseOrderItemForm({
                         }`}
                       >
                         <span className="font-mono-data text-xs text-secondary">{p.sku}</span>
+                        {p.manufacturerSku && p.manufacturerSku !== p.sku && (
+                          <span className="ml-2 font-mono-data text-xs text-on-surface-variant">· {p.manufacturerSku}</span>
+                        )}
                         <span className="block text-on-surface-variant truncate">{p.description}</span>
                       </button>
                     ))
