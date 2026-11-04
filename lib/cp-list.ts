@@ -34,8 +34,18 @@ export type CpListMatch = {
 
 type ListRow = { ncm: string; nationalMaker: boolean; cp: string };
 
+// "Consulta Pública" vem como texto ("35/26"). Em alguns .ods o programa leu
+// células como data ("01/20" virava "Invalid Date"): só aceita texto, pra não
+// gravar lixo como número de CP.
+const cpText = (v: unknown) => (typeof v === "string" && !/invalid date/i.test(v) ? v.trim() : "");
+
 // Comparação exata: ignora maiúsculas/minúsculas e espaços sobrando.
 const norm = (v: unknown) => String(v ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+
+// Tira o que está entre parênteses: nossos nomes trazem a versão/região
+// ("amaran Ray 60c (US)", "STORM XT52(EU CEE 32A)") e o governo lista o modelo
+// puro ("Amaran Ray 60c"). Ignora também parênteses de largura total (（ ）).
+const withoutParens = (v: unknown) => String(v ?? "").replace(/[(（][^)）]*[)）]/g, " ");
 
 // Comparação aproximada: ignora também acentos, espaços e pontuação
 // ("LIGHT DOME 150" = "LIGHTDOME150", "A1-600" = "A1600"). Exige 5+
@@ -131,17 +141,24 @@ function scanCpRows(
 
   const byModel = new Map<string, ListRow[]>();
   const byLooseModel = new Map<string, ListRow[]>();
+  const byBaseModel = new Map<string, ListRow[]>(); // sem parênteses
   for (const r of rows.slice(headerIdx + 1)) {
     const model = norm(r[4]);
     if (!model) continue;
     const list = byModel.get(model) ?? [];
-    list.push({ ncm: String(r[0] ?? "").trim(), nationalMaker: norm(r[5]) !== "", cp: String(r[6] ?? "").trim() });
+    list.push({ ncm: String(r[0] ?? "").trim(), nationalMaker: norm(r[5]) !== "", cp: cpText(r[6]) });
     byModel.set(model, list);
     const looseKey = loose(model);
     if (looseKey.length >= MIN_LOOSE_LENGTH) {
       const looseList = byLooseModel.get(looseKey) ?? [];
       looseList.push(list[list.length - 1]);
       byLooseModel.set(looseKey, looseList);
+    }
+    const baseKey = loose(withoutParens(model));
+    if (baseKey.length >= MIN_LOOSE_LENGTH) {
+      const baseList = byBaseModel.get(baseKey) ?? [];
+      baseList.push(list[list.length - 1]);
+      byBaseModel.set(baseKey, baseList);
     }
   }
 
@@ -150,7 +167,15 @@ function scanCpRows(
     const exactHits =
       (p.manufacturerSku ? byModel.get(norm(p.manufacturerSku)) : undefined) ?? byModel.get(norm(p.sku));
     const looseKeys = [p.manufacturerSku, p.sku].map(loose).filter((k) => k.length >= MIN_LOOSE_LENGTH);
-    const approxHits = exactHits ? undefined : looseKeys.map((k) => byLooseModel.get(k)).find(Boolean);
+    let approxHits = exactHits ? undefined : looseKeys.map((k) => byLooseModel.get(k)).find(Boolean);
+    if (!exactHits && !approxHits) {
+      // 3ª tentativa: sem a versão/região entre parênteses, pelo SKU, SKU do
+      // fabricante ou nome — sempre "para conferir" (a variante pode mudar).
+      const baseKeys = [p.manufacturerSku, p.sku, p.description]
+        .map((v) => loose(withoutParens(v)))
+        .filter((k) => k.length >= MIN_LOOSE_LENGTH);
+      approxHits = baseKeys.map((k) => byBaseModel.get(k)).find(Boolean);
+    }
     const hits = exactHits ?? approxHits;
     if (!hits) continue;
     const cps = [...new Set(hits.map((h) => h.cp).filter(Boolean))].sort((a, b) => cpSortKey(b).localeCompare(cpSortKey(a)));
