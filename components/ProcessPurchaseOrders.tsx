@@ -190,12 +190,24 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
         </form>
       )}
       {!closed && available.length === 0 && (
-        <p className="mt-2 text-xs text-on-surface-variant">
-          Só pedidos <strong>Confirmados</strong> e ainda sem processo aparecem aqui.{" "}
-          <Link href="/pedidos-compra" className="text-secondary hover:underline">
+        <div className="mt-3 rounded-lg border border-dashed border-outline-variant p-4 text-body-sm font-body-sm">
+          <p className="font-medium text-primary">Como colocar pedidos neste processo</p>
+          <ol className="mt-1 list-decimal space-y-0.5 pl-5 text-on-surface-variant">
+            <li>Crie o pedido de compra de cada fornecedor (Aputure, Swit, DZO…) em Pedidos de Compra.</li>
+            <li>Adicione os itens e marque o pedido como <strong>Enviado</strong> e depois <strong>Confirmado</strong>.</li>
+            <li>Volte aqui: os pedidos confirmados e ainda sem processo aparecem na lista acima.</li>
+          </ol>
+          <Link
+            href="/pedidos-compra/novo"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 font-label-md text-label-md text-white hover:opacity-90"
+          >
+            <span className="material-symbols-outlined text-[16px]">add</span>
+            Criar pedido de compra
+          </Link>
+          <Link href="/pedidos-compra" className="ml-3 text-secondary hover:underline">
             Ver pedidos de compra
           </Link>
-        </p>
+        </div>
       )}
     </section>
   );
