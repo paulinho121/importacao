@@ -159,6 +159,8 @@
   --color-outline-variant: #1e293b;
   --color-primary: #f1f5f9;
   --color-error-container: #7f1d1d;
+  /* O fundo vermelho-escuro acima exige texto claro (o padrão #991b1b sumia nele). */
+  --color-on-error-container: #fecaca;
 }
 
 @theme inline {

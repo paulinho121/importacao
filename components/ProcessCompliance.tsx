@@ -106,7 +106,7 @@ export default function ProcessCompliance({
                       {LPCO_AGENCY_LABEL[lpco.agency]}
                     </span>
                     <span
-                      className={`px-2 py-1 rounded-full font-label-md text-label-md ${LICENSE_STATUS_BADGE_CLASS[lpco.status]}`}
+                      className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${LICENSE_STATUS_BADGE_CLASS[lpco.status]}`}
                     >
                       {LICENSE_STATUS_LABEL[lpco.status]}
                     </span>

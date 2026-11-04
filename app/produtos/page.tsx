@@ -327,7 +327,7 @@ export default async function ProdutosPage({
                   <td className="px-6 py-3">
                     {p.licenseStatus ? (
                       <span
-                        className={`px-2 py-1 rounded-full font-label-md text-label-md ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
+                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
                       >
                         {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
                       </span>
