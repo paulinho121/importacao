@@ -12,12 +12,14 @@ type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export class LinkError extends Error {}
 
-// Vincula um pedido CONFIRMADO ao processo e traz os itens dele.
+// Vincula um pedido (rascunho, enviado ou confirmado) ao processo e traz os
+// itens dele. Depois de vinculado, os itens do pedido ficam travados (ver
+// addPurchaseOrderItem) para não divergirem dos itens já copiados.
 export async function linkPurchaseOrderToProcess(tx: Tx, poId: string, processId: string) {
   const [po] = await tx.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId));
   if (!po) throw new LinkError("Pedido de compra não encontrado.");
-  if (po.status !== "CONFIRMADO") throw new LinkError("Só pedidos Confirmados podem entrar em um processo.");
-  if (po.processId) throw new LinkError("Este pedido já está em um processo.");
+  if (po.status === "CANCELADO") throw new LinkError(`O pedido ${po.poNumber} está cancelado e não pode entrar em um processo.`);
+  if (po.processId) throw new LinkError(`O pedido ${po.poNumber} já está em um processo.`);
 
   const [process] = await tx.select().from(processes).where(eq(processes.id, processId));
   if (!process) throw new LinkError("Processo não encontrado.");

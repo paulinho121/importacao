@@ -11,12 +11,13 @@ import {
   processInvoices,
   processLpcos,
   itemReservations,
+  purchaseOrders,
 } from "@/db/schema";
 import { LinkError, linkPurchaseOrderToProcess, unlinkPurchaseOrderFromProcess } from "@/lib/process-purchase-orders";
 import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { withFlash } from "@/lib/flash";
+import { withFlash, withFlashError } from "@/lib/flash";
 import {
   STATUS_BY_STEP,
   WORKFLOW_STEPS,
@@ -72,11 +73,58 @@ function resolveModal(formData: FormData, currentModal: string | null) {
   return null;
 }
 
+// Tela "Novo Processo": ou cria um processo novo, ou (escolhendo um existente
+// na lista do campo Número do Processo) só coloca pedidos de compra nele. Em
+// ambos os casos os pedidos marcados entram no processo, e os fornecedores do
+// processo vêm deles.
 export async function createProcess(formData: FormData) {
+  const poIds = [
+    ...new Set(
+      formData
+        .getAll("purchaseOrderId")
+        .map((v) => String(v).trim())
+        .filter(Boolean),
+    ),
+  ];
+  const existingProcessId = optionalText(formData, "existingProcessId");
+
+  if (existingProcessId) {
+    if (poIds.length === 0) {
+      redirect(withFlashError("/processos/novo", "Escolha ao menos um pedido de compra para colocar no processo."));
+    }
+    let linkError: string | null = null;
+    try {
+      await db.transaction(async (tx) => {
+        for (const poId of poIds) await linkPurchaseOrderToProcess(tx, poId, existingProcessId);
+      });
+    } catch (e) {
+      if (e instanceof LinkError) linkError = e.message;
+      else throw e;
+    }
+    if (linkError) redirect(withFlashError("/processos/novo", linkError));
+    revalidatePath(`/processos/${existingProcessId}`);
+    revalidatePath("/processos");
+    revalidatePath("/pedidos-compra");
+    redirect(
+      withFlash(`/processos/${existingProcessId}`, `${poIds.length} ${poIds.length === 1 ? "pedido adicionado" : "pedidos adicionados"} ao processo.`),
+    );
+  }
+
   const processNumber = String(formData.get("processNumber") ?? "").trim();
-  const supplierId = String(formData.get("supplierId") ?? "").trim();
   if (!processNumber) throw new Error("Número do processo é obrigatório.");
-  if (!supplierId) throw new Error("Fornecedor é obrigatório.");
+
+  const [sameNumber] = await db.select({ id: processes.id }).from(processes).where(eq(processes.processNumber, processNumber));
+  if (sameNumber) {
+    redirect(withFlashError("/processos/novo", `Já existe um processo com o número "${processNumber}". Escolha-o na lista para adicionar pedidos, ou use outro número.`));
+  }
+
+  // O fornecedor principal vem do primeiro pedido escolhido; sem pedidos, do campo.
+  let supplierId = String(formData.get("supplierId") ?? "").trim();
+  if (poIds.length > 0) {
+    const [firstPo] = await db.select({ supplierId: purchaseOrders.supplierId }).from(purchaseOrders).where(eq(purchaseOrders.id, poIds[0]));
+    if (firstPo) supplierId = firstPo.supplierId;
+  }
+  if (!supplierId) throw new Error("Escolha o fornecedor ou adicione um pedido de compra.");
 
   const modal = resolveModal(formData, null);
   const agentId = optionalText(formData, "agentId");
@@ -97,51 +145,68 @@ export async function createProcess(formData: FormData) {
   }
   const destinationFreeText = optionalText(formData, "destination");
 
-  const [created] = await db
-    .insert(processes)
-    .values({
-      processNumber,
-      supplierId,
-      externalReference: optionalText(formData, "externalReference"),
-      modal: modal as (typeof processes.$inferInsert)["modal"],
-      containerType: optionalText(formData, "containerType"),
-      etd: optionalDate(formData, "etd"),
-      etaEstimated: optionalDate(formData, "etaEstimated"),
-      agentId,
-      destination: destinationFreeText,
-      destinationCode,
-      destinationCity,
-      destinationState,
-      destinationBranch: optionalText(formData, "destinationBranch"),
-      weightKg: optionalNumber(formData, "weightKg"),
-      volumeM3: optionalNumber(formData, "volumeM3"),
-      notes: optionalText(formData, "notes"),
-      status: "AGUARDANDO_EMBARQUE",
-      currentStep: 1,
-    })
-    .returning({ id: processes.id });
-
   // Até 4 invoices no form de criação (como na planilha), sem limite na
   // tabela — mais invoices podem ser adicionados depois na tela de detalhe.
   const invoiceNumbers = ["invoice1", "invoice2", "invoice3", "invoice4"]
     .map((key) => optionalText(formData, key))
     .filter((v): v is string => Boolean(v));
-  if (invoiceNumbers.length > 0) {
-    await db
-      .insert(processInvoices)
-      .values(invoiceNumbers.map((invoiceNumber) => ({ processId: created.id, invoiceNumber })));
-  }
 
-  await db.insert(processEvents).values({
-    processId: created.id,
-    eventDate: new Date(),
-    eventType: "Processo criado",
-    statusAtEvent: "AGUARDANDO_EMBARQUE",
-  });
+  // Processo, invoices e pedidos vinculados numa transação só: se um pedido
+  // não puder entrar (já está em outro processo, cancelado…), nada é criado.
+  let createdId: string | null = null;
+  let linkError: string | null = null;
+  try {
+    createdId = await db.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(processes)
+        .values({
+          processNumber,
+          supplierId,
+          externalReference: optionalText(formData, "externalReference"),
+          modal: modal as (typeof processes.$inferInsert)["modal"],
+          containerType: optionalText(formData, "containerType"),
+          etd: optionalDate(formData, "etd"),
+          etaEstimated: optionalDate(formData, "etaEstimated"),
+          agentId,
+          destination: destinationFreeText,
+          destinationCode,
+          destinationCity,
+          destinationState,
+          destinationBranch: optionalText(formData, "destinationBranch"),
+          weightKg: optionalNumber(formData, "weightKg"),
+          volumeM3: optionalNumber(formData, "volumeM3"),
+          notes: optionalText(formData, "notes"),
+          status: "AGUARDANDO_EMBARQUE",
+          currentStep: 1,
+        })
+        .returning({ id: processes.id });
+
+      if (invoiceNumbers.length > 0) {
+        await tx
+          .insert(processInvoices)
+          .values(invoiceNumbers.map((invoiceNumber) => ({ processId: created.id, invoiceNumber })));
+      }
+
+      await tx.insert(processEvents).values({
+        processId: created.id,
+        eventDate: new Date(),
+        eventType: "Processo criado",
+        statusAtEvent: "AGUARDANDO_EMBARQUE",
+      });
+
+      for (const poId of poIds) await linkPurchaseOrderToProcess(tx, poId, created.id);
+      return created.id;
+    });
+  } catch (e) {
+    if (e instanceof LinkError) linkError = e.message;
+    else throw e;
+  }
+  if (linkError || !createdId) redirect(withFlashError("/processos/novo", linkError ?? "Não foi possível criar o processo."));
 
   revalidatePath("/processos");
+  revalidatePath("/pedidos-compra");
   revalidatePath("/");
-  redirect(withFlash(`/processos/${created.id}`, "Processo criado."));
+  redirect(withFlash(`/processos/${createdId}`, poIds.length > 0 ? `Processo criado com ${poIds.length} ${poIds.length === 1 ? "pedido" : "pedidos"}.` : "Processo criado."));
 }
 
 export async function updateProcessNumber(processId: string, formData: FormData) {

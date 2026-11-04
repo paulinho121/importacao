@@ -1,7 +1,8 @@
-import { createProcess } from "@/app/processos/actions";
 import { db } from "@/db/client";
-import { suppliers, processes, freightAgents } from "@/db/schema";
-import { sql } from "drizzle-orm";
+import { suppliers, processes, freightAgents, purchaseOrders, purchaseOrderItems } from "@/db/schema";
+import { and, eq, isNull, ne, notInArray, sql } from "drizzle-orm";
+import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
+import NewProcessForm from "@/components/NewProcessForm";
 import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
 import ModalidadeTipoFields from "@/components/ModalidadeTipoFields";
 
@@ -17,11 +18,42 @@ async function suggestProcessNumber(): Promise<string> {
 }
 
 export default async function NovoProcessoPage() {
-  const [supplierRows, agentRows, suggestedNumber] = await Promise.all([
+  const [supplierRows, agentRows, suggestedNumber, openProcessRows, orderRows] = await Promise.all([
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
     db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
     suggestProcessNumber(),
+    // processos em andamento: dá pra colocar mais pedidos neles
+    db
+      .select({ id: processes.id, processNumber: processes.processNumber })
+      .from(processes)
+      .where(notInArray(processes.status, ["CONCLUIDO", "ABANDONADO"]))
+      .orderBy(processes.processNumber),
+    // pedidos já criados que ainda não estão em nenhum processo
+    db
+      .select({
+        id: purchaseOrders.id,
+        poNumber: purchaseOrders.poNumber,
+        status: purchaseOrders.status,
+        currency: purchaseOrders.currency,
+        supplierId: suppliers.id,
+        supplierName: suppliers.name,
+        supplierLogoUrl: suppliers.logoUrl,
+        itemCount: sql<number>`count(${purchaseOrderItems.id})`.mapWith(Number),
+        total: sql<number>`coalesce(sum(${purchaseOrderItems.quantity} * ${purchaseOrderItems.unitPrice}), 0)`.mapWith(Number),
+      })
+      .from(purchaseOrders)
+      .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+      .leftJoin(purchaseOrderItems, eq(purchaseOrderItems.purchaseOrderId, purchaseOrders.id))
+      .where(and(ne(purchaseOrders.status, "CANCELADO"), isNull(purchaseOrders.processId)))
+      .groupBy(purchaseOrders.id, suppliers.id, suppliers.name, suppliers.logoUrl)
+      .orderBy(suppliers.name, purchaseOrders.poNumber),
   ]);
+  const suppliersByProcess = await getSuppliersByProcess(openProcessRows.map((p) => p.id));
+  const processOptions = openProcessRows.map((p) => ({
+    id: p.id,
+    processNumber: p.processNumber,
+    suppliers: suppliersByProcess.get(p.id) ?? [],
+  }));
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
@@ -33,45 +65,12 @@ export default async function NovoProcessoPage() {
       </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
-        <form action={createProcess} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Número do Processo
-              </label>
-              <input
-                className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md font-mono-data focus:outline-none focus:border-secondary transition-all"
-                type="text"
-                name="processNumber"
-                defaultValue={suggestedNumber}
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
-                Fornecedor
-              </label>
-              <select
-                className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all appearance-none"
-                name="supplierId"
-                required
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Selecione o fornecedor
-                </option>
-                {supplierRows.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-              {supplierRows.length === 0 && (
-                <p className="text-xs text-error mt-1">
-                  Nenhum fornecedor cadastrado — cadastre um em /fornecedores/novo primeiro.
-                </p>
-              )}
-            </div>
+        <NewProcessForm
+          suggestedNumber={suggestedNumber}
+          suppliers={supplierRows}
+          processes={processOptions}
+          orders={orderRows}
+        >
             <div className="sm:col-span-2">
               <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
                 Referência Externa
@@ -222,17 +221,7 @@ export default async function NovoProcessoPage() {
                 name="notes"
               />
             </div>
-          </div>
-
-          <div className="flex justify-end gap-4 pt-2">
-            <button
-              type="submit"
-              className="px-8 py-3 rounded-lg bg-secondary text-white font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
-            >
-              Criar Processo
-            </button>
-          </div>
-        </form>
+        </NewProcessForm>
       </div>
     </div>
   );

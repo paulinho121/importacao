@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { purchaseOrders, purchaseOrderItems, suppliers } from "@/db/schema";
 import { addPurchaseOrderToProcess, removePurchaseOrderFromProcess } from "@/app/processos/actions";
@@ -51,6 +51,7 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
           .select({
             id: purchaseOrders.id,
             poNumber: purchaseOrders.poNumber,
+            status: purchaseOrders.status,
             currency: purchaseOrders.currency,
             supplierName: suppliers.name,
             ...poTotals,
@@ -58,9 +59,10 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
           .from(purchaseOrders)
           .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
           .leftJoin(purchaseOrderItems, eq(purchaseOrderItems.purchaseOrderId, purchaseOrders.id))
-          .where(and(eq(purchaseOrders.status, "CONFIRMADO"), isNull(purchaseOrders.processId)))
+          .where(and(ne(purchaseOrders.status, "CANCELADO"), isNull(purchaseOrders.processId)))
           .groupBy(purchaseOrders.id, suppliers.name)
           .orderBy(suppliers.name, purchaseOrders.poNumber),
+
   ]);
 
   const currencies = [...new Set(linked.map((l) => l.currency).filter(Boolean))];
@@ -171,11 +173,11 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
               className="w-full appearance-none rounded-lg border border-outline-variant bg-surface-container-low p-2.5 text-body-sm font-body-sm focus:border-secondary focus:outline-none"
             >
               <option value="">
-                {available.length === 0 ? "Nenhum pedido confirmado disponível" : "Escolha um pedido confirmado…"}
+                {available.length === 0 ? "Nenhum pedido disponível" : "Escolha um pedido…"}
               </option>
               {available.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.supplierName} — {p.poNumber} ({p.itemCount} {p.itemCount === 1 ? "item" : "itens"} · {money(p.total, p.currency)})
+                  {p.supplierName} — {p.poNumber} · {PURCHASE_ORDER_STATUS_LABEL[p.status as PurchaseOrderStatus]} ({p.itemCount} {p.itemCount === 1 ? "item" : "itens"} · {money(p.total, p.currency)})
                 </option>
               ))}
             </select>
@@ -194,8 +196,8 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
           <p className="font-medium text-primary">Como colocar pedidos neste processo</p>
           <ol className="mt-1 list-decimal space-y-0.5 pl-5 text-on-surface-variant">
             <li>Crie o pedido de compra de cada fornecedor (Aputure, Swit, DZO…) em Pedidos de Compra.</li>
-            <li>Adicione os itens e marque o pedido como <strong>Enviado</strong> e depois <strong>Confirmado</strong>.</li>
-            <li>Volte aqui: os pedidos confirmados e ainda sem processo aparecem na lista acima.</li>
+            <li>Adicione os itens ao pedido.</li>
+            <li>Volte aqui: os pedidos que ainda não estão em nenhum processo aparecem na lista acima.</li>
           </ol>
           <Link
             href="/pedidos-compra/novo"

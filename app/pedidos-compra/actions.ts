@@ -6,7 +6,7 @@ import { and, eq, ilike, inArray, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
-import { withFlash } from "@/lib/flash";
+import { withFlash, withFlashError } from "@/lib/flash";
 import { LinkError, linkPurchaseOrderToProcess } from "@/lib/process-purchase-orders";
 
 function optionalText(formData: FormData, key: string) {
@@ -27,6 +27,11 @@ export async function createPurchaseOrder(formData: FormData) {
   const supplierId = String(formData.get("supplierId") ?? "").trim();
   if (!poNumber) throw new Error("Número do pedido é obrigatório.");
   if (!supplierId) throw new Error("Fornecedor é obrigatório.");
+
+  const [duplicate] = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber));
+  if (duplicate) {
+    redirect(withFlashError("/pedidos-compra/novo", `Já existe um pedido com o número "${poNumber}" — use um número diferente.`));
+  }
 
   const user = await getCurrentUser();
 
@@ -58,7 +63,7 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
 
   const [existing] = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber));
   if (existing && existing.id !== poId) {
-    throw new Error(`Já existe um pedido com o número "${poNumber}" — use um número diferente.`);
+    redirect(withFlashError(`/pedidos-compra/${poId}`, `Já existe um pedido com o número "${poNumber}" — use um número diferente.`));
   }
 
   await db
@@ -75,8 +80,9 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
     })
     .where(eq(purchaseOrders.id, poId));
 
-  revalidatePath(`/pedidos-compra/${poId}`);
   revalidatePath("/pedidos-compra");
+  // o redirect recarrega a página com o formulário de edição fechado e mostra o aviso
+  redirect(withFlash(`/pedidos-compra/${poId}`, "Pedido atualizado."));
 }
 
 export async function deletePurchaseOrder(poId: string) {
@@ -147,8 +153,14 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   const quantity = optionalNumber(formData, "quantity");
   const unitPrice = optionalNumber(formData, "unitPrice");
 
-  const [po] = await db.select({ status: purchaseOrders.status }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  const [po] = await db
+    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.id, poId));
   if (po?.status !== "RASCUNHO") throw new Error("Só é possível adicionar itens enquanto o pedido está em Rascunho.");
+  if (po.processId) {
+    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
+  }
 
   if (productId) {
     const [product] = await db.select().from(products).where(eq(products.id, productId));
@@ -177,8 +189,14 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
 }
 
 export async function removePurchaseOrderItem(itemId: string, poId: string) {
-  const [po] = await db.select({ status: purchaseOrders.status }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  const [po] = await db
+    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.id, poId));
   if (po?.status !== "RASCUNHO") throw new Error("Só é possível remover itens enquanto o pedido está em Rascunho.");
+  if (po.processId) {
+    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
+  }
 
   await db.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
   revalidatePath(`/pedidos-compra/${poId}`);
