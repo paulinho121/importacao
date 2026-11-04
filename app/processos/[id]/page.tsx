@@ -331,7 +331,7 @@ export default async function ProcessDetailPage({
             itens, invoices e documentos ficam associados ao processo, não ao número.
           </p>
           <p className="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md max-w-2xl">
-            <span className="flex -space-x-2">
+            <span className="flex items-center gap-1">
               {(suppliersOfProcess.length > 0 ? suppliersOfProcess : [{ id: process.supplierId, name: process.supplierName, logoUrl: process.supplierLogoUrl }]).map((sp) => (
                 <SupplierLogo key={sp.id} logoUrl={sp.logoUrl} name={sp.name} size={32} />
               ))}
