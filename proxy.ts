@@ -26,9 +26,11 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims valida o JWT localmente (chaves públicas em cache) em vez de
+  // ir ao servidor de Auth a cada request, como getUser faz — uma viagem de
+  // rede a menos em toda página e toda ação. Renova a sessão se expirou.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims?.sub ? claimsData.claims : null;
 
   const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
 
