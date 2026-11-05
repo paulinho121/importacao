@@ -686,7 +686,14 @@ export const processFreightQuotes = pgTable(
     quoteDate: date("quote_date"),
     // "Validade para embarque" da proposta.
     validUntil: date("valid_until"),
+    // Modal estruturado (derivado do tipo de embarque quando dá).
     modal: modalEnum("modal"),
+    // Modalidade (MARITIMO | AEREO | TERRESTRE) e tipo de embarque (FCL, LCL,
+    // Air Cargo…) como na planilha: "MODAL: SEA/AIR" e "TIPO: FCL/LCL".
+    modalidade: text("modalidade"),
+    containerType: text("container_type"),
+    // Situação da proposta: ATUALIZADO | ANTIGO | FECHADO.
+    status: text("status").notNull().default("ATUALIZADO"),
     incoterm: text("incoterm"),
     // Companhia aérea / armador (coluna "CIA" da planilha).
     carrier: text("carrier"),
@@ -701,6 +708,7 @@ export const processFreightQuotes = pgTable(
     frequency: text("frequency"),
     // Carga cotada.
     cargoDescription: text("cargo_description"),
+    // "Peso considerado" (peso tarifado) da cotação, em kg.
     grossWeightKg: numeric("gross_weight_kg", { precision: 10, scale: 2 }),
     volumes: integer("volumes"),
     volumeM3: numeric("volume_m3", { precision: 10, scale: 3 }),

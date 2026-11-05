@@ -1,4 +1,4 @@
-import { tipoEmbarqueLabel } from "@/lib/modais";
+import { tipoEmbarqueLabel, modalidadeFromModal } from "@/lib/modais";
 import { branchLabel, landingLabel } from "@/lib/locations";
 import { ModalBadge } from "@/components/shared/ModalBadge";
 import Link from "next/link";
@@ -202,7 +202,9 @@ export default async function ProcessDetailPage({
     proposal: q.proposal,
     quoteDate: q.quoteDate,
     validUntil: q.validUntil,
-    modal: q.modal,
+    modalidade: q.modalidade ?? modalidadeFromModal(q.modal),
+    containerType: q.containerType,
+    status: q.status,
     incoterm: q.incoterm,
     carrier: q.carrier,
     origin: q.origin,
@@ -499,7 +501,12 @@ export default async function ProcessDetailPage({
         agents={agentOptions}
         processCurrency={process.currency}
         exchangeRate={process.exchangeRate ? Number(process.exchangeRate) : null}
-        defaults={{ modal: process.modal, incoterm: process.incoterm, weightKg: process.weightKg }}
+        defaults={{
+          modalidade: modalidadeFromModal(process.modal),
+          containerType: process.containerType,
+          incoterm: process.incoterm,
+          weightKg: process.weightKg,
+        }}
         closed={isClosed}
       />
 

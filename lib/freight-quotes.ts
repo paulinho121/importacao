@@ -37,8 +37,8 @@ export const QUOTE_SECTIONS: {
   },
   {
     value: "OUTRAS",
-    label: "Outras taxas / custo adicional",
-    hint: "DTA, seguro, descontos ou qualquer custo extra.",
+    label: "DTA e outros custos",
+    hint: "DTA e qualquer custo adicional.",
     defaultCurrency: "BRL",
     suggestions: ["DTA", "Seguro", "Despachante", "Custo adicional", "Desconto"],
   },
@@ -144,4 +144,49 @@ export function transitLabel(min: number | null, max: number | null): string {
   if (min !== null && max !== null && max !== min) return `${min} a ${max} dias`;
   const v = min ?? max;
   return v !== null ? `${v} dias` : "—";
+}
+
+// Situação da proposta (linha "ATUALIZADO / ANTIGO / FECHADO" da planilha).
+export type QuoteStatus = "ATUALIZADO" | "ANTIGO" | "FECHADO";
+
+export const QUOTE_STATUSES: { value: QuoteStatus; label: string; color: string }[] = [
+  { value: "ATUALIZADO", label: "Atualizado", color: "#2e9e5b" },
+  { value: "ANTIGO", label: "Antigo", color: "#8a8f98" },
+  { value: "FECHADO", label: "Fechado", color: "#d98a14" },
+];
+
+export function isQuoteStatus(v: string): v is QuoteStatus {
+  return QUOTE_STATUSES.some((s) => s.value === v);
+}
+
+// Quantas linhas de taxa (TX-1 … TX-n) cabem em cada bloco, origem e destino.
+export const MAX_TAX_ROWS = 10;
+export const DEFAULT_TAX_ROWS = 3;
+
+// Tudo convertido para uma só moeda, a do "dólar do dia": reais viram a moeda
+// estrangeira dividindo pelo câmbio; a própria moeda entra direto; qualquer
+// outra não tem como converter (retorna null).
+export function totalInForeign(
+  lines: QuoteLineAmount[],
+  foreign: string,
+  rate: number | null,
+): number | null {
+  let total = 0;
+  for (const l of lines) {
+    const v = num(l.total);
+    if (l.currency === foreign) total += v;
+    else if (l.currency === "BRL" && rate) total += v / rate;
+    else return null;
+  }
+  return total;
+}
+
+// Total em reais com a moeda estrangeira informada (mesma regra de totalBRL,
+// mas sem depender da moeda do processo).
+export function totalInBRL(
+  lines: QuoteLineAmount[],
+  foreign: string,
+  rate: number | null,
+): number | null {
+  return totalBRL(lines, foreign, rate);
 }

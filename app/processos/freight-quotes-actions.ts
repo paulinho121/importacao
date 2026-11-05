@@ -13,7 +13,16 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash, withFlashError } from "@/lib/flash";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
-import { computeLineTotal, freightToApply, formatMoney, QUOTE_SECTIONS, type QuoteSection } from "@/lib/freight-quotes";
+import {
+  computeLineTotal,
+  freightToApply,
+  formatMoney,
+  isQuoteStatus,
+  QUOTE_SECTIONS,
+  type QuoteSection,
+} from "@/lib/freight-quotes";
+import { MODALIDADES, TIPOS_EMBARQUE, modalFromTipo } from "@/lib/modais";
+import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
 
 const CURRENCIES = ["USD", "EUR", "CNY", "GBP", "JPY", "OTHER", "BRL"] as const;
 const MODALS = ["AIR", "SEA_FCL", "SEA_LCL", "SEA_BREAK_BULK", "SEA_RORO", "COURIER", "ROAD"] as const;
@@ -147,14 +156,26 @@ export async function saveFreightQuote(
   }
   const removeFile = formData.get("removeFile") === "1";
 
-  const modalRaw = text(formData, "modal");
+  // Modalidade (Marítimo/Aéreo/Terrestre) e tipo de embarque (FCL, LCL, Air
+  // Cargo…); o enum `modal` é derivado deles.
+  const modalidadeRaw = text(formData, "modalidade");
+  const modalidade = MODALIDADES.some((m) => m.value === modalidadeRaw) ? modalidadeRaw : null;
+  const tipoRaw = text(formData, "containerType");
+  const containerType = TIPOS_EMBARQUE.some((t) => t.value === tipoRaw) ? tipoRaw : null;
+  const modalFromChoice =
+    modalFromTipo(containerType) ?? (modalidade === "AEREO" ? "AIR" : modalidade === "TERRESTRE" ? "ROAD" : null);
+  const statusRaw = text(formData, "status") ?? "";
+  const status = isQuoteStatus(statusRaw) ? statusRaw : "ATUALIZADO";
   const cargoCurrencyRaw = text(formData, "cargoValueCurrency");
   const values = {
     agentId,
     proposal: text(formData, "proposal"),
     quoteDate: text(formData, "quoteDate"),
     validUntil: text(formData, "validUntil"),
-    modal: modalRaw && (MODALS as readonly string[]).includes(modalRaw) ? (modalRaw as Modal) : null,
+    modal: modalFromChoice && (MODALS as readonly string[]).includes(modalFromChoice) ? (modalFromChoice as Modal) : null,
+    modalidade,
+    containerType,
+    status,
     incoterm: text(formData, "incoterm"),
     carrier: text(formData, "carrier"),
     origin: text(formData, "origin"),
@@ -294,13 +315,18 @@ export async function selectFreightQuote(quoteId: string, processId: string) {
   const apply = freightToApply(lines, process.currency);
 
   await db.transaction(async (tx) => {
+    // Só uma cotação fica "Fechada": a que foi escolhida.
+    await tx
+      .update(processFreightQuotes)
+      .set({ isSelected: false, status: "ATUALIZADO" })
+      .where(and(eq(processFreightQuotes.processId, processId), eq(processFreightQuotes.status, "FECHADO")));
     await tx
       .update(processFreightQuotes)
       .set({ isSelected: false })
       .where(eq(processFreightQuotes.processId, processId));
     await tx
       .update(processFreightQuotes)
-      .set({ isSelected: true, updatedAt: new Date() })
+      .set({ isSelected: true, status: "FECHADO", updatedAt: new Date() })
       .where(eq(processFreightQuotes.id, quoteId));
 
     const patch: Partial<typeof processes.$inferInsert> = { updatedAt: new Date() };
@@ -339,8 +365,23 @@ export async function clearFreightQuoteSelection(processId: string) {
   const back = `/processos/${processId}`;
   await db
     .update(processFreightQuotes)
-    .set({ isSelected: false })
-    .where(eq(processFreightQuotes.processId, processId));
+    .set({ isSelected: false, status: "ATUALIZADO" })
+    .where(and(eq(processFreightQuotes.processId, processId), eq(processFreightQuotes.isSelected, true)));
   revalidatePath(back);
   redirect(withFlash(back, "Escolha da cotação removida. O frete do processo continua como estava."));
+}
+
+// Dólar (ou outra moeda) do dia, só para comparar as cotações na tela: não
+// grava nada nem altera o câmbio do processo. Usa a PTAX de venda de hoje (ou
+// do último dia útil publicado pelo Bacen).
+export async function fetchDailyRate(
+  currency: string,
+): Promise<{ ok: true; rate: number; date: string } | { ok: false; error: string }> {
+  if (!["USD", "EUR", "CNY", "GBP", "JPY"].includes(currency)) {
+    return { ok: false, error: "Essa moeda não tem câmbio automático — digite o valor." };
+  }
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
+  const result = await fetchPtaxRate({ currency: currency as PtaxCurrency, date: today });
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, rate: result.data.rate, date: result.data.date };
 }
