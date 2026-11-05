@@ -195,9 +195,6 @@ export default async function ProcessDetailPage({
         .where(inArray(processFreightQuoteLines.quoteId, quoteIds))
         .orderBy(processFreightQuoteLines.position)
     : [];
-  const freightQuotesKey = freightQuoteRows
-    .map((q) => `${q.id}:${q.updatedAt.getTime()}:${q.isSelected}`)
-    .join("|");
   const freightQuotes: FreightQuoteRow[] = freightQuoteRows.map((q) => ({
     id: q.id,
     agentId: q.agentId,
@@ -205,7 +202,6 @@ export default async function ProcessDetailPage({
     proposal: q.proposal,
     quoteDate: q.quoteDate,
     validUntil: q.validUntil,
-    validityDaysLeft: diasRestantes(q.validUntil),
     modal: q.modal,
     incoterm: q.incoterm,
     carrier: q.carrier,
@@ -498,14 +494,12 @@ export default async function ProcessDetailPage({
       />
 
       <ProcessFreightQuotes
-        // Remonta quando os dados mudam (fecha o formulário após salvar).
-        key={freightQuotesKey}
         processId={id}
         quotes={freightQuotes}
         agents={agentOptions}
         processCurrency={process.currency}
         exchangeRate={process.exchangeRate ? Number(process.exchangeRate) : null}
-        defaults={{ modal: process.modal, incoterm: process.incoterm, destination: process.destinationCode }}
+        defaults={{ modal: process.modal, incoterm: process.incoterm, weightKg: process.weightKg }}
         closed={isClosed}
       />
 

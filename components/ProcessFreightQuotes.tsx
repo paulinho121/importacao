@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { useFormStatus } from "react-dom";
+import { Fragment, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   saveFreightQuote,
@@ -12,18 +11,19 @@ import {
 import DocumentViewer from "@/components/DocumentViewer";
 import { MODAIS } from "@/lib/modais";
 import { INCOTERMS } from "@/lib/incoterms";
-import { formatDate } from "@/lib/status";
 import {
-  QUOTE_SECTIONS,
-  QUOTE_UNITS,
   computeLineTotal,
   formatMoney,
-  quoteUnitLabel,
   totalBRL,
   totalsByCurrency,
-  transitLabel,
+  type QuoteLineAmount,
   type QuoteSection,
 } from "@/lib/freight-quotes";
+
+// Cotações de frete no formato da planilha de comparação do time: uma coluna
+// por agente de carga, lado a lado, com "moeda | custos" em cada linha. Tudo
+// é editável na própria tela e cada coluna é salva separadamente, para
+// comparar várias cotações do mesmo processo.
 
 export type FreightQuoteLineRow = {
   id: string;
@@ -44,8 +44,6 @@ export type FreightQuoteRow = {
   proposal: string | null;
   quoteDate: string | null;
   validUntil: string | null;
-  // Dias que faltam para a validade (negativo = vencida), calculado no servidor.
-  validityDaysLeft: number | null;
   modal: string | null;
   incoterm: string | null;
   carrier: string | null;
@@ -69,58 +67,148 @@ export type FreightQuoteRow = {
   lines: FreightQuoteLineRow[];
 };
 
-const CURRENCY_OPTIONS = [
-  { value: "USD", label: "USD" },
-  { value: "BRL", label: "BRL" },
-  { value: "EUR", label: "EUR" },
-  { value: "CNY", label: "CNY" },
-  { value: "GBP", label: "GBP" },
-  { value: "JPY", label: "JPY" },
-  { value: "OTHER", label: "Outra" },
-];
+type Defaults = { modal: string | null; incoterm: string | null; weightKg: string | null };
 
-const MODAL_LABEL = Object.fromEntries(MODAIS.filter((m) => m.value).map((m) => [m.value, m.label]));
-const MAX_FILE_BYTES = 4 * 1024 * 1024;
+// ------------------------------------------------------------ rascunho (coluna)
 
-const inputClass =
-  "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
-const smallInputClass =
-  "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
-const labelClass = "block font-label-md text-label-md text-on-surface-variant mb-1.5";
-const miniLabel = "block text-[11px] text-on-surface-variant mb-0.5";
-
-function SubmitButton({ children }: { children: ReactNode }) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all disabled:opacity-60"
-    >
-      {pending ? "Salvando…" : children}
-    </button>
-  );
-}
-
-// ---------- formulário ----------
-
-type LineState = {
-  key: string;
-  section: QuoteSection;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-  unit: string;
-  minimum: string;
-  currency: string;
-  total: string;
-  // true quando o total foi digitado à mão (ou veio da proposta): deixa de
-  // ser recalculado por quantidade × tarifa.
-  totalTouched: boolean;
+type Draft = {
+  agentId: string;
+  proposal: string;
+  incoterm: string;
+  modal: string;
+  transitDays: string;
+  transitDaysMax: string;
+  origin: string;
+  destination: string;
+  carrier: string;
+  validUntil: string;
+  grossWeightKg: string;
+  freightRate: string;
+  freightCurrency: string;
+  originFee: string;
+  originCurrency: string;
+  destinationFee: string;
+  destinationCurrency: string;
+  dta: string;
+  dtaCurrency: string;
+  otherFee: string;
+  otherCurrency: string;
+  notes: string;
+  // "Mais dados da proposta"
+  route: string;
+  quoteDate: string;
+  frequency: string;
+  cargoDescription: string;
+  volumes: string;
+  volumeM3: string;
+  dimensions: string;
+  cargoValue: string;
+  cargoValueCurrency: string;
+  pickupAddress: string;
+  removeFile: boolean;
+  newFileName: string;
 };
 
-let keySeq = 0;
-const nextKey = () => `l${++keySeq}`;
+type Col = {
+  key: string;
+  quoteId: string | null;
+  savedFileName: string | null;
+  isSelected: boolean;
+  draft: Draft;
+  base: string; // JSON do rascunho no último estado salvo — para saber se há alteração
+  fileNonce: number;
+  colorIdx: number;
+};
+
+const num = (v: string | number | null | undefined) =>
+  v === null || v === undefined || v === "" ? "" : String(Number(v));
+
+const EMPTY_DATE = "";
+
+function emptyDraft(d: Defaults): Draft {
+  return {
+    agentId: "",
+    proposal: "",
+    incoterm: d.incoterm ?? "",
+    modal: d.modal ?? "",
+    transitDays: "",
+    transitDaysMax: "",
+    origin: "",
+    destination: "",
+    carrier: "",
+    validUntil: EMPTY_DATE,
+    grossWeightKg: num(d.weightKg),
+    freightRate: "",
+    freightCurrency: "USD",
+    originFee: "",
+    originCurrency: "USD",
+    destinationFee: "",
+    destinationCurrency: "USD",
+    dta: "",
+    dtaCurrency: "BRL",
+    otherFee: "",
+    otherCurrency: "BRL",
+    notes: "",
+    route: "",
+    quoteDate: EMPTY_DATE,
+    frequency: "",
+    cargoDescription: "",
+    volumes: "",
+    volumeM3: "",
+    dimensions: "",
+    cargoValue: "",
+    cargoValueCurrency: "USD",
+    pickupAddress: "",
+    removeFile: false,
+    newFileName: "",
+  };
+}
+
+function draftFromQuote(q: FreightQuoteRow, d: Defaults): Draft {
+  const base = emptyDraft(d);
+  const bySection = (s: QuoteSection) => q.lines.filter((l) => l.section === s);
+  const freight = bySection("FRETE")[0];
+  const origin = bySection("ORIGEM")[0];
+  const destination = bySection("DESTINO")[0];
+  const outras = bySection("OUTRAS");
+  const dta = outras.find((l) => /^dta$/i.test(l.description.trim()));
+  const other = outras.find((l) => l !== dta);
+  return {
+    ...base,
+    agentId: q.agentId ?? "",
+    proposal: q.proposal ?? "",
+    incoterm: q.incoterm ?? "",
+    modal: q.modal ?? "",
+    transitDays: num(q.transitDays),
+    transitDaysMax: num(q.transitDaysMax),
+    origin: q.origin ?? "",
+    destination: q.destination ?? "",
+    carrier: q.carrier ?? "",
+    validUntil: q.validUntil ?? "",
+    grossWeightKg: num(q.grossWeightKg),
+    freightRate: freight ? num(freight.unitPrice ?? freight.total) : "",
+    freightCurrency: freight?.currency ?? "USD",
+    originFee: origin ? num(origin.total) : "",
+    originCurrency: origin?.currency ?? "USD",
+    destinationFee: destination ? num(destination.total) : "",
+    destinationCurrency: destination?.currency ?? "USD",
+    dta: dta ? num(dta.total) : "",
+    dtaCurrency: dta?.currency ?? "BRL",
+    otherFee: other ? num(other.total) : "",
+    otherCurrency: other?.currency ?? "BRL",
+    notes: q.notes ?? "",
+    route: q.route ?? "",
+    quoteDate: q.quoteDate ?? "",
+    frequency: q.frequency ?? "",
+    cargoDescription: q.cargoDescription ?? "",
+    volumes: num(q.volumes),
+    volumeM3: num(q.volumeM3),
+    dimensions: q.dimensions ?? "",
+    cargoValue: num(q.cargoValue),
+    cargoValueCurrency: q.cargoValueCurrency ?? "USD",
+    pickupAddress: q.pickupAddress ?? "",
+  };
+}
 
 function toNumber(s: string): number | null {
   if (s.trim() === "") return null;
@@ -128,515 +216,70 @@ function toNumber(s: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function emptyLine(section: QuoteSection, currency?: string): LineState {
-  const def = QUOTE_SECTIONS.find((s) => s.value === section)!;
-  return {
-    key: nextKey(),
-    section,
-    description: "",
-    quantity: "",
-    unitPrice: "",
-    unit: "",
-    minimum: "",
-    currency: currency ?? def.defaultCurrency,
-    total: "",
-    totalTouched: false,
-  };
+// Frete = carga (kg) × tarifa por kg; sem kg informado, a tarifa é tratada
+// como valor total (frete fechado).
+function freightTotal(d: Draft): number | null {
+  const rate = toNumber(d.freightRate);
+  if (rate === null) return null;
+  const kg = toNumber(d.grossWeightKg);
+  return kg !== null && kg > 0 ? computeLineTotal(kg, rate, null) : rate;
 }
 
-function initialLines(quote: FreightQuoteRow | null): LineState[] {
-  if (!quote) return [emptyLine("FRETE")];
-  return quote.lines.map((l) => ({
-    key: nextKey(),
-    section: l.section,
-    description: l.description,
-    quantity: l.quantity ? String(Number(l.quantity)) : "",
-    unitPrice: l.unitPrice ? String(Number(l.unitPrice)) : "",
-    unit: l.unit ?? "",
-    minimum: l.minimum && Number(l.minimum) > 0 ? String(Number(l.minimum)) : "",
-    currency: l.currency,
-    total: l.total,
-    totalTouched: true,
-  }));
-}
+type SubmitLine = {
+  section: QuoteSection;
+  description: string;
+  quantity: string;
+  unitPrice: string;
+  unit: string;
+  currency: string;
+  total: number;
+};
 
-function LinesEditor({
-  lines,
-  setLines,
-}: {
-  lines: LineState[];
-  setLines: (fn: (prev: LineState[]) => LineState[]) => void;
-}) {
-  function update(key: string, patch: Partial<LineState>) {
-    setLines((prev) =>
-      prev.map((l) => {
-        if (l.key !== key) return l;
-        const next = { ...l, ...patch };
-        if ("total" in patch) next.totalTouched = patch.total !== "";
-        const affectsTotal = "quantity" in patch || "unitPrice" in patch || "minimum" in patch;
-        if (affectsTotal && !next.totalTouched) {
-          const t = computeLineTotal(toNumber(next.quantity), toNumber(next.unitPrice), toNumber(next.minimum));
-          next.total = t === null ? "" : String(t);
-        }
-        return next;
-      }),
-    );
+// Linhas que a coluna grava no banco (só as preenchidas).
+function linesOf(d: Draft): SubmitLine[] {
+  const out: SubmitLine[] = [];
+  const freight = freightTotal(d);
+  if (freight !== null) {
+    const kg = toNumber(d.grossWeightKg);
+    const hasKg = kg !== null && kg > 0;
+    out.push({
+      section: "FRETE",
+      description: "Frete",
+      quantity: hasKg ? String(kg) : "",
+      unitPrice: hasKg ? d.freightRate : "",
+      unit: hasKg ? "KG" : "",
+      currency: d.freightCurrency,
+      total: freight,
+    });
   }
-
-  return (
-    <div className="space-y-4">
-      {QUOTE_SECTIONS.map((section) => {
-        const sectionLines = lines.filter((l) => l.section === section.value);
-        const subtotal = totalsByCurrency(
-          sectionLines.map((l) => ({ section: l.section, currency: l.currency, total: toNumber(l.total) ?? 0 })),
-        );
-        const listId = `sugestoes-${section.value}`;
-        return (
-          <div key={section.value} className="border border-outline-variant rounded-lg p-3 bg-surface-container-lowest">
-            <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
-              <div>
-                <h5 className="font-label-md text-label-md text-primary">{section.label}</h5>
-                <p className="text-[11px] text-on-surface-variant">{section.hint}</p>
-              </div>
-              {subtotal.length > 0 && (
-                <span className="font-mono-data text-xs text-on-surface-variant">
-                  {subtotal.map((t) => formatMoney(t.value, t.currency)).join(" + ")}
-                </span>
-              )}
-            </div>
-            <datalist id={listId}>
-              {section.suggestions.map((s) => (
-                <option key={s} value={s} />
-              ))}
-            </datalist>
-
-            <div className="space-y-2">
-              {sectionLines.map((l) => (
-                <div
-                  key={l.key}
-                  className="grid grid-cols-2 sm:grid-cols-6 lg:grid-cols-[minmax(0,2fr)_80px_90px_110px_80px_80px_110px_auto] gap-2 items-end border-t border-outline-variant/50 pt-2 first:border-t-0 first:pt-0"
-                >
-                  <input type="hidden" name="lineSection" value={l.section} />
-                  <label className="col-span-2 sm:col-span-6 lg:col-span-1">
-                    <span className={miniLabel}>Descrição</span>
-                    <input
-                      className={smallInputClass}
-                      name="lineDescription"
-                      list={listId}
-                      value={l.description}
-                      onChange={(e) => update(l.key, { description: e.target.value })}
-                      placeholder="Ex: Airport transfer"
-                    />
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Qtde</span>
-                    <input
-                      className={`${smallInputClass} font-mono-data`}
-                      name="lineQuantity"
-                      type="number"
-                      step="any"
-                      min="0"
-                      inputMode="decimal"
-                      value={l.quantity}
-                      onChange={(e) => update(l.key, { quantity: e.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Tarifa</span>
-                    <input
-                      className={`${smallInputClass} font-mono-data`}
-                      name="lineUnitPrice"
-                      type="number"
-                      step="any"
-                      min="0"
-                      inputMode="decimal"
-                      value={l.unitPrice}
-                      onChange={(e) => update(l.key, { unitPrice: e.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Unidade</span>
-                    <select
-                      className={`${smallInputClass} appearance-none`}
-                      name="lineUnit"
-                      value={l.unit}
-                      onChange={(e) => update(l.key, { unit: e.target.value })}
-                    >
-                      {QUOTE_UNITS.map((u) => (
-                        <option key={u.value} value={u.value}>
-                          {u.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Mínimo</span>
-                    <input
-                      className={`${smallInputClass} font-mono-data`}
-                      name="lineMinimum"
-                      type="number"
-                      step="any"
-                      min="0"
-                      inputMode="decimal"
-                      value={l.minimum}
-                      onChange={(e) => update(l.key, { minimum: e.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Moeda</span>
-                    <select
-                      className={`${smallInputClass} appearance-none`}
-                      name="lineCurrency"
-                      value={l.currency}
-                      onChange={(e) => update(l.key, { currency: e.target.value })}
-                    >
-                      {CURRENCY_OPTIONS.map((c) => (
-                        <option key={c.value} value={c.value}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span className={miniLabel}>Total</span>
-                    <input
-                      className={`${smallInputClass} font-mono-data font-bold`}
-                      name="lineTotal"
-                      type="number"
-                      step="any"
-                      min="0"
-                      inputMode="decimal"
-                      value={l.total}
-                      onChange={(e) => update(l.key, { total: e.target.value })}
-                      placeholder="0,00"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setLines((prev) => prev.filter((x) => x.key !== l.key))}
-                    aria-label={`Remover linha ${l.description || ""}`}
-                    className="col-span-2 sm:col-span-1 px-2 py-2 rounded-lg text-error text-xs font-bold hover:bg-error-container/30 transition-all"
-                  >
-                    Remover
-                  </button>
-                </div>
-              ))}
-              {sectionLines.length === 0 && (
-                <p className="text-xs text-on-surface-variant">Nenhuma linha nesta seção.</p>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                const last = sectionLines[sectionLines.length - 1];
-                setLines((prev) => [...prev, emptyLine(section.value, last?.currency)]);
-              }}
-              className="mt-2 text-xs font-bold text-secondary hover:underline"
-            >
-              + Adicionar linha
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
+  const simple: [QuoteSection, string, string, string][] = [
+    ["ORIGEM", "Taxas de origem", d.originFee, d.originCurrency],
+    ["DESTINO", "Taxas de destino", d.destinationFee, d.destinationCurrency],
+    ["OUTRAS", "DTA", d.dta, d.dtaCurrency],
+    ["OUTRAS", "Outras taxas / custo adicional", d.otherFee, d.otherCurrency],
+  ];
+  for (const [section, description, value, currency] of simple) {
+    const n = toNumber(value);
+    if (n !== null) out.push({ section, description, quantity: "", unitPrice: "", unit: "", currency, total: n });
+  }
+  return out;
 }
 
-function QuoteForm({
-  processId,
-  quote,
-  agents,
-  defaults,
-  onCancel,
-}: {
-  processId: string;
-  quote: FreightQuoteRow | null;
-  agents: { id: string; name: string }[];
-  defaults: { modal: string | null; incoterm: string | null; destination: string | null };
-  onCancel: () => void;
-}) {
-  const action = saveFreightQuote.bind(null, processId, quote?.id ?? null);
-  const [lines, setLines] = useState<LineState[]>(() => initialLines(quote));
-  const grand = totalsByCurrency(
-    lines.map((l) => ({ section: l.section, currency: l.currency, total: toNumber(l.total) ?? 0 })),
-  );
+const COLORS = ["#1f9d8f", "#2b7bbf", "#7b5ea7", "#d99a14", "#d9534f", "#c026d3"];
 
-  return (
-    <form
-      action={action}
-      className="border border-outline-variant rounded-xl p-4 bg-surface-container-low/40 space-y-5 mb-stack-md"
-    >
-      <h4 className="font-headline-sm text-headline-sm text-primary">
-        {quote ? "Editar cotação" : "Nova cotação de frete"}
-      </h4>
+let seq = 0;
 
-      <fieldset className="space-y-3">
-        <legend className="font-label-md text-label-md text-primary mb-1">Proposta</legend>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-2">
-            <label className={labelClass}>Agente de carga *</label>
-            <select name="agentId" required defaultValue={quote?.agentId ?? ""} className={`${inputClass} appearance-none`}>
-              <option value="">Selecione o agente</option>
-              {agents.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Referência da cotação</label>
-            <input className={inputClass} name="proposal" defaultValue={quote?.proposal ?? ""} placeholder="Ex: RKT-014949-26" />
-          </div>
-          <div>
-            <label className={labelClass}>Data da cotação</label>
-            <input className={inputClass} type="date" name="quoteDate" defaultValue={quote?.quoteDate ?? ""} />
-          </div>
-          <div>
-            <label className={labelClass}>Validade para embarque</label>
-            <input className={inputClass} type="date" name="validUntil" defaultValue={quote?.validUntil ?? ""} />
-          </div>
-        </div>
-      </fieldset>
+// ----------------------------------------------------------------- estilos
 
-      <fieldset className="space-y-3">
-        <legend className="font-label-md text-label-md text-primary mb-1">Embarque</legend>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className={labelClass}>Modal</label>
-            <select
-              name="modal"
-              defaultValue={quote ? (quote.modal ?? "") : (defaults.modal ?? "")}
-              className={`${inputClass} appearance-none`}
-            >
-              {MODAIS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.value ? m.label : "—"}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Cia aérea / armador</label>
-            <input className={inputClass} name="carrier" defaultValue={quote?.carrier ?? ""} placeholder="Ex: KLM" />
-          </div>
-          <div>
-            <label className={labelClass}>Incoterm</label>
-            <select
-              name="incoterm"
-              defaultValue={quote ? (quote.incoterm ?? "") : (defaults.incoterm ?? "")}
-              className={`${inputClass} appearance-none`}
-            >
-              <option value="">—</option>
-              {INCOTERMS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Frequência</label>
-            <input className={inputClass} name="frequency" defaultValue={quote?.frequency ?? ""} placeholder="Ex: 5 x por semana" />
-          </div>
-          <div>
-            <label className={labelClass}>Origem</label>
-            <input className={inputClass} name="origin" defaultValue={quote?.origin ?? ""} placeholder="Ex: Beijing International Airport" />
-          </div>
-          <div>
-            <label className={labelClass}>Destino</label>
-            <input
-              className={inputClass}
-              name="destination"
-              defaultValue={quote ? (quote.destination ?? "") : (defaults.destination ?? "")}
-              placeholder="Ex: Guarulhos"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Rota</label>
-            <input className={inputClass} name="route" defaultValue={quote?.route ?? ""} placeholder="Ex: PKE-CDG-GRU" />
-          </div>
-          <div>
-            <label className={labelClass}>Trânsito (dias)</label>
-            <div className="flex items-center gap-2">
-              <input
-                className={`${inputClass} font-mono-data`}
-                type="number"
-                min="0"
-                step="1"
-                name="transitDays"
-                aria-label="Trânsito mínimo em dias"
-                placeholder="de"
-                defaultValue={quote?.transitDays ?? ""}
-              />
-              <span className="text-xs text-on-surface-variant">a</span>
-              <input
-                className={`${inputClass} font-mono-data`}
-                type="number"
-                min="0"
-                step="1"
-                name="transitDaysMax"
-                aria-label="Trânsito máximo em dias"
-                placeholder="até"
-                defaultValue={quote?.transitDaysMax ?? ""}
-              />
-            </div>
-          </div>
-        </div>
-      </fieldset>
+const cellInput =
+  "w-full bg-surface-container-low border border-outline-variant/60 rounded px-2 py-1 text-xs focus:outline-none focus:border-secondary transition-all";
+const moneyInput = `${cellInput} font-mono-data text-right`;
+const labelCell =
+  "sticky left-0 z-10 bg-surface-container-lowest py-1.5 pr-3 pl-2 text-left align-middle font-label-md text-label-md text-on-surface-variant whitespace-nowrap border-t border-outline-variant/40";
+const dataCell = "py-1.5 px-1.5 align-middle border-t border-l border-outline-variant/40";
+const CURRENCIES = ["USD", "BRL", "EUR", "CNY", "GBP", "JPY", "OTHER"];
 
-      <fieldset className="space-y-3">
-        <legend className="font-label-md text-label-md text-primary mb-1">Carga cotada</legend>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className={labelClass}>Mercadoria</label>
-            <input className={inputClass} name="cargoDescription" defaultValue={quote?.cargoDescription ?? ""} placeholder="Ex: FAK" />
-          </div>
-          <div>
-            <label className={labelClass}>Peso bruto (kg)</label>
-            <input
-              className={`${inputClass} font-mono-data`}
-              type="number"
-              step="any"
-              min="0"
-              name="grossWeightKg"
-              defaultValue={quote?.grossWeightKg ? String(Number(quote.grossWeightKg)) : ""}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Volumes</label>
-            <input
-              className={`${inputClass} font-mono-data`}
-              type="number"
-              step="1"
-              min="0"
-              name="volumes"
-              defaultValue={quote?.volumes ?? ""}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Volume (m³)</label>
-            <input
-              className={`${inputClass} font-mono-data`}
-              type="number"
-              step="any"
-              min="0"
-              name="volumeM3"
-              defaultValue={quote?.volumeM3 ? String(Number(quote.volumeM3)) : ""}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className={labelClass}>Dimensões</label>
-            <input
-              className={inputClass}
-              name="dimensions"
-              defaultValue={quote?.dimensions ?? ""}
-              placeholder="Ex: 1 volume · 120 × 83 × 90 cm"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Valor da mercadoria</label>
-            <input
-              className={`${inputClass} font-mono-data`}
-              type="number"
-              step="any"
-              min="0"
-              name="cargoValue"
-              defaultValue={quote?.cargoValue ? String(Number(quote.cargoValue)) : ""}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Moeda do valor</label>
-            <select
-              name="cargoValueCurrency"
-              defaultValue={quote?.cargoValueCurrency ?? "USD"}
-              className={`${inputClass} appearance-none`}
-            >
-              {CURRENCY_OPTIONS.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="sm:col-span-2 lg:col-span-4">
-            <label className={labelClass}>Endereço de coleta</label>
-            <input
-              className={inputClass}
-              name="pickupAddress"
-              defaultValue={quote?.pickupAddress ?? ""}
-              placeholder="Endereço do fornecedor onde a carga será coletada"
-            />
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset className="space-y-3">
-        <legend className="font-label-md text-label-md text-primary mb-1">Valores da proposta</legend>
-        <p className="text-xs text-on-surface-variant">
-          Cada linha tem a sua moeda. O total sai de quantidade × tarifa (respeitando o mínimo), mas você pode
-          digitar o total direto, como na proposta do agente. Só preencha o que vier na cotação.
-        </p>
-        <LinesEditor lines={lines} setLines={setLines} />
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface-container-high px-3 py-2">
-          <span className="font-label-md text-label-md text-primary">Resumo de despesas</span>
-          <span className="font-mono-data font-bold text-primary">
-            {grand.length === 0 ? "—" : grand.map((t) => formatMoney(t.value, t.currency)).join(" + ")}
-          </span>
-        </div>
-      </fieldset>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Observações</label>
-          <textarea
-            className={inputClass}
-            name="notes"
-            rows={3}
-            defaultValue={quote?.notes ?? ""}
-            placeholder="Ex: coleta inclusa, condições, restrições da proposta…"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Arquivo da proposta (PDF, imagem ou planilha — até 4 MB)</label>
-          <input
-            type="file"
-            name="file"
-            accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f && f.size > MAX_FILE_BYTES) {
-                toast.error("O arquivo passa de 4 MB. Reduza ou comprima e escolha de novo.");
-                e.target.value = "";
-              }
-            }}
-            className="block w-full text-body-sm font-body-sm file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-xs file:font-bold file:text-white"
-          />
-          {quote?.fileName && (
-            <label className="mt-2 flex items-center gap-2 text-xs text-on-surface-variant">
-              <input type="checkbox" name="removeFile" value="1" />
-              Remover o arquivo atual ({quote.fileName}) — ou escolha outro acima para substituir
-            </label>
-          )}
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <SubmitButton>{quote ? "Salvar alterações" : "Adicionar cotação"}</SubmitButton>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all"
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
-  );
-}
-
-// ---------- comparação ----------
+// ---------------------------------------------------------------- componente
 
 export default function ProcessFreightQuotes({
   processId,
@@ -652,20 +295,142 @@ export default function ProcessFreightQuotes({
   agents: { id: string; name: string }[];
   processCurrency: string | null;
   exchangeRate: number | null;
-  defaults: { modal: string | null; incoterm: string | null; destination: string | null };
+  defaults: Defaults;
   closed: boolean;
 }) {
-  // "new" = formulário de nova cotação; id = editando aquela cotação.
-  const [editing, setEditing] = useState<string | "new" | null>(null);
-  const editingQuote = editing && editing !== "new" ? (quotes.find((q) => q.id === editing) ?? null) : null;
+  const [cols, setCols] = useState<Col[]>(() =>
+    quotes.map((q, i) => {
+      const draft = draftFromQuote(q, defaults);
+      return {
+        key: q.id,
+        quoteId: q.id,
+        savedFileName: q.fileName,
+        isSelected: q.isSelected,
+        draft,
+        base: JSON.stringify(draft),
+        fileNonce: 0,
+        colorIdx: i,
+      };
+    }),
+  );
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [showMore, setShowMore] = useState(false);
 
-  const totalsBRL = quotes.map((q) => (q.lines.length > 0 ? totalBRL(q.lines, processCurrency, exchangeRate) : null));
-  const comparable = totalsBRL.filter((v): v is number => v !== null);
+  // Sincroniza com os dados do servidor (depois de salvar/escolher/remover),
+  // sem apagar o que o usuário está digitando em outras colunas.
+  const sig = JSON.stringify(quotes);
+  const [prevSig, setPrevSig] = useState(sig);
+  if (sig !== prevSig) {
+    setPrevSig(sig);
+    setCols((prev) => {
+      const next: Col[] = [];
+      for (const q of quotes) {
+        const fresh = draftFromQuote(q, defaults);
+        const freshJson = JSON.stringify(fresh);
+        const existing = prev.find((c) => c.quoteId === q.id);
+        if (existing) {
+          const dirty = JSON.stringify(existing.draft) !== existing.base;
+          const keepDraft = dirty && JSON.stringify(existing.draft) !== freshJson;
+          next.push({
+            ...existing,
+            savedFileName: q.fileName,
+            isSelected: q.isSelected,
+            draft: keepDraft ? existing.draft : fresh,
+            base: freshJson,
+          });
+        } else {
+          next.push({
+            key: q.id,
+            quoteId: q.id,
+            savedFileName: q.fileName,
+            isSelected: q.isSelected,
+            draft: fresh,
+            base: freshJson,
+            fileNonce: 0,
+            colorIdx: next.length,
+          });
+        }
+      }
+      // colunas novas ainda não salvas continuam no fim
+      for (const c of prev) if (c.quoteId === null) next.push({ ...c, colorIdx: next.length });
+      return next.map((c, i) => ({ ...c, colorIdx: i }));
+    });
+  }
+
+  function patch(key: string, p: Partial<Draft>) {
+    setCols((prev) => prev.map((c) => (c.key === key ? { ...c, draft: { ...c.draft, ...p } } : c)));
+  }
+
+  function addColumn() {
+    const key = `new-${++seq}`;
+    setCols((prev) => [
+      ...prev,
+      {
+        key,
+        quoteId: null,
+        savedFileName: null,
+        isSelected: false,
+        draft: emptyDraft(defaults),
+        base: JSON.stringify(emptyDraft(defaults)),
+        fileNonce: 0,
+        colorIdx: prev.length,
+      },
+    ]);
+  }
+
+  async function save(col: Col) {
+    const form = document.getElementById(`fq-${col.key}`) as HTMLFormElement | null;
+    if (!form) return;
+    setSavingKey(col.key);
+    try {
+      const res = await saveFreightQuote(processId, col.quoteId, new FormData(form));
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success(res.created ? "Cotação adicionada." : "Cotação atualizada.");
+      setCols((prev) =>
+        prev
+          .map((c) =>
+            c.key === col.key
+              ? {
+                  ...c,
+                  quoteId: res.id,
+                  savedFileName: res.fileName,
+                  draft: { ...c.draft, removeFile: false, newFileName: "" },
+                  base: JSON.stringify({ ...c.draft, removeFile: false, newFileName: "" }),
+                  fileNonce: c.fileNonce + 1,
+                }
+              : c,
+          )
+          // os dados do servidor podem ter chegado antes deste retorno e
+          // criado uma coluna igual para a cotação nova: fica só a do usuário
+          .filter((c) => !(c.quoteId === res.id && c.key !== col.key)),
+      );
+    } catch {
+      toast.error("Não foi possível salvar a cotação. Tente novamente.");
+    } finally {
+      setSavingKey(null);
+    }
+  }
+
+  const computed = cols.map((c) => {
+    const lines: QuoteLineAmount[] = linesOf(c.draft).map((l) => ({
+      section: l.section,
+      currency: l.currency,
+      total: l.total,
+    }));
+    return {
+      lines,
+      totals: totalsByCurrency(lines),
+      brl: lines.length > 0 ? totalBRL(lines, processCurrency, exchangeRate) : null,
+    };
+  });
+  const comparable = computed.map((c) => c.brl).filter((v): v is number => v !== null);
   const cheapest = comparable.length >= 2 ? Math.min(...comparable) : null;
 
-  const rowLabel = "py-2 pr-3 text-left align-top font-label-md text-label-md text-on-surface-variant whitespace-nowrap";
-  const cell = "py-2 px-3 align-top border-l border-outline-variant/60 min-w-[210px] max-w-[280px]";
-  const sel = (q: FreightQuoteRow) => (q.isSelected ? "bg-tertiary-fixed/30" : "");
+  const nCols = cols.length;
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
@@ -673,14 +438,14 @@ export default function ProcessFreightQuotes({
         <div>
           <h3 className="font-headline-sm text-headline-sm text-primary">Cotações de Frete</h3>
           <p className="text-xs text-on-surface-variant">
-            Registre a proposta de cada agente de carga e compare. Ao escolher uma, o agente e o frete (+ despesas de
-            origem) vão para o processo.
+            Uma coluna por agente de carga, como na planilha. Preencha a moeda e o valor de cada linha e clique em
+            Salvar na coluna. Ao escolher uma cotação, o agente e o frete (+ taxa de origem) vão para o processo.
           </p>
         </div>
-        {!closed && editing === null && (
+        {!closed && (
           <button
             type="button"
-            onClick={() => setEditing("new")}
+            onClick={addColumn}
             className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             + Adicionar cotação
@@ -688,358 +453,634 @@ export default function ProcessFreightQuotes({
         )}
       </div>
 
-      {editing !== null && (editing === "new" || editingQuote) && (
-        <QuoteForm
-          key={editing}
-          processId={processId}
-          quote={editingQuote}
-          agents={agents}
-          defaults={defaults}
-          onCancel={() => setEditing(null)}
-        />
-      )}
-
-      {quotes.length === 0 ? (
+      {nCols === 0 ? (
         <p className="text-on-surface-variant font-body-sm text-body-sm">
           Nenhuma cotação registrada ainda.{" "}
           {agents.length === 0 && "Cadastre um agente de carga em Agentes antes de adicionar."}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-body-sm font-body-sm">
-            <tbody>
-              <tr>
-                <th className={rowLabel} />
-                {quotes.map((q, i) => (
-                  <td key={q.id} className={`${cell} ${sel(q)}`}>
-                    <p className="font-bold text-primary">{q.agentName ?? "Agente removido"}</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {q.isSelected && (
-                        <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-[11px] font-bold">
-                          Escolhida
-                        </span>
-                      )}
-                      {cheapest !== null && totalsBRL[i] === cheapest && (
-                        <span className="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant text-[11px] font-bold">
-                          Menor custo
-                        </span>
-                      )}
-                    </div>
-                  </td>
+        <>
+          {/* Um <form> por coluna; os campos da tabela se ligam a ele pelo atributo `form`. */}
+          <div hidden>
+            {cols.map((c) => (
+              <ColumnForm key={c.key} col={c} showMore={showMore} />
+            ))}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="border-collapse text-body-sm font-body-sm min-w-full">
+              <colgroup>
+                <col style={{ width: 150 }} />
+                {cols.map((c) => (
+                  <Fragment key={c.key}>
+                    <col style={{ width: 78 }} />
+                    <col style={{ width: 132 }} />
+                  </Fragment>
                 ))}
-              </tr>
-              <Row
-                label="Referência"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => (
-                  <>
-                    {q.proposal ?? "—"}
-                    {q.quoteDate && <span className="block text-xs text-on-surface-variant">em {formatDate(q.quoteDate)}</span>}
-                  </>
-                )}
-              />
-              <Row
-                label="Validade p/ embarque"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) =>
-                  q.validUntil ? (
-                    <span className={q.validityDaysLeft !== null && q.validityDaysLeft < 0 ? "text-error font-semibold" : ""}>
-                      {formatDate(q.validUntil)}
-                      {q.validityDaysLeft !== null && q.validityDaysLeft < 0 ? " (vencida)" : ""}
-                    </span>
-                  ) : (
-                    "—"
-                  )
-                }
-              />
-              <Row
-                label="Modal / Cia"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) =>
-                  [q.modal ? MODAL_LABEL[q.modal] : null, q.carrier, q.incoterm].filter(Boolean).join(" · ") || "—"
-                }
-              />
-              <Row
-                label="Rota"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => (
-                  <>
-                    {q.origin || q.destination ? `${q.origin ?? "?"} → ${q.destination ?? "?"}` : "—"}
-                    {q.route && <span className="block text-xs text-on-surface-variant">{q.route}</span>}
-                  </>
-                )}
-              />
-              <Row
-                label="Trânsito"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => (
-                  <>
-                    {transitLabel(q.transitDays, q.transitDaysMax)}
-                    {q.frequency && <span className="block text-xs text-on-surface-variant">{q.frequency}</span>}
-                  </>
-                )}
-              />
-              <Row
-                label="Carga"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => {
-                  const parts = [
-                    q.grossWeightKg ? `${Number(q.grossWeightKg).toLocaleString("pt-BR")} kg` : null,
-                    q.volumes !== null ? `${q.volumes} vol.` : null,
-                    q.volumeM3 ? `${Number(q.volumeM3).toLocaleString("pt-BR")} m³` : null,
-                    q.cargoDescription,
-                  ].filter(Boolean);
-                  return (
-                    <>
-                      {parts.length > 0 ? parts.join(" · ") : "—"}
-                      {q.dimensions && <span className="block text-xs text-on-surface-variant">{q.dimensions}</span>}
-                      {q.cargoValue && (
-                        <span className="block text-xs text-on-surface-variant">
-                          Mercadoria: {formatMoney(Number(q.cargoValue), q.cargoValueCurrency ?? "USD")}
-                        </span>
-                      )}
-                    </>
-                  );
-                }}
-              />
-              {QUOTE_SECTIONS.map((section) => (
-                <Row
-                  key={section.value}
-                  label={section.value === "OUTRAS" ? "Outras taxas" : section.label}
-                  quotes={quotes}
-                  cell={cell}
-                  rowLabel={rowLabel}
-                  sel={sel}
-                  render={(q) => {
-                    const totals = totalsByCurrency(q.lines, section.value);
-                    if (totals.length === 0) return "—";
-                    return totals.map((t) => (
-                      <p key={t.currency} className="font-mono-data">
-                        {formatMoney(t.value, t.currency)}
-                      </p>
-                    ));
-                  }}
-                />
-              ))}
-              <tr className="border-t-2 border-outline-variant">
-                <th className={`${rowLabel} text-primary`}>Total</th>
-                {quotes.map((q, i) => {
-                  const totals = totalsByCurrency(q.lines);
-                  const brl = totalsBRL[i];
-                  const mixed = totals.some((t) => t.currency !== "BRL");
-                  return (
-                    <td key={q.id} className={`${cell} ${sel(q)}`}>
-                      {totals.length === 0 ? (
-                        "—"
-                      ) : (
-                        <>
-                          {totals.map((t) => (
-                            <p key={t.currency} className="font-mono-data font-bold text-primary">
-                              {formatMoney(t.value, t.currency)}
-                            </p>
-                          ))}
-                          {mixed && brl !== null && (
-                            <p className="font-mono-data text-xs text-on-surface-variant mt-0.5">
-                              ≈ {formatMoney(brl, "BRL")}
-                            </p>
-                          )}
-                          {mixed && brl === null && (
-                            <p className="text-[11px] text-outline mt-0.5">
-                              {exchangeRate ? "Moedas diferentes — sem conversão" : "Busque o câmbio para somar em R$"}
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-              <Row
-                label="Detalhamento"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) =>
-                  q.lines.length === 0 ? (
-                    "—"
-                  ) : (
-                    <details>
-                      <summary className="cursor-pointer text-secondary text-xs font-bold">
-                        Ver {q.lines.length} {q.lines.length === 1 ? "linha" : "linhas"}
-                      </summary>
-                      <div className="mt-2 space-y-2">
-                        {QUOTE_SECTIONS.map((section) => {
-                          const sectionLines = q.lines.filter((l) => l.section === section.value);
-                          if (sectionLines.length === 0) return null;
-                          return (
-                            <div key={section.value}>
-                              <p className="text-[11px] font-bold uppercase tracking-wide text-outline">{section.label}</p>
-                              <ul className="space-y-1">
-                                {sectionLines.map((l) => (
-                                  <li key={l.id} className="text-xs">
-                                    <span className="flex justify-between gap-2">
-                                      <span>{l.description}</span>
-                                      <span className="font-mono-data whitespace-nowrap">
-                                        {formatMoney(Number(l.total), l.currency)}
-                                      </span>
-                                    </span>
-                                    {(l.quantity || l.unitPrice) && (
-                                      <span className="block text-[11px] text-on-surface-variant">
-                                        {l.quantity ? `${Number(l.quantity).toLocaleString("pt-BR")} × ` : ""}
-                                        {l.unitPrice ? formatMoney(Number(l.unitPrice), l.currency) : ""}
-                                        {l.unit ? ` ${quoteUnitLabel(l.unit)}` : ""}
-                                        {l.minimum && Number(l.minimum) > 0
-                                          ? ` · mín. ${formatMoney(Number(l.minimum), l.currency)}`
-                                          : ""}
-                                      </span>
-                                    )}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  )
-                }
-              />
-              <Row
-                label="Coleta"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => q.pickupAddress ?? "—"}
-              />
-              <Row
-                label="Observações"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) => (q.notes ? <span className="whitespace-pre-wrap">{q.notes}</span> : "—")}
-              />
-              <Row
-                label="Proposta (arquivo)"
-                quotes={quotes}
-                cell={cell}
-                rowLabel={rowLabel}
-                sel={sel}
-                render={(q) =>
-                  q.fileName ? (
-                    <DocumentViewer
-                      src={`/api/processos/cotacoes/${q.id}`}
-                      fileName={q.fileName}
-                      className="text-secondary font-semibold break-all"
-                    />
-                  ) : (
-                    "—"
-                  )
-                }
-              />
-              {!closed && (
+              </colgroup>
+              <tbody>
+                {/* AGENTE DE CARGAS */}
                 <tr>
-                  <th className={rowLabel} />
-                  {quotes.map((q) => (
-                    <td key={q.id} className={`${cell} ${sel(q)}`}>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {q.isSelected ? (
-                          <form action={clearFreightQuoteSelection.bind(null, processId)}>
-                            <button
-                              type="submit"
-                              className="px-3 py-1.5 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
-                            >
-                              Desmarcar
-                            </button>
-                          </form>
-                        ) : (
-                          <form action={selectFreightQuote.bind(null, q.id, processId)}>
-                            <button
-                              type="submit"
-                              className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
-                            >
-                              Escolher
-                            </button>
-                          </form>
+                  <th className={labelCell}>Agente de cargas</th>
+                  {cols.map((c) => (
+                    <td
+                      key={c.key}
+                      colSpan={2}
+                      className="p-0 border-l border-outline-variant/40"
+                      style={{ background: COLORS[c.colorIdx % COLORS.length] }}
+                    >
+                      <div className="flex items-center gap-1 px-1.5 py-1.5">
+                        <select
+                          form={`fq-${c.key}`}
+                          name="agentId"
+                          value={c.draft.agentId}
+                          disabled={closed}
+                          onChange={(e) => patch(c.key, { agentId: e.target.value })}
+                          aria-label="Agente de carga"
+                          className="w-full bg-transparent text-white font-bold text-xs uppercase focus:outline-none cursor-pointer"
+                        >
+                          <option value="" className="text-black">
+                            Selecione o agente
+                          </option>
+                          {agents.map((a) => (
+                            <option key={a.id} value={a.id} className="text-black">
+                              {a.name}
+                            </option>
+                          ))}
+                        </select>
+                        {c.isSelected && (
+                          <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black">
+                            ESCOLHIDA
+                          </span>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => setEditing(q.id)}
-                          className="px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant text-xs font-bold hover:bg-surface-container-high transition-all"
-                        >
-                          Editar
-                        </button>
-                        <form
-                          action={deleteFreightQuote.bind(null, q.id, processId)}
-                          onSubmit={(e) => {
-                            if (!window.confirm(`Remover a cotação de ${q.agentName ?? "este agente"}?`)) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          <button
-                            type="submit"
-                            className="px-3 py-1.5 rounded-lg text-error text-xs font-bold hover:bg-error-container/30 transition-all"
-                          >
-                            Remover
-                          </button>
-                        </form>
                       </div>
                     </td>
                   ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+                <TextRow label="Proposta" cols={cols} closed={closed} render={(c) => (
+                  <input
+                    form={`fq-${c.key}`}
+                    name="proposal"
+                    value={c.draft.proposal}
+                    onChange={(e) => patch(c.key, { proposal: e.target.value })}
+                    disabled={closed}
+                    placeholder="Ex: RKT-014949-26"
+                    className={cellInput}
+                  />
+                )} />
+                <TextRow label="Incoterm" cols={cols} closed={closed} render={(c) => (
+                  <select
+                    form={`fq-${c.key}`}
+                    name="incoterm"
+                    value={c.draft.incoterm}
+                    onChange={(e) => patch(c.key, { incoterm: e.target.value })}
+                    disabled={closed}
+                    className={`${cellInput} appearance-none`}
+                  >
+                    <option value="">—</option>
+                    {INCOTERMS.map((t) => (
+                      <option key={t} value={t}>
+                        {t.split(" - ")[0]}
+                      </option>
+                    ))}
+                  </select>
+                )} />
+                <TextRow label="Modal" cols={cols} closed={closed} render={(c) => (
+                  <select
+                    form={`fq-${c.key}`}
+                    name="modal"
+                    value={c.draft.modal}
+                    onChange={(e) => patch(c.key, { modal: e.target.value })}
+                    disabled={closed}
+                    className={`${cellInput} appearance-none`}
+                  >
+                    {MODAIS.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.value ? m.label : "—"}
+                      </option>
+                    ))}
+                  </select>
+                )} />
+
+                {/* INFORMAÇÕES */}
+                <TextRow label="Trânsito (dias)" cols={cols} closed={closed} render={(c) => (
+                  <div className="flex items-center gap-1">
+                    <input
+                      form={`fq-${c.key}`}
+                      name="transitDays"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={c.draft.transitDays}
+                      onChange={(e) => patch(c.key, { transitDays: e.target.value })}
+                      disabled={closed}
+                      aria-label="Trânsito mínimo"
+                      placeholder="de"
+                      className={moneyInput}
+                    />
+                    <span className="text-[11px] text-on-surface-variant">a</span>
+                    <input
+                      form={`fq-${c.key}`}
+                      name="transitDaysMax"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={c.draft.transitDaysMax}
+                      onChange={(e) => patch(c.key, { transitDaysMax: e.target.value })}
+                      disabled={closed}
+                      aria-label="Trânsito máximo"
+                      placeholder="até"
+                      className={moneyInput}
+                    />
+                  </div>
+                )} />
+                <TextRow label="Origem" cols={cols} closed={closed} render={(c) => (
+                  <input
+                    form={`fq-${c.key}`}
+                    name="origin"
+                    value={c.draft.origin}
+                    onChange={(e) => patch(c.key, { origin: e.target.value })}
+                    disabled={closed}
+                    placeholder="Ex: HKG"
+                    className={cellInput}
+                  />
+                )} />
+                <TextRow label="Destino" cols={cols} closed={closed} render={(c) => (
+                  <input
+                    form={`fq-${c.key}`}
+                    name="destination"
+                    value={c.draft.destination}
+                    onChange={(e) => patch(c.key, { destination: e.target.value })}
+                    disabled={closed}
+                    placeholder="Ex: GRU"
+                    className={cellInput}
+                  />
+                )} />
+                <TextRow label="Cia" cols={cols} closed={closed} render={(c) => (
+                  <input
+                    form={`fq-${c.key}`}
+                    name="carrier"
+                    value={c.draft.carrier}
+                    onChange={(e) => patch(c.key, { carrier: e.target.value })}
+                    disabled={closed}
+                    placeholder="Ex: Qatar Airways"
+                    className={cellInput}
+                  />
+                )} />
+                <TextRow label="Validade da proposta" cols={cols} closed={closed} render={(c) => (
+                  <>
+                    <input
+                      form={`fq-${c.key}`}
+                      name="validUntil"
+                      type="date"
+                      value={c.draft.validUntil}
+                      onChange={(e) => patch(c.key, { validUntil: e.target.value })}
+                      disabled={closed}
+                      className={cellInput}
+                    />
+                    {c.draft.validUntil && c.draft.validUntil < today && (
+                      <p className="mt-0.5 text-[10px] font-bold text-error">Proposta vencida</p>
+                    )}
+                  </>
+                )} />
+
+                {/* CARGA */}
+                <TextRow label="Carga (kg)" cols={cols} closed={closed} section="CARGA" render={(c) => (
+                  <input
+                    form={`fq-${c.key}`}
+                    name="grossWeightKg"
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={c.draft.grossWeightKg}
+                    onChange={(e) => patch(c.key, { grossWeightKg: e.target.value })}
+                    disabled={closed}
+                    className={moneyInput}
+                  />
+                )} />
+                <MoneyRow label="Frete (por kg)" cols={cols} closed={closed} section="CARGA"
+                  value={(d) => d.freightRate} currency={(d) => d.freightCurrency}
+                  onValue={(c, v) => patch(c.key, { freightRate: v })}
+                  onCurrency={(c, v) => patch(c.key, { freightCurrency: v })} />
+                <tr>
+                  <th className={labelCell}>Carga × Frete</th>
+                  {cols.map((c) => {
+                    const total = freightTotal(c.draft);
+                    return (
+                      <Fragment key={c.key}>
+                        <td className={`${dataCell} text-center text-xs font-bold`}>
+                          {total !== null ? c.draft.freightCurrency : ""}
+                        </td>
+                        <td className={`${dataCell} text-right font-mono-data font-bold text-xs`}>
+                          {total !== null ? total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : "—"}
+                        </td>
+                      </Fragment>
+                    );
+                  })}
+                </tr>
+
+                {/* TAXAS */}
+                <MoneyRow label="Taxa de origem" cols={cols} closed={closed} section="TAXAS"
+                  value={(d) => d.originFee} currency={(d) => d.originCurrency}
+                  onValue={(c, v) => patch(c.key, { originFee: v })}
+                  onCurrency={(c, v) => patch(c.key, { originCurrency: v })} />
+                <MoneyRow label="Taxa de destino" cols={cols} closed={closed} section="TAXAS"
+                  value={(d) => d.destinationFee} currency={(d) => d.destinationCurrency}
+                  onValue={(c, v) => patch(c.key, { destinationFee: v })}
+                  onCurrency={(c, v) => patch(c.key, { destinationCurrency: v })} />
+
+                {/* OUTRAS */}
+                <MoneyRow label="DTA" cols={cols} closed={closed} section="OUTRAS"
+                  value={(d) => d.dta} currency={(d) => d.dtaCurrency}
+                  onValue={(c, v) => patch(c.key, { dta: v })}
+                  onCurrency={(c, v) => patch(c.key, { dtaCurrency: v })} />
+                <MoneyRow label="Outras taxas / custo adicional" cols={cols} closed={closed} section="OUTRAS"
+                  value={(d) => d.otherFee} currency={(d) => d.otherCurrency}
+                  onValue={(c, v) => patch(c.key, { otherFee: v })}
+                  onCurrency={(c, v) => patch(c.key, { otherCurrency: v })} />
+                <TextRow label="Observação / ajuste" cols={cols} closed={closed} render={(c) => (
+                  <textarea
+                    form={`fq-${c.key}`}
+                    name="notes"
+                    rows={2}
+                    value={c.draft.notes}
+                    onChange={(e) => patch(c.key, { notes: e.target.value })}
+                    disabled={closed}
+                    placeholder="Ex: coleta inclusa"
+                    className={cellInput}
+                  />
+                )} />
+
+                {/* CUSTOS ESTIMADOS */}
+                <tr className="bg-surface-container-high/60">
+                  <th className={`${labelCell} text-primary font-bold`}>Custos estimados</th>
+                  {cols.map((c, i) => {
+                    const { totals, brl } = computed[i];
+                    const mixed = totals.some((t) => t.currency !== "BRL");
+                    return (
+                      <td key={c.key} colSpan={2} className={`${dataCell} align-top`}>
+                        {totals.length === 0 ? (
+                          <span className="text-on-surface-variant">—</span>
+                        ) : (
+                          <>
+                            {totals.map((t) => (
+                              <p key={t.currency} className="flex justify-between gap-2 font-mono-data font-bold text-primary text-xs">
+                                <span>{t.currency}</span>
+                                <span>{t.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                              </p>
+                            ))}
+                            {mixed && brl !== null && (
+                              <p className="flex justify-between gap-2 font-mono-data text-[11px] text-on-surface-variant mt-0.5">
+                                <span>≈ BRL</span>
+                                <span>{formatMoney(brl, "BRL").replace("R$ ", "")}</span>
+                              </p>
+                            )}
+                            {mixed && brl === null && (
+                              <p className="text-[10px] text-outline mt-0.5">
+                                {exchangeRate ? "Moedas diferentes — sem conversão" : "Busque o câmbio p/ somar em R$"}
+                              </p>
+                            )}
+                            {cheapest !== null && brl === cheapest && (
+                              <span className="mt-1 inline-block rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-bold text-on-tertiary-fixed-variant">
+                                Menor custo
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+
+                {/* MAIS DADOS DA PROPOSTA */}
+                {showMore && (
+                  <>
+                    <TextRow label="Rota (escalas)" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="route" value={c.draft.route} disabled={closed}
+                        onChange={(e) => patch(c.key, { route: e.target.value })} placeholder="Ex: PKE-CDG-GRU" className={cellInput} />
+                    )} />
+                    <TextRow label="Data da cotação" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="quoteDate" type="date" value={c.draft.quoteDate} disabled={closed}
+                        onChange={(e) => patch(c.key, { quoteDate: e.target.value })} className={cellInput} />
+                    )} />
+                    <TextRow label="Frequência" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="frequency" value={c.draft.frequency} disabled={closed}
+                        onChange={(e) => patch(c.key, { frequency: e.target.value })} placeholder="Ex: 5 x por semana" className={cellInput} />
+                    )} />
+                    <TextRow label="Mercadoria" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="cargoDescription" value={c.draft.cargoDescription} disabled={closed}
+                        onChange={(e) => patch(c.key, { cargoDescription: e.target.value })} placeholder="Ex: FAK" className={cellInput} />
+                    )} />
+                    <TextRow label="Volumes" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="volumes" type="number" min="0" step="1" value={c.draft.volumes} disabled={closed}
+                        onChange={(e) => patch(c.key, { volumes: e.target.value })} className={moneyInput} />
+                    )} />
+                    <TextRow label="Volume (m³)" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="volumeM3" type="number" step="any" min="0" value={c.draft.volumeM3} disabled={closed}
+                        onChange={(e) => patch(c.key, { volumeM3: e.target.value })} className={moneyInput} />
+                    )} />
+                    <TextRow label="Dimensões" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="dimensions" value={c.draft.dimensions} disabled={closed}
+                        onChange={(e) => patch(c.key, { dimensions: e.target.value })} placeholder="Ex: 120 × 83 × 90 cm" className={cellInput} />
+                    )} />
+                    <MoneyRow label="Valor da mercadoria" cols={cols} closed={closed}
+                      valueName="cargoValue" currencyName="cargoValueCurrency"
+                      value={(d) => d.cargoValue} currency={(d) => d.cargoValueCurrency}
+                      onValue={(c, v) => patch(c.key, { cargoValue: v })}
+                      onCurrency={(c, v) => patch(c.key, { cargoValueCurrency: v })} />
+                    <TextRow label="Endereço de coleta" cols={cols} closed={closed} render={(c) => (
+                      <input form={`fq-${c.key}`} name="pickupAddress" value={c.draft.pickupAddress} disabled={closed}
+                        onChange={(e) => patch(c.key, { pickupAddress: e.target.value })} className={cellInput} />
+                    )} />
+                    <TextRow label="Arquivo da proposta" cols={cols} closed={closed} render={(c) => (
+                      <div className="space-y-1">
+                        {c.savedFileName && (
+                          <div className="text-xs">
+                            {c.quoteId && (
+                              <DocumentViewer
+                                src={`/api/processos/cotacoes/${c.quoteId}`}
+                                fileName={c.savedFileName}
+                                className="text-secondary font-semibold break-all"
+                              />
+                            )}
+                            <label className="mt-0.5 flex items-center gap-1 text-[11px] text-on-surface-variant">
+                              <input
+                                form={`fq-${c.key}`}
+                                type="checkbox"
+                                name="removeFile"
+                                value="1"
+                                checked={c.draft.removeFile}
+                                onChange={(e) => patch(c.key, { removeFile: e.target.checked })}
+                              />
+                              remover
+                            </label>
+                          </div>
+                        )}
+                        {!closed && (
+                          <input
+                            key={c.fileNonce}
+                            form={`fq-${c.key}`}
+                            type="file"
+                            name="file"
+                            accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f && f.size > 4 * 1024 * 1024) {
+                                toast.error("O arquivo passa de 4 MB. Reduza ou comprima e escolha de novo.");
+                                e.target.value = "";
+                                patch(c.key, { newFileName: "" });
+                                return;
+                              }
+                              patch(c.key, { newFileName: f?.name ?? "" });
+                            }}
+                            className="block w-full text-[11px] file:mr-2 file:rounded file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-[11px] file:font-bold file:text-white"
+                          />
+                        )}
+                      </div>
+                    )} />
+                  </>
+                )}
+
+                {/* AÇÕES */}
+                {!closed && (
+                  <tr>
+                    <th className={labelCell} />
+                    {cols.map((c) => {
+                      const dirty = JSON.stringify(c.draft) !== c.base;
+                      const saving = savingKey === c.key;
+                      return (
+                        <td key={c.key} colSpan={2} className={`${dataCell} align-top`}>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => save(c)}
+                              disabled={saving || (!dirty && c.quoteId !== null)}
+                              className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all disabled:opacity-40"
+                            >
+                              {saving ? "Salvando…" : dirty || c.quoteId === null ? "Salvar" : "Salvo"}
+                            </button>
+                            {c.quoteId === null ? (
+                              <button
+                                type="button"
+                                onClick={() => setCols((prev) => prev.filter((x) => x.key !== c.key))}
+                                className="px-2 py-1.5 rounded-lg text-on-surface-variant text-xs font-bold hover:bg-surface-container-high"
+                              >
+                                Descartar
+                              </button>
+                            ) : (
+                              <>
+                                {c.isSelected ? (
+                                  <form action={clearFreightQuoteSelection.bind(null, processId)}>
+                                    <button
+                                      type="submit"
+                                      className="px-2 py-1.5 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high"
+                                    >
+                                      Desmarcar
+                                    </button>
+                                  </form>
+                                ) : (
+                                  <form action={selectFreightQuote.bind(null, c.quoteId, processId)}>
+                                    <button
+                                      type="submit"
+                                      disabled={dirty}
+                                      title={dirty ? "Salve as alterações antes de escolher" : undefined}
+                                      className="px-2 py-1.5 rounded-lg border border-secondary text-secondary text-xs font-bold hover:bg-secondary/10 disabled:opacity-40"
+                                    >
+                                      Escolher
+                                    </button>
+                                  </form>
+                                )}
+                                <form
+                                  action={deleteFreightQuote.bind(null, c.quoteId, processId)}
+                                  onSubmit={(e) => {
+                                    if (!window.confirm("Remover esta cotação?")) e.preventDefault();
+                                  }}
+                                >
+                                  <button
+                                    type="submit"
+                                    className="px-2 py-1.5 rounded-lg text-error text-xs font-bold hover:bg-error-container/30"
+                                  >
+                                    Remover
+                                  </button>
+                                </form>
+                              </>
+                            )}
+                          </div>
+                          {dirty && c.quoteId !== null && (
+                            <p className="mt-1 text-[10px] text-warning">Alterações não salvas</p>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMore((v) => !v)}
+            className="mt-3 text-xs font-bold text-secondary hover:underline"
+          >
+            {showMore ? "Ocultar dados extras da proposta" : "Mostrar mais dados da proposta (rota, frequência, volumes, valor da mercadoria, coleta, arquivo)"}
+          </button>
+        </>
       )}
     </section>
   );
 }
 
-function Row({
+// ---------------------------------------------------------------- auxiliares
+
+const SECTION_BG: Record<string, string> = { CARGA: "#1f9d8f", TAXAS: "#2b7bbf", OUTRAS: "#d86a8a" };
+
+function SectionTag({ section }: { section?: string }) {
+  if (!section) return null;
+  return (
+    <span
+      className="mr-2 inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
+      style={{ background: SECTION_BG[section] }}
+    >
+      {section}
+    </span>
+  );
+}
+
+function TextRow({
   label,
-  quotes,
-  cell,
-  rowLabel,
-  sel,
+  cols,
   render,
+  section,
 }: {
   label: string;
-  quotes: FreightQuoteRow[];
-  cell: string;
-  rowLabel: string;
-  sel: (q: FreightQuoteRow) => string;
-  render: (q: FreightQuoteRow) => ReactNode;
+  cols: Col[];
+  closed?: boolean;
+  render: (c: Col) => ReactNode;
+  section?: string;
 }) {
   return (
     <tr>
-      <th className={rowLabel}>{label}</th>
-      {quotes.map((q) => (
-        <td key={q.id} className={`${cell} ${sel(q)}`}>
-          {render(q)}
+      <th className={labelCell}>
+        <SectionTag section={section} />
+        {label}
+      </th>
+      {cols.map((c) => (
+        <td key={c.key} colSpan={2} className={dataCell}>
+          {render(c)}
         </td>
       ))}
     </tr>
+  );
+}
+
+function MoneyRow({
+  label,
+  cols,
+  closed,
+  section,
+  value,
+  currency,
+  onValue,
+  onCurrency,
+  valueName,
+  currencyName,
+}: {
+  label: string;
+  cols: Col[];
+  closed: boolean;
+  section?: string;
+  value: (d: Draft) => string;
+  currency: (d: Draft) => string;
+  onValue: (c: Col, v: string) => void;
+  onCurrency: (c: Col, v: string) => void;
+  valueName?: string;
+  currencyName?: string;
+}) {
+  return (
+    <tr>
+      <th className={labelCell}>
+        <SectionTag section={section} />
+        {label}
+      </th>
+      {cols.map((c) => (
+        <Fragment key={c.key}>
+          <td className={dataCell}>
+            <select
+              form={currencyName ? `fq-${c.key}` : undefined}
+              name={currencyName}
+              value={currency(c.draft)}
+              disabled={closed}
+              onChange={(e) => onCurrency(c, e.target.value)}
+              aria-label={`${label} — moeda`}
+              className={`${cellInput} appearance-none text-center`}
+            >
+              {CURRENCIES.map((m) => (
+                <option key={m} value={m}>
+                  {m === "OTHER" ? "Outra" : m}
+                </option>
+              ))}
+            </select>
+          </td>
+          <td className={dataCell}>
+            <input
+              form={valueName ? `fq-${c.key}` : undefined}
+              name={valueName}
+              type="number"
+              step="any"
+              min="0"
+              inputMode="decimal"
+              value={value(c.draft)}
+              disabled={closed}
+              onChange={(e) => onValue(c, e.target.value)}
+              aria-label={`${label} — custos`}
+              placeholder="0,00"
+              className={moneyInput}
+            />
+          </td>
+        </Fragment>
+      ))}
+    </tr>
+  );
+}
+
+// <form> invisível de uma coluna: guarda os campos que não estão na tabela
+// (valores calculados, linhas de custo e dados extras recolhidos).
+function ColumnForm({ col, showMore }: { col: Col; showMore: boolean }) {
+  const d = col.draft;
+  const lines = linesOf(d);
+  const hiddenExtras: [string, string][] = showMore
+    ? []
+    : [
+        ["route", d.route],
+        ["quoteDate", d.quoteDate],
+        ["frequency", d.frequency],
+        ["cargoDescription", d.cargoDescription],
+        ["volumes", d.volumes],
+        ["volumeM3", d.volumeM3],
+        ["dimensions", d.dimensions],
+        ["cargoValue", d.cargoValue],
+        ["cargoValueCurrency", d.cargoValueCurrency],
+        ["pickupAddress", d.pickupAddress],
+      ];
+  return (
+    <form id={`fq-${col.key}`} onSubmit={(e) => e.preventDefault()}>
+      {hiddenExtras.map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      {lines.map((l, i) => (
+        <Fragment key={i}>
+          <input type="hidden" name="lineSection" value={l.section} />
+          <input type="hidden" name="lineDescription" value={l.description} />
+          <input type="hidden" name="lineQuantity" value={l.quantity} />
+          <input type="hidden" name="lineUnitPrice" value={l.unitPrice} />
+          <input type="hidden" name="lineUnit" value={l.unit} />
+          <input type="hidden" name="lineMinimum" value="" />
+          <input type="hidden" name="lineCurrency" value={l.currency} />
+          <input type="hidden" name="lineTotal" value={String(l.total)} />
+        </Fragment>
+      ))}
+    </form>
   );
 }

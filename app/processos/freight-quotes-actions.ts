@@ -54,15 +54,25 @@ function safeFileName(name: string) {
     .replace(/[^A-Za-z0-9._-]+/g, "_");
 }
 
+export type SaveResult =
+  | { ok: true; id: string; created: boolean; fileName: string | null }
+  | { ok: false; error: string };
+
+const fail = (error: string): SaveResult => ({ ok: false, error });
+
 const fixed = (n: number | null, digits: number) => (n === null ? null : n.toFixed(digits));
 
-export async function saveFreightQuote(processId: string, quoteId: string | null, formData: FormData) {
+export async function saveFreightQuote(
+  processId: string,
+  quoteId: string | null,
+  formData: FormData,
+): Promise<SaveResult> {
   const back = `/processos/${processId}`;
 
   const agentId = text(formData, "agentId");
-  if (!agentId) redirect(withFlashError(back, "Escolha o agente de carga da cotação."));
+  if (!agentId) return fail("Escolha o agente de carga da cotação.");
   const [agent] = await db.select({ name: freightAgents.name }).from(freightAgents).where(eq(freightAgents.id, agentId));
-  if (!agent) redirect(withFlashError(back, "Agente de carga não encontrado."));
+  if (!agent) return fail("Agente de carga não encontrado.");
 
   const transitDays = parseInt0(formData.get("transitDays"));
   const transitDaysMax = parseInt0(formData.get("transitDaysMax"));
@@ -71,13 +81,13 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
   const volumeM3 = parseNumber(formData.get("volumeM3"));
   const cargoValue = parseNumber(formData.get("cargoValue"));
   if ([transitDays, transitDaysMax, volumes].some((n) => Number.isNaN(n))) {
-    redirect(withFlashError(back, "Trânsito e volumes devem ser números inteiros."));
+    return fail("Trânsito e volumes devem ser números inteiros.");
   }
   if ([grossWeightKg, volumeM3, cargoValue].some((n) => n !== null && (Number.isNaN(n) || n < 0))) {
-    redirect(withFlashError(back, "Confira peso, volume e valor da mercadoria: use só números, sem negativos."));
+    return fail("Confira peso, volume e valor da mercadoria: use só números, sem negativos.");
   }
   if (transitDays !== null && transitDaysMax !== null && transitDaysMax < transitDays) {
-    redirect(withFlashError(back, "O trânsito máximo não pode ser menor que o mínimo."));
+    return fail("O trânsito máximo não pode ser menor que o mínimo.");
   }
 
   // Linhas de valor: campos paralelos (um de cada por linha do formulário).
@@ -102,12 +112,12 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
     if (!description && quantity === null && unitPrice === null && minimum === null && typedTotal === null) continue;
     const label = `Linha "${description || `${i + 1}`}"`;
     if (!validSections.includes(sections[i])) continue;
-    if (!description) redirect(withFlashError(back, `${label}: informe a descrição da despesa.`));
+    if (!description) return fail(`${label}: informe a descrição da despesa.`);
     if ([quantity, unitPrice, minimum, typedTotal].some((n) => n !== null && (Number.isNaN(n) || n < 0))) {
-      redirect(withFlashError(back, `${label}: use só números, sem valores negativos.`));
+      return fail(`${label}: use só números, sem valores negativos.`);
     }
     const total = typedTotal ?? computeLineTotal(quantity, unitPrice, minimum);
-    if (total === null) redirect(withFlashError(back, `${label}: informe o total (ou quantidade e tarifa).`));
+    if (total === null) return fail(`${label}: informe o total (ou quantidade e tarifa).`);
     const unit = UNITS.includes(lineUnits[i]) ? lineUnits[i] : null;
     lines.push({
       quoteId: quoteId ?? "", // preenchido na gravação
@@ -129,10 +139,10 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
   if (file) {
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
     if (!FILE_EXTENSIONS.includes(ext)) {
-      redirect(withFlashError(back, "O arquivo da proposta deve ser PDF, imagem (PNG/JPG) ou planilha."));
+      return fail("O arquivo da proposta deve ser PDF, imagem (PNG/JPG) ou planilha.");
     }
     if (file.size > MAX_FILE_BYTES) {
-      redirect(withFlashError(back, "O arquivo passa de 4 MB. Reduza ou comprima e tente de novo."));
+      return fail("O arquivo passa de 4 MB. Reduza ou comprima e tente de novo.");
     }
   }
   const removeFile = formData.get("removeFile") === "1";
@@ -164,13 +174,13 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
     notes: text(formData, "notes"),
   };
 
-  let existing: { storagePath: string | null } | undefined;
+  let existing: { storagePath: string | null; fileName: string | null } | undefined;
   if (quoteId) {
     [existing] = await db
-      .select({ storagePath: processFreightQuotes.storagePath })
+      .select({ storagePath: processFreightQuotes.storagePath, fileName: processFreightQuotes.fileName })
       .from(processFreightQuotes)
       .where(and(eq(processFreightQuotes.id, quoteId), eq(processFreightQuotes.processId, processId)));
-    if (!existing) redirect(withFlashError(back, "Cotação não encontrada."));
+    if (!existing) return fail("Cotação não encontrada.");
   }
 
   // Upload antes de gravar; se o banco falhar depois, o arquivo órfão é
@@ -181,11 +191,12 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
     const { error } = await supabaseAdmin.storage
       .from(DOCUMENTS_BUCKET)
       .upload(path, file, { contentType: file.type || "application/octet-stream" });
-    if (error) redirect(withFlashError(back, `Falha no upload de ${file.name}: ${error.message}`));
+    if (error) return fail(`Falha no upload de ${file.name}: ${error.message}`);
     uploaded = { fileName: file.name, storagePath: path };
   }
 
   let failed = false;
+  let savedId: string | null = quoteId;
   try {
     await db.transaction(async (tx) => {
       const filePatch = uploaded
@@ -212,6 +223,7 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
           eventType: `Cotação de frete adicionada: ${agent.name}`,
         });
       }
+      savedId = id;
       if (lines.length > 0) {
         await tx.insert(processFreightQuoteLines).values(lines.map((l) => ({ ...l, quoteId: id! })));
       }
@@ -221,7 +233,7 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
     console.error("saveFreightQuote falhou", e);
     if (uploaded) await supabaseAdmin.storage.from(DOCUMENTS_BUCKET).remove([uploaded.storagePath]);
   }
-  if (failed) redirect(withFlashError(back, "Não foi possível salvar a cotação. Tente novamente."));
+  if (failed) return fail("Não foi possível salvar a cotação. Tente novamente.");
 
   // Arquivo antigo substituído/removido: apaga do Storage.
   if (existing?.storagePath && (uploaded || removeFile)) {
@@ -229,7 +241,12 @@ export async function saveFreightQuote(processId: string, quoteId: string | null
   }
 
   revalidatePath(back);
-  redirect(withFlash(back, quoteId ? "Cotação atualizada." : "Cotação adicionada."));
+  return {
+    ok: true,
+    id: savedId!,
+    created: !quoteId,
+    fileName: uploaded ? uploaded.fileName : removeFile ? null : (existing?.fileName ?? null),
+  };
 }
 
 export async function deleteFreightQuote(quoteId: string, processId: string) {
