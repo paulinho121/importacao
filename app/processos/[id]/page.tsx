@@ -129,7 +129,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows, processSuppliers, linkedPos, currentUser] = await Promise.all([
+  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows] = await Promise.all([
     db
       .select({
         id: processItems.id,
@@ -185,13 +185,6 @@ export default async function ProcessDetailPage({
       .leftJoin(freightAgents, eq(processFreightQuotes.agentId, freightAgents.id))
       .where(eq(processFreightQuotes.processId, id))
       .orderBy(processFreightQuotes.createdAt),
-    getSuppliersByProcess([id]),
-    db
-      .select({ id: purchaseOrders.id, poNumber: purchaseOrders.poNumber, supplierName: suppliers.name })
-      .from(purchaseOrders)
-      .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
-      .where(eq(purchaseOrders.processId, id)),
-    getCurrentUser(),
   ]);
   const freightQuotesKey = freightQuoteRows
     .map((q) => `${q.id}:${q.updatedAt.getTime()}:${q.isSelected}`)
@@ -222,20 +215,22 @@ export default async function ProcessDetailPage({
     isSelected: q.isSelected,
   }));
 
+  const [processSuppliers, linkedPos] = await Promise.all([
+    getSuppliersByProcess([id]),
+    db
+      .select({ id: purchaseOrders.id, poNumber: purchaseOrders.poNumber, supplierName: suppliers.name })
+      .from(purchaseOrders)
+      .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+      .where(eq(purchaseOrders.processId, id)),
+  ]);
   const suppliersOfProcess = processSuppliers.get(id) ?? [];
   const poById = new Map(linkedPos.map((po) => [po.id, po]));
   const isClosed = process.status === "CONCLUIDO" || process.status === "ABANDONADO";
 
   const itemIds = items.map((item) => item.id);
-  const productIds = [...new Set(items.map((i) => i.productId).filter((v): v is string => Boolean(v)))];
-  const [reservations, lpcoRows] = await Promise.all([
-    itemIds.length
-      ? db.select().from(itemReservations).where(inArray(itemReservations.itemId, itemIds))
-      : Promise.resolve([]),
-    productIds.length
-      ? db.select().from(productLpcos).where(inArray(productLpcos.productId, productIds))
-      : Promise.resolve([]),
-  ]);
+  const reservations = itemIds.length
+    ? await db.select().from(itemReservations).where(inArray(itemReservations.itemId, itemIds))
+    : [];
   const reservationsByItemId = new Map<string, typeof reservations>();
   for (const r of reservations) {
     const list = reservationsByItemId.get(r.itemId) ?? [];
@@ -244,6 +239,10 @@ export default async function ProcessDetailPage({
   }
 
   // LPCO por estado (SP/SC/CE) dos produtos dos itens
+  const productIds = [...new Set(items.map((i) => i.productId).filter((v): v is string => Boolean(v)))];
+  const lpcoRows = productIds.length
+    ? await db.select().from(productLpcos).where(inArray(productLpcos.productId, productIds))
+    : [];
   const lpcosByProduct = new Map<string, typeof lpcoRows>();
   for (const l of lpcoRows) {
     const list = lpcosByProduct.get(l.productId) ?? [];
@@ -296,6 +295,7 @@ export default async function ProcessDetailPage({
   const boundAddItem = addProcessItem.bind(null, id);
   const boundAddInvoice = addProcessInvoice.bind(null, id);
   const boundCreatePayable = createPayable.bind(null, id);
+  const currentUser = await getCurrentUser();
   const isAdmin = currentUser?.role === "ADMIN";
 
   // Custo pousado por item — só calcula quando há câmbio (mesma condição
