@@ -33,6 +33,7 @@ import {
   processLpcos,
   processPayables,
   processFreightQuotes,
+  processFreightQuoteLines,
   freightAgents,
   itemReservations,
   purchaseOrders,
@@ -186,6 +187,14 @@ export default async function ProcessDetailPage({
       .where(eq(processFreightQuotes.processId, id))
       .orderBy(processFreightQuotes.createdAt),
   ]);
+  const quoteIds = freightQuoteRows.map((q) => q.id);
+  const quoteLineRows = quoteIds.length
+    ? await db
+        .select()
+        .from(processFreightQuoteLines)
+        .where(inArray(processFreightQuoteLines.quoteId, quoteIds))
+        .orderBy(processFreightQuoteLines.position)
+    : [];
   const freightQuotesKey = freightQuoteRows
     .map((q) => `${q.id}:${q.updatedAt.getTime()}:${q.isSelected}`)
     .join("|");
@@ -194,27 +203,43 @@ export default async function ProcessDetailPage({
     agentId: q.agentId,
     agentName: q.agentName,
     proposal: q.proposal,
+    quoteDate: q.quoteDate,
+    validUntil: q.validUntil,
+    validityDaysLeft: diasRestantes(q.validUntil),
     modal: q.modal,
     incoterm: q.incoterm,
     carrier: q.carrier,
     origin: q.origin,
     destination: q.destination,
+    route: q.route,
     transitDays: q.transitDays,
-    validUntil: q.validUntil,
-    validityDaysLeft: diasRestantes(q.validUntil),
-    freightValue: q.freightValue,
-    freightCurrency: q.freightCurrency,
-    originFeesValue: q.originFeesValue,
-    originFeesCurrency: q.originFeesCurrency,
-    destinationFeesValue: q.destinationFeesValue,
-    destinationFeesCurrency: q.destinationFeesCurrency,
-    otherFeesLabel: q.otherFeesLabel,
-    otherFeesValue: q.otherFeesValue,
-    otherFeesCurrency: q.otherFeesCurrency,
+    transitDaysMax: q.transitDaysMax,
+    frequency: q.frequency,
+    cargoDescription: q.cargoDescription,
+    grossWeightKg: q.grossWeightKg,
+    volumes: q.volumes,
+    volumeM3: q.volumeM3,
+    dimensions: q.dimensions,
+    cargoValue: q.cargoValue,
+    cargoValueCurrency: q.cargoValueCurrency,
+    pickupAddress: q.pickupAddress,
     notes: q.notes,
+    fileName: q.fileName,
     isSelected: q.isSelected,
+    lines: quoteLineRows
+      .filter((l) => l.quoteId === q.id)
+      .map((l) => ({
+        id: l.id,
+        section: l.section,
+        description: l.description,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        unit: l.unit,
+        minimum: l.minimum,
+        currency: l.currency,
+        total: l.total,
+      })),
   }));
-
   const [processSuppliers, linkedPos] = await Promise.all([
     getSuppliersByProcess([id]),
     db

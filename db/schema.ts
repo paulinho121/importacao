@@ -667,11 +667,12 @@ export const purchaseOrderDocuments = pgTable("purchase_order_documents", {
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Cotações de frete de um processo: uma por agente de carga (como as colunas
-// da planilha de comparação). Cada valor tem a sua própria moeda — o frete e
-// as taxas de origem costumam vir em USD e as de destino/DTA em BRL. Só uma
-// cotação por processo fica "escolhida" (isSelected); ao escolher, o frete +
-// taxas de origem vão para o Frete Internacional do processo.
+// Cotações de frete de um processo: uma por agente de carga (como a proposta
+// em PDF que o agente manda, ou as colunas da planilha de comparação). O
+// cabeçalho tem os dados do embarque e da carga; os valores ficam em linhas
+// (process_freight_quote_lines), cada uma com a própria moeda. Só uma cotação
+// por processo fica "escolhida" (isSelected); ao escolher, frete + despesas
+// de origem vão para o Frete Internacional do processo.
 export const processFreightQuotes = pgTable(
   "process_freight_quotes",
   {
@@ -680,32 +681,87 @@ export const processFreightQuotes = pgTable(
       .notNull()
       .references(() => processes.id, { onDelete: "cascade" }),
     agentId: uuid("agent_id").references(() => freightAgents.id, { onDelete: "set null" }),
-    // Nº/referência da proposta do agente (ex: "Cotação 6903").
+    // Referência da proposta do agente (ex: "RKT-014949-26") e a data dela.
     proposal: text("proposal"),
+    quoteDate: date("quote_date"),
+    // "Validade para embarque" da proposta.
+    validUntil: date("valid_until"),
     modal: modalEnum("modal"),
     incoterm: text("incoterm"),
     // Companhia aérea / armador (coluna "CIA" da planilha).
     carrier: text("carrier"),
     origin: text("origin"),
     destination: text("destination"),
+    // Rota com escalas (ex: "PKE-CDG-GRU").
+    route: text("route"),
+    // Trânsito em dias: mínimo e máximo ("de 8 a 15 dias"); só o mínimo = fixo.
     transitDays: integer("transit_days"),
-    validUntil: date("valid_until"),
+    transitDaysMax: integer("transit_days_max"),
+    // Frequência dos embarques (ex: "5 x por semana").
+    frequency: text("frequency"),
+    // Carga cotada.
+    cargoDescription: text("cargo_description"),
+    grossWeightKg: numeric("gross_weight_kg", { precision: 10, scale: 2 }),
+    volumes: integer("volumes"),
+    volumeM3: numeric("volume_m3", { precision: 10, scale: 3 }),
+    dimensions: text("dimensions"),
+    cargoValue: numeric("cargo_value", { precision: 14, scale: 2 }),
+    cargoValueCurrency: currencyEnum("cargo_value_currency"),
+    pickupAddress: text("pickup_address"),
+    // DEPRECADAS: substituídas pelas linhas em process_freight_quote_lines.
+    // Seguem na tabela só para o deploy antigo continuar lendo sem erro; o
+    // código novo não usa — podem ser removidas numa migração futura.
     freightValue: numeric("freight_value", { precision: 12, scale: 2 }),
     freightCurrency: currencyEnum("freight_currency").notNull().default("USD"),
     originFeesValue: numeric("origin_fees_value", { precision: 12, scale: 2 }),
     originFeesCurrency: currencyEnum("origin_fees_currency").notNull().default("USD"),
     destinationFeesValue: numeric("destination_fees_value", { precision: 12, scale: 2 }),
     destinationFeesCurrency: currencyEnum("destination_fees_currency").notNull().default("BRL"),
-    // Outras taxas / custo adicional (DTA, seguro, handling…) com descrição.
     otherFeesLabel: text("other_fees_label"),
     otherFeesValue: numeric("other_fees_value", { precision: 12, scale: 2 }),
     otherFeesCurrency: currencyEnum("other_fees_currency").notNull().default("BRL"),
     notes: text("notes"),
+    // PDF/planilha da proposta, no bucket de documentos.
+    fileName: text("file_name"),
+    storagePath: text("storage_path"),
     isSelected: boolean("is_selected").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("process_freight_quotes_process_idx").on(t.processId)],
+);
+
+// Seção da proposta a que a linha pertence: frete internacional, despesas na
+// origem, despesas no destino ou outras (DTA, custo adicional…).
+export const freightQuoteSectionEnum = pgEnum("freight_quote_section", [
+  "FRETE",
+  "ORIGEM",
+  "DESTINO",
+  "OUTRAS",
+]);
+
+// Linha de valor de uma cotação: tarifa × quantidade (com mínimo) = total.
+// total é gravado como vem da proposta (alguns itens, como taxa por
+// percentual, não se calculam por quantidade × tarifa).
+export const processFreightQuoteLines = pgTable(
+  "process_freight_quote_lines",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    quoteId: uuid("quote_id")
+      .notNull()
+      .references(() => processFreightQuotes.id, { onDelete: "cascade" }),
+    section: freightQuoteSectionEnum("section").notNull(),
+    position: integer("position").notNull().default(0),
+    description: text("description").notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 3 }),
+    unitPrice: numeric("unit_price", { precision: 12, scale: 4 }),
+    // KG | HAWB | PROCESSO | CONTAINER | VOLUME | PERCENT | FIXO
+    unit: text("unit"),
+    minimum: numeric("minimum", { precision: 12, scale: 2 }),
+    currency: currencyEnum("currency").notNull().default("USD"),
+    total: numeric("total", { precision: 12, scale: 2 }).notNull(),
+  },
+  (t) => [index("process_freight_quote_lines_quote_idx").on(t.quoteId, t.position)],
 );
 
 // Itens/SKUs de cada processo. sku é sempre string — corrige a perda de
