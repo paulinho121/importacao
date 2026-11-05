@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   processes,
   suppliers,
   freightAgents,
   processItems,
+  products,
   processInvoices,
   processLpcos,
   processEvents,
@@ -130,7 +131,14 @@ export default async function ProcessoImprimirPage({ params }: { params: Promise
   if (!p) notFound();
 
   const [items, invoices, lpcos, events] = await Promise.all([
-    db.select().from(processItems).where(eq(processItems.processId, id)).orderBy(asc(processItems.createdAt)),
+    // foto do cadastro do produto (quando o item veio do catálogo e o produto tem foto)
+    db
+      .select({ item: processItems, photoUrl: products.photoUrl })
+      .from(processItems)
+      .leftJoin(products, eq(processItems.productId, products.id))
+      .where(eq(processItems.processId, id))
+      .orderBy(asc(processItems.createdAt))
+      .then((rows) => rows.map((r) => ({ ...r.item, photoUrl: r.photoUrl }))),
     db
       .select({
         id: processInvoices.id,
@@ -144,6 +152,29 @@ export default async function ProcessoImprimirPage({ params }: { params: Promise
     db.select().from(processLpcos).where(eq(processLpcos.processId, id)),
     db.select().from(processEvents).where(eq(processEvents.processId, id)).orderBy(desc(processEvents.eventDate)),
   ]);
+
+  // Itens que vieram da planilha não têm produto ligado: tenta achar a foto
+  // pelo SKU (do sistema ou do fabricante) entre os produtos que têm foto.
+  const skusWithoutPhoto = [...new Set(items.filter((i) => !i.photoUrl && i.sku).map((i) => i.sku as string))];
+  const photoBySku = new Map<string, string>();
+  if (skusWithoutPhoto.length > 0) {
+    const candidates = await db
+      .select({ sku: products.sku, manufacturerSku: products.manufacturerSku, photoUrl: products.photoUrl })
+      .from(products)
+      .where(
+        and(
+          isNotNull(products.photoUrl),
+          or(inArray(products.sku, skusWithoutPhoto), inArray(products.manufacturerSku, skusWithoutPhoto)),
+        ),
+      );
+    for (const c of candidates) {
+      if (c.photoUrl) {
+        photoBySku.set(c.sku.toLowerCase(), c.photoUrl);
+        if (c.manufacturerSku) photoBySku.set(c.manufacturerSku.toLowerCase(), c.photoUrl);
+      }
+    }
+  }
+  const photoOf = (item: (typeof items)[number]) => item.photoUrl ?? (item.sku ? photoBySku.get(item.sku.toLowerCase()) : null) ?? null;
 
   const invoiceNumberById = new Map(invoices.map((i) => [i.id, i.invoiceNumber]));
   const totalQty = items.reduce((sum, i) => sum + Number(i.quantity ?? 0), 0);
@@ -248,6 +279,7 @@ export default async function ProcessoImprimirPage({ params }: { params: Promise
             <thead>
               <tr className="border-b-2" style={{ borderColor: INK }}>
                 <Th>#</Th>
+                <Th>Foto</Th>
                 <Th>SKU</Th>
                 <Th>Descrição</Th>
                 <Th>Invoice</Th>
@@ -260,9 +292,21 @@ export default async function ProcessoImprimirPage({ params }: { params: Promise
             </thead>
             <tbody>
               {items.map((item, idx) => (
-                <tr key={item.id} className="border-b align-top" style={{ borderColor: LINE }}>
+                <tr key={item.id} className="border-b align-top" style={{ borderColor: LINE, breakInside: "avoid" }}>
                   <td className="py-2 pr-3" style={{ color: MUTED }}>
                     {idx + 1}
+                  </td>
+                  <td className="py-2 pr-3">
+                    {photoOf(item) ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- documento impresso: <img> simples, sem otimização
+                      <img
+                        src={photoOf(item) as string}
+                        alt={item.description}
+                        style={{ width: 56, height: 56, objectFit: "contain", background: "#fff", border: `1px solid ${LINE}`, borderRadius: 4 }}
+                      />
+                    ) : (
+                      <span style={{ color: MUTED }}>—</span>
+                    )}
                   </td>
                   <td className="py-2 pr-3 whitespace-nowrap" style={{ fontVariantNumeric: "tabular-nums" }}>
                     {item.sku ?? "—"}
@@ -285,7 +329,7 @@ export default async function ProcessoImprimirPage({ params }: { params: Promise
             </tbody>
             <tfoot>
               <tr className="border-t-2" style={{ borderColor: INK }}>
-                <td colSpan={4} className="pt-2 pr-3 text-right font-bold">
+                <td colSpan={5} className="pt-2 pr-3 text-right font-bold">
                   Total de peças
                 </td>
                 <td className="pt-2 pr-3 text-right font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>
