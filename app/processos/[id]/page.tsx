@@ -15,6 +15,7 @@ import ProcessEditDetails from "@/components/ProcessEditDetails";
 // pro item do processo apesar do nome.
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
+import ProcessFreightQuotes, { type FreightQuoteRow } from "@/components/ProcessFreightQuotes";
 import ProcessCompliance from "@/components/ProcessCompliance";
 import LandedCostBreakdown from "@/components/LandedCostBreakdown";
 import ProcessPayables from "@/components/ProcessPayables";
@@ -31,6 +32,7 @@ import {
   processInvoices,
   processLpcos,
   processPayables,
+  processFreightQuotes,
   freightAgents,
   itemReservations,
   purchaseOrders,
@@ -127,7 +129,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions] = await Promise.all([
+  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows] = await Promise.all([
     db
       .select({
         id: processItems.id,
@@ -177,7 +179,41 @@ export default async function ProcessDetailPage({
       .orderBy(processPayables.dueDate),
     db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
     db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
+    db
+      .select({ ...getTableColumns(processFreightQuotes), agentName: freightAgents.name })
+      .from(processFreightQuotes)
+      .leftJoin(freightAgents, eq(processFreightQuotes.agentId, freightAgents.id))
+      .where(eq(processFreightQuotes.processId, id))
+      .orderBy(processFreightQuotes.createdAt),
   ]);
+  const freightQuotesKey = freightQuoteRows
+    .map((q) => `${q.id}:${q.updatedAt.getTime()}:${q.isSelected}`)
+    .join("|");
+  const freightQuotes: FreightQuoteRow[] = freightQuoteRows.map((q) => ({
+    id: q.id,
+    agentId: q.agentId,
+    agentName: q.agentName,
+    proposal: q.proposal,
+    modal: q.modal,
+    incoterm: q.incoterm,
+    carrier: q.carrier,
+    origin: q.origin,
+    destination: q.destination,
+    transitDays: q.transitDays,
+    validUntil: q.validUntil,
+    validityDaysLeft: diasRestantes(q.validUntil),
+    freightValue: q.freightValue,
+    freightCurrency: q.freightCurrency,
+    originFeesValue: q.originFeesValue,
+    originFeesCurrency: q.originFeesCurrency,
+    destinationFeesValue: q.destinationFeesValue,
+    destinationFeesCurrency: q.destinationFeesCurrency,
+    otherFeesLabel: q.otherFeesLabel,
+    otherFeesValue: q.otherFeesValue,
+    otherFeesCurrency: q.otherFeesCurrency,
+    notes: q.notes,
+    isSelected: q.isSelected,
+  }));
 
   const [processSuppliers, linkedPos] = await Promise.all([
     getSuppliersByProcess([id]),
@@ -434,6 +470,18 @@ export default async function ProcessDetailPage({
             invoices={invoices.map((inv) => ({ id: inv.id, invoiceNumber: inv.invoiceNumber }))}
           />
         }
+      />
+
+      <ProcessFreightQuotes
+        // Remonta quando os dados mudam (fecha o formulário após salvar).
+        key={freightQuotesKey}
+        processId={id}
+        quotes={freightQuotes}
+        agents={agentOptions}
+        processCurrency={process.currency}
+        exchangeRate={process.exchangeRate ? Number(process.exchangeRate) : null}
+        defaults={{ modal: process.modal, incoterm: process.incoterm, destination: process.destinationCode }}
+        closed={isClosed}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">

@@ -667,6 +667,47 @@ export const purchaseOrderDocuments = pgTable("purchase_order_documents", {
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Cotações de frete de um processo: uma por agente de carga (como as colunas
+// da planilha de comparação). Cada valor tem a sua própria moeda — o frete e
+// as taxas de origem costumam vir em USD e as de destino/DTA em BRL. Só uma
+// cotação por processo fica "escolhida" (isSelected); ao escolher, o frete +
+// taxas de origem vão para o Frete Internacional do processo.
+export const processFreightQuotes = pgTable(
+  "process_freight_quotes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    processId: uuid("process_id")
+      .notNull()
+      .references(() => processes.id, { onDelete: "cascade" }),
+    agentId: uuid("agent_id").references(() => freightAgents.id, { onDelete: "set null" }),
+    // Nº/referência da proposta do agente (ex: "Cotação 6903").
+    proposal: text("proposal"),
+    modal: modalEnum("modal"),
+    incoterm: text("incoterm"),
+    // Companhia aérea / armador (coluna "CIA" da planilha).
+    carrier: text("carrier"),
+    origin: text("origin"),
+    destination: text("destination"),
+    transitDays: integer("transit_days"),
+    validUntil: date("valid_until"),
+    freightValue: numeric("freight_value", { precision: 12, scale: 2 }),
+    freightCurrency: currencyEnum("freight_currency").notNull().default("USD"),
+    originFeesValue: numeric("origin_fees_value", { precision: 12, scale: 2 }),
+    originFeesCurrency: currencyEnum("origin_fees_currency").notNull().default("USD"),
+    destinationFeesValue: numeric("destination_fees_value", { precision: 12, scale: 2 }),
+    destinationFeesCurrency: currencyEnum("destination_fees_currency").notNull().default("BRL"),
+    // Outras taxas / custo adicional (DTA, seguro, handling…) com descrição.
+    otherFeesLabel: text("other_fees_label"),
+    otherFeesValue: numeric("other_fees_value", { precision: 12, scale: 2 }),
+    otherFeesCurrency: currencyEnum("other_fees_currency").notNull().default("BRL"),
+    notes: text("notes"),
+    isSelected: boolean("is_selected").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("process_freight_quotes_process_idx").on(t.processId)],
+);
+
 // Itens/SKUs de cada processo. sku é sempre string — corrige a perda de
 // zero à esquerda observada na planilha quando o Excel converte código em número.
 // productId é opcional: item pode vir do catálogo (sku/description copiados
