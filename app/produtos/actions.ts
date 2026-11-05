@@ -10,6 +10,7 @@ import { BRANCHES } from "@/lib/locations";
 import { PRODUCT_LPCO_STATUSES } from "@/lib/lpco";
 import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
 import { supabaseAdmin, LOGOS_BUCKET } from "@/lib/supabase-admin";
+import { compressPhoto } from "@/lib/image-compress";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -91,8 +92,21 @@ async function savePhotos(productId: string, formData: FormData) {
   for (const file of files) {
     const ext = PHOTO_TYPES[file.type];
     if (!ext) throw new Error("As fotos precisam ser PNG, JPEG ou WebP (ou cole links).");
-    const path = `produtos/${productId}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-    const { error } = await supabaseAdmin.storage.from(LOGOS_BUCKET).upload(path, file, { contentType: file.type });
+    // Reduz e converte para WebP antes de guardar (economiza espaço no Storage).
+    // Se a imagem não puder ser lida/convertida, guarda o arquivo original.
+    let body: Buffer | File = file;
+    let contentType = file.type;
+    let fileExt = ext;
+    try {
+      const compressed = await compressPhoto(await file.arrayBuffer());
+      body = compressed.buffer;
+      contentType = compressed.contentType;
+      fileExt = compressed.ext;
+    } catch {
+      // mantém o original
+    }
+    const path = `produtos/${productId}-${crypto.randomUUID().slice(0, 8)}.${fileExt}`;
+    const { error } = await supabaseAdmin.storage.from(LOGOS_BUCKET).upload(path, body, { contentType });
     if (error) throw new Error(`Falha no upload da foto: ${error.message}`);
     toAdd.push(supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl);
   }
