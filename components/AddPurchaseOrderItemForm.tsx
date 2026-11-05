@@ -16,6 +16,8 @@ type Product = {
   sku: string;
   manufacturerSku: string | null;
   description: string;
+  manufacturerName: string | null;
+  noSupplier: boolean;
   costPrice: string | null;
   priceTiers: PriceTier[];
 };
@@ -34,12 +36,10 @@ export default function AddPurchaseOrderItemForm({
   action,
   supplierId,
   supplierName,
-  hasProducts,
 }: {
   action: (formData: FormData) => void;
   supplierId: string;
   supplierName: string;
-  hasProducts: boolean;
 }) {
   const [mode, setMode] = useState<"catalogo" | "avulso">("catalogo");
   const [unitPrice, setUnitPrice] = useState("");
@@ -187,12 +187,7 @@ export default function AddPurchaseOrderItemForm({
       </div>
 
       {mode === "catalogo" ? (
-        !hasProducts ? (
-          <p className="text-on-surface-variant font-body-sm text-body-sm">
-            Nenhum produto do catálogo tem este fornecedor como padrão. Use &quot;Item avulso&quot; ou
-            ajuste o fornecedor padrão do produto em Produtos.
-          </p>
-        ) : (
+        (
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">
               search
@@ -236,7 +231,7 @@ export default function AddPurchaseOrderItemForm({
             {open && (
               <div className="absolute z-10 mt-1 w-full bg-surface-container border border-outline-variant rounded-lg shadow-lg overflow-hidden">
                 <div className="px-3 py-1.5 bg-surface-container-low border-b border-outline-variant text-xs font-label-md text-on-surface-variant flex justify-between">
-                  <span>{supplierName}</span>
+                  <span>{supplierName} e produtos sem fornecedor definido</span>
                   <span>
                     {loading ? "Buscando..." : `${results.length}${results.length === 50 ? "+" : ""} ${results.length === 1 ? "item" : "itens"}`}
                   </span>
@@ -260,6 +255,11 @@ export default function AddPurchaseOrderItemForm({
                         <span className="font-mono-data text-xs text-secondary">{p.sku}</span>
                         {p.manufacturerSku && p.manufacturerSku !== p.sku && (
                           <span className="ml-2 font-mono-data text-xs text-on-surface-variant">· {p.manufacturerSku}</span>
+                        )}
+                        {p.noSupplier && (
+                          <span className="ml-2 rounded bg-surface-container-high px-1.5 py-0.5 text-[10px] font-bold text-on-surface-variant">
+                            sem fornecedor{p.manufacturerName ? ` · ${p.manufacturerName}` : ""}
+                          </span>
                         )}
                         <span className="block text-on-surface-variant truncate">{p.description}</span>
                       </button>

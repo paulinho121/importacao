@@ -11,7 +11,7 @@ import {
   processItems,
   productPriceTiers,
 } from "@/db/schema";
-import { and, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
@@ -157,12 +157,16 @@ export async function searchPurchaseOrderProducts(supplierId: string, query: str
       manufacturerSku: products.manufacturerSku,
       description: products.description,
       costPrice: products.costPrice,
+      manufacturerName: products.manufacturerName,
+      noSupplier: sql<boolean>`${products.defaultSupplierId} is null`.mapWith(Boolean),
     })
     .from(products)
     .where(
       q
         ? and(
-            eq(products.defaultSupplierId, supplierId),
+            // produtos do fornecedor do pedido + os que ainda não têm
+            // fornecedor padrão (senão ficariam impossíveis de pedir)
+            or(eq(products.defaultSupplierId, supplierId), isNull(products.defaultSupplierId)),
             // o código do fabricante (ex.: AP0701051U) costuma ser o que vem na
             // invoice, então também vale na busca
             or(
@@ -171,9 +175,10 @@ export async function searchPurchaseOrderProducts(supplierId: string, query: str
               ilike(products.description, `%${q}%`),
             ),
           )
-        : eq(products.defaultSupplierId, supplierId),
+        : or(eq(products.defaultSupplierId, supplierId), isNull(products.defaultSupplierId)),
     )
-    .orderBy(products.sku)
+    // os do próprio fornecedor primeiro
+    .orderBy(sql`(${products.defaultSupplierId} is null)`, products.sku)
     .limit(50);
 
   if (rows.length === 0) return rows.map((r) => ({ ...r, priceTiers: [] as { minQuantity: string; price: string }[] }));

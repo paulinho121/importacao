@@ -69,7 +69,7 @@ export default async function PedidoCompraDetailPage({
 
   if (!po) notFound();
 
-  const [items, [{ catalogCount }], suggestedProcessNumber, branchRows, openProcesses] = await Promise.all([
+  const [items, suggestedProcessNumber, branchRows, openProcesses] = await Promise.all([
     db
       .select({
         id: purchaseOrderItems.id,
@@ -87,10 +87,6 @@ export default async function PedidoCompraDetailPage({
       .from(purchaseOrderItems)
       .leftJoin(products, eq(purchaseOrderItems.productId, products.id))
       .where(eq(purchaseOrderItems.purchaseOrderId, id)),
-    db
-      .select({ catalogCount: sql<number>`count(*)`.mapWith(Number) })
-      .from(products)
-      .where(eq(products.defaultSupplierId, po.supplierId)),
     po.status === "CONFIRMADO" && !po.processId ? suggestProcessNumber() : Promise.resolve(""),
     db.select().from(companyBranches).orderBy(desc(companyBranches.isDefault), companyBranches.name),
     // Processos em andamento que podem receber este pedido (o contêiner que já
@@ -380,7 +376,6 @@ export default async function PedidoCompraDetailPage({
                 action={boundAddItem}
                 supplierId={po.supplierId}
                 supplierName={po.supplierName}
-                hasProducts={catalogCount > 0}
               />
             )}
             {canEdit && po.processId && (
