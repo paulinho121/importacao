@@ -58,7 +58,7 @@ export default function Sidebar() {
                   {group.label}
                 </p>
               )}
-              {group.items.map((item) => {
+              {group.items.filter((item) => !item.hidden).map((item) => {
                 const active = isActive(pathname, currentStatus, item.href);
                 const Icon = item.icon;
                 const link = (

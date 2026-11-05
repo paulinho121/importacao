@@ -21,6 +21,9 @@ export interface NavLink {
   label: string;
   href: string;
   icon: LucideIcon;
+  // Escondido dos menus (a rota continua existindo e o título do breadcrumb
+  // segue funcionando). Para mostrar de novo, remova `hidden`.
+  hidden?: boolean;
 }
 
 export interface NavGroup {
@@ -40,7 +43,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Operações",
     items: [
       { label: "Pedidos de Compra", href: "/pedidos-compra", icon: ClipboardList },
-      { label: "Em Importação (Externo)", href: "/em-importacao", icon: Warehouse },
+      { label: "Em Importação (Externo)", href: "/em-importacao", icon: Warehouse, hidden: true },
       { label: "Processos", href: "/processos", icon: PackageSearch },
       { label: "Em Trânsito", href: "/processos?status=EM_TRANSITO", icon: Ship },
       { label: "Embarques", href: "/processos?status=EMBARCADO", icon: Anchor },
