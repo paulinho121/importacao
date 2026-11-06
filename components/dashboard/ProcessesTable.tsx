@@ -22,7 +22,7 @@ import type { DashboardMetrics } from "@/lib/dashboard-metrics";
 
 type Row = DashboardMetrics["table"][number];
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 6;
 
 function fob(value: number | null, currency: string | null) {
   if (value === null) return "—";
@@ -77,10 +77,10 @@ export function ProcessesTable({ data }: { data: Row[] }) {
   );
 
   return (
-    <section className="overflow-hidden rounded-card border border-border bg-card">
-      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight text-on-surface">
+          <h2 className="text-base font-semibold sm:text-lg tracking-tight text-on-surface">
             Processos Recentes em Acompanhamento
           </h2>
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -103,9 +103,9 @@ export function ProcessesTable({ data }: { data: Row[] }) {
             }}
             placeholder="Filtrar tabela..."
             aria-label="Filtrar tabela"
-            className="w-full sm:w-56"
+            className="h-10 min-w-0 flex-1 sm:w-56 sm:flex-none"
           />
-          <Button type="submit" variant="outline" className="gap-2">
+          <Button type="submit" variant="outline" className="h-10 gap-2">
             <Filter className="h-4 w-4" aria-hidden />
             Filtrar
           </Button>
@@ -124,38 +124,106 @@ export function ProcessesTable({ data }: { data: Row[] }) {
           />
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead>Ref. Processo</TableHead>
-              <TableHead>Fornecedor / Origem</TableHead>
-              <TableHead>Modal</TableHead>
-              <TableHead>ETA (Previsão)</TableHead>
-              <TableHead>Valor (FOB)</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ação</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+          <div className="hidden xl:block">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead>Ref. Processo</TableHead>
+                  <TableHead>Fornecedor / Origem</TableHead>
+                  <TableHead>Modal</TableHead>
+                  <TableHead>ETA (Previsão)</TableHead>
+                  <TableHead>Valor (FOB)</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visible.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      <Link
+                        href={`/processos/${r.id}`}
+                        className="font-mono text-sm font-semibold text-on-surface hover:text-secondary hover:underline whitespace-nowrap"
+                      >
+                        {r.processNumber}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <SupplierLogo
+                          logoUrl={r.supplierLogoUrl}
+                          name={r.supplierName}
+                          size={32}
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium uppercase tracking-wide">
+                            {r.supplierName}
+                          </p>
+                          {r.supplierCountry && (
+                            <p className="text-xs text-muted-foreground">
+                              {r.supplierCountry}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <ModalBadge
+                        modal={r.modal}
+                        className="text-sm text-muted-foreground"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-sm whitespace-nowrap">
+                        {formatDate(r.etaEstimated)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-sm whitespace-nowrap">
+                        {fob(r.fobValue, r.currency)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={r.status as ProcessStatus} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link
+                        href={`/processos/${r.id}`}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary hover:underline whitespace-nowrap"
+                      >
+                        Detalhes
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <ul className="grid gap-3 border-t border-border p-4 lg:grid-cols-2 sm:p-5 xl:hidden">
             {visible.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell>
-                  <Link
-                    href={`/processos/${r.id}`}
-                    className="font-mono text-sm font-semibold text-on-surface hover:text-secondary hover:underline whitespace-nowrap"
-                  >
-                    {r.processNumber}
-                  </Link>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
+              <li key={r.id}>
+                <Link
+                  href={`/processos/${r.id}`}
+                  className="group block rounded-xl border border-border bg-background/40 p-4 transition active:scale-[0.99] hover:border-secondary/50 hover:bg-secondary/5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-sm font-bold text-on-surface">
+                      {r.processNumber}
+                    </span>
+                    <StatusBadge status={r.status as ProcessStatus} />
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-3">
                     <SupplierLogo
                       logoUrl={r.supplierLogoUrl}
                       name={r.supplierName}
                       size={32}
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium uppercase tracking-wide">
+                      <p className="truncate text-sm font-semibold uppercase tracking-wide">
                         {r.supplierName}
                       </p>
                       {r.supplierCountry && (
@@ -165,39 +233,46 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       )}
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <ModalBadge
-                    modal={r.modal}
-                    className="text-sm text-muted-foreground"
-                  />
-                </TableCell>
-                <TableCell>
-                  <span className="font-mono text-sm whitespace-nowrap">
-                    {formatDate(r.etaEstimated)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="font-mono text-sm whitespace-nowrap">
-                    {fob(r.fobValue, r.currency)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={r.status as ProcessStatus} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link
-                    href={`/processos/${r.id}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary hover:underline whitespace-nowrap"
-                  >
-                    Detalhes
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                  </Link>
-                </TableCell>
-              </TableRow>
+
+                  <dl className="mt-4 grid grid-cols-3 gap-2 rounded-lg bg-muted/40 px-3 py-2.5">
+                    <div className="min-w-0">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Modal
+                      </dt>
+                      <dd className="mt-0.5 truncate text-sm">
+                        <ModalBadge modal={r.modal} className="text-sm" />
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        ETA
+                      </dt>
+                      <dd className="mt-0.5 font-mono text-sm">
+                        {formatDate(r.etaEstimated)}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        FOB
+                      </dt>
+                      <dd className="mt-0.5 truncate font-mono text-sm">
+                        {fob(r.fobValue, r.currency)}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <p className="mt-3 flex items-center justify-end gap-1 text-sm font-medium text-secondary">
+                    Ver detalhes
+                    <ChevronRight
+                      className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                      aria-hidden
+                    />
+                  </p>
+                </Link>
+              </li>
             ))}
-          </TableBody>
-        </Table>
+          </ul>
+        </>
       )}
 
       <div className="flex items-center justify-between gap-3 border-t border-border px-5 py-3">
