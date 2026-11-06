@@ -62,6 +62,7 @@ import { getSignedDocumentUrl } from "@/lib/supabase-admin";
 import { calcValorAduaneiro, calcLandedCostByItem } from "@/lib/landed-cost";
 import { getCurrentUser } from "@/lib/supabase-server";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 const DOC_TYPES = [
@@ -429,12 +430,11 @@ export default async function ProcessDetailPage({
                   required
                   className="bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
                 />
-                <button
-                  type="submit"
+                <SubmitButton
                   className="px-3 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
                 >
                   Salvar
-                </button>
+                </SubmitButton>
               </form>
             </details>
           </div>
@@ -468,12 +468,11 @@ export default async function ProcessDetailPage({
                 </option>
               ))}
             </select>
-            <button
-              type="submit"
+            <SubmitButton
               className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
             >
               Alterar Status
-            </button>
+            </SubmitButton>
           </form>
           {process.status !== "CONCLUIDO" && process.status !== "ABANDONADO" && (
             <AbandonProcessButton action={boundAbandon} processNumber={process.processNumber} />
@@ -572,12 +571,11 @@ export default async function ProcessDetailPage({
           </div>
           {nextStepLabel && (
             <form action={boundAdvanceStep} className="mt-6 pt-4 border-t border-outline-variant">
-              <button
-                type="submit"
+              <SubmitButton
                 className="w-full px-4 py-3 rounded-lg bg-secondary text-white font-bold text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all"
               >
                 Avançar para: {nextStepLabel}
-              </button>
+              </SubmitButton>
             </form>
           )}
         </div>
@@ -673,12 +671,11 @@ export default async function ProcessDetailPage({
                       </option>
                     ))}
                   </select>
-                  <button
-                    type="submit"
+                  <SubmitButton
                     className="px-3 py-2 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
                   >
                     Adicionar
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
               {process.notes && (
@@ -823,12 +820,11 @@ export default async function ProcessDetailPage({
                         required
                         className="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
                       />
-                      <button
-                        type="submit"
+                      <SubmitButton
                         className="w-full px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
                       >
                         {uploaded ? "Substituir" : "Enviar"}
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                 );
@@ -881,13 +877,12 @@ export default async function ProcessDetailPage({
                         <td className="px-6 py-3 text-right">
                           {isManual && (
                             <form action={removeProcessFollowUp.bind(null, ev.id, id)}>
-                              <button
-                                type="submit"
+                              <SubmitButton
                                 className="text-error hover:underline text-xs"
                                 aria-label="Remover andamento"
                               >
                                 Remover
-                              </button>
+                              </SubmitButton>
                             </form>
                           )}
                         </td>

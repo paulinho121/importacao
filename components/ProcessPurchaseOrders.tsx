@@ -8,6 +8,7 @@ import SupplierLogo from "@/components/SupplierLogo";
 import DocumentViewer from "@/components/DocumentViewer";
 import { PURCHASE_ORDER_STATUS_BADGE_CLASS, PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 function money(value: number, currency: string | null) {
   if (currency && currency !== "OTHER") {
     try {
@@ -218,13 +219,12 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
               ))}
             </select>
           </div>
-          <button
-            type="submit"
+          <SubmitButton
             disabled={available.length === 0}
             className="rounded-lg bg-secondary px-4 py-2.5 font-label-md text-label-md text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Adicionar ao processo
-          </button>
+          </SubmitButton>
         </form>
       )}
       {!closed && available.length === 0 && (

@@ -11,6 +11,7 @@ import {
   type ExternalImportItemStatus,
 } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 type Product = {
   id: string;
   sku: string;
@@ -353,13 +354,12 @@ export default function AddPurchaseOrderItemForm({
         </div>
       )}
 
-      <button
-        type="submit"
+      <SubmitButton
         disabled={mode === "catalogo" && !selected}
         className="w-full px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Adicionar Item
-      </button>
+      </SubmitButton>
     </form>
   );
 }

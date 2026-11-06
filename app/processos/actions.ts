@@ -14,6 +14,7 @@ import {
   purchaseOrders,
 } from "@/db/schema";
 import { LinkError, linkPurchaseOrderToProcess, unlinkPurchaseOrderFromProcess } from "@/lib/process-purchase-orders";
+import { isUniqueViolation } from "@/lib/db-errors";
 import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -113,17 +114,19 @@ export async function createProcess(formData: FormData) {
   const processNumber = String(formData.get("processNumber") ?? "").trim();
   if (!processNumber) throw new Error("Número do processo é obrigatório.");
 
-  const [sameNumber] = await db.select({ id: processes.id }).from(processes).where(eq(processes.processNumber, processNumber));
-  if (sameNumber) {
-    redirect(withFlashError("/processos/novo", `Já existe um processo com o número "${processNumber}". Escolha-o na lista para adicionar pedidos, ou use outro número.`));
-  }
+  // As duas leituras iniciais são independentes: saem juntas (1 ida em vez de 2).
+  const duplicateMessage = `Já existe um processo com o número "${processNumber}". Escolha-o na lista para adicionar pedidos, ou use outro número.`;
+  const [[sameNumber], firstPoRows] = await Promise.all([
+    db.select({ id: processes.id }).from(processes).where(eq(processes.processNumber, processNumber)),
+    poIds.length > 0
+      ? db.select({ supplierId: purchaseOrders.supplierId }).from(purchaseOrders).where(eq(purchaseOrders.id, poIds[0]))
+      : Promise.resolve([] as { supplierId: string }[]),
+  ]);
+  if (sameNumber) redirect(withFlashError("/processos/novo", duplicateMessage));
 
   // O fornecedor principal vem do primeiro pedido escolhido; sem pedidos, do campo.
   let supplierId = String(formData.get("supplierId") ?? "").trim();
-  if (poIds.length > 0) {
-    const [firstPo] = await db.select({ supplierId: purchaseOrders.supplierId }).from(purchaseOrders).where(eq(purchaseOrders.id, poIds[0]));
-    if (firstPo) supplierId = firstPo.supplierId;
-  }
+  if (firstPoRows[0]) supplierId = firstPoRows[0].supplierId;
   if (!supplierId) {
     redirect(withFlashError("/processos/novo", "Escolha o fornecedor ou adicione um pedido de compra."));
   }
@@ -201,6 +204,8 @@ export async function createProcess(formData: FormData) {
     });
   } catch (e) {
     if (e instanceof LinkError) linkError = e.message;
+    // duas pessoas criando o mesmo número ao mesmo tempo: a restrição única do banco decide
+    else if (isUniqueViolation(e)) linkError = duplicateMessage;
     else throw e;
   }
   if (linkError || !createdId) redirect(withFlashError("/processos/novo", linkError ?? "Não foi possível criar o processo."));

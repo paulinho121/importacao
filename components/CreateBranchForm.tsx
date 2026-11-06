@@ -2,6 +2,7 @@
 
 import { createCompanyBranch } from "@/app/configuracoes/actions";
 
+import SubmitButton from "@/components/SubmitButton";
 export default function CreateBranchForm() {
   return (
     <form action={createCompanyBranch} className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
@@ -40,12 +41,11 @@ export default function CreateBranchForm() {
           <input type="checkbox" name="isDefault" className="rounded border-outline-variant" />
           Usar como filial padrão em novos pedidos
         </label>
-        <button
-          type="submit"
+        <SubmitButton
           className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
         >
           Cadastrar filial
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );

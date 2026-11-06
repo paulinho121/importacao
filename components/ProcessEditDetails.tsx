@@ -2,6 +2,7 @@ import { updateProcessDetails } from "@/app/processos/actions";
 import { BRANCHES, LANDING_LOCATIONS, locationLabel } from "@/lib/locations";
 import ModalidadeTipoFields from "@/components/ModalidadeTipoFields";
 
+import SubmitButton from "@/components/SubmitButton";
 const INPUT_CLASS =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
 const LABEL_CLASS = "block font-label-md text-label-md text-on-surface-variant mb-1";
@@ -132,12 +133,11 @@ export default function ProcessEditDetails({
           <textarea className={INPUT_CLASS} name="notes" rows={3} defaultValue={defaults.notes ?? ""} />
         </div>
         <div className="sm:col-span-2">
-          <button
-            type="submit"
+          <SubmitButton
             className="px-5 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             Salvar alterações
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </details>

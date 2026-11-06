@@ -260,6 +260,13 @@
       "when": 1793908786929,
       "tag": "0036_graceful_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793994220186,
+      "tag": "0037_small_sentry",
+      "breakpoints": true
     }
   ]
 }

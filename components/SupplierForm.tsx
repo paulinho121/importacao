@@ -1,5 +1,6 @@
 import { INCOTERMS } from "@/lib/incoterms";
 
+import SubmitButton from "@/components/SubmitButton";
 export type SupplierFormValues = {
   name?: string | null;
   country?: string | null;
@@ -261,12 +262,11 @@ export default function SupplierForm({
       </div>
 
       <div className="flex justify-end gap-4 pt-2">
-        <button
-          type="submit"
+        <SubmitButton
           className="px-8 py-3 rounded-lg bg-secondary text-white font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
         >
           {submitLabel}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );

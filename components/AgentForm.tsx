@@ -1,3 +1,4 @@
+import SubmitButton from "@/components/SubmitButton";
 export type AgentFormValues = {
   name?: string | null;
   contactName?: string | null;
@@ -86,12 +87,11 @@ export default function AgentForm({
       </div>
 
       <div className="flex justify-end gap-4 pt-2">
-        <button
-          type="submit"
+        <SubmitButton
           className="px-8 py-3 rounded-lg bg-secondary text-white font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
         >
           {submitLabel}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );

@@ -16,6 +16,7 @@ import { LPCO_TONE_CLASS, lpcoCountdown, lpcoTone, lpcoValidUntil, productLpcoSt
 import { CP_STATUS_OPTIONS, hasPublicConsultation } from "@/lib/product-flow";
 import { formatDate, stockStatus } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 export type ProcessItemRow = {
   id: string;
   productId: string | null;
@@ -143,9 +144,9 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
             <option value="nao">LPCO consulta pública: Não</option>
           </select>
           <input className={`${INPUT} col-span-2 font-mono-data`} name="lpcoNumber" defaultValue={row.lpcoNumber ?? ""} placeholder="LPCO do item (nº)" aria-label="LPCO do item" />
-          <button type="submit" className={`${SAVE_BTN} col-span-2`}>
+          <SubmitButton className={`${SAVE_BTN} col-span-2`}>
             Salvar item
-          </button>
+          </SubmitButton>
         </form>
         <form action={updateProcessItemValue.bind(null, row.id, processId)} className="mt-3 flex gap-1.5">
           <input
@@ -157,9 +158,9 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
             placeholder="Valor unitário"
             aria-label="Valor unitário"
           />
-          <button type="submit" className={SAVE_BTN}>
+          <SubmitButton className={SAVE_BTN}>
             Salvar valor
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -240,9 +241,9 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
               <input className={`${INPUT} w-28`} placeholder="Nome" name="personName" required />
               <input className={`${INPUT} w-16`} placeholder="Qtd" type="number" step="0.01" name="quantity" required />
               <input className={`${INPUT} min-w-24 flex-1`} placeholder="Obs. (opcional)" name="observation" />
-              <button type="submit" className="rounded-lg border border-outline px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high">
+              <SubmitButton className="rounded-lg border border-outline px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high">
                 Reservar
-              </button>
+              </SubmitButton>
             </form>
           </>
         ) : (

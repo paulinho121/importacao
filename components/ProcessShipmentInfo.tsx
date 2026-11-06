@@ -1,6 +1,7 @@
 import { updateShipmentInfo } from "@/app/processos/actions";
 import { formatDate } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 const INPUT_CLASS =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
 
@@ -100,12 +101,11 @@ export default function ProcessShipmentInfo({
           <input className={INPUT_CLASS} type="date" name="closedAt" defaultValue={shipment.closedAt ?? ""} />
         </div>
         <div className="sm:col-span-2">
-          <button
-            type="submit"
+          <SubmitButton
             className="px-5 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             Salvar dados do embarque
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </section>

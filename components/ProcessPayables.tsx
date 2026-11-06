@@ -2,6 +2,7 @@ import { PAYABLE_CATEGORY_LABEL, formatDate, diasRestantes, type PayableCategory
 import { PAYABLE_CURRENCIES } from "@/lib/currencies";
 import { markPayableAsPaid } from "@/app/financeiro/actions";
 
+import SubmitButton from "@/components/SubmitButton";
 const CATEGORIES: PayableCategory[] = [
   "FORNECEDOR",
   "FRETE",
@@ -73,12 +74,11 @@ export default function ProcessPayables({
                     )}
                     {canEdit && (
                       <form action={boundMarkPaid}>
-                        <button
-                          type="submit"
+                        <SubmitButton
                           className="px-2 py-1 rounded-lg text-xs text-secondary hover:bg-secondary/10 transition-colors"
                         >
                           Marcar como paga
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                   </div>
@@ -133,12 +133,11 @@ export default function ProcessPayables({
             type="date"
             name="dueDate"
           />
-          <button
-            type="submit"
+          <SubmitButton
             className="sm:col-span-3 px-4 py-2 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
           >
             Adicionar conta
-          </button>
+          </SubmitButton>
         </form>
       )}
     </div>

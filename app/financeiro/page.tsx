@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 import { PAYABLE_CATEGORY_LABEL, formatDate, diasRestantes, type PayableCategory } from "@/lib/status";
 import { markPayableAsPaid } from "./actions";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 type FilterKey = "aberto" | "vencida" | "pago" | "todas";
@@ -150,12 +151,11 @@ export default async function FinanceiroPage({
                       <td className="px-6 py-3 text-right">
                         {!r.paidAt && (
                           <form action={boundMarkPaid}>
-                            <button
-                              type="submit"
+                            <SubmitButton
                               className="px-3 py-1.5 rounded-lg text-secondary hover:bg-secondary/10 transition-colors font-label-md text-label-md"
                             >
                               Marcar como paga
-                            </button>
+                            </SubmitButton>
                           </form>
                         )}
                       </td>

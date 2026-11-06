@@ -1,5 +1,7 @@
 "use client";
 
+import SubmitButton from "@/components/SubmitButton";
+
 // Botão de formulário que pede confirmação antes de executar a ação.
 export default function ConfirmActionButton({
   action,
@@ -19,9 +21,9 @@ export default function ConfirmActionButton({
         if (!confirm(message)) e.preventDefault();
       }}
     >
-      <button type="submit" className={className}>
+      <SubmitButton className={className}>
         {label}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

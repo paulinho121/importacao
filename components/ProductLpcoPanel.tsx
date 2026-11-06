@@ -17,6 +17,7 @@ import {
 } from "@/lib/lpco";
 import { formatDate } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 const INPUT_CLASS =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all";
 const LABEL_CLASS = "block font-label-md text-label-md text-on-surface-variant mb-1";
@@ -165,12 +166,11 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
                           </summary>
                           <form action={updateProductLpco.bind(null, l.id, productId)} className="mt-2 space-y-2">
                             <LpcoFields lpco={l} />
-                            <button
-                              type="submit"
+                            <SubmitButton
                               className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
                             >
                               Salvar
-                            </button>
+                            </SubmitButton>
                           </form>
                           <div className="mt-1.5">
                             <DeleteExternalImportItemButton
@@ -197,12 +197,11 @@ export default function ProductLpcoPanel({ productId, lpcos }: { productId: stri
         </summary>
         <form action={boundAdd} className="mt-3 space-y-2">
           <LpcoFields />
-          <button
-            type="submit"
+          <SubmitButton
             className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             Registrar solicitação
-          </button>
+          </SubmitButton>
         </form>
       </details>
     </div>

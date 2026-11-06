@@ -363,7 +363,9 @@ export const processInvoices = pgTable("process_invoices", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("process_invoices_process_idx").on(t.processId),
+]);
 
 // Contas a pagar ligadas a um processo — fornecedor, frete, seguro,
 // desembaraço, armazenagem, imposto apurado etc. Só controle/trilha (data
@@ -392,7 +394,9 @@ export const processPayables = pgTable("process_payables", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("process_payables_process_idx").on(t.processId),
+]);
 
 // LPCOs (Licença, Permissão, Certificado e Outros documentos) efetivamente
 // abertos/obtidos para um processo específico — um processo pode precisar
@@ -419,7 +423,9 @@ export const processLpcos = pgTable("process_lpcos", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("process_lpcos_process_idx").on(t.processId),
+]);
 
 // Catálogo mestre de produtos. Itens de processo podem referenciar um
 // produto daqui (FK opcional) em vez de digitar SKU/descrição soltos —
@@ -516,7 +522,9 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("products_default_supplier_idx").on(t.defaultSupplierId),
+]);
 
 // Preço por faixa de quantidade (MOQ) — ex: Aputure vende "amaran Halo
 // 100x" a US$92 na unidade, mas US$85 a partir de 100 unidades. price
@@ -534,7 +542,9 @@ export const productPriceTiers = pgTable("product_price_tiers", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("product_price_tiers_product_idx").on(t.productId),
+]);
 
 // Registro externo de itens que já estão em importação (controle
 // paralelo que o usuário mantinha numa planilha própria, fora do
@@ -616,7 +626,9 @@ export const purchaseOrders = pgTable("purchase_orders", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("purchase_orders_process_idx").on(t.processId),
+]);
 
 export const purchaseOrderItems = pgTable("purchase_order_items", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -631,7 +643,9 @@ export const purchaseOrderItems = pgTable("purchase_order_items", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("purchase_order_items_po_idx").on(t.purchaseOrderId),
+]);
 
 // Histórico do pedido de compra: cada passo (criação, edição, itens, status,
 // packing list, entrada no processo) vira uma linha, com quem fez e quando.
@@ -665,7 +679,9 @@ export const purchaseOrderDocuments = pgTable("purchase_order_documents", {
   fileName: text("file_name").notNull(),
   storagePath: text("storage_path").notNull(),
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => [
+  index("purchase_order_documents_po_idx").on(t.purchaseOrderId),
+]);
 
 // Cotações de frete de um processo: uma por agente de carga (como a proposta
 // em PDF que o agente manda, ou as colunas da planilha de comparação). O
@@ -812,7 +828,10 @@ export const processItems = pgTable("process_items", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("process_items_process_idx").on(t.processId),
+  index("process_items_purchase_order_idx").on(t.purchaseOrderId),
+]);
 
 // Reservas de estoque por item — várias pessoas podem reservar parte da
 // quantidade de um mesmo item (visto nas abas "IMP 3426"/"Modelo" da
@@ -829,7 +848,9 @@ export const itemReservations = pgTable("item_reservations", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("item_reservations_item_idx").on(t.itemId),
+]);
 
 // Histórico de eventos / trilha de auditoria — a planilha não tem isso,
 // ETA era sobrescrito sem deixar rastro de quando mudou.
@@ -845,7 +866,9 @@ export const processEvents = pgTable("process_events", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("process_events_process_date_idx").on(t.processId, t.eventDate.desc()),
+]);
 
 export const processDocuments = pgTable("process_documents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -860,7 +883,9 @@ export const processDocuments = pgTable("process_documents", {
   // Preenchido quando o documento veio de um pedido de compra (packing list
   // anexada ao pedido); sai junto se o pedido for removido do processo.
   purchaseOrderId: uuid("purchase_order_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
-});
+}, (t) => [
+  index("process_documents_process_idx").on(t.processId),
+]);
 
 // Tipos de embarque (aba "Tipo de Embarques" da planilha FLUXOGRAMA DE
 // IMPORTAÇÃO): modalidade + tipo + descrição. `modalCode` aponta pro valor
@@ -924,7 +949,9 @@ export const productLpcos = pgTable("product_lpcos", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (t) => [
+  index("product_lpcos_product_idx").on(t.productId),
+]);
 
 // Galeria de fotos do produto (pode haver várias). products.photo_url guarda
 // a foto principal (a primeira por position) — mantida em sincronia pelas

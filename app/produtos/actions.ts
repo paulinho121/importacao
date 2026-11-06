@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { products, productPriceTiers, productLpcos, productPhotos } from "@/db/schema";
-import { and, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
@@ -11,6 +11,7 @@ import { PRODUCT_LPCO_STATUSES } from "@/lib/lpco";
 import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
 import { supabaseAdmin, LOGOS_BUCKET } from "@/lib/supabase-admin";
 import { compressPhoto } from "@/lib/image-compress";
+import { applyCpListToProducts, applyLpcoRecords } from "@/lib/product-imports";
 
 function optionalText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim() || null;
@@ -80,23 +81,33 @@ const MAX_UPLOAD_TOTAL = 4 * 1024 * 1024; // limite do corpo da requisição (ve
 // foto principal. products.photo_url acompanha sempre a primeira da galeria.
 async function savePhotos(productId: string, formData: FormData) {
   const removeIds = formData.getAll("removePhotoId").map(String).filter((v) => /^[0-9a-f-]{36}$/i.test(v));
-  if (removeIds.length > 0) {
-    await db.delete(productPhotos).where(and(eq(productPhotos.productId, productId), inArray(productPhotos.id, removeIds)));
-  }
 
+  // Valida TUDO antes de qualquer gravação/envio: um arquivo inválido não deixa
+  // fotos removidas nem arquivos soltos no Storage.
   const files = formData.getAll("photoFile").filter((f): f is File => f instanceof File && f.size > 0);
   if (files.reduce((sum, f) => sum + f.size, 0) > MAX_UPLOAD_TOTAL) {
     throw new Error("As fotos enviadas passam de 4 MB no total — envie menos fotos por vez, reduza o tamanho ou use links.");
   }
-  const toAdd: string[] = [];
   for (const file of files) {
-    const ext = PHOTO_TYPES[file.type];
-    if (!ext) throw new Error("As fotos precisam ser PNG, JPEG ou WebP (ou cole links).");
+    if (!PHOTO_TYPES[file.type]) throw new Error("As fotos precisam ser PNG, JPEG ou WebP (ou cole links).");
+  }
+  const links: string[] = [];
+  for (const line of String(formData.get("photoLinks") ?? "").split(/\r?\n/)) {
+    const link = line.trim();
+    if (!link) continue;
+    if (!/^https?:\/\//i.test(link)) throw new Error("Os links das fotos precisam começar com http:// ou https://.");
+    links.push(link);
+  }
+
+  // Remoção e envios saem juntos (eram em fila). Cada envio reduz a foto e manda
+  // para o Storage; se algum falhar, os que já subiram são apagados.
+  const uploadedPaths: string[] = [];
+  const upload = async (file: File) => {
     // Reduz e converte para WebP antes de guardar (economiza espaço no Storage).
     // Se a imagem não puder ser lida/convertida, guarda o arquivo original.
     let body: Buffer | File = file;
     let contentType = file.type;
-    let fileExt = ext;
+    let fileExt = PHOTO_TYPES[file.type];
     try {
       const compressed = await compressPhoto(await file.arrayBuffer());
       body = compressed.buffer;
@@ -108,14 +119,24 @@ async function savePhotos(productId: string, formData: FormData) {
     const path = `produtos/${productId}-${crypto.randomUUID().slice(0, 8)}.${fileExt}`;
     const { error } = await supabaseAdmin.storage.from(LOGOS_BUCKET).upload(path, body, { contentType });
     if (error) throw new Error(`Falha no upload da foto: ${error.message}`);
-    toAdd.push(supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl);
+    uploadedPaths.push(path);
+    return supabaseAdmin.storage.from(LOGOS_BUCKET).getPublicUrl(path).data.publicUrl;
+  };
+  const [, settled] = await Promise.all([
+    removeIds.length > 0
+      ? db.delete(productPhotos).where(and(eq(productPhotos.productId, productId), inArray(productPhotos.id, removeIds)))
+      : undefined,
+    Promise.allSettled(files.map(upload)),
+  ]);
+  const failed = settled.find((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failed) {
+    if (uploadedPaths.length > 0) await supabaseAdmin.storage.from(LOGOS_BUCKET).remove(uploadedPaths);
+    throw failed.reason;
   }
-  for (const line of String(formData.get("photoLinks") ?? "").split(/\r?\n/)) {
-    const link = line.trim();
-    if (!link) continue;
-    if (!/^https?:\/\//i.test(link)) throw new Error("Os links das fotos precisam começar com http:// ou https://.");
-    toAdd.push(link);
-  }
+  const toAdd = [
+    ...settled.map((r) => (r as PromiseFulfilledResult<string>).value),
+    ...links,
+  ];
   if (toAdd.length > 0) {
     await db
       .insert(productPhotos)
@@ -125,16 +146,24 @@ async function savePhotos(productId: string, formData: FormData) {
 
   // Reordena: a escolhida como principal vai pra frente; as demais mantêm a ordem.
   const all = await db
-    .select({ id: productPhotos.id, url: productPhotos.url })
+    .select({ id: productPhotos.id, url: productPhotos.url, position: productPhotos.position })
     .from(productPhotos)
     .where(eq(productPhotos.productId, productId))
     .orderBy(productPhotos.position, productPhotos.createdAt);
   const coverId = String(formData.get("coverPhotoId") ?? "");
   const ordered = [...all.filter((p) => p.id === coverId), ...all.filter((p) => p.id !== coverId)];
-  for (const [i, p] of ordered.entries()) {
-    await db.update(productPhotos).set({ position: i }).where(eq(productPhotos.id, p.id));
-  }
-  await db.update(products).set({ photoUrl: ordered[0]?.url ?? null }).where(eq(products.id, productId));
+  // Só as fotos cuja posição realmente mudou, numa única instrução (antes: um
+  // UPDATE por foto, em fila), em paralelo com a foto principal do produto.
+  const moved = ordered.map((p, i) => ({ id: p.id, position: i, changed: p.position !== i })).filter((p) => p.changed);
+  await Promise.all([
+    moved.length > 0
+      ? db.execute(sql`
+          update product_photos set position = v.pos
+          from (values ${sql.join(moved.map((m) => sql`(${m.id}::uuid, ${m.position}::int)`), sql`, `)}) as v(id, pos)
+          where product_photos.id = v.id`)
+      : undefined,
+    db.update(products).set({ photoUrl: ordered[0]?.url ?? null }).where(eq(products.id, productId)),
+  ]);
 }
 
 function readProductForm(formData: FormData) {
@@ -282,29 +311,9 @@ export async function applyCpListResults(payload: CpListPayload) {
   const source = payload.listDate ? `${payload.source} (atualizada em ${payload.listDate})` : payload.source;
   const validMatches = payload.matches.filter((m) => /^[0-9a-f-]{36}$/i.test(m.productId));
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(products)
-      .set({ cpListResult: "NOT_FOUND", cpListRef: null, cpListNcm: null, cpListCheckedAt: now, cpListSource: source });
-
-    for (const m of validMatches) {
-      await tx
-        .update(products)
-        .set({
-          cpListResult: m.result,
-          cpListRef: m.ref || null,
-          cpListNcm: m.ncm,
-          ...(m.result === "FOUND" ? { hasPublicConsultation: true, cpStatus: "POSSUI" } : {}),
-        })
-        .where(eq(products.id, m.productId));
-      if (m.result === "FOUND" && m.ref) {
-        await tx
-          .update(products)
-          .set({ publicConsultationRef: `Consulta Pública nº ${m.ref.split(", ")[0]}` })
-          .where(and(eq(products.id, m.productId), or(isNull(products.publicConsultationRef), eq(products.publicConsultationRef, ""))));
-      }
-    }
-  });
+  // Gravação em lote (ver lib/product-imports.ts): poucas instruções em vez de
+  // duas por produto encontrado.
+  await db.transaction((tx) => applyCpListToProducts(tx, { source, now, matches: validMatches }));
 
   revalidatePath("/produtos");
   return {
@@ -331,8 +340,6 @@ type LpcoSheetPayload = {
 // atualiza) uma solicitação do produto no estado. O Nº do LPCO identifica a
 // solicitação, então reenviar a mesma planilha atualiza em vez de duplicar.
 export async function applyLpcoSheet(payload: LpcoSheetPayload) {
-  let inserted = 0;
-  let updated = 0;
   const valid = payload.records.filter(
     (r) =>
       /^[0-9a-f-]{36}$/i.test(r.productId) &&
@@ -340,32 +347,9 @@ export async function applyLpcoSheet(payload: LpcoSheetPayload) {
       PRODUCT_LPCO_STATUSES.some((s) => s.value === r.status),
   );
 
-  await db.transaction(async (tx) => {
-    for (const r of valid) {
-      const values = {
-        branch: r.branch,
-        status: r.status,
-        requestedAt: r.requestedAt,
-        approvedAt: r.approvedAt,
-        validUntil: r.validUntil,
-        lpcoNumber: r.lpcoNumber,
-        notes: r.notes,
-      };
-      const [existing] = r.lpcoNumber
-        ? await tx
-            .select({ id: productLpcos.id })
-            .from(productLpcos)
-            .where(and(eq(productLpcos.productId, r.productId), eq(productLpcos.lpcoNumber, r.lpcoNumber)))
-        : [];
-      if (existing) {
-        await tx.update(productLpcos).set({ ...values, updatedAt: new Date() }).where(eq(productLpcos.id, existing.id));
-        updated++;
-      } else {
-        await tx.insert(productLpcos).values({ productId: r.productId, ...values });
-        inserted++;
-      }
-    }
-  });
+  // Gravação em lote (ver lib/product-imports.ts): uma consulta + um INSERT + um
+  // UPDATE, em vez de uma consulta e uma gravação por linha.
+  const { inserted, updated } = await db.transaction((tx) => applyLpcoRecords(tx, valid));
 
   revalidatePath("/produtos");
   return { inserted, updated };
@@ -429,11 +413,12 @@ export async function applyIncisoBase(payload: {
 
     if (payload.create.length > 0) {
       const taken = new Set((await tx.select({ sku: products.sku }).from(products)).map((p) => p.sku.toLowerCase()));
+      const toCreate: (typeof products.$inferInsert)[] = [];
       for (const r of payload.create) {
         const sku = r.model.trim();
         if (!sku || taken.has(sku.toLowerCase())) continue;
         taken.add(sku.toLowerCase());
-        await tx.insert(products).values({
+        toCreate.push({
           sku,
           manufacturerSku: sku,
           description: sku,
@@ -450,8 +435,12 @@ export async function applyIncisoBase(payload: {
           customsBrokerRef: r.customsBrokerRef,
           cpStatus: r.licenseStatus === "DEFERIDA" && r.publicConsultationRef ? "POSSUI" : null,
         });
-        created++;
       }
+      // um INSERT de várias linhas (em blocos) em vez de um por item
+      for (let i = 0; i < toCreate.length; i += 200) {
+        await tx.insert(products).values(toCreate.slice(i, i + 200));
+      }
+      created += toCreate.length;
     }
   });
 

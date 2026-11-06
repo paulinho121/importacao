@@ -1,5 +1,7 @@
 "use client";
 
+import SubmitButton from "@/components/SubmitButton";
+
 export default function DeletePurchaseOrderButton({
   action,
   poNumber,
@@ -19,20 +21,18 @@ export default function DeletePurchaseOrderButton({
       }}
     >
       {compact ? (
-        <button
-          type="submit"
+        <SubmitButton
           className="flex items-center gap-1 text-error hover:underline w-fit"
         >
           <span className="material-symbols-outlined text-[16px]">delete</span>
           Excluir
-        </button>
+        </SubmitButton>
       ) : (
-        <button
-          type="submit"
+        <SubmitButton
           className="w-full px-4 py-2.5 rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-all"
         >
           Excluir Pedido
-        </button>
+        </SubmitButton>
       )}
     </form>
   );

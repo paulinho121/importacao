@@ -25,6 +25,7 @@ import {
   type QuoteSection,
 } from "@/lib/freight-quotes";
 
+import SubmitButton from "@/components/SubmitButton";
 // Cotações de frete no formato da planilha de comparação do time: uma coluna
 // por agente de carga, lado a lado, com nome da taxa | moeda | custos em cada
 // linha. Tudo é editável na própria tela e cada coluna é salva separadamente.
@@ -1102,18 +1103,18 @@ export default function ProcessFreightQuotes({
                               <>
                                 {c.isSelected ? (
                                   <form action={clearFreightQuoteSelection.bind(null, processId)}>
-                                    <button type="submit"
+                                    <SubmitButton
                                       className="px-2 py-1.5 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high">
                                       Desmarcar
-                                    </button>
+                                    </SubmitButton>
                                   </form>
                                 ) : (
                                   <form action={selectFreightQuote.bind(null, c.quoteId, processId)}>
-                                    <button type="submit" disabled={dirty}
+                                    <SubmitButton disabled={dirty}
                                       title={dirty ? "Salve as alterações antes de escolher" : "Escolher e marcar como fechada"}
                                       className="px-2 py-1.5 rounded-lg border border-secondary text-secondary text-xs font-bold hover:bg-secondary/10 disabled:opacity-40">
                                       Escolher
-                                    </button>
+                                    </SubmitButton>
                                   </form>
                                 )}
                                 <form
@@ -1122,10 +1123,10 @@ export default function ProcessFreightQuotes({
                                     if (!window.confirm("Remover esta cotação?")) e.preventDefault();
                                   }}
                                 >
-                                  <button type="submit"
+                                  <SubmitButton
                                     className="px-2 py-1.5 rounded-lg text-error text-xs font-bold hover:bg-error-container/30">
                                     Remover
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                               </>
                             )}

@@ -27,6 +27,7 @@ import {
 import { CURRENCIES } from "@/lib/currencies";
 import { INCOTERMS } from "@/lib/incoterms";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 async function suggestProcessNumber(): Promise<string> {
@@ -258,12 +259,11 @@ export default async function PedidoCompraDetailPage({
                   defaultValue={po.notes ?? ""}
                 />
               </div>
-              <button
-                type="submit"
+              <SubmitButton
                 className="w-full px-3 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
               >
                 Salvar
-              </button>
+              </SubmitButton>
             </form>
           </details>
         )}
@@ -345,18 +345,17 @@ export default async function PedidoCompraDetailPage({
                           {canEditItems && (
                             <td className="py-2 whitespace-nowrap text-right">
                               <form id={editFormId} action={boundEditItem} className="inline">
-                                <button type="submit" className="mr-3 text-xs font-bold text-secondary hover:underline">
+                                <SubmitButton className="mr-3 text-xs font-bold text-secondary hover:underline">
                                   Salvar
-                                </button>
+                                </SubmitButton>
                               </form>
                               <form action={boundRemove} className="inline">
-                                <button
-                                  type="submit"
+                                <SubmitButton
                                   className="text-error hover:underline text-xs"
                                   aria-label="Remover item"
                                 >
                                   Remover
-                                </button>
+                                </SubmitButton>
                               </form>
                             </td>
                           )}
@@ -407,12 +406,11 @@ export default async function PedidoCompraDetailPage({
             {po.status === "RASCUNHO" && (
               <form action={boundUpdateStatus}>
                 <input type="hidden" name="status" value="ENVIADO" />
-                <button
-                  type="submit"
+                <SubmitButton
                   className="w-full px-4 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
                 >
                   Marcar como Enviado
-                </button>
+                </SubmitButton>
               </form>
             )}
 
@@ -420,21 +418,19 @@ export default async function PedidoCompraDetailPage({
               <div className="space-y-2">
                 <form action={boundUpdateStatus}>
                   <input type="hidden" name="status" value="CONFIRMADO" />
-                  <button
-                    type="submit"
+                  <SubmitButton
                     className="w-full px-4 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
                   >
                     Marcar como Confirmado
-                  </button>
+                  </SubmitButton>
                 </form>
                 <form action={boundUpdateStatus}>
                   <input type="hidden" name="status" value="CANCELADO" />
-                  <button
-                    type="submit"
+                  <SubmitButton
                     className="w-full px-4 py-2.5 rounded-lg border border-outline-variant text-error font-label-md text-label-md hover:bg-error-container/20 transition-all"
                   >
                     Cancelar Pedido
-                  </button>
+                  </SubmitButton>
                 </form>
                 {po.sentAt && (
                   <p className="text-xs text-on-surface-variant">
@@ -458,12 +454,11 @@ export default async function PedidoCompraDetailPage({
                     required
                   />
                 </div>
-                <button
-                  type="submit"
+                <SubmitButton
                   className="w-full px-4 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
                 >
                   Criar Processo de Importação
-                </button>
+                </SubmitButton>
               </form>
             )}
 
@@ -486,13 +481,12 @@ export default async function PedidoCompraDetailPage({
                     </option>
                   ))}
                 </select>
-                <button
-                  type="submit"
+                <SubmitButton
                   disabled={openProcesses.length === 0}
                   className="w-full px-4 py-2.5 rounded-lg border border-secondary text-secondary font-label-md text-label-md hover:bg-secondary/10 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Adicionar ao processo escolhido
-                </button>
+                </SubmitButton>
               </form>
             )}
 

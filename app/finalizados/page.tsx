@@ -12,6 +12,7 @@ import { and, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { formatDate, type ProcessStatus } from "@/lib/status";
 import { MODAIS } from "@/lib/modais";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
@@ -231,12 +232,11 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
           />
         </div>
         <div className="sm:col-span-2 lg:col-span-4 flex items-center gap-3">
-          <button
-            type="submit"
+          <SubmitButton
             className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             Filtrar
-          </button>
+          </SubmitButton>
           {hasFilters && (
             <Link
               href="/finalizados"

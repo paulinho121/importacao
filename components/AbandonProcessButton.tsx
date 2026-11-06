@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import SubmitButton from "@/components/SubmitButton";
 export default function AbandonProcessButton({
   action,
   processNumber,
@@ -48,12 +49,11 @@ export default function AbandonProcessButton({
         className="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-error transition-all"
       />
       <div className="flex items-center gap-2">
-        <button
-          type="submit"
+        <SubmitButton
           className="px-4 py-2 rounded-lg bg-error text-white font-label-md text-label-md hover:opacity-90 transition-all"
         >
           Confirmar abandono
-        </button>
+        </SubmitButton>
         <button
           type="button"
           onClick={() => setOpen(false)}

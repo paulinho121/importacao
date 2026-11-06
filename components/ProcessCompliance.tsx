@@ -16,6 +16,7 @@ import {
   type LicenseStatus,
 } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 const CHANNELS: CustomsChannel[] = ["VERDE", "AMARELO", "VERMELHO", "CINZA"];
 const AGENCIES: LpcoAgency[] = ["ANVISA", "MAPA", "INMETRO", "IBAMA", "EXERCITO", "ANP", "DECEX", "OUTRO"];
 const LICENSE_STATUSES: LicenseStatus[] = [
@@ -77,12 +78,11 @@ export default function ProcessCompliance({
               </option>
             ))}
           </select>
-          <button
-            type="submit"
+          <SubmitButton
             className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
           >
             Salvar
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -147,12 +147,11 @@ export default function ProcessCompliance({
                       name="validUntil"
                       defaultValue={lpco.validUntil ?? ""}
                     />
-                    <button
-                      type="submit"
+                    <SubmitButton
                       className="px-3 py-2 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
                     >
                       Salvar
-                    </button>
+                    </SubmitButton>
                   </form>
                 </li>
               );
@@ -191,12 +190,11 @@ export default function ProcessCompliance({
             name="validUntil"
             title="Validade (opcional)"
           />
-          <button
-            type="submit"
+          <SubmitButton
             className="px-3 py-2 rounded-lg bg-secondary text-white text-xs font-bold hover:opacity-90 transition-all"
           >
             Adicionar LPCO
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </section>

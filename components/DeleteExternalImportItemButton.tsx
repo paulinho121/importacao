@@ -1,5 +1,7 @@
 "use client";
 
+import SubmitButton from "@/components/SubmitButton";
+
 export default function DeleteExternalImportItemButton({
   action,
   description,
@@ -19,16 +21,15 @@ export default function DeleteExternalImportItemButton({
       }}
     >
       {compact ? (
-        <button type="submit" className="text-error hover:underline text-xs">
+        <SubmitButton className="text-error hover:underline text-xs">
           Excluir
-        </button>
+        </SubmitButton>
       ) : (
-        <button
-          type="submit"
+        <SubmitButton
           className="w-full px-4 py-2.5 rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-all"
         >
           Excluir Item
-        </button>
+        </SubmitButton>
       )}
     </form>
   );

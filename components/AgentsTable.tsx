@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { updateAgentInline } from "@/app/agentes/actions";
 
+import SubmitButton from "@/components/SubmitButton";
 export type AgentRow = {
   id: string;
   name: string;
@@ -65,9 +66,9 @@ export default function AgentsTable({ rows }: { rows: AgentRow[] }) {
                     <td className="px-6 py-3 font-mono-data">{a.processCount}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-right">
                       <form id={formId} action={updateAgentInline.bind(null, a.id)} className="inline">
-                        <button type="submit" className="mr-3 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:opacity-90">
+                        <SubmitButton className="mr-3 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:opacity-90">
                           Salvar
-                        </button>
+                        </SubmitButton>
                       </form>
                       <button type="button" onClick={() => setEditingId(null)} className="text-xs font-bold text-on-surface-variant hover:underline">
                         Cancelar

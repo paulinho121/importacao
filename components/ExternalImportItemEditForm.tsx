@@ -2,6 +2,7 @@
 
 import { EXTERNAL_IMPORT_ITEM_STATUS_LABEL, type ExternalImportItemStatus } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 export type ExternalImportItemDefaults = {
   sku: string | null;
   description: string;
@@ -172,12 +173,11 @@ export default function ExternalImportItemEditForm({
         />
       </div>
       <div className="sm:col-span-3">
-        <button
-          type="submit"
+        <SubmitButton
           className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
         >
           {submitLabel}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );

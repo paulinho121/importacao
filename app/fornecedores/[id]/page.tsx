@@ -7,6 +7,7 @@ import { suppliers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 export default async function EditFornecedorPage({
@@ -53,12 +54,11 @@ export default async function EditFornecedorPage({
               required
               className="flex-1 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
             />
-            <button
-              type="submit"
+            <SubmitButton
               className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"
             >
               {supplier.logoUrl ? "Substituir Logo" : "Enviar Logo"}
-            </button>
+            </SubmitButton>
           </form>
         </div>
         <p className="text-xs text-on-surface-variant mt-3">

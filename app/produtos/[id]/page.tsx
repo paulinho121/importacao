@@ -9,6 +9,7 @@ import { products, suppliers, productPriceTiers, productLpcos, productPhotos } f
 import { eq, asc } from "drizzle-orm";
 import { formatDate } from "@/lib/status";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 export default async function EditProdutoPage({
@@ -64,21 +65,19 @@ export default async function EditProdutoPage({
             <div className="flex gap-3">
               <form action={boundResolveNcm}>
                 <input type="hidden" name="action" value="accept" />
-                <button
-                  type="submit"
+                <SubmitButton
                   className="px-4 py-2 rounded-lg bg-warning text-warning-foreground font-label-md text-label-md hover:opacity-90 transition-all"
                 >
                   Usar NCM oficial
-                </button>
+                </SubmitButton>
               </form>
               <form action={boundResolveNcm}>
                 <input type="hidden" name="action" value="dismiss" />
-                <button
-                  type="submit"
+                <SubmitButton
                   className="px-4 py-2 rounded-lg border border-outline-variant font-label-md text-label-md hover:bg-surface-container transition-all"
                 >
                   Manter o atual
-                </button>
+                </SubmitButton>
               </form>
             </div>
           </div>
@@ -176,9 +175,9 @@ export default async function EditProdutoPage({
                     </td>
                     <td className="py-2 text-right">
                       <form action={boundRemove}>
-                        <button type="submit" className="text-error hover:underline text-xs">
+                        <SubmitButton className="text-error hover:underline text-xs">
                           Remover
-                        </button>
+                        </SubmitButton>
                       </form>
                     </td>
                   </tr>
@@ -215,12 +214,11 @@ export default async function EditProdutoPage({
               required
             />
           </div>
-          <button
-            type="submit"
+          <SubmitButton
             className="px-4 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
           >
             Adicionar
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </div>

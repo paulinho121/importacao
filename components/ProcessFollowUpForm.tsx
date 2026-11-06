@@ -1,5 +1,6 @@
 import { addProcessFollowUp } from "@/app/processos/actions";
 
+import SubmitButton from "@/components/SubmitButton";
 // Data de hoje no fuso do Brasil (YYYY-MM-DD) — toISOString() usaria UTC e
 // viraria o dia depois das 21h.
 function todayInSaoPaulo() {
@@ -37,12 +38,11 @@ export default function ProcessFollowUpForm({ processId }: { processId: string }
           required
         />
       </div>
-      <button
-        type="submit"
+      <SubmitButton
         className="px-5 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
       >
         Registrar
-      </button>
+      </SubmitButton>
     </form>
   );
 }

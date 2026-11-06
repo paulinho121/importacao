@@ -1,5 +1,7 @@
 "use client";
 
+import SubmitButton from "@/components/SubmitButton";
+
 export default function DeleteBranchButton({ action, name }: { action: () => void; name: string }) {
   return (
     <form
@@ -8,9 +10,9 @@ export default function DeleteBranchButton({ action, name }: { action: () => voi
         if (!confirm(`Excluir a filial "${name}"?`)) e.preventDefault();
       }}
     >
-      <button type="submit" className="text-error hover:underline text-xs">
+      <SubmitButton className="text-error hover:underline text-xs">
         Excluir
-      </button>
+      </SubmitButton>
     </form>
   );
 }

@@ -5,6 +5,7 @@ import { sql, desc } from "drizzle-orm";
 import { CURRENCIES } from "@/lib/currencies";
 import { INCOTERMS } from "@/lib/incoterms";
 
+import SubmitButton from "@/components/SubmitButton";
 export const dynamic = "force-dynamic";
 
 async function suggestPoNumber(): Promise<string> {
@@ -157,12 +158,11 @@ export default async function NovoPedidoCompraPage() {
           </div>
 
           <div className="flex justify-end gap-4 pt-2">
-            <button
-              type="submit"
+            <SubmitButton
               className="px-8 py-3 rounded-lg bg-secondary text-white font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
             >
               Criar Pedido
-            </button>
+            </SubmitButton>
           </div>
         </form>
       </div>

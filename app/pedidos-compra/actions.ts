@@ -16,6 +16,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
 import { withFlash, withFlashError } from "@/lib/flash";
+import { isUniqueViolation } from "@/lib/db-errors";
 import { LinkError, linkPurchaseOrderToProcess, syncPackingListToProcess } from "@/lib/process-purchase-orders";
 import { logPurchaseOrderEvent } from "@/lib/purchase-order-events";
 import { PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
@@ -50,50 +51,58 @@ export async function createPurchaseOrder(formData: FormData) {
   if (!poNumber) throw new Error("Número do pedido é obrigatório.");
   if (!supplierId) throw new Error("Fornecedor é obrigatório.");
 
-  const [duplicate] = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber));
-  if (duplicate) {
+  const user = await getCurrentUser();
+  const userName = user ? (user.name ?? user.email) : null;
+
+  // Pedido + evento "Pedido criado" numa única instrução (atômica): 1 ida ao
+  // banco em vez de 3 (consulta de duplicado + pedido + evento). O número
+  // repetido é barrado pela restrição única do banco — sem consulta prévia e
+  // sem janela de corrida entre duas pessoas salvando o mesmo número.
+  let createdId: string | null = null;
+  try {
+    const rows = await db.execute<{ id: string }>(sql`
+      with new_po as (
+        insert into purchase_orders
+          (po_number, supplier_id, branch_id, currency, incoterm, payment_terms, expected_delivery_date, notes, created_by_user_id)
+        values
+          (${poNumber}, ${supplierId}, ${optionalText(formData, "branchId")}, ${optionalText(formData, "currency")},
+           ${optionalText(formData, "incoterm")}, ${optionalText(formData, "paymentTerms")},
+           ${optionalDate(formData, "expectedDeliveryDate")}, ${optionalText(formData, "notes")}, ${user?.id ?? null})
+        returning id
+      )
+      insert into purchase_order_events (purchase_order_id, event_type, description, user_name)
+      select id, 'CRIADO', ${`Pedido ${poNumber} criado`}, ${userName} from new_po
+      returning purchase_order_id as id`);
+    createdId = rows[0]?.id ?? null;
+  } catch (e) {
+    if (!isUniqueViolation(e)) throw e;
+  }
+  if (!createdId) {
     redirect(withFlashError("/pedidos-compra/novo", `Já existe um pedido com o número "${poNumber}" — use um número diferente.`));
   }
 
-  const user = await getCurrentUser();
-
-  const [created] = await db
-    .insert(purchaseOrders)
-    .values({
-      poNumber,
-      supplierId,
-      branchId: optionalText(formData, "branchId"),
-      currency: optionalText(formData, "currency") as (typeof purchaseOrders.$inferInsert)["currency"] | null,
-      incoterm: optionalText(formData, "incoterm"),
-      paymentTerms: optionalText(formData, "paymentTerms"),
-      expectedDeliveryDate: optionalDate(formData, "expectedDeliveryDate"),
-      notes: optionalText(formData, "notes"),
-      createdByUserId: user?.id ?? null,
-    })
-    .returning({ id: purchaseOrders.id });
-
-  await logPurchaseOrderEvent(db, created.id, "CRIADO", `Pedido ${poNumber} criado`);
-
   revalidatePath("/pedidos-compra");
-  redirect(withFlash(`/pedidos-compra/${created.id}`, "Pedido de compra criado."));
+  redirect(withFlash(`/pedidos-compra/${createdId}`, "Pedido de compra criado."));
 }
 
 // Edita os dados do pedido em qualquer status, menos Cancelado. Cada campo
 // alterado entra no histórico ("Moeda: USD → EUR").
 export async function updatePurchaseOrder(poId: string, formData: FormData) {
-  const [po] = await db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  const poNumber = String(formData.get("poNumber") ?? "").trim();
+  if (!poNumber) throw new Error("Número do pedido é obrigatório.");
+
+  // login e as duas leituras em paralelo (eram 3 esperas em fila)
+  const userP = getCurrentUser().catch(() => null);
+  const [[po], [existing]] = await Promise.all([
+    db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId)),
+    db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber)),
+  ]);
   if (!po) throw new Error("Pedido de compra não encontrado.");
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser editado."));
   }
-
-  const poNumber = String(formData.get("poNumber") ?? "").trim();
-  if (!poNumber) throw new Error("Número do pedido é obrigatório.");
-
-  const [existing] = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber));
-  if (existing && existing.id !== poId) {
-    redirect(withFlashError(`/pedidos-compra/${poId}`, `Já existe um pedido com o número "${poNumber}" — use um número diferente.`));
-  }
+  const duplicateMessage = `Já existe um pedido com o número "${poNumber}" — use um número diferente.`;
+  if (existing && existing.id !== poId) redirect(withFlashError(`/pedidos-compra/${poId}`, duplicateMessage));
 
   const next = {
     poNumber,
@@ -118,12 +127,22 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
   }
   if (next.notes !== po.notes) changes.push("Observações alteradas");
 
-  await db
-    .update(purchaseOrders)
-    .set({ ...next, updatedAt: new Date() })
-    .where(eq(purchaseOrders.id, poId));
-
-  if (changes.length > 0) await logPurchaseOrderEvent(db, poId, "EDITADO", changes.join(" · "));
+  // Nada mudou: não grava nem registra histórico (antes fazia o UPDATE à toa).
+  if (changes.length > 0) {
+    let raced = false;
+    try {
+      await db
+        .update(purchaseOrders)
+        .set({ ...next, updatedAt: new Date() })
+        .where(eq(purchaseOrders.id, poId));
+    } catch (e) {
+      // outra pessoa pegou o mesmo número entre a leitura e a gravação
+      if (!isUniqueViolation(e)) throw e;
+      raced = true;
+    }
+    if (raced) redirect(withFlashError(`/pedidos-compra/${poId}`, duplicateMessage));
+    await logPurchaseOrderEvent(db, poId, "EDITADO", changes.join(" · "), userP);
+  }
 
   revalidatePath("/pedidos-compra");
   // o redirect recarrega a página com o formulário de edição fechado e mostra o aviso
@@ -203,10 +222,17 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   const quantity = optionalNumber(formData, "quantity");
   const unitPrice = optionalNumber(formData, "unitPrice");
 
-  const [po] = await db
-    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
-    .from(purchaseOrders)
-    .where(eq(purchaseOrders.id, poId));
+  // login + pedido + produto em paralelo (eram 3 esperas em fila)
+  const userP = getCurrentUser().catch(() => null);
+  const [[po], product] = await Promise.all([
+    db
+      .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+      .from(purchaseOrders)
+      .where(eq(purchaseOrders.id, poId)),
+    productId
+      ? db.select().from(products).where(eq(products.id, productId)).then((r) => r[0])
+      : Promise.resolve(undefined),
+  ]);
   if (!po) throw new Error("Pedido de compra não encontrado.");
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
@@ -216,7 +242,6 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   }
 
   if (productId) {
-    const [product] = await db.select().from(products).where(eq(products.id, productId));
     if (!product) throw new Error("Produto não encontrado.");
     await db.insert(purchaseOrderItems).values({
       purchaseOrderId: poId,
@@ -226,7 +251,7 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
       quantity,
       unitPrice,
     });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
+    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`, userP);
   } else {
     const description = optionalText(formData, "description");
     if (!description) throw new Error("Descrição é obrigatória para item avulso.");
@@ -237,7 +262,7 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
       quantity,
       unitPrice,
     });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
+    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`, userP);
   }
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -245,10 +270,17 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
 
 // Altera quantidade e preço de um item (pedido ainda fora de processo).
 export async function updatePurchaseOrderItem(itemId: string, poId: string, formData: FormData) {
-  const [po] = await db
-    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
-    .from(purchaseOrders)
-    .where(eq(purchaseOrders.id, poId));
+  const userP = getCurrentUser().catch(() => null);
+  const [[po], [item]] = await Promise.all([
+    db
+      .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+      .from(purchaseOrders)
+      .where(eq(purchaseOrders.id, poId)),
+    db
+      .select()
+      .from(purchaseOrderItems)
+      .where(and(eq(purchaseOrderItems.id, itemId), eq(purchaseOrderItems.purchaseOrderId, poId))),
+  ]);
   if (!po) throw new Error("Pedido de compra não encontrado.");
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
@@ -256,11 +288,6 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
   if (po.processId) {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
   }
-
-  const [item] = await db
-    .select()
-    .from(purchaseOrderItems)
-    .where(and(eq(purchaseOrderItems.id, itemId), eq(purchaseOrderItems.purchaseOrderId, poId)));
   if (!item) throw new Error("Item não encontrado.");
 
   const quantity = optionalNumber(formData, "quantity");
@@ -271,7 +298,7 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
   if (Number(quantity ?? 0) !== Number(item.quantity ?? 0)) changes.push(`qtd ${item.quantity ?? "—"} → ${quantity ?? "—"}`);
   if (Number(unitPrice ?? 0) !== Number(item.unitPrice ?? 0)) changes.push(`preço ${item.unitPrice ?? "—"} → ${unitPrice ?? "—"}`);
   if (changes.length > 0) {
-    await logPurchaseOrderEvent(db, poId, "ITEM_EDITADO", `${item.sku ? `${item.sku} — ` : ""}${item.description}: ${changes.join(", ")}`);
+    await logPurchaseOrderEvent(db, poId, "ITEM_EDITADO", `${item.sku ? `${item.sku} — ` : ""}${item.description}: ${changes.join(", ")}`, userP);
   }
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -279,10 +306,17 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
 }
 
 export async function removePurchaseOrderItem(itemId: string, poId: string) {
-  const [po] = await db
-    .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
-    .from(purchaseOrders)
-    .where(eq(purchaseOrders.id, poId));
+  const userP = getCurrentUser().catch(() => null);
+  const [[po], [item]] = await Promise.all([
+    db
+      .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
+      .from(purchaseOrders)
+      .where(eq(purchaseOrders.id, poId)),
+    db
+      .select()
+      .from(purchaseOrderItems)
+      .where(and(eq(purchaseOrderItems.id, itemId), eq(purchaseOrderItems.purchaseOrderId, poId))),
+  ]);
   if (!po) throw new Error("Pedido de compra não encontrado.");
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
@@ -291,12 +325,8 @@ export async function removePurchaseOrderItem(itemId: string, poId: string) {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
   }
 
-  const [item] = await db
-    .select()
-    .from(purchaseOrderItems)
-    .where(and(eq(purchaseOrderItems.id, itemId), eq(purchaseOrderItems.purchaseOrderId, poId)));
   await db.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
-  if (item) await logPurchaseOrderEvent(db, poId, "ITEM_REMOVIDO", `${item.sku ? `${item.sku} — ` : ""}${item.description}`);
+  if (item) await logPurchaseOrderEvent(db, poId, "ITEM_REMOVIDO", `${item.sku ? `${item.sku} — ` : ""}${item.description}`, userP);
   revalidatePath(`/pedidos-compra/${poId}`);
 }
 
@@ -306,6 +336,7 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
     throw new Error("Status inválido.");
   }
 
+  const userP = getCurrentUser().catch(() => null);
   const [current] = await db.select({ status: purchaseOrders.status }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
   if (!current) throw new Error("Pedido de compra não encontrado.");
   if (current.status === status) return;
@@ -326,6 +357,7 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
     poId,
     status as "ENVIADO" | "CONFIRMADO" | "CANCELADO",
     `${PURCHASE_ORDER_STATUS_LABEL[current.status as PurchaseOrderStatus]} → ${PURCHASE_ORDER_STATUS_LABEL[status as PurchaseOrderStatus]}`,
+    userP,
   );
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -333,56 +365,72 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
 }
 
 export async function convertToProcess(poId: string, formData: FormData) {
-  const [po] = await db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  const processNumber = String(formData.get("processNumber") ?? "").trim();
+
+  // pedido, número já usado e itens: leituras independentes, saem juntas
+  const userP = getCurrentUser().catch(() => null);
+  const [[po], [existing], items] = await Promise.all([
+    db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId)),
+    processNumber
+      ? db.select({ id: processes.id }).from(processes).where(eq(processes.processNumber, processNumber))
+      : Promise.resolve([] as { id: string }[]),
+    db.select().from(purchaseOrderItems).where(eq(purchaseOrderItems.purchaseOrderId, poId)),
+  ]);
   if (!po) throw new Error("Pedido de compra não encontrado.");
   if (po.status !== "CONFIRMADO") throw new Error("Só é possível criar o processo depois que o pedido estiver Confirmado.");
   if (po.processId) throw new Error("Este pedido já foi convertido em processo.");
-
-  const processNumber = String(formData.get("processNumber") ?? "").trim();
   if (!processNumber) throw new Error("Número do processo é obrigatório.");
+  const duplicateMessage = `Já existe um processo com o número "${processNumber}" — use um número diferente.`;
+  if (existing) throw new Error(duplicateMessage);
 
-  const [existing] = await db.select({ id: processes.id }).from(processes).where(eq(processes.processNumber, processNumber));
-  if (existing) throw new Error(`Já existe um processo com o número "${processNumber}" — use um número diferente.`);
+  // Processo + itens + vínculo do pedido + histórico numa transação só: antes eram
+  // gravações soltas, e uma falha no meio deixava um processo criado sem o pedido ligado.
+  let createdId: string | null = null;
+  try {
+    createdId = await db.transaction(async (tx) => {
+      const [createdProcess] = await tx
+        .insert(processes)
+        .values({
+          processNumber,
+          supplierId: po.supplierId,
+          currency: po.currency,
+          incoterm: po.incoterm,
+          status: "PEDIDO",
+          currentStep: 2,
+        })
+        .returning({ id: processes.id });
 
-  const items = await db.select().from(purchaseOrderItems).where(eq(purchaseOrderItems.purchaseOrderId, poId));
+      // itens e vínculo não dependem um do outro: saem juntos
+      await Promise.all([
+        items.length > 0
+          ? tx.insert(processItems).values(
+              items.map((item) => ({
+                processId: createdProcess.id,
+                productId: item.productId,
+                sku: item.sku,
+                description: item.description,
+                quantity: item.quantity,
+                unitValueOverride: item.unitPrice,
+                purchaseOrderId: poId,
+              })),
+            )
+          : undefined,
+        tx.update(purchaseOrders).set({ processId: createdProcess.id, updatedAt: new Date() }).where(eq(purchaseOrders.id, poId)),
+      ]);
 
-  const [createdProcess] = await db
-    .insert(processes)
-    .values({
-      processNumber,
-      supplierId: po.supplierId,
-      currency: po.currency,
-      incoterm: po.incoterm,
-      status: "PEDIDO",
-      currentStep: 2,
-    })
-    .returning({ id: processes.id });
-
-  if (items.length > 0) {
-    await db.insert(processItems).values(
-      items.map((item) => ({
-        processId: createdProcess.id,
-        productId: item.productId,
-        sku: item.sku,
-        description: item.description,
-        quantity: item.quantity,
-        unitValueOverride: item.unitPrice,
-        purchaseOrderId: poId,
-      })),
-    );
+      await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`, userP);
+      return createdProcess.id;
+    });
+  } catch (e) {
+    // dois cliques/duas pessoas com o mesmo número: a restrição única do banco decide
+    if (isUniqueViolation(e)) throw new Error(duplicateMessage);
+    throw e;
   }
-
-  await db
-    .update(purchaseOrders)
-    .set({ processId: createdProcess.id, updatedAt: new Date() })
-    .where(eq(purchaseOrders.id, poId));
-
-  await logPurchaseOrderEvent(db, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`);
 
   revalidatePath("/pedidos-compra");
   revalidatePath(`/pedidos-compra/${poId}`);
   revalidatePath("/processos");
-  redirect(withFlash(`/processos/${createdProcess.id}`, "Pedido convertido em Processo de Importação."));
+  redirect(withFlash(`/processos/${createdId}`, "Pedido convertido em Processo de Importação."));
 }
 
 // Coloca o pedido em um processo que já existe (ex.: o contêiner que já tem
