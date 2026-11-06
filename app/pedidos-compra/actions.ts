@@ -91,8 +91,6 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
   const poNumber = String(formData.get("poNumber") ?? "").trim();
   if (!poNumber) throw new Error("Número do pedido é obrigatório.");
 
-  // login e as duas leituras em paralelo (eram 3 esperas em fila)
-  const userP = getCurrentUser().catch(() => null);
   const [[po], [existing]] = await Promise.all([
     db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId)),
     db.select({ id: purchaseOrders.id }).from(purchaseOrders).where(eq(purchaseOrders.poNumber, poNumber)),
@@ -141,7 +139,7 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
       raced = true;
     }
     if (raced) redirect(withFlashError(`/pedidos-compra/${poId}`, duplicateMessage));
-    await logPurchaseOrderEvent(db, poId, "EDITADO", changes.join(" · "), userP);
+    await logPurchaseOrderEvent(db, poId, "EDITADO", changes.join(" · "));
   }
 
   revalidatePath("/pedidos-compra");
@@ -222,8 +220,6 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   const quantity = optionalNumber(formData, "quantity");
   const unitPrice = optionalNumber(formData, "unitPrice");
 
-  // login + pedido + produto em paralelo (eram 3 esperas em fila)
-  const userP = getCurrentUser().catch(() => null);
   const [[po], product] = await Promise.all([
     db
       .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
@@ -251,7 +247,7 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
       quantity,
       unitPrice,
     });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`, userP);
+    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
   } else {
     const description = optionalText(formData, "description");
     if (!description) throw new Error("Descrição é obrigatória para item avulso.");
@@ -262,7 +258,7 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
       quantity,
       unitPrice,
     });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`, userP);
+    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
   }
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -270,7 +266,6 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
 
 // Altera quantidade e preço de um item (pedido ainda fora de processo).
 export async function updatePurchaseOrderItem(itemId: string, poId: string, formData: FormData) {
-  const userP = getCurrentUser().catch(() => null);
   const [[po], [item]] = await Promise.all([
     db
       .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
@@ -298,7 +293,7 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
   if (Number(quantity ?? 0) !== Number(item.quantity ?? 0)) changes.push(`qtd ${item.quantity ?? "—"} → ${quantity ?? "—"}`);
   if (Number(unitPrice ?? 0) !== Number(item.unitPrice ?? 0)) changes.push(`preço ${item.unitPrice ?? "—"} → ${unitPrice ?? "—"}`);
   if (changes.length > 0) {
-    await logPurchaseOrderEvent(db, poId, "ITEM_EDITADO", `${item.sku ? `${item.sku} — ` : ""}${item.description}: ${changes.join(", ")}`, userP);
+    await logPurchaseOrderEvent(db, poId, "ITEM_EDITADO", `${item.sku ? `${item.sku} — ` : ""}${item.description}: ${changes.join(", ")}`);
   }
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -306,7 +301,6 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
 }
 
 export async function removePurchaseOrderItem(itemId: string, poId: string) {
-  const userP = getCurrentUser().catch(() => null);
   const [[po], [item]] = await Promise.all([
     db
       .select({ status: purchaseOrders.status, processId: purchaseOrders.processId })
@@ -326,7 +320,7 @@ export async function removePurchaseOrderItem(itemId: string, poId: string) {
   }
 
   await db.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
-  if (item) await logPurchaseOrderEvent(db, poId, "ITEM_REMOVIDO", `${item.sku ? `${item.sku} — ` : ""}${item.description}`, userP);
+  if (item) await logPurchaseOrderEvent(db, poId, "ITEM_REMOVIDO", `${item.sku ? `${item.sku} — ` : ""}${item.description}`);
   revalidatePath(`/pedidos-compra/${poId}`);
 }
 
@@ -336,7 +330,6 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
     throw new Error("Status inválido.");
   }
 
-  const userP = getCurrentUser().catch(() => null);
   const [current] = await db.select({ status: purchaseOrders.status }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
   if (!current) throw new Error("Pedido de compra não encontrado.");
   if (current.status === status) return;
@@ -357,7 +350,6 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
     poId,
     status as "ENVIADO" | "CONFIRMADO" | "CANCELADO",
     `${PURCHASE_ORDER_STATUS_LABEL[current.status as PurchaseOrderStatus]} → ${PURCHASE_ORDER_STATUS_LABEL[status as PurchaseOrderStatus]}`,
-    userP,
   );
 
   revalidatePath(`/pedidos-compra/${poId}`);
@@ -367,8 +359,6 @@ export async function updatePurchaseOrderStatus(poId: string, formData: FormData
 export async function convertToProcess(poId: string, formData: FormData) {
   const processNumber = String(formData.get("processNumber") ?? "").trim();
 
-  // pedido, número já usado e itens: leituras independentes, saem juntas
-  const userP = getCurrentUser().catch(() => null);
   const [[po], [existing], items] = await Promise.all([
     db.select().from(purchaseOrders).where(eq(purchaseOrders.id, poId)),
     processNumber
@@ -418,7 +408,7 @@ export async function convertToProcess(poId: string, formData: FormData) {
         tx.update(purchaseOrders).set({ processId: createdProcess.id, updatedAt: new Date() }).where(eq(purchaseOrders.id, poId)),
       ]);
 
-      await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`, userP);
+      await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`);
       return createdProcess.id;
     });
   } catch (e) {
