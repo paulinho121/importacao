@@ -83,6 +83,8 @@ export async function getDashboardMetrics() {
         createdAt: processes.createdAt,
         supplierName: suppliers.name,
         supplierLogoUrl: suppliers.logoUrl,
+        supplierCountry: suppliers.country,
+        currency: processes.currency,
         agentName: freightAgents.name,
         internationalFreightValue: processes.internationalFreightValue,
         insuranceValue: processes.insuranceValue,
@@ -399,6 +401,7 @@ export async function getDashboardMetrics() {
       processNumber: p.processNumber,
       supplierName: p.supplierName,
       supplierLogoUrl: p.supplierLogoUrl,
+      supplierCountry: p.supplierCountry,
       modal: p.modal,
       destination: p.destinationCity
         ? `${p.destinationCity}${p.destinationState ? `/${p.destinationState}` : ""}`
@@ -406,6 +409,9 @@ export async function getDashboardMetrics() {
       etaEstimated: p.etaEstimated,
       status: p.status,
       agentName: p.agentName,
+      // FOB = soma das invoices (na moeda do processo); null enquanto nenhuma invoice tem valor.
+      fobValue: invoiceValueByProcess.get(p.id) ?? null,
+      currency: p.currency,
     }));
 
   const ncmDivergences = ncmDivergentRows.map((p) => ({

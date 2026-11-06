@@ -1,6 +1,4 @@
-import Image from "next/image";
-import Link from "next/link";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -36,7 +34,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <PageHeader title="Dashboard" description="Visão geral das operações de importação" />
+      <div className="px-4 pt-6 lg:px-6">
+        <DashboardHero />
+      </div>
+
+      <div className="px-4 lg:px-6">
+        <ProcessesTable data={metrics.table} />
+      </div>
 
       <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-3 lg:grid-cols-5 lg:px-6 2xl:grid-cols-9 max-sm:[&>*:nth-child(n+5)]:hidden">
         <KpiCard
@@ -122,19 +126,6 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="px-4 lg:px-6">
-        <div className="relative aspect-[2/1] overflow-hidden rounded-card border border-border sm:aspect-[3/1]">
-          <Image
-            src="/banner-dashboard.png"
-            alt="Sistema Integrado de Importação — conectando o mundo por mar e ar"
-            fill
-            priority
-            sizes="(min-width: 1024px) 80vw, 100vw"
-            className="object-cover object-center"
-          />
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
         <div className="lg:col-span-2">
           <AreaChartCard
@@ -206,23 +197,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
-
-      <div className="px-4 lg:px-6">
-        <div className="rounded-card border border-border bg-card p-5">
-          <SectionHeader
-            title="Processos"
-            description="Lista completa com filtros e ordenação"
-            actions={
-              <Link href="/processos" className="text-sm font-medium text-secondary hover:underline">
-                Ver todos
-              </Link>
-            }
-          />
-          <div className="mt-4">
-            <ProcessesTable data={metrics.table} />
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
