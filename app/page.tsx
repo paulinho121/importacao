@@ -1,33 +1,15 @@
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { KpiCard } from "@/components/dashboard/KpiCard";
 import { AlertCard } from "@/components/dashboard/AlertCard";
 import { PipelineFunnel } from "@/components/dashboard/PipelineFunnel";
 import { ProcessesTable } from "@/components/dashboard/ProcessesTable";
 import { AreaChartCard } from "@/components/charts/AreaChartCard";
 import { BarChartCard } from "@/components/charts/BarChartCard";
 import { getDashboardMetrics } from "@/lib/dashboard-metrics";
-import {
-  ClipboardList,
-  PackageSearch,
-  Ship,
-  CheckCircle2,
-  AlertTriangle,
-  FileWarning,
-  Boxes,
-  ShieldCheck,
-  DollarSign,
-  Wallet,
-} from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-const brlFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  maximumFractionDigits: 0,
-});
 
 export default async function DashboardPage() {
   const metrics = await getDashboardMetrics();
@@ -40,90 +22,6 @@ export default async function DashboardPage() {
 
       <div className="px-4 lg:px-6">
         <ProcessesTable data={metrics.table} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-3 lg:grid-cols-5 lg:px-6 2xl:grid-cols-9 max-sm:[&>*:nth-child(n+5)]:hidden">
-        <KpiCard
-          icon={<ClipboardList className="h-4 w-4" />}
-          label="Pedidos em Aberto"
-          value={String(metrics.kpis.pedidosAbertos.value)}
-          trend={metrics.kpis.pedidosAbertos.trend}
-          sparklineData={metrics.kpis.pedidosAbertos.sparkline}
-          accent="var(--chart-2)"
-          href="/pedidos-compra?abertos=1"
-        />
-        <KpiCard
-          icon={<PackageSearch className="h-4 w-4" />}
-          label="Processos Ativos"
-          value={String(metrics.kpis.processosAtivos.value)}
-          trend={metrics.kpis.processosAtivos.trend}
-          sparklineData={metrics.kpis.processosAtivos.sparkline}
-          accent="var(--chart-1)"
-          href="/processos"
-        />
-        <KpiCard
-          icon={<Ship className="h-4 w-4" />}
-          label="Em Trânsito"
-          value={String(metrics.kpis.emTransito.value)}
-          trend={metrics.kpis.emTransito.trend}
-          sparklineData={metrics.kpis.emTransito.sparkline}
-          accent="var(--chart-1)"
-          href="/processos?status=EM_TRANSITO"
-        />
-        <KpiCard
-          icon={<CheckCircle2 className="h-4 w-4" />}
-          label="Processos Finalizados"
-          value={String(metrics.kpis.finalizados.value)}
-          trend={metrics.kpis.finalizados.trend}
-          sparklineData={metrics.kpis.finalizados.sparkline}
-          accent="var(--chart-2)"
-          href="/finalizados"
-        />
-        <KpiCard
-          icon={<AlertTriangle className="h-4 w-4" />}
-          label="Atrasados"
-          value={String(metrics.kpis.atrasados.value)}
-          trend={metrics.kpis.atrasados.trend}
-          sparklineData={metrics.kpis.atrasados.sparkline}
-          accent="var(--chart-5)"
-          href="/processos?status=ATRASADO"
-        />
-        <KpiCard
-          icon={<FileWarning className="h-4 w-4" />}
-          label="Documentos Pendentes"
-          value={String(metrics.kpis.documentosPendentes.value)}
-          trend={metrics.kpis.documentosPendentes.trend}
-          sparklineData={metrics.kpis.documentosPendentes.sparkline}
-          accent="var(--chart-3)"
-          href="/processos?docsPendentes=1"
-        />
-        <KpiCard
-          icon={<Boxes className="h-4 w-4" />}
-          label="Itens em Processo"
-          value={String(metrics.kpis.itensEmProcesso.value)}
-          trend={metrics.kpis.itensEmProcesso.trend}
-          sparklineData={metrics.kpis.itensEmProcesso.sparkline}
-          accent="var(--chart-1)"
-          href="/processos"
-        />
-        <KpiCard
-          icon={<DollarSign className="h-4 w-4" />}
-          label="Valor FOB Total"
-          value={brlFormatter.format(metrics.kpis.valorFobTotal.value)}
-          trend={metrics.kpis.valorFobTotal.trend}
-          sparklineData={metrics.kpis.valorFobTotal.sparkline}
-          accent="var(--chart-1)"
-          href="/processos"
-        />
-        <KpiCard
-          icon={<Wallet className="h-4 w-4" />}
-          label="Valor CIF Total"
-          value={brlFormatter.format(metrics.kpis.valorCifTotal.value)}
-          trend={metrics.kpis.valorCifTotal.trend}
-          sparklineData={metrics.kpis.valorCifTotal.sparkline}
-          accent="var(--chart-1)"
-          href="/processos"
-        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
