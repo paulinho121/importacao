@@ -1,11 +1,21 @@
-import postgres from "postgres";
-import { drizzle } from "drizzle-orm/postgres-js";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
-type Db = ReturnType<typeof drizzle<typeof schema>>;
+type Db = ReturnType<typeof drizzle<typeof schema, Pool>>;
 
 let cached: Db | null = null;
 
+// Driver `pg` (node-postgres), não o `postgres` (postgres.js): o postgres.js
+// ENCADEIA várias consultas na mesma conexão quando há mais consultas do que
+// conexões (e quando a conexão ainda está abrindo). O pooler de transações do
+// Supabase (Supavisor, porta 6543) não aguenta isso: as consultas encadeadas
+// ficavam presas para sempre ("active / ClientRead" no banco), esgotavam as vagas
+// do pooler e o site inteiro travava no esqueleto da tela. Reproduzido: 1
+// conexão com 6 consultas simultâneas terminava só 2; o `pg` termina 6 de 6, e
+// 24 consultas em 5 conexões também (cada conexão executa uma consulta por vez e
+// o excedente espera na fila do pool). Instruções preparadas continuam desligadas
+// (o pooler de transações não as suporta): o `pg` só as usa com consultas nomeadas.
 function getDb(): Db {
   if (cached) return cached;
   if (!process.env.DATABASE_URL) {
@@ -13,35 +23,38 @@ function getDb(): Db {
       "DATABASE_URL não definida. Copie .env.example para .env.local (localmente) ou defina em Project Settings > Environment Variables (Vercel).",
     );
   }
-  // prepare: false é necessário quando a connection string aponta para o
-  // pooler do Supabase (pgbouncer, modo transaction) — que não suporta
-  // prepared statements. Funciona também com conexão direta.
-  const client = postgres(process.env.DATABASE_URL, {
-    prepare: false,
-    // fetch_types: false evita a consulta a pg_type que o driver faz em TODA
-    // conexão nova (1 ida ao banco a mais por conexão; o sistema não usa
-    // colunas de array). Medido: -71 ms na primeira consulta de cada conexão.
-    fetch_types: false,
-    // Poucas conexões por instância (o pooler do Supabase já multiplexa), e
-    // conexões ociosas/antigas são fechadas: em ambiente serverless uma
-    // conexão "congelada" não pode ficar presa ao pooler.
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    // Poucas conexões por instância (o pooler do Supabase já multiplexa); as
+    // ociosas/antigas são fechadas, e esperar vaga ou conectar tem limite de tempo.
     max: 5,
-    idle_timeout: 20,
-    max_lifetime: 60 * 30,
-    connect_timeout: 10,
-    // Diagnóstico: com DB_QUERY_LOG=1 cada instrução enviada ao banco (inclusive
-    // BEGIN/COMMIT) é registrada em globalThis.__dbQueries — usado pelos testes
-    // de desempenho. Desligado por padrão, sem custo em produção.
-    ...(process.env.DB_QUERY_LOG
-      ? {
-          debug: (_connection: number, query: string) => {
-            const g = globalThis as unknown as { __dbQueries?: string[] };
-            (g.__dbQueries ??= []).push(query);
-          },
-        }
-      : {}),
+    idleTimeoutMillis: 20_000,
+    maxLifetimeSeconds: 60 * 30,
+    connectionTimeoutMillis: 10_000,
+    // Consulta que não responde falha em 25 s em vez de deixar a tela esperando
+    // para sempre (a mensagem de erro aparece e dá para tentar de novo).
+    query_timeout: 25_000,
   });
-  cached = drizzle(client, { schema });
+  // Sem isso, um erro numa conexão ociosa derruba o processo (evento 'error' sem ouvinte).
+  pool.on("error", (e) => console.error("Erro numa conexão ociosa do banco:", e.message));
+
+  // Diagnóstico: com DB_QUERY_LOG=1 cada instrução enviada ao banco (inclusive
+  // BEGIN/COMMIT) é registrada em globalThis.__dbQueries — usado pelos testes de
+  // desempenho. Desligado por padrão, sem custo em produção.
+  if (process.env.DB_QUERY_LOG) {
+    pool.on("connect", (client) => {
+      const original = client.query.bind(client) as (...args: unknown[]) => unknown;
+      (client as unknown as { query: (...args: unknown[]) => unknown }).query = (...args: unknown[]) => {
+        const first = args[0] as string | { text?: string } | undefined;
+        const text = typeof first === "string" ? first : (first?.text ?? "");
+        const g = globalThis as unknown as { __dbQueries?: string[] };
+        (g.__dbQueries ??= []).push(text);
+        return original(...args);
+      };
+    });
+  }
+
+  cached = drizzle(pool, { schema });
   return cached;
 }
 

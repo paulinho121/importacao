@@ -64,7 +64,7 @@ async function oldCp(tx: any, source: string, now: Date, matches: Match[]) {
 
 const snapCp = async (tx: any) =>
   JSON.stringify(
-    await tx.execute(sql`select id, cp_list_result, cp_list_ref, cp_list_ncm, cp_list_source, has_public_consultation, cp_status, public_consultation_ref from products order by id`),
+    (await tx.execute(sql`select id, cp_list_result, cp_list_ref, cp_list_ncm, cp_list_source, has_public_consultation, cp_status, public_consultation_ref from products order by id`)).rows,
   );
 
 async function testCp() {
@@ -116,7 +116,7 @@ async function oldLpco(tx: any, records: Rec[]) {
 
 const snapLpco = async (tx: any) =>
   JSON.stringify(
-    await tx.execute(sql`select product_id, branch, status, requested_at, approved_at, valid_until, lpco_number, notes from product_lpcos order by product_id, lpco_number nulls first, branch, status, notes`),
+    (await tx.execute(sql`select product_id, branch, status, requested_at, approved_at, valid_until, lpco_number, notes from product_lpcos order by product_id, lpco_number nulls first, branch, status, notes`)).rows,
   );
 
 async function testLpco() {

@@ -3,15 +3,15 @@
 // "já existe" em vez de consultar antes de gravar: uma ida ao banco a menos e
 // sem janela de corrida entre a consulta e a gravação.
 
-type PgLike = { code?: string; constraint_name?: string; cause?: unknown };
+type PgLike = { code?: string; constraint?: string; constraint_name?: string; cause?: unknown };
 
 function pg(e: unknown): { code?: string; constraint?: string } {
   const err = e as PgLike | null;
   if (!err || typeof err !== "object") return {};
-  const direct = { code: err.code, constraint: err.constraint_name };
+  const direct = { code: err.code, constraint: err.constraint ?? err.constraint_name };
   if (direct.code) return direct;
   const cause = err.cause as PgLike | undefined;
-  return cause ? { code: cause.code, constraint: cause.constraint_name } : {};
+  return cause ? { code: cause.code, constraint: cause.constraint ?? cause.constraint_name } : {};
 }
 
 // 23505 = unique_violation. `constraint` (opcional) restringe a uma restrição.

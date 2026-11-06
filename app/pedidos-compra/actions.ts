@@ -73,7 +73,7 @@ export async function createPurchaseOrder(formData: FormData) {
       insert into purchase_order_events (purchase_order_id, event_type, description, user_name)
       select id, 'CRIADO', ${`Pedido ${poNumber} criado`}, ${userName} from new_po
       returning purchase_order_id as id`);
-    createdId = rows[0]?.id ?? null;
+    createdId = rows.rows[0]?.id ?? null;
   } catch (e) {
     if (!isUniqueViolation(e)) throw e;
   }
@@ -390,23 +390,20 @@ export async function convertToProcess(poId: string, formData: FormData) {
         })
         .returning({ id: processes.id });
 
-      // itens e vínculo não dependem um do outro: saem juntos
-      await Promise.all([
-        items.length > 0
-          ? tx.insert(processItems).values(
-              items.map((item) => ({
-                processId: createdProcess.id,
-                productId: item.productId,
-                sku: item.sku,
-                description: item.description,
-                quantity: item.quantity,
-                unitValueOverride: item.unitPrice,
-                purchaseOrderId: poId,
-              })),
-            )
-          : undefined,
-        tx.update(purchaseOrders).set({ processId: createdProcess.id, updatedAt: new Date() }).where(eq(purchaseOrders.id, poId)),
-      ]);
+      if (items.length > 0) {
+        await tx.insert(processItems).values(
+          items.map((item) => ({
+            processId: createdProcess.id,
+            productId: item.productId,
+            sku: item.sku,
+            description: item.description,
+            quantity: item.quantity,
+            unitValueOverride: item.unitPrice,
+            purchaseOrderId: poId,
+          })),
+        );
+      }
+      await tx.update(purchaseOrders).set({ processId: createdProcess.id, updatedAt: new Date() }).where(eq(purchaseOrders.id, poId));
 
       await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `${processNumber} · processo criado a partir deste pedido`);
       return createdProcess.id;
