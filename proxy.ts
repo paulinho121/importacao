@@ -52,6 +52,9 @@ export const config = {
     // Roda em toda rota, exceto assets estáticos/Next internals e o
     // Material Symbols (link externo, não passa por aqui de qualquer
     // forma) — mesmo padrão recomendado pela documentação do Supabase.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // manifest.webmanifest também fica de fora: o navegador busca o manifesto SEM
+    // cookies, e sem isso o login o redirecionava para /login (HTML), gerando o
+    // erro "Manifest: Line 1, column 1, Syntax error" no console a cada página.
+    "/((?!_next/static|_next/image|favicon.ico|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
