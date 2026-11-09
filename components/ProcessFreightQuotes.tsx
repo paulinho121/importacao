@@ -9,7 +9,6 @@ import {
   selectFreightQuote,
   clearFreightQuoteSelection,
   fetchDailyRate,
-  saveFreightQuoteHeader,
 } from "@/app/processos/freight-quotes-actions";
 import DocumentViewer from "@/components/DocumentViewer";
 import { MODALIDADES, TIPOS_EMBARQUE } from "@/lib/modais";
@@ -28,6 +27,7 @@ import {
 } from "@/lib/freight-quotes";
 
 import SubmitButton from "@/components/SubmitButton";
+import { driveDownloadUrl } from "@/lib/drive-links";
 // Cotações de frete no formato da planilha de comparação do time: uma coluna
 // por agente de carga, lado a lado, com nome da taxa | moeda | custos em cada
 // linha. Tudo é editável na própria tela e cada coluna é salva separadamente.
@@ -73,6 +73,7 @@ export type FreightQuoteRow = {
   notes: string | null;
   fileName: string | null;
   isSelected: boolean;
+  driveUrl: string | null;
   lines: FreightQuoteLineRow[];
 };
 
@@ -90,6 +91,7 @@ type Tax = { name: string; currency: string; value: string };
 type Draft = {
   agentId: string;
   proposal: string;
+  driveUrl: string;
   incoterm: string;
   modalidade: string;
   containerType: string;
@@ -105,7 +107,6 @@ type Draft = {
   freightCurrency: string;
   originTaxes: Tax[];
   destinationTaxes: Tax[];
-  roadTaxes: Tax[]; // TX DESTINO BLR (transporte rodoviário)
   dta: string;
   dtaCurrency: string;
   otherName: string;
@@ -141,8 +142,8 @@ type Col = {
 const num = (v: string | number | null | undefined) =>
   v === null || v === undefined || v === "" ? "" : String(Number(v));
 
-const blankTaxes = (n = MAX_TAX_ROWS, currency = "USD"): Tax[] =>
-  Array.from({ length: n }, () => ({ name: "", currency, value: "" }));
+const blankTaxes = (n = MAX_TAX_ROWS): Tax[] =>
+  Array.from({ length: n }, () => ({ name: "", currency: "USD", value: "" }));
 
 const OTHER_DEFAULT_NAME = "Outros custos";
 
@@ -151,6 +152,7 @@ function emptyDraft(d: Defaults): Draft {
   return {
     agentId: "",
     proposal: "",
+    driveUrl: "",
     incoterm: d.incoterm ?? "",
     modalidade: d.modalidade ?? "",
     containerType: tipoOk ? (d.containerType ?? "") : "",
@@ -166,7 +168,6 @@ function emptyDraft(d: Defaults): Draft {
     freightCurrency: "USD",
     originTaxes: blankTaxes(),
     destinationTaxes: blankTaxes(),
-    roadTaxes: blankTaxes(MAX_TAX_ROWS, "BRL"),
     dta: "",
     dtaCurrency: "BRL",
     otherName: "",
@@ -188,9 +189,9 @@ function emptyDraft(d: Defaults): Draft {
   };
 }
 
-function taxesFromLines(lines: FreightQuoteLineRow[], blankCurrency = "USD"): Tax[] {
+function taxesFromLines(lines: FreightQuoteLineRow[]): Tax[] {
   const taxes: Tax[] = lines.map((l) => ({ name: l.description, currency: l.currency, value: num(l.total) }));
-  while (taxes.length < MAX_TAX_ROWS) taxes.push({ name: "", currency: blankCurrency, value: "" });
+  while (taxes.length < MAX_TAX_ROWS) taxes.push({ name: "", currency: "USD", value: "" });
   return taxes;
 }
 
@@ -205,6 +206,7 @@ function draftFromQuote(q: FreightQuoteRow, d: Defaults): Draft {
     ...base,
     agentId: q.agentId ?? "",
     proposal: q.proposal ?? "",
+    driveUrl: q.driveUrl ?? "",
     incoterm: q.incoterm ?? "",
     modalidade: q.modalidade ?? "",
     containerType: q.containerType ?? "",
@@ -220,7 +222,6 @@ function draftFromQuote(q: FreightQuoteRow, d: Defaults): Draft {
     freightCurrency: freight?.currency ?? "USD",
     originTaxes: taxesFromLines(bySection("ORIGEM")),
     destinationTaxes: taxesFromLines(bySection("DESTINO")),
-    roadTaxes: taxesFromLines(bySection("RODOVIARIO"), "BRL"),
     dta: dta ? num(dta.total) : "",
     dtaCurrency: dta?.currency ?? "BRL",
     otherName: other && other.description !== OTHER_DEFAULT_NAME ? other.description : "",
@@ -299,7 +300,6 @@ function linesOf(d: Draft): SubmitLine[] {
   };
   addTaxes("ORIGEM", d.originTaxes, "TX origem");
   addTaxes("DESTINO", d.destinationTaxes, "TX destino");
-  addTaxes("RODOVIARIO", d.roadTaxes, "TX destino BLR");
   const dta = toNumber(d.dta);
   if (dta !== null) {
     out.push({ section: "OUTRAS", description: "DTA", quantity: "", unitPrice: "", unit: "", currency: d.dtaCurrency, total: dta });
@@ -403,7 +403,6 @@ export default function ProcessFreightQuotes({
   processCurrency,
   exchangeRate,
   defaults,
-  header,
   closed,
 }: {
   processId: string;
@@ -412,7 +411,6 @@ export default function ProcessFreightQuotes({
   processCurrency: string | null;
   exchangeRate: number | null;
   defaults: Defaults;
-  header: { number: string; date: string; responsible: string; notes: string };
   closed: boolean;
 }) {
   const [cols, setCols] = useState<Col[]>(() =>
@@ -432,31 +430,10 @@ export default function ProcessFreightQuotes({
   );
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
-  const [userRows, setUserRows] = useState({ origin: DEFAULT_TAX_ROWS, destination: DEFAULT_TAX_ROWS, road: DEFAULT_TAX_ROWS });
-  const [open, setOpen] = useState({ origin: true, destination: true, road: true });
-  const toggle = (k: "origin" | "destination" | "road") => setOpen((o) => ({ ...o, [k]: !o[k] }));
+  const [userRows, setUserRows] = useState({ origin: DEFAULT_TAX_ROWS, destination: DEFAULT_TAX_ROWS });
+  const [open, setOpen] = useState({ origin: true, destination: true });
+  const toggle = (k: "origin" | "destination") => setOpen((o) => ({ ...o, [k]: !o[k] }));
 
-  // Cabeçalho da planilha (vale para o processo todo)
-  const [hdr, setHdr] = useState(header);
-  const [hdrBase, setHdrBase] = useState(JSON.stringify(header));
-  const [hdrSaving, setHdrSaving] = useState(false);
-  const hdrDirty = JSON.stringify(hdr) !== hdrBase;
-  async function saveHeader() {
-    setHdrSaving(true);
-    try {
-      const res = await saveFreightQuoteHeader(processId, hdr);
-      if (!res.ok) {
-        toast.error(res.error);
-        return;
-      }
-      setHdrBase(JSON.stringify(hdr));
-      toast.success("Cabeçalho da cotação salvo.");
-    } catch {
-      toast.error("Não foi possível salvar o cabeçalho. Tente novamente.");
-    } finally {
-      setHdrSaving(false);
-    }
-  }
 
   // Moeda estrangeira da comparação e o câmbio ("dólar do dia"), só para
   // comparar as cotações: não altera o câmbio salvo no processo.
@@ -511,7 +488,7 @@ export default function ProcessFreightQuotes({
     setCols((prev) => prev.map((c) => (c.key === key ? { ...c, draft: { ...c.draft, ...p } } : c)));
   }
 
-  function patchTax(key: string, field: "originTaxes" | "destinationTaxes" | "roadTaxes", index: number, p: Partial<Tax>) {
+  function patchTax(key: string, field: "originTaxes" | "destinationTaxes", index: number, p: Partial<Tax>) {
     setCols((prev) =>
       prev.map((c) => {
         if (c.key !== key) return c;
@@ -633,16 +610,11 @@ export default function ProcessFreightQuotes({
     Math.max(userRows.destination, ...cols.map((c) => lastFilled(c.draft.destinationTaxes))),
   );
 
-  const rowsRoad = Math.min(
-    MAX_TAX_ROWS,
-    Math.max(userRows.road, ...cols.map((c) => lastFilled(c.draft.roadTaxes))),
-  );
   const detail = (isOpen: boolean, n: number) => (isOpen ? n + (!closed && n < MAX_TAX_ROWS ? 1 : 0) : 0);
-  // linhas do bloco TAXAS: 3 resumos + DTA + Outros + detalhes abertos
-  const taxSpan =
-    5 + detail(open.origin, rowsOrigin) + detail(open.destination, rowsDestination) + detail(open.road, rowsRoad);
+  // linhas do bloco TAXAS: 2 resumos + DTA + Outros + detalhes abertos
+  const taxSpan = 4 + detail(open.origin, rowsOrigin) + detail(open.destination, rowsDestination);
   // linhas do bloco EXTRAS: observação + (10 dados extras) + (ações)
-  const extrasSpan = 1 + (showMore ? 10 : 0) + (closed ? 0 : 1);
+  const extrasSpan = 2 + (showMore ? 10 : 0) + (closed ? 0 : 1);
 
   const nCols = cols.length;
   const today = new Date().toISOString().slice(0, 10);
@@ -680,6 +652,18 @@ export default function ProcessFreightQuotes({
             cotação, o agente e o frete (+ taxas de origem) vão para o processo.
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {nCols > 0 && (
+            <a
+              href={`/processos/${processId}/cotacoes/imprimir`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
+              title="Abre o relatório para imprimir ou salvar em PDF (as cotações precisam estar salvas)"
+            >
+              Imprimir cotações
+            </a>
+          )}
         {!closed && (
           <button
             type="button"
@@ -689,6 +673,7 @@ export default function ProcessFreightQuotes({
             + Adicionar cotação
           </button>
         )}
+        </div>
       </div>
 
       {nCols === 0 ? (
@@ -703,37 +688,6 @@ export default function ProcessFreightQuotes({
             {cols.map((c) => (
               <ColumnForm key={c.key} col={c} showMore={showMore} />
             ))}
-          </div>
-
-          <div className="mb-3 grid gap-x-4 gap-y-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 md:grid-cols-2">
-            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
-              <span className="w-28 shrink-0">Cotação Nº</span>
-              <input value={hdr.number} disabled={closed} onChange={(e) => setHdr({ ...hdr, number: e.target.value })}
-                placeholder="Nº da cotação" className={cellInput} />
-            </label>
-            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
-              <span className="w-28 shrink-0">Data da cotação</span>
-              <input type="date" value={hdr.date} disabled={closed} onChange={(e) => setHdr({ ...hdr, date: e.target.value })}
-                className={cellInput} />
-            </label>
-            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
-              <span className="w-28 shrink-0">Responsável</span>
-              <input value={hdr.responsible} disabled={closed} onChange={(e) => setHdr({ ...hdr, responsible: e.target.value })}
-                placeholder="Quem fez a cotação" className={cellInput} />
-            </label>
-            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
-              <span className="w-28 shrink-0">Observações</span>
-              <input value={hdr.notes} disabled={closed} onChange={(e) => setHdr({ ...hdr, notes: e.target.value })}
-                placeholder="Ex: valores estimados sujeitos a confirmação" className={cellInput} />
-            </label>
-            {!closed && (
-              <div className="md:col-span-2 flex justify-end">
-                <button type="button" onClick={saveHeader} disabled={hdrSaving || !hdrDirty}
-                  className="px-3 py-1 rounded-lg border border-secondary text-secondary text-xs font-bold hover:bg-secondary/10 disabled:opacity-40">
-                  {hdrSaving ? "Salvando…" : hdrDirty ? "Salvar cabeçalho" : "Cabeçalho salvo"}
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-surface-container-low px-3 py-2">
@@ -1066,24 +1020,6 @@ export default function ProcessFreightQuotes({
                 )}
 
                 <tr>
-                  <Lead sec="TAXAS" label={<GroupToggle label="TX destino BLR" open={open.road} onClick={() => toggle("road")} />}
-                    desc="Transporte rodoviário" />
-                  {summaryCells("RODOVIARIO")}
-                </tr>
-                {open.road && (
-                  <>
-                    {Array.from({ length: rowsRoad }, (_, i) => (
-                      <TaxRow key={`r${i}`} index={i} tag="TX destino BLR" cols={cols} closed={closed}
-                        taxOf={(c) => c.draft.roadTaxes[i] ?? { name: "", currency: "BRL", value: "" }}
-                        onChange={(c, p) => patchTax(c.key, "roadTaxes", i, p)} />
-                    ))}
-                    {!closed && rowsRoad < MAX_TAX_ROWS && (
-                      <AddRowLine onClick={() => setUserRows((r) => ({ ...r, road: rowsRoad + 1 }))} label="+ taxa de transporte rodoviário" />
-                    )}
-                  </>
-                )}
-
-                <tr>
                   <Lead sec="TAXAS" label="DTA" desc="Declaração de trânsito" />
                   {cols.map((c) => (
                     <Fragment key={c.key}>
@@ -1187,6 +1123,27 @@ export default function ProcessFreightQuotes({
                       onChange={(e) => patch(c.key, { notes: e.target.value })}
                       placeholder="Ex: coleta inclusa" className={cellInput} />
                   ))}
+                </tr>
+
+                <tr>
+                  <Lead sec="EXTRAS" label="Link (Drive)" desc="Download da cotação" />
+                  {fullCells((c) => {
+                    const href = driveDownloadUrl(c.draft.driveUrl.trim());
+                    return (
+                      <div className="flex items-center gap-1">
+                        <input form={F(c)} name="driveUrl" type="url" value={c.draft.driveUrl} disabled={closed}
+                          onChange={(e) => patch(c.key, { driveUrl: e.target.value })}
+                          aria-label="Link do Google Drive da cotação"
+                          placeholder="Cole o link do Google Drive" className={cellInput} />
+                        {href && (
+                          <a href={href} target="_blank" rel="noopener noreferrer" title="Baixar a cotação do Google Drive"
+                            className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[10px] font-bold text-white hover:opacity-90">
+                            Baixar
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </tr>
 
                 {showMore && (

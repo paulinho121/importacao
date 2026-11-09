@@ -19,6 +19,7 @@ import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash, withFlashError } from "@/lib/flash";
+import { normalizeDriveUrl } from "@/lib/drive-links";
 import {
   STATUS_BY_STEP,
   WORKFLOW_STEPS,
@@ -251,8 +252,26 @@ export async function addProcessInvoice(processId: string, formData: FormData) {
   // Opcional — vazio = invoice do fornecedor do próprio processo.
   const supplierId = optionalText(formData, "supplierId");
 
-  await db.insert(processInvoices).values({ processId, invoiceNumber, supplierId });
+  const drive = normalizeDriveUrl(optionalText(formData, "driveUrl"));
+  if (!drive.ok) redirect(withFlashError(`/processos/${processId}`, drive.error));
+
+  await db.insert(processInvoices).values({ processId, invoiceNumber, supplierId, driveUrl: drive.url });
   revalidatePath(`/processos/${processId}`);
+}
+
+// Link do Google Drive com o arquivo da invoice (vazio = remove o link).
+export async function updateProcessInvoiceLink(invoiceId: string, processId: string, formData: FormData) {
+  const back = `/processos/${processId}`;
+  const drive = normalizeDriveUrl(optionalText(formData, "driveUrl"));
+  if (!drive.ok) redirect(withFlashError(back, drive.error));
+
+  await db
+    .update(processInvoices)
+    .set({ driveUrl: drive.url })
+    .where(and(eq(processInvoices.id, invoiceId), eq(processInvoices.processId, processId)));
+
+  revalidatePath(back);
+  redirect(withFlash(back, drive.url ? "Link da invoice salvo." : "Link da invoice removido."));
 }
 
 // Dados de embarque que a planilha do time acompanhava em colunas soltas

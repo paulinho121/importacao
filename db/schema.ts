@@ -365,6 +365,8 @@ export const processInvoices = pgTable("process_invoices", {
   supplierId: uuid("supplier_id").references(() => suppliers.id, { onDelete: "set null" }),
   // Valor FOB declarado desta invoice, na moeda de processes.currency.
   value: numeric("value", { precision: 12, scale: 2 }),
+  // Link do Google Drive com o arquivo da invoice (download direto).
+  driveUrl: text("drive_url"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -702,6 +704,8 @@ export const processFreightQuotes = pgTable(
       .notNull()
       .references(() => processes.id, { onDelete: "cascade" }),
     agentId: uuid("agent_id").references(() => freightAgents.id, { onDelete: "set null" }),
+    // Link do Google Drive com o arquivo da cotação (download direto).
+    driveUrl: text("drive_url"),
     // Referência da proposta do agente (ex: "RKT-014949-26") e a data dela.
     proposal: text("proposal"),
     quoteDate: date("quote_date"),

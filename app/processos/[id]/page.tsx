@@ -15,6 +15,7 @@ import ProcessEditDetails from "@/components/ProcessEditDetails";
 // pro item do processo apesar do nome.
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
+import { driveDownloadUrl } from "@/lib/drive-links";
 import ProcessFreightQuotes, { type FreightQuoteRow } from "@/components/ProcessFreightQuotes";
 import ProcessCompliance from "@/components/ProcessCompliance";
 import LandedCostBreakdown from "@/components/LandedCostBreakdown";
@@ -55,6 +56,7 @@ import {
   removeProcessFollowUp,
   addProcessItem,
   addProcessInvoice,
+  updateProcessInvoiceLink,
   uploadProcessDocument,
 } from "@/app/processos/actions";
 import { createPayable } from "@/app/financeiro/actions";
@@ -101,10 +103,6 @@ export default async function ProcessDetailPage({
       notes: processes.notes,
       currency: processes.currency,
       incoterm: processes.incoterm,
-      freightQuoteNumber: processes.freightQuoteNumber,
-      freightQuoteDate: processes.freightQuoteDate,
-      freightQuoteResponsible: processes.freightQuoteResponsible,
-      freightQuoteNotes: processes.freightQuoteNotes,
       internationalFreightValue: processes.internationalFreightValue,
       insuranceValue: processes.insuranceValue,
       exchangeRate: processes.exchangeRate,
@@ -248,6 +246,7 @@ export default async function ProcessDetailPage({
     notes: q.notes,
     fileName: q.fileName,
     isSelected: q.isSelected,
+    driveUrl: q.driveUrl,
     lines: quoteLineRows
       .filter((l) => l.quoteId === q.id)
       .map((l) => ({
@@ -512,12 +511,6 @@ export default async function ProcessDetailPage({
           incoterm: process.incoterm,
           weightKg: process.weightKg,
         }}
-        header={{
-          number: process.freightQuoteNumber ?? "",
-          date: process.freightQuoteDate ?? "",
-          responsible: process.freightQuoteResponsible ?? "",
-          notes: process.freightQuoteNotes ?? "",
-        }}
         closed={isClosed}
       />
 
@@ -646,18 +639,44 @@ export default async function ProcessDetailPage({
                     Nenhuma invoice registrada.
                   </p>
                 ) : (
-                  <ul className="flex flex-wrap gap-2 mb-3">
-                    {invoices.map((inv) => (
-                      <li
-                        key={inv.id}
-                        className="px-2 py-1 rounded bg-surface-container-low font-mono-data text-xs"
-                      >
-                        {inv.invoiceNumber}
-                        {inv.supplierName && inv.supplierId !== process.supplierId && (
-                          <span className="ml-1.5 font-body-sm text-outline">· {inv.supplierName}</span>
-                        )}
-                      </li>
-                    ))}
+                  <ul className="mb-3 space-y-2">
+                    {invoices.map((inv) => {
+                      const download = driveDownloadUrl(inv.driveUrl);
+                      return (
+                        <li key={inv.id} className="rounded-lg bg-surface-container-low p-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono-data text-xs font-bold">{inv.invoiceNumber}</span>
+                            {inv.supplierName && inv.supplierId !== process.supplierId && (
+                              <span className="font-body-sm text-xs text-outline">· {inv.supplierName}</span>
+                            )}
+                            {download && (
+                              <a
+                                href={download}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-auto rounded-lg bg-secondary px-2.5 py-1 text-[11px] font-bold text-white hover:opacity-90"
+                                title="Baixar a invoice do Google Drive"
+                              >
+                                Baixar invoice
+                              </a>
+                            )}
+                          </div>
+                          <form action={updateProcessInvoiceLink.bind(null, inv.id, id)} className="mt-1.5 flex gap-2">
+                            <input
+                              type="url"
+                              name="driveUrl"
+                              defaultValue={inv.driveUrl ?? ""}
+                              placeholder="Link do Google Drive da invoice"
+                              aria-label={`Link do Drive da invoice ${inv.invoiceNumber}`}
+                              className="min-w-0 flex-1 rounded-lg border border-outline-variant bg-surface p-1.5 text-xs focus:border-secondary focus:outline-none"
+                            />
+                            <SubmitButton className="rounded-lg border border-outline px-2.5 py-1 text-[11px] font-bold text-primary hover:bg-surface-container-high">
+                              Salvar link
+                            </SubmitButton>
+                          </form>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
                 <form action={boundAddInvoice} className="flex flex-wrap gap-2">
@@ -681,6 +700,13 @@ export default async function ProcessDetailPage({
                       </option>
                     ))}
                   </select>
+                  <input
+                    className="flex-1 min-w-[200px] bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                    placeholder="Link do Google Drive (opcional)"
+                    type="url"
+                    name="driveUrl"
+                    aria-label="Link do Google Drive da invoice"
+                  />
                   <SubmitButton
                     className="px-3 py-2 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high transition-all"
                   >

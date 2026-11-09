@@ -23,6 +23,7 @@ import {
 } from "@/lib/freight-quotes";
 import { MODALIDADES, TIPOS_EMBARQUE, modalFromTipo } from "@/lib/modais";
 import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
+import { normalizeDriveUrl } from "@/lib/drive-links";
 
 const CURRENCIES = ["USD", "EUR", "CNY", "GBP", "JPY", "OTHER", "BRL"] as const;
 const MODALS = ["AIR", "SEA_FCL", "SEA_LCL", "SEA_BREAK_BULK", "SEA_RORO", "COURIER", "ROAD"] as const;
@@ -164,12 +165,15 @@ export async function saveFreightQuote(
   const containerType = TIPOS_EMBARQUE.some((t) => t.value === tipoRaw) ? tipoRaw : null;
   const modalFromChoice =
     modalFromTipo(containerType) ?? (modalidade === "AEREO" ? "AIR" : modalidade === "TERRESTRE" ? "ROAD" : null);
+  const drive = normalizeDriveUrl(String(formData.get("driveUrl") ?? ""));
+  if (!drive.ok) return fail(drive.error);
   const statusRaw = text(formData, "status") ?? "";
   const status = isQuoteStatus(statusRaw) ? statusRaw : "ATUALIZADO";
   const cargoCurrencyRaw = text(formData, "cargoValueCurrency");
   const values = {
     agentId,
     proposal: text(formData, "proposal"),
+    driveUrl: drive.url,
     quoteDate: text(formData, "quoteDate"),
     validUntil: text(formData, "validUntil"),
     modal: modalFromChoice && (MODALS as readonly string[]).includes(modalFromChoice) ? (modalFromChoice as Modal) : null,
@@ -384,32 +388,4 @@ export async function fetchDailyRate(
   const result = await fetchPtaxRate({ currency: currency as PtaxCurrency, date: today });
   if (!result.ok) return { ok: false, error: result.error };
   return { ok: true, rate: result.data.rate, date: result.data.date };
-}
-
-// Cabeçalho da planilha de cotações (Cotação Nº, data, responsável e observações
-// gerais): vale para o processo todo, não para uma cotação específica.
-export async function saveFreightQuoteHeader(
-  processId: string,
-  header: { number: string; date: string; responsible: string; notes: string },
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  const clean = (v: string, max: number) => v.trim().slice(0, max) || null;
-  const date = header.date.trim();
-  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: "Data da cotação inválida." };
-  try {
-    await db
-      .update(processes)
-      .set({
-        freightQuoteNumber: clean(header.number, 80),
-        freightQuoteDate: date || null,
-        freightQuoteResponsible: clean(header.responsible, 120),
-        freightQuoteNotes: clean(header.notes, 2000),
-        updatedAt: new Date(),
-      })
-      .where(eq(processes.id, processId));
-  } catch (e) {
-    console.error("saveFreightQuoteHeader falhou", e);
-    return { ok: false, error: "Não foi possível salvar o cabeçalho. Tente novamente." };
-  }
-  revalidatePath(`/processos/${processId}`);
-  return { ok: true };
 }
