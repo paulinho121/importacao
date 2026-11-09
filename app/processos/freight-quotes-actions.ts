@@ -385,3 +385,31 @@ export async function fetchDailyRate(
   if (!result.ok) return { ok: false, error: result.error };
   return { ok: true, rate: result.data.rate, date: result.data.date };
 }
+
+// Cabeçalho da planilha de cotações (Cotação Nº, data, responsável e observações
+// gerais): vale para o processo todo, não para uma cotação específica.
+export async function saveFreightQuoteHeader(
+  processId: string,
+  header: { number: string; date: string; responsible: string; notes: string },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const clean = (v: string, max: number) => v.trim().slice(0, max) || null;
+  const date = header.date.trim();
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: "Data da cotação inválida." };
+  try {
+    await db
+      .update(processes)
+      .set({
+        freightQuoteNumber: clean(header.number, 80),
+        freightQuoteDate: date || null,
+        freightQuoteResponsible: clean(header.responsible, 120),
+        freightQuoteNotes: clean(header.notes, 2000),
+        updatedAt: new Date(),
+      })
+      .where(eq(processes.id, processId));
+  } catch (e) {
+    console.error("saveFreightQuoteHeader falhou", e);
+    return { ok: false, error: "Não foi possível salvar o cabeçalho. Tente novamente." };
+  }
+  revalidatePath(`/processos/${processId}`);
+  return { ok: true };
+}

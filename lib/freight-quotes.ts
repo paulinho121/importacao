@@ -5,7 +5,7 @@
 // "Resumo de despesas" das propostas dos agentes. Só dá pra comparar cotações
 // em reais quando há câmbio do processo para a moeda estrangeira usada.
 
-export type QuoteSection = "FRETE" | "ORIGEM" | "DESTINO" | "OUTRAS";
+export type QuoteSection = "FRETE" | "ORIGEM" | "DESTINO" | "RODOVIARIO" | "OUTRAS";
 
 export const QUOTE_SECTIONS: {
   value: QuoteSection;
@@ -34,6 +34,13 @@ export const QUOTE_SECTIONS: {
     hint: "Taxas cobradas no Brasil.",
     defaultCurrency: "USD",
     suggestions: ["CCT", "Collect fee", "Delivery fee", "Desconsolidação", "Ad valorem", "Entrega", "THC destino", "Armazenagem"],
+  },
+  {
+    value: "RODOVIARIO",
+    label: "Transporte rodoviário (destino)",
+    hint: "TX DESTINO BLR: transporte rodoviário no Brasil.",
+    defaultCurrency: "BRL",
+    suggestions: ["Transporte rodoviário", "Frete rodoviário", "Redespacho"],
   },
   {
     value: "OUTRAS",

@@ -101,6 +101,10 @@ export default async function ProcessDetailPage({
       notes: processes.notes,
       currency: processes.currency,
       incoterm: processes.incoterm,
+      freightQuoteNumber: processes.freightQuoteNumber,
+      freightQuoteDate: processes.freightQuoteDate,
+      freightQuoteResponsible: processes.freightQuoteResponsible,
+      freightQuoteNotes: processes.freightQuoteNotes,
       internationalFreightValue: processes.internationalFreightValue,
       insuranceValue: processes.insuranceValue,
       exchangeRate: processes.exchangeRate,
@@ -507,6 +511,12 @@ export default async function ProcessDetailPage({
           containerType: process.containerType,
           incoterm: process.incoterm,
           weightKg: process.weightKg,
+        }}
+        header={{
+          number: process.freightQuoteNumber ?? "",
+          date: process.freightQuoteDate ?? "",
+          responsible: process.freightQuoteResponsible ?? "",
+          notes: process.freightQuoteNotes ?? "",
         }}
         closed={isClosed}
       />

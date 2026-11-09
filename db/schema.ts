@@ -325,6 +325,11 @@ export const processes = pgTable("processes", {
   // por processo (caso comum na prática — ver lib/dashboard-metrics.ts).
   currency: currencyEnum("currency"),
   incoterm: text("incoterm"),
+  // Cabeçalho da planilha de cotações de frete (vale para o processo todo)
+  freightQuoteNumber: text("freight_quote_number"),
+  freightQuoteDate: date("freight_quote_date"),
+  freightQuoteResponsible: text("freight_quote_responsible"),
+  freightQuoteNotes: text("freight_quote_notes"),
   internationalFreightValue: numeric("international_freight_value", { precision: 12, scale: 2 }),
   insuranceValue: numeric("insurance_value", { precision: 12, scale: 2 }),
   // Câmbio de venda PTAX (Bacen) usado para converter os valores acima
@@ -762,6 +767,7 @@ export const freightQuoteSectionEnum = pgEnum("freight_quote_section", [
   "ORIGEM",
   "DESTINO",
   "OUTRAS",
+  "RODOVIARIO", // TX DESTINO BLR: transporte rodoviário no destino
 ]);
 
 // Linha de valor de uma cotação: tarifa × quantidade (com mínimo) = total.

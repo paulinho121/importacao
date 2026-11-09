@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import {
   saveFreightQuote,
@@ -8,6 +9,7 @@ import {
   selectFreightQuote,
   clearFreightQuoteSelection,
   fetchDailyRate,
+  saveFreightQuoteHeader,
 } from "@/app/processos/freight-quotes-actions";
 import DocumentViewer from "@/components/DocumentViewer";
 import { MODALIDADES, TIPOS_EMBARQUE } from "@/lib/modais";
@@ -103,6 +105,7 @@ type Draft = {
   freightCurrency: string;
   originTaxes: Tax[];
   destinationTaxes: Tax[];
+  roadTaxes: Tax[]; // TX DESTINO BLR (transporte rodoviário)
   dta: string;
   dtaCurrency: string;
   otherName: string;
@@ -138,8 +141,8 @@ type Col = {
 const num = (v: string | number | null | undefined) =>
   v === null || v === undefined || v === "" ? "" : String(Number(v));
 
-const blankTaxes = (n = MAX_TAX_ROWS): Tax[] =>
-  Array.from({ length: n }, () => ({ name: "", currency: "USD", value: "" }));
+const blankTaxes = (n = MAX_TAX_ROWS, currency = "USD"): Tax[] =>
+  Array.from({ length: n }, () => ({ name: "", currency, value: "" }));
 
 const OTHER_DEFAULT_NAME = "Outros custos";
 
@@ -163,6 +166,7 @@ function emptyDraft(d: Defaults): Draft {
     freightCurrency: "USD",
     originTaxes: blankTaxes(),
     destinationTaxes: blankTaxes(),
+    roadTaxes: blankTaxes(MAX_TAX_ROWS, "BRL"),
     dta: "",
     dtaCurrency: "BRL",
     otherName: "",
@@ -184,9 +188,9 @@ function emptyDraft(d: Defaults): Draft {
   };
 }
 
-function taxesFromLines(lines: FreightQuoteLineRow[]): Tax[] {
+function taxesFromLines(lines: FreightQuoteLineRow[], blankCurrency = "USD"): Tax[] {
   const taxes: Tax[] = lines.map((l) => ({ name: l.description, currency: l.currency, value: num(l.total) }));
-  while (taxes.length < MAX_TAX_ROWS) taxes.push({ name: "", currency: "USD", value: "" });
+  while (taxes.length < MAX_TAX_ROWS) taxes.push({ name: "", currency: blankCurrency, value: "" });
   return taxes;
 }
 
@@ -216,6 +220,7 @@ function draftFromQuote(q: FreightQuoteRow, d: Defaults): Draft {
     freightCurrency: freight?.currency ?? "USD",
     originTaxes: taxesFromLines(bySection("ORIGEM")),
     destinationTaxes: taxesFromLines(bySection("DESTINO")),
+    roadTaxes: taxesFromLines(bySection("RODOVIARIO"), "BRL"),
     dta: dta ? num(dta.total) : "",
     dtaCurrency: dta?.currency ?? "BRL",
     otherName: other && other.description !== OTHER_DEFAULT_NAME ? other.description : "",
@@ -294,6 +299,7 @@ function linesOf(d: Draft): SubmitLine[] {
   };
   addTaxes("ORIGEM", d.originTaxes, "TX origem");
   addTaxes("DESTINO", d.destinationTaxes, "TX destino");
+  addTaxes("RODOVIARIO", d.roadTaxes, "TX destino BLR");
   const dta = toNumber(d.dta);
   if (dta !== null) {
     out.push({ section: "OUTRAS", description: "DTA", quantity: "", unitPrice: "", unit: "", currency: d.dtaCurrency, total: dta });
@@ -325,14 +331,31 @@ let seq = 0;
 // ----------------------------------------------------------------- estilos
 
 const cellInput =
-  "w-full bg-surface-container-low border border-outline-variant/60 rounded px-2 py-1 text-xs focus:outline-none focus:border-secondary transition-all";
+  "w-full bg-surface-container-low border border-outline-variant/60 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-secondary transition-all";
 const moneyInput = `${cellInput} font-mono-data text-right`;
-const labelCell =
-  "sticky left-0 z-10 bg-surface-container-lowest py-1.5 pr-3 pl-2 text-left align-middle font-label-md text-label-md text-on-surface-variant whitespace-nowrap border-t border-outline-variant/40";
-const dataCell = "py-1.5 px-1.5 align-middle border-t border-l border-outline-variant/40";
+const dataCell = "py-1 px-1.5 align-middle border-t border-l border-outline-variant/40";
+const keyCell =
+  "sticky z-10 bg-surface-container-lowest px-2 py-1 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface whitespace-nowrap border-t border-outline-variant/40";
+const descCell =
+  "overflow-hidden text-ellipsis whitespace-nowrap px-2 py-1 align-middle text-[11px] text-on-surface-variant border-t border-outline-variant/40";
 const CURRENCIES = ["USD", "BRL", "EUR", "CNY", "GBP", "JPY", "OTHER"];
-const SECTION_BG: Record<string, string> = { CARGA: "#1f9d8f", ORIGEM: "#2b7bbf", DESTINO: "#7b5ea7", OUTROS: "#d86a8a" };
+// Blocos coloridos à esquerda, como na planilha do time.
+type SecKey = "GERAIS" | "ROTA" | "CARGA" | "TAXAS" | "TOTAL" | "EXTRAS";
+const SEC: Record<SecKey, string> = {
+  GERAIS: "#1e5a96",
+  ROTA: "#5b6b85",
+  CARGA: "#1f9d8f",
+  TAXAS: "#2b7bbf",
+  TOTAL: "#d99a14",
+  EXTRAS: "#7b5ea7",
+};
 
+// Larguras fixas: a tabela não estica quando há poucas cotações (campos ficam juntos do rótulo).
+const BLOCK_W = 88;
+const KEY_W = 128;
+const DESC_W = 150;
+const LABEL_W = BLOCK_W + KEY_W + DESC_W;
+const COL_W = 112 + 66 + 106;
 const SPAN = 3; // subcolunas por cotação: nome | moeda | custos
 
 const money = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -380,6 +403,7 @@ export default function ProcessFreightQuotes({
   processCurrency,
   exchangeRate,
   defaults,
+  header,
   closed,
 }: {
   processId: string;
@@ -388,6 +412,7 @@ export default function ProcessFreightQuotes({
   processCurrency: string | null;
   exchangeRate: number | null;
   defaults: Defaults;
+  header: { number: string; date: string; responsible: string; notes: string };
   closed: boolean;
 }) {
   const [cols, setCols] = useState<Col[]>(() =>
@@ -407,7 +432,31 @@ export default function ProcessFreightQuotes({
   );
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
-  const [userRows, setUserRows] = useState({ origin: DEFAULT_TAX_ROWS, destination: DEFAULT_TAX_ROWS });
+  const [userRows, setUserRows] = useState({ origin: DEFAULT_TAX_ROWS, destination: DEFAULT_TAX_ROWS, road: DEFAULT_TAX_ROWS });
+  const [open, setOpen] = useState({ origin: true, destination: true, road: true });
+  const toggle = (k: "origin" | "destination" | "road") => setOpen((o) => ({ ...o, [k]: !o[k] }));
+
+  // Cabeçalho da planilha (vale para o processo todo)
+  const [hdr, setHdr] = useState(header);
+  const [hdrBase, setHdrBase] = useState(JSON.stringify(header));
+  const [hdrSaving, setHdrSaving] = useState(false);
+  const hdrDirty = JSON.stringify(hdr) !== hdrBase;
+  async function saveHeader() {
+    setHdrSaving(true);
+    try {
+      const res = await saveFreightQuoteHeader(processId, hdr);
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setHdrBase(JSON.stringify(hdr));
+      toast.success("Cabeçalho da cotação salvo.");
+    } catch {
+      toast.error("Não foi possível salvar o cabeçalho. Tente novamente.");
+    } finally {
+      setHdrSaving(false);
+    }
+  }
 
   // Moeda estrangeira da comparação e o câmbio ("dólar do dia"), só para
   // comparar as cotações: não altera o câmbio salvo no processo.
@@ -462,7 +511,7 @@ export default function ProcessFreightQuotes({
     setCols((prev) => prev.map((c) => (c.key === key ? { ...c, draft: { ...c.draft, ...p } } : c)));
   }
 
-  function patchTax(key: string, field: "originTaxes" | "destinationTaxes", index: number, p: Partial<Tax>) {
+  function patchTax(key: string, field: "originTaxes" | "destinationTaxes" | "roadTaxes", index: number, p: Partial<Tax>) {
     setCols((prev) =>
       prev.map((c) => {
         if (c.key !== key) return c;
@@ -584,9 +633,42 @@ export default function ProcessFreightQuotes({
     Math.max(userRows.destination, ...cols.map((c) => lastFilled(c.draft.destinationTaxes))),
   );
 
+  const rowsRoad = Math.min(
+    MAX_TAX_ROWS,
+    Math.max(userRows.road, ...cols.map((c) => lastFilled(c.draft.roadTaxes))),
+  );
+  const detail = (isOpen: boolean, n: number) => (isOpen ? n + (!closed && n < MAX_TAX_ROWS ? 1 : 0) : 0);
+  // linhas do bloco TAXAS: 3 resumos + DTA + Outros + detalhes abertos
+  const taxSpan =
+    5 + detail(open.origin, rowsOrigin) + detail(open.destination, rowsDestination) + detail(open.road, rowsRoad);
+  // linhas do bloco EXTRAS: observação + (10 dados extras) + (ações)
+  const extrasSpan = 1 + (showMore ? 10 : 0) + (closed ? 0 : 1);
+
   const nCols = cols.length;
   const today = new Date().toISOString().slice(0, 10);
   const F = (c: Col) => `fq-${c.key}`;
+
+  // células que ocupam a coluna inteira da cotação (nome + moeda + custos)
+  const fullCells = (render: (c: Col) => ReactNode) =>
+    cols.map((c) => (
+      <td key={c.key} colSpan={SPAN} className={dataCell}>
+        {render(c)}
+      </td>
+    ));
+  // resumo de um grupo de taxas por cotação: "USD 120,00 + BRL 50,00"
+  const summaryCells = (section: QuoteSection) =>
+    cols.map((c, i) => {
+      const totals = totalsByCurrency(computed[i].lines.filter((l) => l.section === section));
+      return (
+        <td key={c.key} colSpan={SPAN} className={`${dataCell} text-right font-mono-data text-xs font-bold text-primary`}>
+          {totals.length === 0 ? (
+            <span className="font-normal text-on-surface-variant">—</span>
+          ) : (
+            totals.map((t) => `${t.currency} ${money(t.value)}`).join(" + ")
+          )}
+        </td>
+      );
+    });
 
   return (
     <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
@@ -623,6 +705,37 @@ export default function ProcessFreightQuotes({
             ))}
           </div>
 
+          <div className="mb-3 grid gap-x-4 gap-y-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 md:grid-cols-2">
+            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
+              <span className="w-28 shrink-0">Cotação Nº</span>
+              <input value={hdr.number} disabled={closed} onChange={(e) => setHdr({ ...hdr, number: e.target.value })}
+                placeholder="Nº da cotação" className={cellInput} />
+            </label>
+            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
+              <span className="w-28 shrink-0">Data da cotação</span>
+              <input type="date" value={hdr.date} disabled={closed} onChange={(e) => setHdr({ ...hdr, date: e.target.value })}
+                className={cellInput} />
+            </label>
+            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
+              <span className="w-28 shrink-0">Responsável</span>
+              <input value={hdr.responsible} disabled={closed} onChange={(e) => setHdr({ ...hdr, responsible: e.target.value })}
+                placeholder="Quem fez a cotação" className={cellInput} />
+            </label>
+            <label className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-on-surface">
+              <span className="w-28 shrink-0">Observações</span>
+              <input value={hdr.notes} disabled={closed} onChange={(e) => setHdr({ ...hdr, notes: e.target.value })}
+                placeholder="Ex: valores estimados sujeitos a confirmação" className={cellInput} />
+            </label>
+            {!closed && (
+              <div className="md:col-span-2 flex justify-end">
+                <button type="button" onClick={saveHeader} disabled={hdrSaving || !hdrDirty}
+                  className="px-3 py-1 rounded-lg border border-secondary text-secondary text-xs font-bold hover:bg-secondary/10 disabled:opacity-40">
+                  {hdrSaving ? "Salvando…" : hdrDirty ? "Salvar cabeçalho" : "Cabeçalho salvo"}
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-surface-container-low px-3 py-2">
             <label className="text-xs text-on-surface-variant">
               <span className="block mb-0.5">
@@ -655,9 +768,14 @@ export default function ProcessFreightQuotes({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="border-collapse text-body-sm font-body-sm min-w-full">
+            <table
+              className="table-fixed border-collapse text-body-sm font-body-sm"
+              style={{ width: LABEL_W + nCols * COL_W }}
+            >
               <colgroup>
-                <col style={{ width: 160 }} />
+                <col style={{ width: BLOCK_W }} />
+                <col style={{ width: KEY_W }} />
+                <col style={{ width: DESC_W }} />
                 {cols.map((c) => {
                   // sombreado da coluna inteira na cor da empresa; cotação FECHADA fica verde
                   const tint = isFechada(c)
@@ -673,9 +791,14 @@ export default function ProcessFreightQuotes({
                 })}
               </colgroup>
               <tbody>
-                {/* AGENTE DE CARGAS */}
+                {/* EMPRESAS (cabeçalho colorido) */}
                 <tr>
-                  <th className={labelCell}>Agente de cargas</th>
+                  <th
+                    colSpan={3}
+                    className="sticky left-0 z-10 bg-surface-container-lowest px-2 py-2 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface"
+                  >
+                    Agente de cargas
+                  </th>
                   {cols.map((c) => (
                     <td
                       key={c.key}
@@ -720,18 +843,23 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* SITUAÇÃO: ATUALIZADO / ANTIGO / FECHADO */}
+                {/* DADOS GERAIS */}
                 <tr>
-                  <th className={`${labelCell} text-primary font-bold`}>Situação da proposta</th>
+                  <Lead sec="GERAIS" name="Dados gerais" span={5} label="Situação" desc="Situação da proposta" />
                   {cols.map((c) => {
                     const st = QUOTE_STATUSES.find((s) => s.value === c.draft.status) ?? QUOTE_STATUSES[0];
                     return (
                       <td key={c.key} colSpan={SPAN} className={dataCell}>
-                        <select form={F(c)} name="status" value={c.draft.status} disabled={closed}
+                        <select
+                          form={F(c)}
+                          name="status"
+                          value={c.draft.status}
+                          disabled={closed}
                           onChange={(e) => patch(c.key, { status: e.target.value })}
                           aria-label="Situação da cotação"
-                          className={`w-full rounded px-2 py-1.5 text-xs font-bold text-center uppercase appearance-none focus:outline-none ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
-                          style={{ background: c.draft.status === "FECHADO" ? "#4ade80" : st.color }}>
+                          className={`w-full rounded px-2 py-1 text-xs font-bold text-center uppercase appearance-none focus:outline-none ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
+                          style={{ background: c.draft.status === "FECHADO" ? "#4ade80" : st.color }}
+                        >
                           {QUOTE_STATUSES.map((s) => (
                             <option key={s.value} value={s.value} className="text-black">
                               {s.label}
@@ -742,98 +870,127 @@ export default function ProcessFreightQuotes({
                     );
                   })}
                 </tr>
+                <tr>
+                  <Lead sec="GERAIS" label="Proposta" desc="Nº da proposta do agente" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="proposal" value={c.draft.proposal} disabled={closed}
+                      onChange={(e) => patch(c.key, { proposal: e.target.value })}
+                      placeholder="Nº da proposta" className={cellInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="GERAIS" label="Modal" desc="Modal de transporte" />
+                  {fullCells((c) => (
+                    <select form={F(c)} name="modalidade" value={c.draft.modalidade} disabled={closed}
+                      onChange={(e) => {
+                        const m = e.target.value;
+                        const tipoOk = TIPOS_EMBARQUE.some((t) => t.value === c.draft.containerType && t.modalidade === m);
+                        patch(c.key, { modalidade: m, containerType: tipoOk ? c.draft.containerType : "" });
+                      }}
+                      className={`${cellInput} appearance-none`}>
+                      <option value="">Marítimo / Aéreo…</option>
+                      {MODALIDADES.map((m) => (
+                        <option key={m.value} value={m.value}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="GERAIS" label="Tipo" desc="Tipo de embarque" />
+                  {fullCells((c) => (
+                    <select form={F(c)} name="containerType" value={c.draft.containerType} disabled={closed}
+                      onChange={(e) => {
+                        const t = TIPOS_EMBARQUE.find((x) => x.value === e.target.value);
+                        patch(c.key, { containerType: e.target.value, modalidade: t ? t.modalidade : c.draft.modalidade });
+                      }}
+                      className={`${cellInput} appearance-none`}>
+                      <option value="">FCL, LCL…</option>
+                      {TIPOS_EMBARQUE.filter((t) => !c.draft.modalidade || t.modalidade === c.draft.modalidade).map((t) => (
+                        <option key={`${t.modalidade}-${t.value}`} value={t.value}>
+                          {t.value}
+                        </option>
+                      ))}
+                    </select>
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="GERAIS" label="Incoterm" desc="Termo de comércio" />
+                  {fullCells((c) => (
+                    <select form={F(c)} name="incoterm" value={c.draft.incoterm} disabled={closed}
+                      onChange={(e) => patch(c.key, { incoterm: e.target.value })}
+                      className={`${cellInput} appearance-none`}>
+                      <option value="">EXW, FOB, CIF…</option>
+                      {INCOTERMS.map((t) => (
+                        <option key={t} value={t}>
+                          {t.split(" - ")[0]}
+                        </option>
+                      ))}
+                    </select>
+                  ))}
+                </tr>
 
-                <FullRow label="Proposta" cols={cols} render={(c) => (
-                  <input form={F(c)} name="proposal" value={c.draft.proposal} disabled={closed}
-                    onChange={(e) => patch(c.key, { proposal: e.target.value })}
-                    placeholder="Nº da proposta" className={cellInput} />
-                )} />
-                <FullRow label="Incoterm" cols={cols} render={(c) => (
-                  <select form={F(c)} name="incoterm" value={c.draft.incoterm} disabled={closed}
-                    onChange={(e) => patch(c.key, { incoterm: e.target.value })}
-                    className={`${cellInput} appearance-none`}>
-                    <option value="">EXW, FOB, CIF…</option>
-                    {INCOTERMS.map((t) => (
-                      <option key={t} value={t}>
-                        {t.split(" - ")[0]}
-                      </option>
-                    ))}
-                  </select>
-                )} />
-                <FullRow label="Modal" cols={cols} render={(c) => (
-                  <select form={F(c)} name="modalidade" value={c.draft.modalidade} disabled={closed}
-                    onChange={(e) => {
-                      const m = e.target.value;
-                      const tipoOk = TIPOS_EMBARQUE.some((t) => t.value === c.draft.containerType && t.modalidade === m);
-                      patch(c.key, { modalidade: m, containerType: tipoOk ? c.draft.containerType : "" });
-                    }}
-                    className={`${cellInput} appearance-none`}>
-                    <option value="">Marítimo / Aéreo…</option>
-                    {MODALIDADES.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                )} />
-                <FullRow label="Tipo" cols={cols} render={(c) => (
-                  <select form={F(c)} name="containerType" value={c.draft.containerType} disabled={closed}
-                    onChange={(e) => {
-                      const t = TIPOS_EMBARQUE.find((x) => x.value === e.target.value);
-                      patch(c.key, { containerType: e.target.value, modalidade: t ? t.modalidade : c.draft.modalidade });
-                    }}
-                    className={`${cellInput} appearance-none`}>
-                    <option value="">FCL, LCL…</option>
-                    {TIPOS_EMBARQUE.filter((t) => !c.draft.modalidade || t.modalidade === c.draft.modalidade).map((t) => (
-                      <option key={`${t.modalidade}-${t.value}`} value={t.value}>
-                        {t.value}
-                      </option>
-                    ))}
-                  </select>
-                )} />
-
-                {/* INFORMAÇÕES */}
-                <FullRow label="Trânsito (dias)" cols={cols} render={(c) => (
-                  <div className="flex items-center gap-1">
-                    <input form={F(c)} name="transitDays" type="number" min="0" step="1" value={c.draft.transitDays}
-                      disabled={closed} onChange={(e) => patch(c.key, { transitDays: e.target.value })}
-                      aria-label="Trânsito mínimo" placeholder="de" className={moneyInput} />
-                    <span className="text-[11px] text-on-surface-variant">a</span>
-                    <input form={F(c)} name="transitDaysMax" type="number" min="0" step="1" value={c.draft.transitDaysMax}
-                      disabled={closed} onChange={(e) => patch(c.key, { transitDaysMax: e.target.value })}
-                      aria-label="Trânsito máximo" placeholder="até" className={moneyInput} />
-                  </div>
-                )} />
-                <FullRow label="Origem" cols={cols} render={(c) => (
-                  <input form={F(c)} name="origin" value={c.draft.origin} disabled={closed}
-                    onChange={(e) => patch(c.key, { origin: e.target.value })} placeholder="Ex: HKG" className={cellInput} />
-                )} />
-                <FullRow label="Destino" cols={cols} render={(c) => (
-                  <input form={F(c)} name="destination" value={c.draft.destination} disabled={closed}
-                    onChange={(e) => patch(c.key, { destination: e.target.value })} placeholder="Ex: GRU" className={cellInput} />
-                )} />
-                <FullRow label="Cia" cols={cols} render={(c) => (
-                  <input form={F(c)} name="carrier" value={c.draft.carrier} disabled={closed}
-                    onChange={(e) => patch(c.key, { carrier: e.target.value })} placeholder="Ex: Qatar Airways" className={cellInput} />
-                )} />
-                <FullRow label="Validade da proposta" cols={cols} render={(c) => (
-                  <>
-                    <input form={F(c)} name="validUntil" type="date" value={c.draft.validUntil} disabled={closed}
-                      onChange={(e) => patch(c.key, { validUntil: e.target.value })} className={cellInput} />
-                    {c.draft.validUntil && c.draft.validUntil < today && (
-                      <p className="mt-0.5 text-[10px] font-bold text-error">Proposta vencida</p>
-                    )}
-                  </>
-                )} />
+                {/* ROTA E PRAZOS */}
+                <tr>
+                  <Lead sec="ROTA" name="Rota e prazos" span={5} label="Trânsito" desc="Dias de trânsito" />
+                  {fullCells((c) => (
+                    <div className="flex items-center gap-1">
+                      <input form={F(c)} name="transitDays" type="number" min="0" step="1" value={c.draft.transitDays}
+                        disabled={closed} onChange={(e) => patch(c.key, { transitDays: e.target.value })}
+                        aria-label="Trânsito mínimo" placeholder="de" className={moneyInput} />
+                      <span className="text-[11px] text-on-surface-variant">a</span>
+                      <input form={F(c)} name="transitDaysMax" type="number" min="0" step="1" value={c.draft.transitDaysMax}
+                        disabled={closed} onChange={(e) => patch(c.key, { transitDaysMax: e.target.value })}
+                        aria-label="Trânsito máximo" placeholder="até" className={moneyInput} />
+                    </div>
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="Origem" desc="Aeroporto / porto de origem" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="origin" value={c.draft.origin} disabled={closed}
+                      onChange={(e) => patch(c.key, { origin: e.target.value })} placeholder="Ex: HKG" className={cellInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="Destino" desc="Aeroporto / porto de destino" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="destination" value={c.draft.destination} disabled={closed}
+                      onChange={(e) => patch(c.key, { destination: e.target.value })} placeholder="Ex: GRU" className={cellInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="Cia" desc="Companhia aérea / armador" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="carrier" value={c.draft.carrier} disabled={closed}
+                      onChange={(e) => patch(c.key, { carrier: e.target.value })} placeholder="Ex: Qatar Airways" className={cellInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="Validade" desc="Validade da proposta" />
+                  {fullCells((c) => (
+                    <>
+                      <input form={F(c)} name="validUntil" type="date" value={c.draft.validUntil} disabled={closed}
+                        onChange={(e) => patch(c.key, { validUntil: e.target.value })} className={cellInput} />
+                      {c.draft.validUntil && c.draft.validUntil < today && (
+                        <p className="mt-0.5 text-[10px] font-bold text-error">Proposta vencida</p>
+                      )}
+                    </>
+                  ))}
+                </tr>
 
                 {/* CARGA */}
-                <FullRow label="Peso considerado (kg)" tag="CARGA" cols={cols} render={(c) => (
-                  <input form={F(c)} name="grossWeightKg" type="number" step="any" min="0" value={c.draft.grossWeightKg}
-                    disabled={closed} onChange={(e) => patch(c.key, { grossWeightKg: e.target.value })}
-                    className={moneyInput} />
-                )} />
                 <tr>
-                  <th className={labelCell}>Frete (kg / moeda)</th>
+                  <Lead sec="CARGA" name="Carga" span={3} label="Carga (kg)" desc="Peso bruto total" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="grossWeightKg" type="number" step="any" min="0" value={c.draft.grossWeightKg}
+                      disabled={closed} onChange={(e) => patch(c.key, { grossWeightKg: e.target.value })}
+                      className={moneyInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="CARGA" label="Frete" desc="Frete internacional (por kg)" />
                   {cols.map((c) => (
                     <Fragment key={c.key}>
                       <td className={`${dataCell} text-[11px] text-on-surface-variant text-center`}>por kg</td>
@@ -850,7 +1007,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
                 <tr>
-                  <th className={labelCell}>Carga × Frete</th>
+                  <Lead sec="CARGA" label="Carga x Frete" desc="Total carga + frete" />
                   {cols.map((c) => {
                     const total = freightTotal(c.draft);
                     const kg = toNumber(c.draft.grossWeightKg);
@@ -870,42 +1027,64 @@ export default function ProcessFreightQuotes({
                   })}
                 </tr>
 
-                {/* CABEÇALHO DAS TAXAS: "1 - EMPRESA" */}
+                {/* TAXAS: um resumo por grupo; as taxas por nome abrem logo abaixo */}
                 <tr>
-                  <th className={labelCell} />
-                  {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} text-center text-xs font-bold`}>
-                      {i + 1} - {agents.find((a) => a.id === c.draft.agentId)?.name ?? "Empresa"}
-                    </td>
-                  ))}
+                  <Lead sec="TAXAS" name="Taxas" span={taxSpan}
+                    label={<GroupToggle label="TX origem" open={open.origin} onClick={() => toggle("origin")} />}
+                    desc="Taxa de origem" />
+                  {summaryCells("ORIGEM")}
                 </tr>
-
-                {/* TX ORIGEM */}
-                {Array.from({ length: rowsOrigin }, (_, i) => (
-                  <TaxRow key={`o${i}`} index={i} tag="TX ORIGEM" tagBg={SECTION_BG.ORIGEM} cols={cols} closed={closed}
-                    taxOf={(c) => c.draft.originTaxes[i] ?? { name: "", currency: "USD", value: "" }}
-                    onChange={(c, p) => patchTax(c.key, "originTaxes", i, p)} />
-                ))}
-                {!closed && rowsOrigin < MAX_TAX_ROWS && (
-                  <AddRowLine onClick={() => setUserRows((r) => ({ ...r, origin: rowsOrigin + 1 }))} label="+ taxa na origem" />
+                {open.origin && (
+                  <>
+                    {Array.from({ length: rowsOrigin }, (_, i) => (
+                      <TaxRow key={`o${i}`} index={i} tag="TX origem" cols={cols} closed={closed}
+                        taxOf={(c) => c.draft.originTaxes[i] ?? { name: "", currency: "USD", value: "" }}
+                        onChange={(c, p) => patchTax(c.key, "originTaxes", i, p)} />
+                    ))}
+                    {!closed && rowsOrigin < MAX_TAX_ROWS && (
+                      <AddRowLine onClick={() => setUserRows((r) => ({ ...r, origin: rowsOrigin + 1 }))} label="+ taxa na origem" />
+                    )}
+                  </>
                 )}
 
-                {/* TX DESTINO */}
-                {Array.from({ length: rowsDestination }, (_, i) => (
-                  <TaxRow key={`d${i}`} index={i} tag="TX DESTINO" tagBg={SECTION_BG.DESTINO} cols={cols} closed={closed}
-                    taxOf={(c) => c.draft.destinationTaxes[i] ?? { name: "", currency: "USD", value: "" }}
-                    onChange={(c, p) => patchTax(c.key, "destinationTaxes", i, p)} />
-                ))}
-                {!closed && rowsDestination < MAX_TAX_ROWS && (
-                  <AddRowLine onClick={() => setUserRows((r) => ({ ...r, destination: rowsDestination + 1 }))} label="+ taxa no destino" />
-                )}
-
-                {/* DTA e OUTROS CUSTOS */}
                 <tr>
-                  <th className={labelCell}>
-                    <Tag bg={SECTION_BG.OUTROS}>OUTROS</Tag>
-                    DTA
-                  </th>
+                  <Lead sec="TAXAS" label={<GroupToggle label="TX destino" open={open.destination} onClick={() => toggle("destination")} />}
+                    desc="Taxa de destino" />
+                  {summaryCells("DESTINO")}
+                </tr>
+                {open.destination && (
+                  <>
+                    {Array.from({ length: rowsDestination }, (_, i) => (
+                      <TaxRow key={`d${i}`} index={i} tag="TX destino" cols={cols} closed={closed}
+                        taxOf={(c) => c.draft.destinationTaxes[i] ?? { name: "", currency: "USD", value: "" }}
+                        onChange={(c, p) => patchTax(c.key, "destinationTaxes", i, p)} />
+                    ))}
+                    {!closed && rowsDestination < MAX_TAX_ROWS && (
+                      <AddRowLine onClick={() => setUserRows((r) => ({ ...r, destination: rowsDestination + 1 }))} label="+ taxa no destino" />
+                    )}
+                  </>
+                )}
+
+                <tr>
+                  <Lead sec="TAXAS" label={<GroupToggle label="TX destino BLR" open={open.road} onClick={() => toggle("road")} />}
+                    desc="Transporte rodoviário" />
+                  {summaryCells("RODOVIARIO")}
+                </tr>
+                {open.road && (
+                  <>
+                    {Array.from({ length: rowsRoad }, (_, i) => (
+                      <TaxRow key={`r${i}`} index={i} tag="TX destino BLR" cols={cols} closed={closed}
+                        taxOf={(c) => c.draft.roadTaxes[i] ?? { name: "", currency: "BRL", value: "" }}
+                        onChange={(c, p) => patchTax(c.key, "roadTaxes", i, p)} />
+                    ))}
+                    {!closed && rowsRoad < MAX_TAX_ROWS && (
+                      <AddRowLine onClick={() => setUserRows((r) => ({ ...r, road: rowsRoad + 1 }))} label="+ taxa de transporte rodoviário" />
+                    )}
+                  </>
+                )}
+
+                <tr>
+                  <Lead sec="TAXAS" label="DTA" desc="Declaração de trânsito" />
                   {cols.map((c) => (
                     <Fragment key={c.key}>
                       <td className={dataCell} />
@@ -922,7 +1101,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
                 <tr>
-                  <th className={labelCell}>Outros custos</th>
+                  <Lead sec="TAXAS" label="Outros" desc="Custo adicional" />
                   {cols.map((c) => (
                     <Fragment key={c.key}>
                       <td className={dataCell}>
@@ -942,22 +1121,34 @@ export default function ProcessFreightQuotes({
                     </Fragment>
                   ))}
                 </tr>
-                <FullRow label="Observação / ajuste" cols={cols} render={(c) => (
-                  <textarea form={F(c)} name="notes" rows={2} value={c.draft.notes} disabled={closed}
-                    onChange={(e) => patch(c.key, { notes: e.target.value })}
-                    placeholder="Ex: coleta inclusa" className={cellInput} />
-                )} />
 
-                {/* CUSTOS ESTIMADOS */}
-                <tr className="bg-surface-container-high/60">
-                  <th className={`${labelCell} text-primary font-bold`}>Custo estimado em moeda</th>
+                {/* TOTAL */}
+                <tr>
+                  <Lead sec="TOTAL" name="Total" span={3} label={`Total ${foreign}`} desc={`Total em ${foreign === "USD" ? "dólares" : foreign}`} />
                   {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
+                    <td key={c.key} colSpan={SPAN}
+                      className={`${dataCell} align-top text-right font-mono-data text-sm font-extrabold text-primary ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {isCheapest(i) && (
-                        <span className="mb-1 inline-block rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
+                        <span className="mb-1 mr-auto block w-fit rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
                           MENOR CUSTO
                         </span>
                       )}
+                      {computed[i].inForeign !== null ? (
+                        `${foreign} ${money(computed[i].inForeign!)}`
+                      ) : computed[i].totals.length === 0 ? (
+                        <span className="text-on-surface-variant font-normal">—</span>
+                      ) : (
+                        <span className="text-[10px] font-normal text-outline">
+                          {rate ? "Moedas sem conversão" : "Informe o dólar do dia"}
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="TOTAL" label="Total em moeda" desc="Soma por moeda" />
+                  {cols.map((c, i) => (
+                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {computed[i].totals.length === 0 ? (
                         <span className="text-on-surface-variant">—</span>
                       ) : (
@@ -971,33 +1162,14 @@ export default function ProcessFreightQuotes({
                     </td>
                   ))}
                 </tr>
-                <tr className="bg-surface-container-high/60">
-                  <th className={`${labelCell} text-primary font-bold`}>
-                    Custo estimado em {foreign}
-                    <span className="block text-[10px] font-normal text-on-surface-variant">considerando o dólar do dia</span>
-                  </th>
-                  {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} text-right font-mono-data text-xs font-bold text-primary ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
-                      {computed[i].inForeign !== null ? (
-                        `${foreign} ${money(computed[i].inForeign!)}`
-                      ) : (
-                        <span className="text-[10px] font-normal text-outline">
-                          {rate ? "Moedas sem conversão" : "Informe o dólar do dia"}
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="bg-surface-container-high/60">
-                  <th className={`${labelCell} text-primary font-bold`}>Valor final em BRL</th>
+                <tr>
+                  <Lead sec="TOTAL" label="Total BRL" desc="Valor final em reais" />
                   {cols.map((c, i) => (
                     <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {computed[i].inBRL !== null ? (
-                        <>
-                          <p className="text-right font-mono-data text-sm font-bold text-primary">
-                            {formatMoney(computed[i].inBRL!, "BRL")}
-                          </p>
-                        </>
+                        <p className="text-right font-mono-data text-sm font-bold text-primary">
+                          {formatMoney(computed[i].inBRL!, "BRL")}
+                        </p>
                       ) : (
                         <span className="block text-right text-[10px] text-outline">
                           {computed[i].totals.length === 0 ? "—" : rate ? "Moedas sem conversão" : "Informe o dólar do dia"}
@@ -1007,39 +1179,69 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* MAIS DADOS DA PROPOSTA */}
+                {/* OBSERVAÇÃO, DADOS EXTRAS E AÇÕES */}
+                <tr>
+                  <Lead sec="EXTRAS" name="Extras" span={extrasSpan} label="Observação" desc="Ajuste / ressalva" />
+                  {fullCells((c) => (
+                    <textarea form={F(c)} name="notes" rows={2} value={c.draft.notes} disabled={closed}
+                      onChange={(e) => patch(c.key, { notes: e.target.value })}
+                      placeholder="Ex: coleta inclusa" className={cellInput} />
+                  ))}
+                </tr>
+
                 {showMore && (
                   <>
-                    <FullRow label="Rota (escalas)" cols={cols} render={(c) => (
-                      <input form={F(c)} name="route" value={c.draft.route} disabled={closed}
-                        onChange={(e) => patch(c.key, { route: e.target.value })} placeholder="Ex: PKE-CDG-GRU" className={cellInput} />
-                    )} />
-                    <FullRow label="Data da cotação" cols={cols} render={(c) => (
-                      <input form={F(c)} name="quoteDate" type="date" value={c.draft.quoteDate} disabled={closed}
-                        onChange={(e) => patch(c.key, { quoteDate: e.target.value })} className={cellInput} />
-                    )} />
-                    <FullRow label="Frequência" cols={cols} render={(c) => (
-                      <input form={F(c)} name="frequency" value={c.draft.frequency} disabled={closed}
-                        onChange={(e) => patch(c.key, { frequency: e.target.value })} placeholder="Ex: 5 x por semana" className={cellInput} />
-                    )} />
-                    <FullRow label="Mercadoria" cols={cols} render={(c) => (
-                      <input form={F(c)} name="cargoDescription" value={c.draft.cargoDescription} disabled={closed}
-                        onChange={(e) => patch(c.key, { cargoDescription: e.target.value })} placeholder="Ex: FAK" className={cellInput} />
-                    )} />
-                    <FullRow label="Volumes" cols={cols} render={(c) => (
-                      <input form={F(c)} name="volumes" type="number" min="0" step="1" value={c.draft.volumes} disabled={closed}
-                        onChange={(e) => patch(c.key, { volumes: e.target.value })} className={moneyInput} />
-                    )} />
-                    <FullRow label="Volume (m³)" cols={cols} render={(c) => (
-                      <input form={F(c)} name="volumeM3" type="number" step="any" min="0" value={c.draft.volumeM3} disabled={closed}
-                        onChange={(e) => patch(c.key, { volumeM3: e.target.value })} className={moneyInput} />
-                    )} />
-                    <FullRow label="Dimensões" cols={cols} render={(c) => (
-                      <input form={F(c)} name="dimensions" value={c.draft.dimensions} disabled={closed}
-                        onChange={(e) => patch(c.key, { dimensions: e.target.value })} placeholder="Ex: 120 × 83 × 90 cm" className={cellInput} />
-                    )} />
                     <tr>
-                      <th className={labelCell}>Valor da mercadoria</th>
+                      <Lead sec="EXTRAS" label="Rota" desc="Escalas" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="route" value={c.draft.route} disabled={closed}
+                          onChange={(e) => patch(c.key, { route: e.target.value })} placeholder="Ex: PKE-CDG-GRU" className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Data" desc="Data da cotação" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="quoteDate" type="date" value={c.draft.quoteDate} disabled={closed}
+                          onChange={(e) => patch(c.key, { quoteDate: e.target.value })} className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Frequência" desc="Saídas por semana" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="frequency" value={c.draft.frequency} disabled={closed}
+                          onChange={(e) => patch(c.key, { frequency: e.target.value })} placeholder="Ex: 5 x por semana" className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Mercadoria" desc="Descrição da carga" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="cargoDescription" value={c.draft.cargoDescription} disabled={closed}
+                          onChange={(e) => patch(c.key, { cargoDescription: e.target.value })} placeholder="Ex: FAK" className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Volumes" desc="Quantidade de volumes" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="volumes" type="number" min="0" step="1" value={c.draft.volumes} disabled={closed}
+                          onChange={(e) => patch(c.key, { volumes: e.target.value })} className={moneyInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Volume (m³)" desc="Cubagem" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="volumeM3" type="number" step="any" min="0" value={c.draft.volumeM3} disabled={closed}
+                          onChange={(e) => patch(c.key, { volumeM3: e.target.value })} className={moneyInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Dimensões" desc="Medidas dos volumes" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="dimensions" value={c.draft.dimensions} disabled={closed}
+                          onChange={(e) => patch(c.key, { dimensions: e.target.value })} placeholder="Ex: 120 × 83 × 90 cm" className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Valor da carga" desc="Valor da mercadoria" />
                       {cols.map((c) => (
                         <Fragment key={c.key}>
                           <td className={dataCell} />
@@ -1056,57 +1258,63 @@ export default function ProcessFreightQuotes({
                         </Fragment>
                       ))}
                     </tr>
-                    <FullRow label="Endereço de coleta" cols={cols} render={(c) => (
-                      <input form={F(c)} name="pickupAddress" value={c.draft.pickupAddress} disabled={closed}
-                        onChange={(e) => patch(c.key, { pickupAddress: e.target.value })} className={cellInput} />
-                    )} />
-                    <FullRow label="Arquivo da proposta" cols={cols} render={(c) => (
-                      <div className="space-y-1">
-                        {c.savedFileName && (
-                          <div className="text-xs">
-                            {c.quoteId && (
-                              <DocumentViewer
-                                src={`/api/processos/cotacoes/${c.quoteId}`}
-                                fileName={c.savedFileName}
-                                className="text-secondary font-semibold break-all"
-                              />
-                            )}
-                            <label className="mt-0.5 flex items-center gap-1 text-[11px] text-on-surface-variant">
-                              <input form={F(c)} type="checkbox" name="removeFile" value="1" checked={c.draft.removeFile}
-                                onChange={(e) => patch(c.key, { removeFile: e.target.checked })} />
-                              remover
-                            </label>
-                          </div>
-                        )}
-                        {!closed && (
-                          <input
-                            key={c.fileNonce}
-                            form={F(c)}
-                            type="file"
-                            name="file"
-                            accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f && f.size > 4 * 1024 * 1024) {
-                                toast.error("O arquivo passa de 4 MB. Reduza ou comprima e escolha de novo.");
-                                e.target.value = "";
-                                patch(c.key, { newFileName: "" });
-                                return;
-                              }
-                              patch(c.key, { newFileName: f?.name ?? "" });
-                            }}
-                            className="block w-full text-[11px] file:mr-2 file:rounded file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-[11px] file:font-bold file:text-white"
-                          />
-                        )}
-                      </div>
-                    )} />
+                    <tr>
+                      <Lead sec="EXTRAS" label="Coleta" desc="Endereço de coleta" />
+                      {fullCells((c) => (
+                        <input form={F(c)} name="pickupAddress" value={c.draft.pickupAddress} disabled={closed}
+                          onChange={(e) => patch(c.key, { pickupAddress: e.target.value })} className={cellInput} />
+                      ))}
+                    </tr>
+                    <tr>
+                      <Lead sec="EXTRAS" label="Arquivo" desc="Arquivo da proposta" />
+                      {fullCells((c) => (
+                        <div className="space-y-1">
+                          {c.savedFileName && (
+                            <div className="text-xs">
+                              {c.quoteId && (
+                                <DocumentViewer
+                                  src={`/api/processos/cotacoes/${c.quoteId}`}
+                                  fileName={c.savedFileName}
+                                  className="text-secondary font-semibold break-all"
+                                />
+                              )}
+                              <label className="mt-0.5 flex items-center gap-1 text-[11px] text-on-surface-variant">
+                                <input form={F(c)} type="checkbox" name="removeFile" value="1" checked={c.draft.removeFile}
+                                  onChange={(e) => patch(c.key, { removeFile: e.target.checked })} />
+                                remover
+                              </label>
+                            </div>
+                          )}
+                          {!closed && (
+                            <input
+                              key={c.fileNonce}
+                              form={F(c)}
+                              type="file"
+                              name="file"
+                              accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f && f.size > 4 * 1024 * 1024) {
+                                  toast.error("O arquivo passa de 4 MB. Reduza ou comprima e escolha de novo.");
+                                  e.target.value = "";
+                                  patch(c.key, { newFileName: "" });
+                                  return;
+                                }
+                                patch(c.key, { newFileName: f?.name ?? "" });
+                              }}
+                              className="block w-full text-[11px] file:mr-2 file:rounded file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-[11px] file:font-bold file:text-white"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </tr>
                   </>
                 )}
 
                 {/* AÇÕES */}
                 {!closed && (
                   <tr>
-                    <th className={labelCell} />
+                    <Lead sec="EXTRAS" label="Ações" desc="Salvar a coluna" />
                     {cols.map((c) => {
                       const dirty = JSON.stringify(c.draft) !== c.base;
                       const saving = savingKey === c.key;
@@ -1190,41 +1398,58 @@ export default function ProcessFreightQuotes({
 
 // ---------------------------------------------------------------- auxiliares
 
-function Tag({ bg, children }: { bg: string; children: ReactNode }) {
+// Células à esquerda de cada linha: bloco colorido da seção (só na 1ª linha,
+// com rowSpan), rótulo em negrito e descrição.
+function Lead({
+  sec,
+  name,
+  span,
+  label,
+  desc,
+}: {
+  sec: SecKey;
+  name?: string;
+  span?: number;
+  label: ReactNode;
+  desc?: ReactNode;
+}) {
+  const color = SEC[sec];
+  const band = { backgroundImage: `linear-gradient(${color}1f, ${color}1f)` };
   return (
-    <span
-      className="mr-2 inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
-      style={{ background: bg }}
-    >
-      {children}
-    </span>
+    <>
+      {name !== undefined && (
+        <th
+          rowSpan={span}
+          className="sticky left-0 z-10 border-t border-white/25 px-2 text-center align-middle text-[11px] font-extrabold uppercase leading-tight tracking-wide text-white"
+          style={{ background: color }}
+        >
+          {name}
+        </th>
+      )}
+      <th className={keyCell} style={{ left: BLOCK_W, ...band }}>
+        {label}
+      </th>
+      <td className={descCell} style={band} title={typeof desc === "string" ? desc : undefined}>
+        {desc}
+      </td>
+    </>
   );
 }
 
-// Linha cujo conteúdo ocupa a coluna inteira da cotação (nome + moeda + custos).
-function FullRow({
-  label,
-  cols,
-  render,
-  tag,
-}: {
-  label: string;
-  cols: Col[];
-  render: (c: Col) => ReactNode;
-  tag?: string;
-}) {
+// Rótulo de um grupo de taxas, com seta para abrir/fechar o detalhe por nome.
+function GroupToggle({ label, open, onClick }: { label: string; open: boolean; onClick: () => void }) {
+  const Icon = open ? ChevronDown : ChevronRight;
   return (
-    <tr>
-      <th className={labelCell}>
-        {tag && <Tag bg={SECTION_BG[tag] ?? "#1f9d8f"}>{tag}</Tag>}
-        {label}
-      </th>
-      {cols.map((c) => (
-        <td key={c.key} colSpan={SPAN} className={dataCell}>
-          {render(c)}
-        </td>
-      ))}
-    </tr>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={open}
+      title={open ? "Recolher as taxas" : "Detalhar as taxas por nome"}
+      className="flex w-full items-center gap-1 text-left uppercase hover:text-secondary"
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      {label}
+    </button>
   );
 }
 
@@ -1232,7 +1457,6 @@ function FullRow({
 function TaxRow({
   index,
   tag,
-  tagBg,
   cols,
   closed,
   taxOf,
@@ -1240,7 +1464,6 @@ function TaxRow({
 }: {
   index: number;
   tag: string;
-  tagBg: string;
   cols: Col[];
   closed: boolean;
   taxOf: (c: Col) => Tax;
@@ -1248,10 +1471,7 @@ function TaxRow({
 }) {
   return (
     <tr>
-      <th className={labelCell}>
-        {index === 0 && <Tag bg={tagBg}>{tag}</Tag>}
-        <span className={index === 0 ? "" : "pl-1 text-[11px] font-normal"}>TX-{index + 1}</span>
-      </th>
+      <Lead sec="TAXAS" label={<span className="pl-5 text-[10px] font-semibold text-on-surface-variant">TX-{index + 1}</span>} />
       {cols.map((c) => {
         const t = taxOf(c);
         return (
@@ -1279,7 +1499,7 @@ function TaxRow({
 function AddRowLine({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <tr>
-      <th className={labelCell} />
+      <Lead sec="TAXAS" label="" />
       <td colSpan={999} className="border-t border-outline-variant/40 py-1 pl-2">
         <button type="button" onClick={onClick} className="text-[11px] font-bold text-secondary hover:underline">
           {label}
