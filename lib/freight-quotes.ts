@@ -150,9 +150,9 @@ export function transitLabel(min: number | null, max: number | null): string {
 export type QuoteStatus = "ATUALIZADO" | "ANTIGO" | "FECHADO";
 
 export const QUOTE_STATUSES: { value: QuoteStatus; label: string; color: string }[] = [
-  { value: "ATUALIZADO", label: "Atualizado", color: "#2e9e5b" },
+  { value: "ATUALIZADO", label: "Atualizado", color: "#2b7bbf" },
   { value: "ANTIGO", label: "Antigo", color: "#8a8f98" },
-  { value: "FECHADO", label: "Fechado", color: "#d98a14" },
+  { value: "FECHADO", label: "Fechado", color: "#16a34a" },
 ];
 
 export function isQuoteStatus(v: string): v is QuoteStatus {

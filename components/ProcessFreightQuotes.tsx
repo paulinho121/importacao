@@ -556,8 +556,24 @@ export default function ProcessFreightQuotes({
       inBRL: lines.length > 0 ? totalInBRL(lines, foreign, rate) : null,
     };
   });
-  const comparable = computed.map((c) => c.inBRL).filter((v): v is number => v !== null);
-  const cheapest = comparable.length >= 2 ? Math.min(...comparable) : null;
+  // Menor custo (o "verde" da planilha): compara em reais quando todas as cotações
+  // convertem; sem o dólar do dia, compara os valores brutos se TODAS estiverem
+  // numa única e mesma moeda. Cotações vazias ficam fora.
+  const withLines = computed.filter((c) => c.lines.length > 0);
+  let compareKeys: (number | null)[] = computed.map(() => null);
+  if (withLines.length >= 2 && withLines.every((c) => c.inBRL !== null)) {
+    compareKeys = computed.map((c) => (c.lines.length > 0 ? c.inBRL : null));
+  } else if (
+    withLines.length >= 2 &&
+    withLines.every((c) => c.totals.length === 1) &&
+    new Set(withLines.map((c) => c.totals[0].currency)).size === 1
+  ) {
+    compareKeys = computed.map((c) => (c.lines.length > 0 ? c.totals[0].value : null));
+  }
+  const keyed = compareKeys.filter((v): v is number => v !== null);
+  const cheapest = keyed.length >= 2 ? Math.min(...keyed) : null;
+  const isCheapest = (i: number) => cheapest !== null && compareKeys[i] === cheapest;
+  const isFechada = (c: Col) => c.draft.status === "FECHADO";
 
   const rowsOrigin = Math.min(
     MAX_TAX_ROWS,
@@ -642,13 +658,19 @@ export default function ProcessFreightQuotes({
             <table className="border-collapse text-body-sm font-body-sm min-w-full">
               <colgroup>
                 <col style={{ width: 160 }} />
-                {cols.map((c) => (
-                  <Fragment key={c.key}>
-                    <col style={{ width: 112 }} />
-                    <col style={{ width: 66 }} />
-                    <col style={{ width: 106 }} />
-                  </Fragment>
-                ))}
+                {cols.map((c) => {
+                  // sombreado da coluna inteira na cor da empresa; cotação FECHADA fica verde
+                  const tint = isFechada(c)
+                    ? "#22c55e30"
+                    : `${COLORS[c.colorIdx % COLORS.length]}${c.colorIdx % 2 ? "26" : "1a"}`;
+                  return (
+                    <Fragment key={c.key}>
+                      <col style={{ width: 112, background: tint }} />
+                      <col style={{ width: 66, background: tint }} />
+                      <col style={{ width: 106, background: tint }} />
+                    </Fragment>
+                  );
+                })}
               </colgroup>
               <tbody>
                 {/* AGENTE DE CARGAS */}
@@ -659,7 +681,10 @@ export default function ProcessFreightQuotes({
                       key={c.key}
                       colSpan={SPAN}
                       className="p-0 border-l border-outline-variant/40"
-                      style={{ background: COLORS[c.colorIdx % COLORS.length] }}
+                      style={{
+                        background: COLORS[c.colorIdx % COLORS.length],
+                        boxShadow: isFechada(c) ? "inset 0 0 0 3px #22c55e" : undefined,
+                      }}
                     >
                       <div className="flex items-center gap-1 px-1.5 py-1.5">
                         <select
@@ -680,6 +705,11 @@ export default function ProcessFreightQuotes({
                             </option>
                           ))}
                         </select>
+                        {isFechada(c) && (
+                          <span className="shrink-0 rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
+                            FECHADA
+                          </span>
+                        )}
                         {c.isSelected && (
                           <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black">
                             ESCOLHIDA
@@ -688,6 +718,29 @@ export default function ProcessFreightQuotes({
                       </div>
                     </td>
                   ))}
+                </tr>
+
+                {/* SITUAÇÃO: ATUALIZADO / ANTIGO / FECHADO */}
+                <tr>
+                  <th className={`${labelCell} text-primary font-bold`}>Situação da proposta</th>
+                  {cols.map((c) => {
+                    const st = QUOTE_STATUSES.find((s) => s.value === c.draft.status) ?? QUOTE_STATUSES[0];
+                    return (
+                      <td key={c.key} colSpan={SPAN} className={dataCell}>
+                        <select form={F(c)} name="status" value={c.draft.status} disabled={closed}
+                          onChange={(e) => patch(c.key, { status: e.target.value })}
+                          aria-label="Situação da cotação"
+                          className={`w-full rounded px-2 py-1.5 text-xs font-bold text-center uppercase appearance-none focus:outline-none ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
+                          style={{ background: c.draft.status === "FECHADO" ? "#4ade80" : st.color }}>
+                          {QUOTE_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value} className="text-black">
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    );
+                  })}
                 </tr>
 
                 <FullRow label="Proposta" cols={cols} render={(c) => (
@@ -895,34 +948,16 @@ export default function ProcessFreightQuotes({
                     placeholder="Ex: coleta inclusa" className={cellInput} />
                 )} />
 
-                {/* SITUAÇÃO: ATUALIZADO / ANTIGO / FECHADO */}
-                <tr>
-                  <th className={labelCell}>Situação</th>
-                  {cols.map((c) => {
-                    const st = QUOTE_STATUSES.find((s) => s.value === c.draft.status) ?? QUOTE_STATUSES[0];
-                    return (
-                      <td key={c.key} colSpan={SPAN} className={dataCell}>
-                        <select form={F(c)} name="status" value={c.draft.status} disabled={closed}
-                          onChange={(e) => patch(c.key, { status: e.target.value })}
-                          aria-label="Situação da cotação"
-                          className="w-full rounded px-2 py-1 text-xs font-bold text-white text-center uppercase appearance-none focus:outline-none"
-                          style={{ background: st.color }}>
-                          {QUOTE_STATUSES.map((s) => (
-                            <option key={s.value} value={s.value} className="text-black">
-                              {s.label}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    );
-                  })}
-                </tr>
-
                 {/* CUSTOS ESTIMADOS */}
                 <tr className="bg-surface-container-high/60">
                   <th className={`${labelCell} text-primary font-bold`}>Custo estimado em moeda</th>
                   {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top`}>
+                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
+                      {isCheapest(i) && (
+                        <span className="mb-1 inline-block rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
+                          MENOR CUSTO
+                        </span>
+                      )}
                       {computed[i].totals.length === 0 ? (
                         <span className="text-on-surface-variant">—</span>
                       ) : (
@@ -942,7 +977,7 @@ export default function ProcessFreightQuotes({
                     <span className="block text-[10px] font-normal text-on-surface-variant">considerando o dólar do dia</span>
                   </th>
                   {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} text-right font-mono-data text-xs font-bold text-primary`}>
+                    <td key={c.key} colSpan={SPAN} className={`${dataCell} text-right font-mono-data text-xs font-bold text-primary ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {computed[i].inForeign !== null ? (
                         `${foreign} ${money(computed[i].inForeign!)}`
                       ) : (
@@ -956,17 +991,12 @@ export default function ProcessFreightQuotes({
                 <tr className="bg-surface-container-high/60">
                   <th className={`${labelCell} text-primary font-bold`}>Valor final em BRL</th>
                   {cols.map((c, i) => (
-                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top`}>
+                    <td key={c.key} colSpan={SPAN} className={`${dataCell} align-top ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {computed[i].inBRL !== null ? (
                         <>
                           <p className="text-right font-mono-data text-sm font-bold text-primary">
                             {formatMoney(computed[i].inBRL!, "BRL")}
                           </p>
-                          {cheapest !== null && computed[i].inBRL === cheapest && (
-                            <span className="mt-1 inline-block rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-bold text-on-tertiary-fixed-variant">
-                              Menor custo
-                            </span>
-                          )}
                         </>
                       ) : (
                         <span className="block text-right text-[10px] text-outline">
