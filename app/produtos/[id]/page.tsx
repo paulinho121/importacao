@@ -3,7 +3,14 @@ import ProductForm from "@/components/ProductForm";
 import ProductLpcoPanel from "@/components/ProductLpcoPanel";
 import ProductFlowSteps from "@/components/ProductFlowSteps";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
-import { updateProduct, resolveNcmDivergence, addPriceTier, removePriceTier } from "@/app/produtos/actions";
+import {
+  updateProduct,
+  resolveNcmDivergence,
+  addPriceTier,
+  removePriceTier,
+  confirmCpMatch,
+  rejectCpMatch,
+} from "@/app/produtos/actions";
 import { db } from "@/db/client";
 import { products, suppliers, productPriceTiers, productLpcos, productPhotos } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
@@ -89,6 +96,7 @@ export default async function EditProdutoPage({
           defaultValues={{
             sku: product.sku,
             manufacturerSku: product.manufacturerSku,
+            datasheetUrl: product.datasheetUrl,
             ncm: product.ncm,
             description: product.description,
             longDescription: product.longDescription,
@@ -140,6 +148,23 @@ export default async function EditProdutoPage({
             {product.cpListCheckedAt ? ` · conferido em ${new Date(product.cpListCheckedAt).toLocaleDateString("pt-BR")}` : ""}
             {product.cpListSource ? ` (${product.cpListSource})` : ""}
           </span>
+          {product.cpListResult === "FOUND_APPROX" && (
+            <div className="flex basis-full flex-wrap items-center gap-2 border-t border-outline-variant pt-3">
+              <span className="mr-1 text-body-sm font-body-sm text-on-surface-variant">
+                O item da lista é este produto?
+              </span>
+              <form action={confirmCpMatch.bind(null, id)}>
+                <SubmitButton className="px-4 py-2 rounded-lg bg-secondary text-white text-sm font-bold hover:opacity-90 transition-all">
+                  Confirmar correspondência
+                </SubmitButton>
+              </form>
+              <form action={rejectCpMatch.bind(null, id)}>
+                <SubmitButton className="px-4 py-2 rounded-lg border border-outline text-primary text-sm font-bold hover:bg-surface-container-high transition-all">
+                  Não é este produto
+                </SubmitButton>
+              </form>
+            </div>
+          )}
         </div>
       )}
 

@@ -457,6 +457,8 @@ export const products = pgTable("products", {
   // Foto do produto: link externo ou arquivo enviado (png/jpeg/webp) — ver
   // app/produtos/actions.ts.
   photoUrl: text("photo_url"),
+  // Link da ficha técnica do produto (Google Drive ou site do fabricante).
+  datasheetUrl: text("datasheet_url"),
   // Etapa "Consulta Pública" do fluxo do produto (lib/product-flow.ts):
   // NAO_VERIFICADO | POSSUI | NAO_POSSUI | SOLICITADA (em acompanhamento).
   // Substitui o antigo hasPublicConsultation (boolean), que não expressa

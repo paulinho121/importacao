@@ -6,6 +6,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash } from "@/lib/flash";
+import { normalizeDriveUrl } from "@/lib/drive-links";
 import { BRANCHES } from "@/lib/locations";
 import { PRODUCT_LPCO_STATUSES } from "@/lib/lpco";
 import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
@@ -171,7 +172,10 @@ function readProductForm(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   if (!sku) throw new Error("SKU interno é obrigatório.");
   if (!description) throw new Error("Nome do produto é obrigatório.");
+  const datasheet = normalizeDriveUrl(optionalText(formData, "datasheetUrl"));
+  if (!datasheet.ok) throw new Error(`Ficha técnica: ${datasheet.error}`);
   return {
+    datasheetUrl: datasheet.url,
     sku,
     description,
     manufacturerSku: optionalText(formData, "manufacturerSku"),
@@ -255,6 +259,47 @@ export async function updateProduct(id: string, formData: FormData) {
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   redirect(withFlash("/produtos", "Alterações salvas."));
+}
+
+// Conferência de uma "Possível correspondência" da lista pública do governo
+// (cpListResult = FOUND_APPROX): a pessoa confirma que o item da lista É este
+// produto (vira "Deferido (consta na lista)" e o produto passa a possuir CP) ou
+// que NÃO é (vira "Não consta"). Só age em quem ainda está como possível.
+export async function confirmCpMatch(productId: string) {
+  const [p] = await db
+    .select({
+      cpListResult: products.cpListResult,
+      cpListRef: products.cpListRef,
+      publicConsultationRef: products.publicConsultationRef,
+    })
+    .from(products)
+    .where(eq(products.id, productId));
+  if (p && p.cpListResult === "FOUND_APPROX") {
+    const firstRef = p.cpListRef?.split(", ")[0];
+    await db
+      .update(products)
+      .set({
+        cpListResult: "FOUND",
+        hasPublicConsultation: true,
+        cpStatus: "POSSUI",
+        ...(firstRef && !p.publicConsultationRef ? { publicConsultationRef: `Consulta Pública nº ${firstRef}` } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, productId));
+  }
+  revalidatePath("/produtos");
+  revalidatePath(`/produtos/${productId}`);
+  redirect(withFlash(`/produtos/${productId}`, "Correspondência confirmada: o produto consta como deferido na lista."));
+}
+
+export async function rejectCpMatch(productId: string) {
+  await db
+    .update(products)
+    .set({ cpListResult: "NOT_FOUND", cpListRef: null, cpListNcm: null, updatedAt: new Date() })
+    .where(and(eq(products.id, productId), eq(products.cpListResult, "FOUND_APPROX")));
+  revalidatePath("/produtos");
+  revalidatePath(`/produtos/${productId}`);
+  redirect(withFlash(`/produtos/${productId}`, "Correspondência descartada: o produto segue como não consta na lista."));
 }
 
 export async function resolveNcmDivergence(id: string, formData: FormData) {

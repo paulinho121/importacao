@@ -12,6 +12,7 @@ export type ProductFormValues = {
   ncm?: string | null;
   description?: string | null;
   longDescription?: string | null;
+  datasheetUrl?: string | null;
   defaultSupplierId?: string | null;
   costPrice?: string | null;
   costCurrency?: string | null;
@@ -178,6 +179,30 @@ export default function ProductForm({
             rows={4}
             defaultValue={defaultValues?.longDescription ?? ""}
           />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block font-label-md text-label-md text-on-surface-variant mb-2">
+            Ficha técnica (link)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all"
+              placeholder="Cole o link da ficha técnica (Google Drive ou site do fabricante)"
+              type="url"
+              name="datasheetUrl"
+              defaultValue={defaultValues?.datasheetUrl ?? ""}
+            />
+            {defaultValues?.datasheetUrl && (
+              <a
+                href={defaultValues.datasheetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 px-4 py-3 rounded-lg bg-secondary text-white text-sm font-bold hover:opacity-90 transition-all"
+              >
+                Abrir ficha
+              </a>
+            )}
+          </div>
         </div>
       </div>
 

@@ -76,6 +76,7 @@ export default async function ProdutosPage({
         description: products.description,
         licenseStatus: products.licenseStatus,
         photoUrl: products.photoUrl,
+        datasheetUrl: products.datasheetUrl,
         cpListResult: products.cpListResult,
         cpStatus: products.cpStatus,
         cpListRef: products.cpListRef,
@@ -320,6 +321,18 @@ export default async function ProdutosPage({
                         />
                       )}
                       {p.description}
+                      {p.datasheetUrl && (
+                        <a
+                          href={p.datasheetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1 inline-flex shrink-0 items-center gap-0.5 rounded-full border border-outline-variant px-2 py-0.5 text-[11px] font-bold text-secondary hover:bg-secondary/10"
+                          title="Abrir a ficha técnica"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">description</span>
+                          Ficha
+                        </a>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
