@@ -219,8 +219,28 @@ function readProductForm(formData: FormData) {
   };
 }
 
+// Licenciamento (Inciso V): sai do formulário do produto — é controlado por outro
+// canto (importação da base do Inciso V e planilhas de LPCO). Por isso nem o
+// cadastro nem a edição do produto mexem nesses campos: o que já está salvo fica.
+const LICENSE_FIELDS = [
+  "ncmAnterior",
+  "manufacturerName",
+  "exporterName",
+  "licenseNumber",
+  "licenseRegisteredAt",
+  "licenseStatus",
+  "licenseApprovedAt",
+  "customsBrokerRef",
+] as const;
+
+function withoutLicenseFields(form: ReturnType<typeof readProductForm>) {
+  const rest: Partial<ReturnType<typeof readProductForm>> = { ...form };
+  for (const key of LICENSE_FIELDS) delete rest[key];
+  return rest as Omit<ReturnType<typeof readProductForm>, (typeof LICENSE_FIELDS)[number]>;
+}
+
 export async function createProduct(formData: FormData) {
-  const [created] = await db.insert(products).values(readProductForm(formData)).returning({ id: products.id });
+  const [created] = await db.insert(products).values(withoutLicenseFields(readProductForm(formData))).returning({ id: products.id });
   await savePhotos(created.id, formData);
   revalidatePath("/produtos");
   redirect(withFlash(`/produtos/${created.id}`, "Produto cadastrado."));
@@ -229,7 +249,7 @@ export async function createProduct(formData: FormData) {
 export async function updateProduct(id: string, formData: FormData) {
   await db
     .update(products)
-    .set({ ...readProductForm(formData), updatedAt: new Date() })
+    .set({ ...withoutLicenseFields(readProductForm(formData)), updatedAt: new Date() })
     .where(eq(products.id, id));
   await savePhotos(id, formData);
   revalidatePath("/produtos");
