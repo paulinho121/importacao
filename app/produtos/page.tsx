@@ -264,8 +264,7 @@ export default async function ProdutosPage({
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NCM</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">NOME</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR PADRÃO</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA (INCISO V)</th>
-                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">SITUAÇÃO DA CP</th>
+                <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA / CP</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO</th>
                 <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">PREÇO SUGERIDO</th>
@@ -276,7 +275,7 @@ export default async function ProdutosPage({
             <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="px-6 py-6 text-on-surface-variant text-center">
+                  <td colSpan={11} className="px-6 py-6 text-on-surface-variant text-center">
                     {q
                       ? "Nenhum produto encontrado para essa busca."
                       : onlyDivergent
@@ -325,17 +324,15 @@ export default async function ProdutosPage({
                   </td>
                   <td className="px-6 py-3">{p.supplierName ?? "—"}</td>
                   <td className="px-6 py-3">
+                    {/* Licença (Inciso V) e situação da CP na mesma coluna, um selo embaixo do outro */}
+                    <div className="flex flex-col items-start gap-1">
                     {p.licenseStatus ? (
                       <span
                         className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
                       >
                         {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
                       </span>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-6 py-3">
+                    ) : null}
                     {(() => {
                       // Resultado da lista do governo; sem ele, a CP/licença cadastradas.
                       if (p.cpListResult && p.cpListResult !== "NOT_FOUND") {
@@ -350,7 +347,7 @@ export default async function ProdutosPage({
                         );
                       }
                       const registered =
-                        p.cpStatus === "POSSUI" ? "Já possui CP" : p.licenseStatus === "DEFERIDA" ? "Licença deferida" : null;
+                        p.cpStatus === "POSSUI" ? "Já possui CP" : null;
                       if (registered) {
                         return (
                           <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.FOUND}`}>
@@ -362,10 +359,11 @@ export default async function ProdutosPage({
                         <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.NOT_FOUND}`}>
                           {CP_LIST_RESULT_LABEL.NOT_FOUND}
                         </span>
-                      ) : (
+                      ) : p.licenseStatus ? null : (
                         "—"
                       );
                     })()}
+                    </div>
                   </td>
                   <td className="px-6 py-3">
                     <Link href={`/produtos/${p.id}`} className="flex gap-1.5">
