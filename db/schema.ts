@@ -51,6 +51,11 @@ export const processStatusEnum = pgEnum("process_status", [
   // (pedido cancelado pelo fornecedor, desistência, etc.), fora da
   // progressão normal do workflow, igual ATRASADO/CONCLUIDO.
   "ABANDONADO",
+  // Sequência nova do fluxo (nov/2026): etapas acrescentadas entre as antigas.
+  "COLETADO_ORIGEM",
+  "AGUARDANDO_PRESENCA_CARGA",
+  "PRESENCA_CARGA",
+  "CARGA_REGISTRADA",
 ]);
 
 // Status do licenciamento de importação ("Inciso V") de um produto —

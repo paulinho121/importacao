@@ -23,6 +23,7 @@ import { normalizeDriveUrl } from "@/lib/drive-links";
 import {
   STATUS_BY_STEP,
   WORKFLOW_STEPS,
+  stepOfStatus,
   CUSTOMS_CHANNEL_LABEL,
   type ProcessStatus,
   type CustomsChannel,
@@ -182,7 +183,7 @@ export async function createProcess(formData: FormData) {
           weightKg: optionalNumber(formData, "weightKg"),
           volumeM3: optionalNumber(formData, "volumeM3"),
           notes: optionalText(formData, "notes"),
-          status: "AGUARDANDO_EMBARQUE",
+          status: "PEDIDO",
           currentStep: 1,
         })
         .returning({ id: processes.id });
@@ -197,7 +198,7 @@ export async function createProcess(formData: FormData) {
         processId: created.id,
         eventDate: new Date(),
         eventType: "Processo criado",
-        statusAtEvent: "AGUARDANDO_EMBARQUE",
+        statusAtEvent: "PEDIDO",
       });
 
       for (const poId of poIds) await linkPurchaseOrderToProcess(tx, poId, created.id);
@@ -490,9 +491,13 @@ export async function updateProcessStatus(processId: string, formData: FormData)
   const status = String(formData.get("status") ?? "").trim() as ProcessStatus;
   if (!status) throw new Error("Status é obrigatório.");
 
+  // Escolher uma etapa da sequência no select também posiciona o stepper nela
+  // (Atrasado/Finalizado/Abandonado não mudam a etapa).
+  const step = stepOfStatus(status);
+
   await db
     .update(processes)
-    .set({ status, updatedAt: new Date() })
+    .set({ status, ...(step ? { currentStep: step } : {}), updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
   await db.insert(processEvents).values({

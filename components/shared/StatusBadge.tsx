@@ -9,18 +9,26 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  Boxes,
+  Hourglass,
+  UserCheck,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_BADGE_CLASS, STATUS_LABEL, type ProcessStatus } from "@/lib/status";
 
 const STATUS_LUCIDE_ICON: Record<ProcessStatus, LucideIcon> = {
-  AGUARDANDO_EMBARQUE: Clock,
   PEDIDO: Receipt,
   PRODUCAO: Factory,
+  COLETADO_ORIGEM: Boxes,
+  AGUARDANDO_EMBARQUE: Clock,
   EMBARCADO: PlaneTakeoff,
   EM_TRANSITO: Truck,
+  AGUARDANDO_PRESENCA_CARGA: Hourglass,
+  PRESENCA_CARGA: UserCheck,
   EM_DESEMBARACO: Gavel,
+  CARGA_REGISTRADA: ClipboardCheck,
   TRANSPORTE_NACIONAL: Truck,
   RECEBIDO: PackageCheck,
   ATRASADO: AlertTriangle,

@@ -386,7 +386,7 @@ export async function convertToProcess(poId: string, formData: FormData) {
           currency: po.currency,
           incoterm: po.incoterm,
           status: "PEDIDO",
-          currentStep: 2,
+          currentStep: 1,
         })
         .returning({ id: processes.id });
 
