@@ -2,14 +2,13 @@ import { notFound } from "next/navigation";
 import ProductForm from "@/components/ProductForm";
 import ProductLpcoPanel from "@/components/ProductLpcoPanel";
 import ProductFlowSteps from "@/components/ProductFlowSteps";
+import CpMatchReview from "@/components/CpMatchReview";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import {
   updateProduct,
   resolveNcmDivergence,
   addPriceTier,
   removePriceTier,
-  confirmCpMatch,
-  rejectCpMatch,
 } from "@/app/produtos/actions";
 import { db } from "@/db/client";
 import { products, suppliers, productPriceTiers, productLpcos, productPhotos } from "@/db/schema";
@@ -148,23 +147,7 @@ export default async function EditProdutoPage({
             {product.cpListCheckedAt ? ` · conferido em ${new Date(product.cpListCheckedAt).toLocaleDateString("pt-BR")}` : ""}
             {product.cpListSource ? ` (${product.cpListSource})` : ""}
           </span>
-          {product.cpListResult === "FOUND_APPROX" && (
-            <div className="flex basis-full flex-wrap items-center gap-2 border-t border-outline-variant pt-3">
-              <span className="mr-1 text-body-sm font-body-sm text-on-surface-variant">
-                O item da lista é este produto?
-              </span>
-              <form action={confirmCpMatch.bind(null, id)}>
-                <SubmitButton className="px-4 py-2 rounded-lg bg-secondary text-white text-sm font-bold hover:opacity-90 transition-all">
-                  Confirmar correspondência
-                </SubmitButton>
-              </form>
-              <form action={rejectCpMatch.bind(null, id)}>
-                <SubmitButton className="px-4 py-2 rounded-lg border border-outline text-primary text-sm font-bold hover:bg-surface-container-high transition-all">
-                  Não é este produto
-                </SubmitButton>
-              </form>
-            </div>
-          )}
+          {product.cpListResult === "FOUND_APPROX" && <CpMatchReview productId={id} />}
         </div>
       )}
 

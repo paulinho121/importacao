@@ -2,6 +2,7 @@ import Link from "next/link";
 import SupplierFilterSelect from "@/components/SupplierFilterSelect";
 import CpListUpload from "@/components/CpListUpload";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
+import { cpStatusLabel } from "@/lib/product-flow";
 import { db } from "@/db/client";
 import { products, suppliers, processItems, productLpcos } from "@/db/schema";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
@@ -163,11 +164,12 @@ export default async function ProdutosPage({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <form action="/produtos" className="relative max-w-md flex-1 min-w-[280px]">
+        <form action="/produtos" className="flex max-w-xl flex-1 min-w-[280px] items-stretch gap-2">
           {onlyDivergent && <input type="hidden" name="divergente" value="1" />}
           {onlyNoPrice && <input type="hidden" name="semPreco" value="1" />}
           {fornecedor && <input type="hidden" name="fornecedor" value={fornecedor} />}
           {lista && <input type="hidden" name="lista" value={lista} />}
+          <div className="relative flex-1">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
             search
           </span>
@@ -178,6 +180,14 @@ export default async function ProdutosPage({
             name="q"
             defaultValue={q}
           />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-secondary px-5 font-label-md text-label-md text-white transition-all hover:opacity-90 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[20px]">search</span>
+            Buscar
+          </button>
         </form>
 
         <SupplierFilterSelect suppliers={supplierOptions} current={fornecedor} />
@@ -369,12 +379,18 @@ export default async function ProdutosPage({
                           </span>
                         );
                       }
-                      const registered =
-                        p.cpStatus === "POSSUI" ? "Já possui CP" : null;
+                      // Situação da CP escolhida no cadastro (Deferida, Em análise, Indeferido…)
+                      const registered = cpStatusLabel(p.cpStatus);
                       if (registered) {
+                        const tone =
+                          p.cpStatus === "POSSUI"
+                            ? CP_LIST_RESULT_CLASS.FOUND
+                            : p.cpStatus === "INDEFERIDO"
+                              ? "bg-error-container text-on-error-container"
+                              : "bg-warning/20 text-warning";
                         return (
-                          <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.FOUND}`}>
-                            {registered}
+                          <span className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${tone}`}>
+                            CP: {registered}
                           </span>
                         );
                       }

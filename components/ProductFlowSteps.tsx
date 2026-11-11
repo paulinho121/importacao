@@ -1,6 +1,12 @@
 import { BRANCHES } from "@/lib/locations";
 import { LPCO_COUNTDOWN_BAR, LPCO_REUSE_DAYS, lpcoCountdown } from "@/lib/lpco";
-import { hasPublicConsultation, missingRegistrationItems, type ProductFlowInput } from "@/lib/product-flow";
+import {
+  CP_IN_PROGRESS_STATUSES,
+  cpStatusLabel,
+  hasPublicConsultation,
+  missingRegistrationItems,
+  type ProductFlowInput,
+} from "@/lib/product-flow";
 import { formatDate } from "@/lib/status";
 
 type Lpco = { branch: string; status: string; approvedAt: string | null; validUntil: string | null };
@@ -56,7 +62,8 @@ export default function ProductFlowSteps({
   const registrationDone = missing.length === 0;
 
   const cpDone = hasPublicConsultation(product);
-  const cpRequested = product.cpStatus === "SOLICITADA";
+  const cpRequested = !!product.cpStatus && CP_IN_PROGRESS_STATUSES.includes(product.cpStatus);
+  const cpDenied = product.cpStatus === "INDEFERIDO";
 
   // Benefício vigente por estado: o deferido com validade mais longa.
   const benefits = BRANCHES.map((b) => {
@@ -87,14 +94,14 @@ export default function ProductFlowSteps({
         n={2}
         title="Consulta Pública"
         tone={cpDone ? "done" : cpRequested ? "doing" : "todo"}
-        badge={cpDone ? "Já possui" : cpRequested ? "Em acompanhamento" : product.cpStatus === "NAO_POSSUI" ? "Solicitar" : "Verificar"}
+        badge={cpDone ? "Deferida" : cpRequested ? (cpStatusLabel(product.cpStatus) ?? "Em andamento") : cpDenied ? "Indeferida" : "Verificar"}
       >
         {cpDone
-          ? `Consulta pública já existe${product.cpListRef ? ` (CP ${product.cpListRef.split(", ")[0]})` : ""}.`
+          ? `Consulta pública deferida${product.cpListRef ? ` (CP ${product.cpListRef.split(", ")[0]})` : ""}.`
           : cpRequested
-            ? `Solicitada${product.cpRequestedAt ? ` em ${formatDate(product.cpRequestedAt)}` : ""} — acompanhe o resultado.`
-            : product.cpStatus === "NAO_POSSUI"
-              ? "Não possui consulta pública: solicite e acompanhe."
+            ? `${cpStatusLabel(product.cpStatus)}${product.cpRequestedAt ? ` — solicitada em ${formatDate(product.cpRequestedAt)}` : ""}. Acompanhe o resultado.`
+            : cpDenied
+              ? "Consulta pública indeferida: veja a exigência ou solicite de novo."
               : "Confira na lista pública do governo (envie a planilha em Produtos) se o item já tem consulta pública."}
       </Step>
 

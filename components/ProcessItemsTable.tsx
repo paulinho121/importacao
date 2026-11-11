@@ -13,7 +13,7 @@ import { ItemPhoto, LpcoUfChips, type ItemLpco } from "@/components/ItemStatus";
 import { CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
 import { BRANCHES } from "@/lib/locations";
 import { LPCO_TONE_CLASS, lpcoCountdown, lpcoTone, lpcoValidUntil, productLpcoStatusLabel } from "@/lib/lpco";
-import { CP_STATUS_OPTIONS, hasPublicConsultation } from "@/lib/product-flow";
+import { CP_IN_PROGRESS_STATUSES, cpStatusLabel, hasPublicConsultation } from "@/lib/product-flow";
 import { formatDate, stockStatus } from "@/lib/status";
 
 import SubmitButton from "@/components/SubmitButton";
@@ -63,11 +63,11 @@ function benefitOf(r: ProcessItemRow): { kind: BenefitKind; label: string; detai
   if (r.cpListResult === "FOUND_APPROX") {
     return { kind: "conferir", label: "Conferir", detail: "possível correspondência na lista", className: "bg-secondary-fixed text-on-secondary-fixed-variant" };
   }
-  if (r.cpStatus === "SOLICITADA") {
-    return { kind: "solicitada", label: "CP solicitada", detail: "em acompanhamento", className: "bg-warning/20 text-warning" };
+  if (r.cpStatus && CP_IN_PROGRESS_STATUSES.includes(r.cpStatus)) {
+    return { kind: "solicitada", label: "CP em andamento", detail: cpStatusLabel(r.cpStatus)?.toLowerCase() ?? null, className: "bg-warning/20 text-warning" };
   }
-  if (r.cpStatus === "NAO_POSSUI") {
-    return { kind: "sem", label: "Sem benefício", detail: "precisa solicitar a CP", className: "bg-error-container text-on-error-container" };
+  if (r.cpStatus === "INDEFERIDO") {
+    return { kind: "sem", label: "Sem benefício", detail: "CP indeferida", className: "bg-error-container text-on-error-container" };
   }
   return { kind: "naoVerificada", label: "Não verificada", detail: "consulta pública pendente", className: LPCO_TONE_CLASS.none };
 }
@@ -99,7 +99,6 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
   const benefit = benefitOf(row);
   const total = num(row.quantity);
   const reserved = row.reservations.reduce((s, r) => s + Number(r.quantity), 0);
-  const cpOption = CP_STATUS_OPTIONS.find((o) => o.value === row.cpStatus);
 
   return (
     <div className="grid grid-cols-1 gap-5 border-t border-outline-variant/60 bg-surface-container-low/60 p-4 lg:grid-cols-3">
@@ -174,7 +173,7 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
           {row.productId ? (
             <>
               <p className="text-on-surface-variant">
-                Consulta pública: <strong className="text-primary">{cpOption?.label ?? "Ainda não verificado"}</strong>
+                Consulta pública: <strong className="text-primary">{cpStatusLabel(row.cpStatus) ?? "Ainda não verificado"}</strong>
               </p>
               <p className="text-on-surface-variant">
                 Lista do governo:{" "}

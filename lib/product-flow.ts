@@ -4,14 +4,25 @@
 //  3. Benefício (LPCO) pedido para o estado do pedido (SP/SC/CE), válido por
 //     LPCO_REUSE_DAYS dias — com contagem do tempo que falta (lib/lpco.ts)
 
-export type CpStatus = "NAO_VERIFICADO" | "POSSUI" | "NAO_POSSUI" | "SOLICITADA";
+// Situação da CP (lista de status do time). "POSSUI" é o código gravado para
+// "Deferida / Deferido" (já era o valor dos produtos existentes e das conferências
+// automáticas); os demais valores são novos. Sem valor = ainda não verificado.
+export type CpStatus = "POSSUI" | "INDEFERIDO" | "EM_EXIGENCIA" | "EM_ANALISE" | "PARA_ANALISE";
 
 export const CP_STATUS_OPTIONS: { value: CpStatus; label: string }[] = [
-  { value: "NAO_VERIFICADO", label: "Ainda não verificado" },
-  { value: "POSSUI", label: "Já possui consulta pública" },
-  { value: "NAO_POSSUI", label: "Não possui — precisa solicitar" },
-  { value: "SOLICITADA", label: "Solicitada — em acompanhamento" },
+  { value: "POSSUI", label: "Deferida / Deferido" },
+  { value: "INDEFERIDO", label: "Indeferido" },
+  { value: "EM_EXIGENCIA", label: "Em exigência" },
+  { value: "EM_ANALISE", label: "Em análise" },
+  { value: "PARA_ANALISE", label: "Para análise" },
 ];
+
+// Situações em que a CP está andando (ainda sem resultado final).
+export const CP_IN_PROGRESS_STATUSES: readonly string[] = ["EM_EXIGENCIA", "EM_ANALISE", "PARA_ANALISE"];
+
+export function cpStatusLabel(status: string | null | undefined): string | null {
+  return CP_STATUS_OPTIONS.find((o) => o.value === status)?.label ?? null;
+}
 
 export type ProductFlowInput = {
   description: string | null;
@@ -36,7 +47,7 @@ export function missingRegistrationItems(p: ProductFlowInput): string[] {
   return missing;
 }
 
-// A CP conta como resolvida quando o usuário marcou "já possui" ou quando a
+// A CP conta como resolvida quando o usuário marcou "deferida" ou quando a
 // varredura da lista pública do governo achou o produto como deferido.
 export function hasPublicConsultation(p: Pick<ProductFlowInput, "cpStatus" | "cpListResult">): boolean {
   return p.cpStatus === "POSSUI" || p.cpListResult === "FOUND";

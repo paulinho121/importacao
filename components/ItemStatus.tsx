@@ -1,7 +1,7 @@
 import { BRANCHES } from "@/lib/locations";
 import { LPCO_TONE_CLASS, lpcoCountdown, lpcoTone, productLpcoStatusLabel } from "@/lib/lpco";
 import { CP_LIST_RESULT_CLASS, CP_LIST_RESULT_LABEL, type CpListResult } from "@/lib/cp-list";
-import { CP_STATUS_OPTIONS, hasPublicConsultation } from "@/lib/product-flow";
+import { CP_IN_PROGRESS_STATUSES, cpStatusLabel, hasPublicConsultation } from "@/lib/product-flow";
 
 export type ItemLpco = {
   branch: string;
@@ -45,13 +45,17 @@ export function LpcoUfChips({ lpcos, highlight = null }: { lpcos: ItemLpco[]; hi
 
 export function CpBadge({ cpStatus, cpListResult }: { cpStatus: string | null; cpListResult: string | null }) {
   const has = hasPublicConsultation({ cpStatus, cpListResult });
-  const label = has
-    ? "CP: já possui"
-    : `CP: ${CP_STATUS_OPTIONS.find((o) => o.value === cpStatus)?.label.split(" — ")[0].toLowerCase() ?? "não verificada"}`;
+  const label = has ? "CP: deferida" : `CP: ${cpStatusLabel(cpStatus)?.toLowerCase() ?? "não verificada"}`;
   return (
     <span
       className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold ${
-        has ? LPCO_TONE_CLASS.ok : cpStatus === "SOLICITADA" ? "bg-warning/20 text-warning" : LPCO_TONE_CLASS.none
+        has
+          ? LPCO_TONE_CLASS.ok
+          : cpStatus && CP_IN_PROGRESS_STATUSES.includes(cpStatus)
+            ? "bg-warning/20 text-warning"
+            : cpStatus === "INDEFERIDO"
+              ? "bg-error-container text-on-error-container"
+              : LPCO_TONE_CLASS.none
       }`}
     >
       {label}

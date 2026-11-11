@@ -221,7 +221,7 @@ export default function ProductForm({
               defaultValue={defaultValues?.cpStatus ?? ""}
             >
               <option value="">Ainda não verificado</option>
-              {CP_STATUS_OPTIONS.filter((o) => o.value !== "NAO_VERIFICADO").map((o) => (
+              {CP_STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
