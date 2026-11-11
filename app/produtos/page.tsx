@@ -326,6 +326,16 @@ export default async function ProdutosPage({
                   <td className="px-6 py-3">
                     {/* Licença (Inciso V) e situação da CP na mesma coluna, um selo embaixo do outro */}
                     <div className="flex flex-col items-start gap-1">
+                    {p.licenseStatus === "DEFERIDA" && (p.cpListResult === "FOUND" || p.cpStatus === "POSSUI") ? (
+                      // Licença deferida e CP deferida dizem a mesma coisa: um selo só.
+                      <span
+                        className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${CP_LIST_RESULT_CLASS.FOUND}`}
+                        title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}
+                      >
+                        Deferida{p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : " · possui CP"}
+                      </span>
+                    ) : (
+                    <>
                     {p.licenseStatus ? (
                       <span
                         className={`px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}
@@ -363,6 +373,8 @@ export default async function ProdutosPage({
                         "—"
                       );
                     })()}
+                    </>
+                    )}
                     </div>
                   </td>
                   <td className="px-6 py-3">
