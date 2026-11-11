@@ -18,6 +18,7 @@ export const PO_EVENT_META: Record<string, { label: string; icon: string }> = {
   CANCELADO: { label: "Pedido cancelado", icon: "cancel" },
   PACKING_LIST_ANEXADA: { label: "Packing list anexada", icon: "inventory" },
   PACKING_LIST_REMOVIDA: { label: "Packing list removida", icon: "folder_delete" },
+  LINKS_ATUALIZADOS: { label: "Links da packing list / invoice atualizados", icon: "link" },
   PROCESSO_VINCULADO: { label: "Incluído no processo", icon: "local_shipping" },
   PROCESSO_REMOVIDO: { label: "Retirado do processo", icon: "undo" },
 };

@@ -628,6 +628,9 @@ export const purchaseOrders = pgTable("purchase_orders", {
   paymentTerms: text("payment_terms"),
   expectedDeliveryDate: date("expected_delivery_date"),
   notes: text("notes"),
+  // Links do Google Drive da packing list e da invoice do pedido (no lugar do upload de arquivo).
+  packingListUrl: text("packing_list_url"),
+  invoiceUrl: text("invoice_url"),
   sentAt: timestamp("sent_at", { withTimezone: true }),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   processId: uuid("process_id").references(() => processes.id),

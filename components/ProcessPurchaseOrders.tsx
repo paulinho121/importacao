@@ -6,6 +6,7 @@ import { addPurchaseOrderToProcess, removePurchaseOrderFromProcess } from "@/app
 import ConfirmActionButton from "@/components/ConfirmActionButton";
 import SupplierLogo from "@/components/SupplierLogo";
 import DocumentViewer from "@/components/DocumentViewer";
+import { driveDownloadUrl } from "@/lib/drive-links";
 import { PURCHASE_ORDER_STATUS_BADGE_CLASS, PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 
 import SubmitButton from "@/components/SubmitButton";
@@ -39,6 +40,8 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
         currency: purchaseOrders.currency,
         supplierName: suppliers.name,
         supplierLogoUrl: suppliers.logoUrl,
+        packingListUrl: purchaseOrders.packingListUrl,
+        invoiceUrl: purchaseOrders.invoiceUrl,
         ...poTotals,
       })
       .from(purchaseOrders)
@@ -145,10 +148,24 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                   <td className="py-2 pr-3 text-right font-mono-data">{l.quantity}</td>
                   <td className="py-2 pr-3 text-right font-mono-data whitespace-nowrap">{money(l.total, l.currency)}</td>
                   <td className="py-2 pr-3">
-                    {(packingByPo.get(l.id) ?? []).length === 0 ? (
+                    {(packingByPo.get(l.id) ?? []).length === 0 && !l.packingListUrl && !l.invoiceUrl ? (
                       <span className="text-xs text-on-surface-variant">—</span>
                     ) : (
                       <ul className="space-y-0.5">
+                        {[
+                          { label: "Packing list", url: l.packingListUrl },
+                          { label: "Invoice", url: l.invoiceUrl },
+                        ].map((x) => {
+                          const href = driveDownloadUrl(x.url);
+                          return href ? (
+                            <li key={x.label} className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[14px] text-on-surface-variant">link</span>
+                              <a href={href} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-secondary hover:underline">
+                                {x.label}
+                              </a>
+                            </li>
+                          ) : null;
+                        })}
                         {(packingByPo.get(l.id) ?? []).map((d) => (
                           <li key={d.id} className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[14px] text-on-surface-variant">inventory</span>

@@ -20,6 +20,7 @@ import { isUniqueViolation } from "@/lib/db-errors";
 import { LinkError, linkPurchaseOrderToProcess, syncPackingListToProcess } from "@/lib/process-purchase-orders";
 import { logPurchaseOrderEvent } from "@/lib/purchase-order-events";
 import { PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
+import { normalizeDriveUrl } from "@/lib/drive-links";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 
 function optionalText(formData: FormData, key: string) {
@@ -489,6 +490,39 @@ export async function addPurchaseOrderPackingList(poId: string, formData: FormDa
   }
   revalidatePath(`/pedidos-compra/${poId}`);
   redirect(withFlash(`/pedidos-compra/${poId}`, files.length === 1 ? "Packing list anexada." : `${files.length} arquivos anexados.`));
+}
+
+// Links do Google Drive da packing list e da invoice do pedido (no lugar do
+// upload de arquivo). Vazio remove o link. Vale em qualquer status, menos cancelado.
+export async function savePurchaseOrderLinks(poId: string, formData: FormData) {
+  const back = `/pedidos-compra/${poId}`;
+  const packing = normalizeDriveUrl(String(formData.get("packingListUrl") ?? ""));
+  if (!packing.ok) redirect(withFlashError(back, `Packing list: ${packing.error}`));
+  const invoice = normalizeDriveUrl(String(formData.get("invoiceUrl") ?? ""));
+  if (!invoice.ok) redirect(withFlashError(back, `Invoice: ${invoice.error}`));
+
+  const [po] = await db
+    .select({ status: purchaseOrders.status })
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.id, poId));
+  if (!po) throw new Error("Pedido de compra não encontrado.");
+  if (po.status === "CANCELADO") redirect(withFlashError(back, "Este pedido está cancelado."));
+
+  await db
+    .update(purchaseOrders)
+    .set({ packingListUrl: packing.url, invoiceUrl: invoice.url, updatedAt: new Date() })
+    .where(eq(purchaseOrders.id, poId));
+  await logPurchaseOrderEvent(
+    db,
+    poId,
+    "LINKS_ATUALIZADOS",
+    [packing.url ? "packing list" : null, invoice.url ? "invoice" : null].filter(Boolean).join(" e ") || "links removidos",
+  );
+
+  revalidatePath(back);
+  const [linked] = await db.select({ processId: purchaseOrders.processId }).from(purchaseOrders).where(eq(purchaseOrders.id, poId));
+  if (linked?.processId) revalidatePath(`/processos/${linked.processId}`);
+  redirect(withFlash(back, "Links salvos."));
 }
 
 export async function removePurchaseOrderDocument(docId: string, poId: string) {
