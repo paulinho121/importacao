@@ -417,21 +417,21 @@ export default async function ProcessDetailPage({
             >
               {STATUS_LABEL[process.status as ProcessStatus]}
             </span>
-            <details className="relative">
+            <details className="relative max-w-full">
               <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
                 <span className="material-symbols-outlined text-[16px]">edit</span>
                 Editar número
               </summary>
               <form
                 action={boundUpdateProcessNumber}
-                className="absolute z-10 mt-2 flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-lg"
+                className="mt-2 flex w-full max-w-sm items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-lg"
               >
                 <input
                   type="text"
                   name="processNumber"
                   defaultValue={process.processNumber}
                   required
-                  className="bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+                  className="min-w-0 flex-1 bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
                 />
                 <SubmitButton
                   className="px-3 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
@@ -459,11 +459,11 @@ export default async function ProcessDetailPage({
           </p>
         </div>
         <div className="lg:col-span-4 flex flex-col items-start gap-2 lg:items-end">
-          <form action={boundUpdateStatus} className="flex items-center gap-2">
+          <form action={boundUpdateStatus} className="flex w-full max-w-full flex-wrap items-center gap-2">
             <select
               name="status"
               defaultValue={process.status}
-              className="bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
+              className="min-w-0 max-w-full flex-1 basis-40 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
             >
               {Object.entries(STATUS_LABEL).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -547,7 +547,7 @@ export default async function ProcessDetailPage({
                     ) : state === "active" ? (
                       <span className="w-2 h-2 rounded-full bg-secondary" />
                     ) : (
-                      <span className="text-[10px] font-bold">{step}</span>
+                      <span className="text-[11px] font-bold">{step}</span>
                     )}
                   </div>
                   <div>

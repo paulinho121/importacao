@@ -18,9 +18,20 @@ import { useCurrentUser, initials } from "@/lib/use-current-user";
 import { signOutAction } from "@/app/session-actions";
 import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
 
-const LABEL_BY_PATH = new Map<string, string>(
-  NAV_GROUPS.flatMap((group) => group.items.map((item) => [item.href.split("?")[0], item.label] as const)),
-);
+// Um nome por caminho: vários itens do menu apontam para /processos (Em Trânsito,
+// Embarcados…, com ?status=…); vale o primeiro sem filtro, para o caminho de
+// /processos continuar "Processos" e não o nome do último filtro.
+const LABEL_BY_PATH = new Map<string, string>();
+const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items);
+// 1º os itens com filtro (o primeiro de cada caminho vale); 2º os sem filtro, que têm prioridade.
+for (const item of NAV_ITEMS) {
+  const [path, query] = item.href.split("?");
+  if (query && !LABEL_BY_PATH.has(path)) LABEL_BY_PATH.set(path, item.label);
+}
+for (const item of NAV_ITEMS) {
+  const [path, query] = item.href.split("?");
+  if (!query) LABEL_BY_PATH.set(path, item.label);
+}
 
 function useBreadcrumb(pathname: string) {
   if (pathname === "/") return [{ label: "Dashboard", href: "/" }];
@@ -70,11 +81,13 @@ export default function Header() {
         <Home className="h-4 w-4 shrink-0" />
         {crumbs.map((crumb, idx) => (
           <React.Fragment key={crumb.href}>
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-50" />
+            {crumbs.length > 1 && (
+              <ChevronRight className={`h-3.5 w-3.5 shrink-0 opacity-50 ${idx === crumbs.length - 1 ? "" : "hidden sm:block"}`} />
+            )}
             {idx === crumbs.length - 1 ? (
               <span className="truncate font-medium text-on-surface">{crumb.label}</span>
             ) : (
-              <Link href={crumb.href} className="truncate hover:text-on-surface transition-colors">
+              <Link href={crumb.href} className="hidden truncate transition-colors hover:text-on-surface sm:inline">
                 {crumb.label}
               </Link>
             )}

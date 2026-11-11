@@ -29,7 +29,7 @@ export function DashboardHero() {
       />
 
       <div className="flex min-h-[380px] flex-col justify-end gap-5 px-5 pb-6 pt-24 sm:min-h-[320px] sm:justify-center sm:px-10 sm:py-10 lg:px-14">
-        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7fddc3] backdrop-blur-md sm:text-[11px]">
+        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7fddc3] backdrop-blur-md sm:text-[11px]">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2abf9c] opacity-60 motion-reduce:hidden" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#2abf9c]" />

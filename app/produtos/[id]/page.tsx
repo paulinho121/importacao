@@ -140,7 +140,7 @@ export default async function EditProdutoPage({
           >
             {CP_LIST_RESULT_LABEL[product.cpListResult as CpListResult]}
           </span>
-          <span className="text-body-sm font-body-sm text-on-surface-variant">
+          <span className="min-w-0 break-words text-body-sm font-body-sm text-on-surface-variant [overflow-wrap:anywhere]">
             Lista pública do governo
             {product.cpListRef ? ` · CP ${product.cpListRef}` : ""}
             {product.cpListNcm ? ` · NCM ${product.cpListNcm}` : ""}

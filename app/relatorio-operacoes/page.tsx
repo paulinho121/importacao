@@ -156,7 +156,8 @@ export default async function RelatorioOperacoesPage() {
             Nenhum processo em andamento.
           </p>
         ) : (
-          <table data-no-zebra className="w-full text-xs">
+          <div className="overflow-x-auto print:overflow-visible">
+          <table data-no-zebra className="w-full min-w-[560px] text-xs print:min-w-0">
             <thead>
               <tr className="border-b" style={{ borderColor: LINE }}>
                 <Th>Processo</Th>
@@ -183,6 +184,7 @@ export default async function RelatorioOperacoesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </section>
 

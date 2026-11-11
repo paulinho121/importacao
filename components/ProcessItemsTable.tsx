@@ -91,7 +91,7 @@ const INPUT =
 const SAVE_BTN = "rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white transition-all hover:opacity-90";
 
 function Label({ children }: { children: ReactNode }) {
-  return <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant lg:hidden">{children}</span>;
+  return <span className="mb-0.5 block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant lg:hidden">{children}</span>;
 }
 
 // Detalhes do item (abre ao clicar na linha): edição, benefício por estado e reservas.
@@ -403,7 +403,7 @@ export default function ProcessItemsTable({
                         {r.manufacturerSku && r.manufacturerSku !== r.sku ? ` · ${r.manufacturerSku}` : ""}
                       </p>
                       {r.poLabel && (
-                        <span className="mt-0.5 inline-flex rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold text-on-surface-variant">
+                        <span className="mt-0.5 inline-flex rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold text-on-surface-variant">
                           {r.poLabel}
                         </span>
                       )}

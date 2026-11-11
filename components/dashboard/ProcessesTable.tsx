@@ -236,7 +236,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
 
                   <dl className="mt-4 grid grid-cols-3 gap-2 rounded-lg bg-muted/40 px-3 py-2.5">
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Modal
                       </dt>
                       <dd className="mt-0.5 truncate text-sm">
@@ -244,7 +244,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         ETA
                       </dt>
                       <dd className="mt-0.5 font-mono text-sm">
@@ -252,7 +252,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         FOB
                       </dt>
                       <dd className="mt-0.5 truncate font-mono text-sm">

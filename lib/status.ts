@@ -37,7 +37,7 @@ export const STATUS_LABEL: Record<ProcessStatus, string> = {
   AGUARDANDO_PRESENCA_CARGA: "Aguardando Presença de Carga",
   PRESENCA_CARGA: "Presença de Carga",
   EM_DESEMBARACO: "Desembaraçado",
-  CARGA_REGISTRADA: "Carga Registrada (DUIMP) — Aguardando Retirada",
+  CARGA_REGISTRADA: "Carga Registrada (DUIMP)",
   TRANSPORTE_NACIONAL: "Em Trânsito Nacional",
   RECEBIDO: "Em Estoque",
   ATRASADO: "Atrasado",

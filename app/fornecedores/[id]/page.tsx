@@ -46,13 +46,13 @@ export default async function EditFornecedorPage({
         <h3 className="font-headline-sm text-headline-sm text-primary mb-4">Logo da Marca</h3>
         <div className="flex flex-col sm:flex-row sm:items-center gap-6">
           <SupplierLogo logoUrl={supplier.logoUrl} name={supplier.name} size={96} />
-          <form action={boundUploadLogo} className="flex-1 flex flex-col sm:flex-row gap-3">
+          <form action={boundUploadLogo} className="min-w-0 flex-1 flex flex-col sm:flex-row gap-3">
             <input
               type="file"
               name="logo"
               accept="image/png,image/jpeg,image/svg+xml,image/webp"
               required
-              className="flex-1 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
+              className="w-full min-w-0 flex-1 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-surface-container-high file:text-on-surface-variant"
             />
             <SubmitButton
               className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"

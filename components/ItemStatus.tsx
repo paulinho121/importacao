@@ -28,7 +28,7 @@ export function LpcoUfChips({ lpcos, highlight = null }: { lpcos: ItemLpco[]; hi
             title={l ? `${b.label}: ${productLpcoStatusLabel(l.status)}` : `${b.label}: sem solicitação`}
             className="flex flex-col items-center gap-0.5"
           >
-            <span className="h-3 whitespace-nowrap text-[10px] leading-3 text-on-surface-variant">
+            <span className="h-3 whitespace-nowrap text-[11px] leading-3 text-on-surface-variant">
               {tone === "wait" ? "em análise" : countdown ? (countdown.expired ? "vencido" : `${countdown.daysLeft}d`) : ""}
             </span>
             <span

@@ -97,7 +97,7 @@ export default async function ItemFichaPage({ params }: { params: Promise<{ id: 
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(260px,380px)_1fr]">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(240px,340px)_minmax(0,1fr)]">
         <div>
           <PhotoGallery photos={photos} alt={p.description} />
           {photos.length === 0 && (

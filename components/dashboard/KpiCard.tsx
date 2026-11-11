@@ -73,7 +73,7 @@ export function KpiCard({
           {trend && (
             <span
               className={cn(
-                "flex items-center gap-0.5 text-[10px] font-medium leading-none",
+                "flex items-center gap-0.5 text-[11px] font-medium leading-none",
                 trend.direction === "flat"
                   ? "text-muted-foreground"
                   : trendGood

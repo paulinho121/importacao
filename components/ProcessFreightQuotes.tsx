@@ -643,7 +643,7 @@ export default function ProcessFreightQuotes({
     });
 
   return (
-    <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
+    <section className="min-w-0 max-w-full bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-stack-md">
         <div>
           <h3 className="font-headline-sm text-headline-sm text-primary">Cotações de Frete</h3>
@@ -783,12 +783,12 @@ export default function ProcessFreightQuotes({
                           ))}
                         </select>
                         {isFechada(c) && (
-                          <span className="shrink-0 rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
+                          <span className="shrink-0 rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
                             FECHADA
                           </span>
                         )}
                         {c.isSelected && (
-                          <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black">
+                          <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-black">
                             ESCOLHIDA
                           </span>
                         )}
@@ -928,7 +928,7 @@ export default function ProcessFreightQuotes({
                       <input form={F(c)} name="validUntil" type="date" value={c.draft.validUntil} disabled={closed}
                         onChange={(e) => patch(c.key, { validUntil: e.target.value })} className={cellInput} />
                       {c.draft.validUntil && c.draft.validUntil < today && (
-                        <p className="mt-0.5 text-[10px] font-bold text-error">Proposta vencida</p>
+                        <p className="mt-0.5 text-[11px] font-bold text-error">Proposta vencida</p>
                       )}
                     </>
                   ))}
@@ -1065,7 +1065,7 @@ export default function ProcessFreightQuotes({
                     <td key={c.key} colSpan={SPAN}
                       className={`${dataCell} align-top text-right font-mono-data text-sm font-extrabold text-primary ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
                       {isCheapest(i) && (
-                        <span className="mb-1 mr-auto block w-fit rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-black">
+                        <span className="mb-1 mr-auto block w-fit rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
                           MENOR CUSTO
                         </span>
                       )}
@@ -1074,7 +1074,7 @@ export default function ProcessFreightQuotes({
                       ) : computed[i].totals.length === 0 ? (
                         <span className="text-on-surface-variant font-normal">—</span>
                       ) : (
-                        <span className="text-[10px] font-normal text-outline">
+                        <span className="text-[11px] font-normal text-outline">
                           {rate ? "Moedas sem conversão" : "Informe o dólar do dia"}
                         </span>
                       )}
@@ -1107,7 +1107,7 @@ export default function ProcessFreightQuotes({
                           {formatMoney(computed[i].inBRL!, "BRL")}
                         </p>
                       ) : (
-                        <span className="block text-right text-[10px] text-outline">
+                        <span className="block text-right text-[11px] text-outline">
                           {computed[i].totals.length === 0 ? "—" : rate ? "Moedas sem conversão" : "Informe o dólar do dia"}
                         </span>
                       )}
@@ -1137,7 +1137,7 @@ export default function ProcessFreightQuotes({
                           placeholder="Cole o link do Google Drive" className={cellInput} />
                         {href && (
                           <a href={href} target="_blank" rel="noopener noreferrer" title="Baixar a cotação do Google Drive"
-                            className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[10px] font-bold text-white hover:opacity-90">
+                            className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[11px] font-bold text-white hover:opacity-90">
                             Baixar
                           </a>
                         )}
@@ -1327,7 +1327,7 @@ export default function ProcessFreightQuotes({
                             )}
                           </div>
                           {dirty && c.quoteId !== null && (
-                            <p className="mt-1 text-[10px] text-warning">Alterações não salvas</p>
+                            <p className="mt-1 text-[11px] text-warning">Alterações não salvas</p>
                           )}
                         </td>
                       );
@@ -1428,7 +1428,7 @@ function TaxRow({
 }) {
   return (
     <tr>
-      <Lead sec="TAXAS" label={<span className="pl-5 text-[10px] font-semibold text-on-surface-variant">TX-{index + 1}</span>} />
+      <Lead sec="TAXAS" label={<span className="pl-5 text-[11px] font-semibold text-on-surface-variant">TX-{index + 1}</span>} />
       {cols.map((c) => {
         const t = taxOf(c);
         return (

@@ -258,7 +258,7 @@ export default function AddPurchaseOrderItemForm({
                           <span className="ml-2 font-mono-data text-xs text-on-surface-variant">· {p.manufacturerSku}</span>
                         )}
                         {p.noSupplier && (
-                          <span className="ml-2 rounded bg-surface-container-high px-1.5 py-0.5 text-[10px] font-bold text-on-surface-variant">
+                          <span className="ml-2 rounded bg-surface-container-high px-1.5 py-0.5 text-[11px] font-bold text-on-surface-variant">
                             sem fornecedor{p.manufacturerName ? ` · ${p.manufacturerName}` : ""}
                           </span>
                         )}

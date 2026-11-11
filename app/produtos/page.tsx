@@ -418,7 +418,7 @@ export default async function ProdutosPage({
                           : `${b.label}: sem solicitação`;
                         return (
                           <span key={b.code} title={title} className="flex flex-col items-center gap-0.5">
-                            <span className="h-3 text-[10px] leading-3 text-on-surface-variant whitespace-nowrap">
+                            <span className="h-3 text-[11px] leading-3 text-on-surface-variant whitespace-nowrap">
                               {tone === "wait"
                                 ? "em análise"
                                 : countdown && !countdown.expired

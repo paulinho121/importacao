@@ -69,7 +69,7 @@ export default async function PurchaseOrderHistory({
               <span className={`mt-1 text-[11px] font-bold leading-tight ${done ? "text-primary" : "text-on-surface-variant"}`}>
                 {step.label}
               </span>
-              <span className="text-[10px] text-on-surface-variant">{done && date ? fmtDate(date) : "—"}</span>
+              <span className="text-[11px] text-on-surface-variant">{done && date ? fmtDate(date) : "—"}</span>
             </li>
           );
         })}
