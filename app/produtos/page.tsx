@@ -252,31 +252,51 @@ export default async function ProdutosPage({
     );
   };
 
-  // SKU interno (link) + SKU do fabricante só quando é diferente do interno.
-  const skuLine = (p: Row) => (
-    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono-data text-xs">
-      <Link href={`/produtos/${p.id}`} className="font-semibold text-secondary hover:underline">
-        {p.sku}
+  // Quando o SKU interno é igual ao nome (comum nos itens importados), o nome vira o
+  // link e o SKU não aparece de novo embaixo.
+  const sameSku = (p: Row) => p.sku.trim().toLowerCase() === p.description.trim().toLowerCase();
+  const nameLine = (p: Row) =>
+    sameSku(p) ? (
+      <Link href={`/produtos/${p.id}`} className="font-medium leading-snug text-secondary hover:underline">
+        {p.description}
       </Link>
-      {p.manufacturerSku && p.manufacturerSku !== p.sku && (
-        <span className="text-on-surface-variant" title="SKU do fabricante">
-          · {p.manufacturerSku}
-        </span>
-      )}
-      {p.datasheetUrl && (
-        <a
-          href={p.datasheetUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-outline-variant px-2 py-0.5 text-[11px] font-bold text-secondary hover:bg-secondary/10"
-          title="Abrir a ficha técnica"
-        >
-          <span className="material-symbols-outlined text-[14px]">description</span>
-          Ficha
-        </a>
-      )}
-    </p>
-  );
+    ) : (
+      <p className="font-medium leading-snug">{p.description}</p>
+    );
+
+  // SKU interno (link) + SKU do fabricante só quando é diferente do interno.
+  const skuLine = (p: Row) => {
+    const mfr = p.manufacturerSku && p.manufacturerSku !== p.sku && p.manufacturerSku !== p.description ? p.manufacturerSku : null;
+    const showSku = !sameSku(p);
+    if (!showSku && !mfr && !p.datasheetUrl) return null;
+    return (
+      <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono-data text-xs">
+        {showSku && (
+          <Link href={`/produtos/${p.id}`} className="font-semibold text-secondary hover:underline">
+            {p.sku}
+          </Link>
+        )}
+        {mfr && (
+          <span className="text-on-surface-variant" title="SKU do fabricante">
+            {showSku ? "· " : "Fabr. "}
+            {mfr}
+          </span>
+        )}
+        {p.datasheetUrl && (
+          <a
+            href={p.datasheetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-outline-variant px-2 py-0.5 text-[11px] font-bold text-secondary hover:bg-secondary/10"
+            title="Abrir a ficha técnica"
+          >
+            <span className="material-symbols-outlined text-[14px]">description</span>
+            Ficha
+          </a>
+        )}
+      </p>
+    );
+  };
 
   const photoOf = (p: Row) =>
     p.photoUrl ? (
@@ -445,13 +465,13 @@ export default async function ProdutosPage({
             <div className="hidden min-[1360px]:block">
               <table className="w-full table-fixed border-collapse text-left">
                 <colgroup>
-                  <col />
-                  <col style={{ width: 150 }} />
-                  <col style={{ width: 175 }} />
-                  <col style={{ width: 115 }} />
-                  <col style={{ width: 125 }} />
-                  <col style={{ width: 56 }} />
-                  <col style={{ width: 88 }} />
+                  <col style={{ width: "34%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "11%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "4%" }} />
+                  <col style={{ width: "7%" }} />
                 </colgroup>
                 <thead>
                   <tr className="bg-surface-container-low border-b border-outline-variant">
@@ -471,7 +491,7 @@ export default async function ProdutosPage({
                         <div className="flex items-center gap-3">
                           {photoOf(p)}
                           <div className="min-w-0">
-                            <p className="font-medium leading-snug">{p.description}</p>
+                            {nameLine(p)}
                             {skuLine(p)}
                           </div>
                         </div>
@@ -508,7 +528,7 @@ export default async function ProdutosPage({
                   <div className="flex items-start gap-3">
                     {photoOf(p)}
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium leading-snug">{p.description}</p>
+                      {nameLine(p)}
                       {skuLine(p)}
                     </div>
                     <Link
