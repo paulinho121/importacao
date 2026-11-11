@@ -9,15 +9,14 @@ import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { BRANCHES } from "@/lib/locations";
 import { LPCO_TONE_CLASS, lpcoCountdown, lpcoTone, lpcoValidUntil, productLpcoStatusLabel } from "@/lib/lpco";
 import { formatDate } from "@/lib/status";
-import { LICENSE_STATUS_LABEL, LICENSE_STATUS_BADGE_CLASS, type LicenseStatus } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
 // "Deferido" = há prova de deferimento em qualquer origem: constou na lista do
-// governo, a CP está marcada como "já possui" (inclusive a vinda da base do
-// Inciso V) ou a licença do Inciso V está deferida. Calculado na hora, então
+// governo ou a CP está marcada como deferida (inclusive a vinda da base do
+// Inciso V). A licença do Inciso V não entra mais na conta. Calculado na hora, então
 // o contador acompanha qualquer importação ou edição.
-const deferidoExpr = sql`coalesce(${products.cpListResult} = 'FOUND' or ${products.cpStatus} = 'POSSUI' or ${products.licenseStatus} = 'DEFERIDA', false)`;
+const deferidoExpr = sql`coalesce(${products.cpListResult} = 'FOUND' or ${products.cpStatus} = 'POSSUI', false)`;
 
 export default async function ProdutosPage({
   searchParams,
@@ -79,7 +78,6 @@ export default async function ProdutosPage({
         ncmDivergent: products.ncmDivergent,
         ncmOfficialSuggested: products.ncmOfficialSuggested,
         description: products.description,
-        licenseStatus: products.licenseStatus,
         photoUrl: products.photoUrl,
         datasheetUrl: products.datasheetUrl,
         cpListResult: products.cpListResult,
@@ -157,24 +155,11 @@ export default async function ProdutosPage({
   type Row = (typeof rows)[number];
   const BADGE = "px-2 py-1 rounded-full font-label-md text-label-md whitespace-nowrap";
 
-  // Licença (Inciso V) e situação da CP juntas, um selo embaixo do outro; quando as
-  // duas dizem "deferida", um selo só.
+  // Só a situação da CP (a licença do Inciso V não aparece mais aqui, para não
+  // duplicar a informação): resultado da lista do governo, ou a CP escolhida no cadastro.
   const licenseCp = (p: Row) => {
-    if (p.licenseStatus === "DEFERIDA" && (p.cpListResult === "FOUND" || p.cpStatus === "POSSUI")) {
-      return (
-        <span className={`${BADGE} ${CP_LIST_RESULT_CLASS.FOUND}`} title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}>
-          Deferida{p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : " · possui CP"}
-        </span>
-      );
-    }
-    const licenseBadge = p.licenseStatus ? (
-      <span className={`${BADGE} ${LICENSE_STATUS_BADGE_CLASS[p.licenseStatus as LicenseStatus]}`}>
-        {LICENSE_STATUS_LABEL[p.licenseStatus as LicenseStatus]}
-      </span>
-    ) : null;
-    let cpBadge: React.ReactNode;
     if (p.cpListResult && p.cpListResult !== "NOT_FOUND") {
-      cpBadge = (
+      return (
         <span
           className={`${BADGE} ${CP_LIST_RESULT_CLASS[p.cpListResult as CpListResult]}`}
           title={p.cpListRef ? `CP ${p.cpListRef}` : undefined}
@@ -183,7 +168,8 @@ export default async function ProdutosPage({
           {p.cpListRef ? ` · CP ${p.cpListRef.split(", ")[0]}` : ""}
         </span>
       );
-    } else if (cpStatusLabel(p.cpStatus)) {
+    }
+    if (cpStatusLabel(p.cpStatus)) {
       // Situação da CP escolhida no cadastro (Deferida, Em análise, Indeferido…)
       const tone =
         p.cpStatus === "POSSUI"
@@ -191,19 +177,12 @@ export default async function ProdutosPage({
           : p.cpStatus === "INDEFERIDO"
             ? "bg-error-container text-on-error-container"
             : "bg-warning/20 text-warning";
-      cpBadge = <span className={`${BADGE} ${tone}`}>CP: {cpStatusLabel(p.cpStatus)}</span>;
-    } else if (p.cpListResult) {
-      cpBadge = <span className={`${BADGE} ${CP_LIST_RESULT_CLASS.NOT_FOUND}`}>{CP_LIST_RESULT_LABEL.NOT_FOUND}</span>;
-    } else {
-      cpBadge = null;
+      return <span className={`${BADGE} ${tone}`}>{cpStatusLabel(p.cpStatus)}</span>;
     }
-    if (!licenseBadge && !cpBadge) return <span className="text-on-surface-variant">—</span>;
-    return (
-      <div className="flex flex-col items-start gap-1">
-        {licenseBadge}
-        {cpBadge}
-      </div>
-    );
+    if (p.cpListResult) {
+      return <span className={`${BADGE} ${CP_LIST_RESULT_CLASS.NOT_FOUND}`}>{CP_LIST_RESULT_LABEL.NOT_FOUND}</span>;
+    }
+    return <span className="text-on-surface-variant">—</span>;
   };
 
   const lpcoDots = (p: Row) => (
@@ -477,7 +456,7 @@ export default async function ProdutosPage({
                   <tr className="bg-surface-container-low border-b border-outline-variant">
                     <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">PRODUTO</th>
                     <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">FORNECEDOR / NCM</th>
-                    <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">LICENÇA / CP</th>
+                    <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">CP</th>
                     <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">LPCO</th>
                     <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">CUSTO / PREÇO</th>
                     <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">USOS</th>
