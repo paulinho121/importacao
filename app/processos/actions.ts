@@ -496,6 +496,7 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   revalidatePath("/");
+  redirect(withFlash(`/processos/${processId}`, `Avançou para "${WORKFLOW_STEPS[nextStep - 1]}".`));
 }
 
 export async function updateProcessStatus(processId: string, formData: FormData) {
@@ -506,6 +507,11 @@ export async function updateProcessStatus(processId: string, formData: FormData)
   const note = String(formData.get("note") ?? "").trim().slice(0, 500);
 
   const [before] = await db.select({ status: processes.status }).from(processes).where(eq(processes.id, processId));
+
+  // Mesmo status e sem observação: não há o que registrar (evita linhas "X → X" no histórico).
+  if (before && before.status === status && !note) {
+    redirect(withFlash(`/processos/${processId}`, `O processo já está em "${STATUS_LABEL[status]}".`));
+  }
 
   // Escolher uma etapa da sequência também posiciona o stepper nela
   // (Abandonado não muda a etapa).
@@ -528,6 +534,8 @@ export async function updateProcessStatus(processId: string, formData: FormData)
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   revalidatePath("/");
+  // Recarrega a tela já no novo status e mostra o aviso (antes não havia retorno visível).
+  redirect(withFlash(`/processos/${processId}`, `Status alterado para "${STATUS_LABEL[status]}".`));
 }
 
 // Encerra o processo imediatamente (fora da progressão normal do
