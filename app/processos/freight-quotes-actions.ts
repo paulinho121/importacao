@@ -6,9 +6,10 @@ import {
   processEvents,
   processFreightQuoteLines,
   processFreightQuotes,
+  processQuoteEvents,
   processes,
 } from "@/db/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withFlash, withFlashError } from "@/lib/flash";
@@ -24,6 +25,8 @@ import {
 import { MODALIDADES, TIPOS_EMBARQUE, modalFromTipo } from "@/lib/modais";
 import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
 import { normalizeDriveUrl } from "@/lib/drive-links";
+import { quoteActorName, recordQuoteEvents } from "@/lib/quote-history";
+import { changeLine, fmtDate, fmtText, sameNumber } from "@/lib/quote-events";
 
 const CURRENCIES = ["USD", "EUR", "CNY", "GBP", "JPY", "OTHER", "BRL"] as const;
 const MODALS = ["AIR", "SEA_FCL", "SEA_LCL", "SEA_BREAK_BULK", "SEA_RORO", "COURIER", "ROAD"] as const;
@@ -64,6 +67,99 @@ function safeFileName(name: string) {
     .replace(/[^A-Za-z0-9._-]+/g, "_");
 }
 
+const FREIGHT_STATUS_LABEL: Record<string, string> = { ATUALIZADO: "Atualizado", ANTIGO: "Antigo", FECHADO: "Fechado" };
+const statusLabel = (s: string) => FREIGHT_STATUS_LABEL[s] ?? s;
+
+// "BRL 10,00 + USD 100,00" (moedas em ordem alfabética, para comparar antes/depois).
+function totalsText(lines: { currency?: string; total: string | number }[]): string {
+  const sums = new Map<string, number>();
+  for (const l of lines) {
+    const c = l.currency ?? "USD";
+    sums.set(c, (sums.get(c) ?? 0) + Number(l.total));
+  }
+  return [...sums.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([currency, value]) => formatMoney(Math.round(value * 100) / 100, currency))
+    .join(" + ");
+}
+
+type FreightFields = Partial<typeof processFreightQuotes.$inferInsert>;
+
+const FREIGHT_TEXT_FIELDS: [keyof FreightFields, string][] = [
+  ["proposal", "Nº da proposta"],
+  ["modalidade", "Modal"],
+  ["containerType", "Tipo de embarque"],
+  ["incoterm", "Incoterm"],
+  ["origin", "Origem"],
+  ["destination", "Destino"],
+  ["carrier", "Cia / armador"],
+  ["route", "Rota"],
+  ["frequency", "Frequência"],
+  ["cargoDescription", "Mercadoria"],
+  ["dimensions", "Dimensões"],
+  ["pickupAddress", "Coleta"],
+  ["notes", "Observação"],
+];
+const FREIGHT_DATE_FIELDS: [keyof FreightFields, string][] = [
+  ["etdEstimated", "Embarque previsto (ETD)"],
+  ["etaEstimated", "Chegada prevista (ETA)"],
+  ["validUntil", "Validade"],
+  ["quoteDate", "Data da cotação"],
+];
+const FREIGHT_NUMBER_FIELDS: [keyof FreightFields, string][] = [
+  ["transitDays", "Trânsito mínimo (dias)"],
+  ["transitDaysMax", "Trânsito máximo (dias)"],
+  ["grossWeightKg", "Peso considerado (kg)"],
+  ["volumes", "Volumes"],
+  ["volumeM3", "Volume (m³)"],
+  ["cargoValue", "Valor da carga"],
+];
+
+// O que mudou entre a cotação gravada e a que está sendo salva, em frases
+// curtas para o histórico.
+function freightChangeDescriptions(p: {
+  before: FreightFields;
+  beforeAgentName: string | null;
+  beforeLines: { currency: string; total: string }[];
+  after: FreightFields;
+  afterAgentName: string;
+  afterLines: { currency?: string; total: string }[];
+  uploadedFileName: string | null;
+  removedFile: boolean;
+}): string[] {
+  const out: (string | null)[] = [];
+  const { before, after } = p;
+  out.push(changeLine("Situação", statusLabel(before.status ?? ""), statusLabel(after.status ?? "")));
+  if (before.agentId !== after.agentId) out.push(changeLine("Agente de cargas", p.beforeAgentName, p.afterAgentName));
+  const totalsBefore = totalsText(p.beforeLines);
+  const totalsAfter = totalsText(p.afterLines);
+  out.push(changeLine("Valores", totalsBefore, totalsAfter));
+  for (const [key, label] of FREIGHT_DATE_FIELDS) {
+    const b = (before[key] as string | null | undefined) ?? null;
+    const a = (after[key] as string | null | undefined) ?? null;
+    if (b !== a) out.push(`${label}: ${fmtDate(b)} → ${fmtDate(a)}`);
+  }
+  for (const [key, label] of FREIGHT_NUMBER_FIELDS) {
+    const b = before[key] as string | number | null | undefined;
+    const a = after[key] as string | number | null | undefined;
+    if (!sameNumber(b, a)) out.push(`${label}: ${fmtText(b === null || b === undefined ? null : String(Number(b)))} → ${fmtText(a === null || a === undefined ? null : String(Number(a)))}`);
+  }
+  for (const [key, label] of FREIGHT_TEXT_FIELDS) {
+    if (key === "notes") {
+      if ((before.notes ?? "").trim() !== (after.notes ?? "").trim()) out.push("Observação alterada");
+      continue;
+    }
+    out.push(changeLine(label, before[key] as string | null, after[key] as string | null));
+  }
+  if ((before.driveUrl ?? null) !== (after.driveUrl ?? null)) {
+    out.push(!after.driveUrl ? "Link do Drive removido" : before.driveUrl ? "Link do Drive alterado" : "Link do Drive adicionado");
+  }
+  if (p.uploadedFileName) out.push(`Arquivo anexado: ${p.uploadedFileName}`);
+  if (p.removedFile) out.push("Arquivo removido");
+  const result = out.filter((v): v is string => Boolean(v));
+  return result;
+}
+
 export type SaveResult =
   | { ok: true; id: string; created: boolean; fileName: string | null }
   | { ok: false; error: string };
@@ -98,6 +194,14 @@ export async function saveFreightQuote(
   }
   if (transitDays !== null && transitDaysMax !== null && transitDaysMax < transitDays) {
     return fail("O trânsito máximo não pode ser menor que o mínimo.");
+  }
+  const etdEstimated = text(formData, "etdEstimated");
+  const etaEstimated = text(formData, "etaEstimated");
+  if ([etdEstimated, etaEstimated].some((d) => d !== null && !/^\d{4}-\d{2}-\d{2}$/.test(d))) {
+    return fail("Confira as datas de embarque e chegada previstas.");
+  }
+  if (etdEstimated && etaEstimated && etaEstimated < etdEstimated) {
+    return fail("A chegada prevista (ETA) não pode ser antes do embarque previsto (ETD).");
   }
 
   // Linhas de valor: campos paralelos (um de cada por linha do formulário).
@@ -187,6 +291,8 @@ export async function saveFreightQuote(
     route: text(formData, "route"),
     transitDays,
     transitDaysMax,
+    etdEstimated,
+    etaEstimated,
     frequency: text(formData, "frequency"),
     cargoDescription: text(formData, "cargoDescription"),
     grossWeightKg: fixed(grossWeightKg, 2),
@@ -199,14 +305,27 @@ export async function saveFreightQuote(
     notes: text(formData, "notes"),
   };
 
-  let existing: { storagePath: string | null; fileName: string | null } | undefined;
+  let existing: typeof processFreightQuotes.$inferSelect | undefined;
+  let existingLines: { currency: string; total: string }[] = [];
+  let existingAgentName: string | null = null;
   if (quoteId) {
     [existing] = await db
-      .select({ storagePath: processFreightQuotes.storagePath, fileName: processFreightQuotes.fileName })
+      .select()
       .from(processFreightQuotes)
       .where(and(eq(processFreightQuotes.id, quoteId), eq(processFreightQuotes.processId, processId)));
     if (!existing) return fail("Cotação não encontrada.");
+    existingLines = await db
+      .select({ currency: processFreightQuoteLines.currency, total: processFreightQuoteLines.total })
+      .from(processFreightQuoteLines)
+      .where(eq(processFreightQuoteLines.quoteId, quoteId));
+    if (existing.agentId && existing.agentId !== agentId) {
+      const [old] = await db.select({ name: freightAgents.name }).from(freightAgents).where(eq(freightAgents.id, existing.agentId));
+      existingAgentName = old?.name ?? null;
+    } else if (existing.agentId) {
+      existingAgentName = agent.name;
+    }
   }
+  const actor = await quoteActorName();
 
   // Upload antes de gravar; se o banco falhar depois, o arquivo órfão é
   // removido para não acumular lixo no Storage.
@@ -252,6 +371,29 @@ export async function saveFreightQuote(
       if (lines.length > 0) {
         await tx.insert(processFreightQuoteLines).values(lines.map((l) => ({ ...l, quoteId: id! })));
       }
+
+      // Histórico da cotação: criação ou o que mudou, com o responsável.
+      const descriptions = existing
+        ? freightChangeDescriptions({
+            before: existing,
+            beforeAgentName: existingAgentName,
+            beforeLines: existingLines,
+            after: values,
+            afterAgentName: agent.name,
+            afterLines: lines,
+            uploadedFileName: uploaded?.fileName ?? null,
+            removedFile: removeFile && !uploaded && Boolean(existing.fileName),
+          })
+        : [
+            `Cotação criada (${agent.name})${status !== "ATUALIZADO" ? ` · situação ${statusLabel(status)}` : ""}`,
+            ...(totalsText(lines) ? [`Valores informados: ${totalsText(lines)}`] : []),
+            ...(etdEstimated || etaEstimated
+              ? [`Previsões: embarque ${fmtDate(etdEstimated)} · chegada ${fmtDate(etaEstimated)}`]
+              : []),
+            ...(drive.url ? ["Link do Drive adicionado"] : []),
+            ...(uploaded ? [`Arquivo anexado: ${uploaded.fileName}`] : []),
+          ];
+      await recordQuoteEvents(tx, { processId, quoteType: "FREIGHT", quoteId: id, descriptions, actor });
     });
   } catch (e) {
     failed = true;
@@ -276,12 +418,25 @@ export async function saveFreightQuote(
 
 export async function deleteFreightQuote(quoteId: string, processId: string) {
   const back = `/processos/${processId}`;
+  const actor = await quoteActorName();
   const [quote] = await db
     .select({ storagePath: processFreightQuotes.storagePath })
     .from(processFreightQuotes)
     .where(and(eq(processFreightQuotes.id, quoteId), eq(processFreightQuotes.processId, processId)));
   if (quote) {
-    await db.delete(processFreightQuotes).where(eq(processFreightQuotes.id, quoteId));
+    await db.transaction(async (tx) => {
+      await tx.delete(processFreightQuotes).where(eq(processFreightQuotes.id, quoteId));
+      // o histórico da cotação some junto; fica o registro no histórico do processo
+      await tx
+        .delete(processQuoteEvents)
+        .where(and(eq(processQuoteEvents.quoteType, "FREIGHT"), eq(processQuoteEvents.quoteId, quoteId)));
+      await tx.insert(processEvents).values({
+        processId,
+        eventDate: new Date(),
+        eventType: "Cotação de frete removida",
+        origin: `Cotação · ${actor}`,
+      });
+    });
     if (quote.storagePath) await supabaseAdmin.storage.from(DOCUMENTS_BUCKET).remove([quote.storagePath]);
   }
   revalidatePath(back);
@@ -317,9 +472,30 @@ export async function selectFreightQuote(quoteId: string, processId: string) {
   const agentName = agent?.name ?? "agente";
 
   const apply = freightToApply(lines, process.currency);
+  const actor = await quoteActorName();
 
   await db.transaction(async (tx) => {
-    // Só uma cotação fica "Fechada": a que foi escolhida.
+    // Só uma cotação fica "Fechada": a que foi escolhida. As outras que estavam
+    // fechadas voltam para "Atualizado" (e isso entra no histórico delas).
+    const reopened = await tx
+      .select({ id: processFreightQuotes.id })
+      .from(processFreightQuotes)
+      .where(
+        and(
+          eq(processFreightQuotes.processId, processId),
+          eq(processFreightQuotes.status, "FECHADO"),
+          ne(processFreightQuotes.id, quoteId),
+        ),
+      );
+    for (const r of reopened) {
+      await recordQuoteEvents(tx, {
+        processId,
+        quoteType: "FREIGHT",
+        quoteId: r.id,
+        descriptions: [`Situação: ${statusLabel("FECHADO")} → ${statusLabel("ATUALIZADO")} (outra cotação foi escolhida)`],
+        actor,
+      });
+    }
     await tx
       .update(processFreightQuotes)
       .set({ isSelected: false, status: "ATUALIZADO" })
@@ -342,6 +518,18 @@ export async function selectFreightQuote(quoteId: string, processId: string) {
     }
     await tx.update(processes).set(patch).where(eq(processes.id, processId));
 
+    await recordQuoteEvents(tx, {
+      processId,
+      quoteType: "FREIGHT",
+      quoteId,
+      descriptions: [
+        `Cotação escolhida · situação ${statusLabel(quote.status)} → ${statusLabel("FECHADO")}`,
+        ...(apply.value !== null
+          ? [`Frete Internacional do processo atualizado para ${formatMoney(apply.value, apply.currency)}`]
+          : []),
+      ],
+      actor,
+    });
     await tx.insert(processEvents).values({
       processId,
       eventDate: new Date(),
@@ -367,10 +555,26 @@ export async function selectFreightQuote(quoteId: string, processId: string) {
 // Tira a marca de "escolhida" (não mexe nos valores já levados ao processo).
 export async function clearFreightQuoteSelection(processId: string) {
   const back = `/processos/${processId}`;
-  await db
-    .update(processFreightQuotes)
-    .set({ isSelected: false, status: "ATUALIZADO" })
-    .where(and(eq(processFreightQuotes.processId, processId), eq(processFreightQuotes.isSelected, true)));
+  const actor = await quoteActorName();
+  await db.transaction(async (tx) => {
+    const selected = await tx
+      .select({ id: processFreightQuotes.id, status: processFreightQuotes.status })
+      .from(processFreightQuotes)
+      .where(and(eq(processFreightQuotes.processId, processId), eq(processFreightQuotes.isSelected, true)));
+    await tx
+      .update(processFreightQuotes)
+      .set({ isSelected: false, status: "ATUALIZADO" })
+      .where(and(eq(processFreightQuotes.processId, processId), eq(processFreightQuotes.isSelected, true)));
+    for (const q of selected) {
+      await recordQuoteEvents(tx, {
+        processId,
+        quoteType: "FREIGHT",
+        quoteId: q.id,
+        descriptions: [`Escolha removida · situação ${statusLabel(q.status)} → ${statusLabel("ATUALIZADO")}`],
+        actor,
+      });
+    }
+  });
   revalidatePath(back);
   redirect(withFlash(back, "Escolha da cotação removida. O frete do processo continua como estava."));
 }

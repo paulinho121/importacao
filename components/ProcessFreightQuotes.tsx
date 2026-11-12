@@ -27,6 +27,8 @@ import {
 } from "@/lib/freight-quotes";
 
 import SubmitButton from "@/components/SubmitButton";
+import QuoteHistory from "@/components/QuoteHistory";
+import type { QuoteEventRow } from "@/lib/quote-events";
 import { driveDownloadUrl } from "@/lib/drive-links";
 import DriveLinkActions from "@/components/DriveLinkActions";
 // Cotações de frete no formato da planilha de comparação do time: uma coluna
@@ -62,6 +64,8 @@ export type FreightQuoteRow = {
   route: string | null;
   transitDays: number | null;
   transitDaysMax: number | null;
+  etdEstimated: string | null;
+  etaEstimated: string | null;
   frequency: string | null;
   cargoDescription: string | null;
   grossWeightKg: string | null;
@@ -99,6 +103,8 @@ type Draft = {
   status: string;
   transitDays: string;
   transitDaysMax: string;
+  etdEstimated: string;
+  etaEstimated: string;
   origin: string;
   destination: string;
   carrier: string;
@@ -160,6 +166,8 @@ function emptyDraft(d: Defaults): Draft {
     status: "ATUALIZADO",
     transitDays: "",
     transitDaysMax: "",
+    etdEstimated: "",
+    etaEstimated: "",
     origin: "",
     destination: "",
     carrier: "",
@@ -214,6 +222,8 @@ function draftFromQuote(q: FreightQuoteRow, d: Defaults): Draft {
     status: q.status,
     transitDays: num(q.transitDays),
     transitDaysMax: num(q.transitDaysMax),
+    etdEstimated: q.etdEstimated ?? "",
+    etaEstimated: q.etaEstimated ?? "",
     origin: q.origin ?? "",
     destination: q.destination ?? "",
     carrier: q.carrier ?? "",
@@ -400,6 +410,7 @@ function CurrencySelect({
 export default function ProcessFreightQuotes({
   processId,
   quotes,
+  events,
   agents,
   processCurrency,
   exchangeRate,
@@ -408,6 +419,7 @@ export default function ProcessFreightQuotes({
 }: {
   processId: string;
   quotes: FreightQuoteRow[];
+  events: QuoteEventRow[];
   agents: { id: string; name: string }[];
   processCurrency: string | null;
   exchangeRate: number | null;
@@ -615,7 +627,7 @@ export default function ProcessFreightQuotes({
   // linhas do bloco TAXAS: 2 resumos + DTA + Outros + detalhes abertos
   const taxSpan = 4 + detail(open.origin, rowsOrigin) + detail(open.destination, rowsDestination);
   // linhas do bloco EXTRAS: observação + (10 dados extras) + (ações)
-  const extrasSpan = 2 + (showMore ? 10 : 0) + (closed ? 0 : 1);
+  const extrasSpan = 3 + (showMore ? 10 : 0) + (closed ? 0 : 1);
 
   const nCols = cols.length;
   const today = new Date().toISOString().slice(0, 10);
@@ -888,7 +900,7 @@ export default function ProcessFreightQuotes({
 
                 {/* ROTA E PRAZOS */}
                 <tr>
-                  <Lead sec="ROTA" name="Rota e prazos" span={5} label="Trânsito" desc="Dias de trânsito" />
+                  <Lead sec="ROTA" name="Rota e prazos" span={7} label="Trânsito" desc="Dias de trânsito" />
                   {fullCells((c) => (
                     <div className="flex items-center gap-1">
                       <input form={F(c)} name="transitDays" type="number" min="0" step="1" value={c.draft.transitDays}
@@ -899,6 +911,27 @@ export default function ProcessFreightQuotes({
                         disabled={closed} onChange={(e) => patch(c.key, { transitDaysMax: e.target.value })}
                         aria-label="Trânsito máximo" placeholder="até" className={moneyInput} />
                     </div>
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="ETD" desc="Previsão de embarque" />
+                  {fullCells((c) => (
+                    <input form={F(c)} name="etdEstimated" type="date" value={c.draft.etdEstimated} disabled={closed}
+                      onChange={(e) => patch(c.key, { etdEstimated: e.target.value })}
+                      aria-label="Previsão de embarque (ETD)" className={cellInput} />
+                  ))}
+                </tr>
+                <tr>
+                  <Lead sec="ROTA" label="ETA" desc="Previsão de chegada" />
+                  {fullCells((c) => (
+                    <>
+                      <input form={F(c)} name="etaEstimated" type="date" value={c.draft.etaEstimated} disabled={closed}
+                        onChange={(e) => patch(c.key, { etaEstimated: e.target.value })}
+                        aria-label="Previsão de chegada (ETA)" className={cellInput} />
+                      {c.draft.etdEstimated && c.draft.etaEstimated && c.draft.etaEstimated < c.draft.etdEstimated && (
+                        <p className="mt-0.5 text-[11px] font-bold text-error">ETA antes do ETD</p>
+                      )}
+                    </>
                   ))}
                 </tr>
                 <tr>
@@ -1263,6 +1296,18 @@ export default function ProcessFreightQuotes({
                     </tr>
                   </>
                 )}
+
+                {/* HISTÓRICO (recolhível, um por cotação) */}
+                <tr>
+                  <Lead sec="EXTRAS" label="Histórico" desc="Quem alterou e quando" />
+                  {fullCells((c) =>
+                    c.quoteId ? (
+                      <QuoteHistory events={events.filter((e) => e.quoteId === c.quoteId)} />
+                    ) : (
+                      <p className="text-[11px] text-on-surface-variant">Começa quando a cotação for salva.</p>
+                    ),
+                  )}
+                </tr>
 
                 {/* AÇÕES */}
                 {!closed && (

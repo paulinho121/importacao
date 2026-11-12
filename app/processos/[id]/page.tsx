@@ -18,6 +18,8 @@ import ProcessFinancials from "@/components/ProcessFinancials";
 import { driveDownloadUrl } from "@/lib/drive-links";
 import DriveLinkActions from "@/components/DriveLinkActions";
 import ProcessFreightQuotes, { type FreightQuoteRow } from "@/components/ProcessFreightQuotes";
+import ProcessSupplierQuotes, { type SupplierQuoteRow } from "@/components/ProcessSupplierQuotes";
+import type { QuoteEventRow, QuoteEventType } from "@/lib/quote-events";
 import ProcessCompliance from "@/components/ProcessCompliance";
 import LandedCostBreakdown from "@/components/LandedCostBreakdown";
 import ProcessPayables from "@/components/ProcessPayables";
@@ -36,6 +38,9 @@ import {
   processPayables,
   processFreightQuotes,
   processFreightQuoteLines,
+  processSupplierQuotes,
+  processSupplierQuoteItems,
+  processQuoteEvents,
   freightAgents,
   itemReservations,
   purchaseOrders,
@@ -137,7 +142,7 @@ export default async function ProcessDetailPage({
 
   if (!process) notFound();
 
-  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows, processSuppliers, linkedPos, currentUser] = await Promise.all([
+  const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows, processSuppliers, linkedPos, currentUser, supplierQuoteRows, quoteEventRows] = await Promise.all([
     db
       .select({
         id: processItems.id,
@@ -200,13 +205,25 @@ export default async function ProcessDetailPage({
       .innerJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
       .where(eq(purchaseOrders.processId, id)),
     getCurrentUser(),
+    db
+      .select({ ...getTableColumns(processSupplierQuotes), supplierName: suppliers.name })
+      .from(processSupplierQuotes)
+      .leftJoin(suppliers, eq(processSupplierQuotes.supplierId, suppliers.id))
+      .where(eq(processSupplierQuotes.processId, id))
+      .orderBy(processSupplierQuotes.createdAt),
+    db
+      .select()
+      .from(processQuoteEvents)
+      .where(eq(processQuoteEvents.processId, id))
+      .orderBy(desc(processQuoteEvents.createdAt)),
   ]);
 
   // Onda 3: o que depende dos itens/cotações da onda anterior, tudo junto.
   const quoteIds = freightQuoteRows.map((q) => q.id);
   const itemIds = items.map((item) => item.id);
   const productIds = [...new Set(items.map((i) => i.productId).filter((v): v is string => Boolean(v)))];
-  const [quoteLineRows, reservations, lpcoRows] = await Promise.all([
+  const supplierQuoteIds = supplierQuoteRows.map((q) => q.id);
+  const [quoteLineRows, reservations, lpcoRows, supplierQuoteItemRows] = await Promise.all([
     quoteIds.length
       ? db
           .select()
@@ -220,7 +237,50 @@ export default async function ProcessDetailPage({
     productIds.length
       ? db.select().from(productLpcos).where(inArray(productLpcos.productId, productIds))
       : Promise.resolve([]),
+    supplierQuoteIds.length
+      ? db
+          .select()
+          .from(processSupplierQuoteItems)
+          .where(inArray(processSupplierQuoteItems.quoteId, supplierQuoteIds))
+          .orderBy(processSupplierQuoteItems.position)
+      : Promise.resolve([]),
   ]);
+  const supplierQuotes: SupplierQuoteRow[] = supplierQuoteRows.map((q) => ({
+    id: q.id,
+    supplierId: q.supplierId,
+    supplierName: q.supplierName,
+    proposal: q.proposal,
+    quoteDate: q.quoteDate,
+    validUntil: q.validUntil,
+    status: q.status,
+    currency: q.currency,
+    totalValue: q.totalValue,
+    incoterm: q.incoterm,
+    commercialTerms: q.commercialTerms,
+    paymentTerms: q.paymentTerms,
+    productionDays: q.productionDays,
+    driveUrl: q.driveUrl,
+    fileName: q.fileName,
+    notes: q.notes,
+    items: supplierQuoteItemRows
+      .filter((it) => it.quoteId === q.id)
+      .map((it) => ({
+        id: it.id,
+        sku: it.sku,
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        total: it.total,
+      })),
+  }));
+  const quoteEvents: QuoteEventRow[] = quoteEventRows.map((e) => ({
+    id: e.id,
+    quoteType: e.quoteType as QuoteEventType,
+    quoteId: e.quoteId,
+    description: e.description,
+    actor: e.actor,
+    createdAt: e.createdAt.toISOString(),
+  }));
   const freightQuotes: FreightQuoteRow[] = freightQuoteRows.map((q) => ({
     id: q.id,
     agentId: q.agentId,
@@ -238,6 +298,8 @@ export default async function ProcessDetailPage({
     route: q.route,
     transitDays: q.transitDays,
     transitDaysMax: q.transitDaysMax,
+    etdEstimated: q.etdEstimated,
+    etaEstimated: q.etaEstimated,
     frequency: q.frequency,
     cargoDescription: q.cargoDescription,
     grossWeightKg: q.grossWeightKg,
@@ -527,9 +589,19 @@ export default async function ProcessDetailPage({
         }
       />
 
+      <ProcessSupplierQuotes
+        processId={id}
+        quotes={supplierQuotes}
+        suppliers={supplierOptions}
+        defaults={{ supplierId: process.supplierId, currency: process.currency, incoterm: process.incoterm }}
+        events={quoteEvents.filter((e) => e.quoteType === "SUPPLIER")}
+        closed={isClosed}
+      />
+
       <ProcessFreightQuotes
         processId={id}
         quotes={freightQuotes}
+        events={quoteEvents.filter((e) => e.quoteType === "FREIGHT")}
         agents={agentOptions}
         processCurrency={process.currency}
         exchangeRate={process.exchangeRate ? Number(process.exchangeRate) : null}

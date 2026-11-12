@@ -309,6 +309,13 @@
       "when": 1794489854976,
       "tag": "0043_tan_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1794490254231,
+      "tag": "0044_next_magdalene",
+      "breakpoints": true
     }
   ]
 }

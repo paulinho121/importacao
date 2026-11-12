@@ -751,6 +751,9 @@ export const processFreightQuotes = pgTable(
     // Trânsito em dias: mínimo e máximo ("de 8 a 15 dias"); só o mínimo = fixo.
     transitDays: integer("transit_days"),
     transitDaysMax: integer("transit_days_max"),
+    // Previsão de embarque (ETD) e de chegada (ETA) prometidas pelo agente.
+    etdEstimated: date("etd_estimated"),
+    etaEstimated: date("eta_estimated"),
     // Frequência dos embarques (ex: "5 x por semana").
     frequency: text("frequency"),
     // Carga cotada.
@@ -818,6 +821,85 @@ export const processFreightQuoteLines = pgTable(
     total: numeric("total", { precision: 12, scale: 2 }).notNull(),
   },
   (t) => [index("process_freight_quote_lines_quote_idx").on(t.quoteId, t.position)],
+);
+
+// Cotações com o FORNECEDOR de um processo (independentes das cotações de
+// frete: uma não depende da aprovação da outra). Pode haver várias por
+// fornecedor. Status: SOLICITADA | RECEBIDA | EM_NEGOCIACAO | APROVADA |
+// RECUSADA | EXPIRADA (texto livre no banco, validado em lib/supplier-quotes.ts).
+export const processSupplierQuotes = pgTable(
+  "process_supplier_quotes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    processId: uuid("process_id")
+      .notNull()
+      .references(() => processes.id, { onDelete: "cascade" }),
+    supplierId: uuid("supplier_id").references(() => suppliers.id, { onDelete: "set null" }),
+    // Referência da proposta do fornecedor (ex: PI / quotation no.) e a data dela.
+    proposal: text("proposal"),
+    quoteDate: date("quote_date"),
+    validUntil: date("valid_until"),
+    status: text("status").notNull().default("SOLICITADA"),
+    // Valor dos produtos: moeda + total (pode vir da soma dos itens abaixo).
+    currency: currencyEnum("currency").notNull().default("USD"),
+    totalValue: numeric("total_value", { precision: 14, scale: 2 }),
+    incoterm: text("incoterm"),
+    commercialTerms: text("commercial_terms"),
+    paymentTerms: text("payment_terms"),
+    // Prazo de produção, em dias.
+    productionDays: integer("production_days"),
+    // Link do Google Drive com o documento da cotação (download direto).
+    driveUrl: text("drive_url"),
+    // Arquivo anexado, no bucket de documentos.
+    fileName: text("file_name"),
+    storagePath: text("storage_path"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("process_supplier_quotes_process_idx").on(t.processId)],
+);
+
+// Valor por item de uma cotação de fornecedor (opcional).
+export const processSupplierQuoteItems = pgTable(
+  "process_supplier_quote_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    quoteId: uuid("quote_id")
+      .notNull()
+      .references(() => processSupplierQuotes.id, { onDelete: "cascade" }),
+    position: integer("position").notNull().default(0),
+    sku: text("sku"),
+    description: text("description").notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 3 }),
+    unitPrice: numeric("unit_price", { precision: 14, scale: 4 }),
+    total: numeric("total", { precision: 14, scale: 2 }).notNull(),
+  },
+  (t) => [index("process_supplier_quote_items_quote_idx").on(t.quoteId, t.position)],
+);
+
+// Histórico das duas cotações (fornecedor e agente de cargas): criação,
+// mudança de status, valores, prazos, datas e anexos, com quem fez. quoteId
+// aponta para a tabela do tipo (sem FK porque é polimórfico); ao remover a
+// cotação os eventos dela são removidos junto, pela aplicação.
+export const processQuoteEvents = pgTable(
+  "process_quote_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    processId: uuid("process_id")
+      .notNull()
+      .references(() => processes.id, { onDelete: "cascade" }),
+    // SUPPLIER | FREIGHT
+    quoteType: text("quote_type").notNull(),
+    quoteId: uuid("quote_id").notNull(),
+    description: text("description").notNull(),
+    actor: text("actor"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("process_quote_events_quote_idx").on(t.quoteType, t.quoteId, t.createdAt.desc()),
+    index("process_quote_events_process_idx").on(t.processId),
+  ],
 );
 
 // Itens/SKUs de cada processo. sku é sempre string — corrige a perda de
