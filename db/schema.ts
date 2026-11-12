@@ -56,6 +56,18 @@ export const processStatusEnum = pgEnum("process_status", [
   "AGUARDANDO_PRESENCA_CARGA",
   "PRESENCA_CARGA",
   "CARGA_REGISTRADA",
+  // Sequência de 24 etapas (nov/2026): novas etapas do processo.
+  "AGUARDANDO_APROVACAO",
+  "PEDIDO_CONFIRMADO",
+  "AGUARDANDO_PRODUCAO",
+  "PRODUCAO_CONCLUIDA",
+  "AGUARDANDO_COLETA_ORIGEM",
+  "EM_ANALISE_ADUANEIRA",
+  "EM_EXIGENCIA",
+  "AGUARDANDO_LIBERACAO_TERMINAL",
+  "AGUARDANDO_RETIRADA",
+  "EM_CONFERENCIA",
+  "EM_ESTOQUE",
 ]);
 
 // Status do licenciamento de importação ("Inciso V") de um produto —

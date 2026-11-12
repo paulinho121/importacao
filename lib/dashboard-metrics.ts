@@ -24,6 +24,7 @@ import {
 import type { KpiTrend } from "@/components/dashboard/KpiCard";
 import type { AlertLevel } from "@/components/shared/PriorityBadge";
 import { calcValorAduaneiro } from "@/lib/landed-cost";
+import { etaLateDays, isCargoPresent } from "@/lib/eta-delay";
 
 const DAY_MS = 86_400_000;
 // Exportado pra /processos?docsPendentes=1 usar o mesmo limiar do card
@@ -151,7 +152,8 @@ export async function getDashboardMetrics() {
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO" && p.status !== "ABANDONADO");
   const emTransito = processRows.filter((p) => p.status === "EM_TRANSITO");
   const finalizados = processRows.filter((p) => p.status === "CONCLUIDO");
-  const atrasados = processRows.filter((p) => p.status === "ATRASADO");
+  // Atrasado é automático: ETA vencida sem presença de carga (lib/eta-delay.ts).
+  const atrasados = processRows.filter((p) => etaLateDays(p) !== null);
 
   const ativoIds = new Set(ativos.map((p) => p.id));
   const itensAtivos = itemRows.filter((i) => ativoIds.has(i.processId));
@@ -194,7 +196,7 @@ export async function getDashboardMetrics() {
   const createdDates = processRows.map((p) => new Date(p.createdAt));
   const transitoDates = eventRows.filter((e) => e.statusAtEvent === "EM_TRANSITO").map((e) => new Date(e.eventDate));
   const finalizadoDates = eventRows.filter((e) => e.statusAtEvent === "CONCLUIDO").map((e) => new Date(e.eventDate));
-  const atrasadoDates = eventRows.filter((e) => e.statusAtEvent === "ATRASADO").map((e) => new Date(e.eventDate));
+  const atrasadoDates = atrasados.map((p) => new Date(`${p.etaEstimated}T12:00:00Z`));
   const uploadDates = docRows.filter((d) => d.uploadedAt).map((d) => new Date(d.uploadedAt as unknown as string));
   const itemDates = itensAtivos.map((i) => new Date(i.createdAt));
 
@@ -275,8 +277,9 @@ export async function getDashboardMetrics() {
   const etaAlertCandidates = ativos
     .map((p) => {
       const dias = diasRestantes(p.etaEstimated);
-      const isAtrasado = p.status === "ATRASADO";
-      const isUrgente = dias !== null && dias <= 3;
+      const isAtrasado = etaLateDays(p) !== null;
+      // chegada próxima só importa enquanto a presença de carga não foi confirmada
+      const isUrgente = dias !== null && dias <= 3 && !isCargoPresent(p.currentStep);
       return { p, dias, isAtrasado, isUrgente };
     })
     .filter((a) => a.isAtrasado || a.isUrgente)
@@ -407,6 +410,7 @@ export async function getDashboardMetrics() {
         ? `${p.destinationCity}${p.destinationState ? `/${p.destinationState}` : ""}`
         : (p.destination ?? "—"),
       etaEstimated: p.etaEstimated,
+      lateDays: etaLateDays(p),
       status: p.status,
       agentName: p.agentName,
       // FOB = soma das invoices (na moeda do processo); null enquanto nenhuma invoice tem valor.

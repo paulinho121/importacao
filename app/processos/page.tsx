@@ -11,6 +11,8 @@ import { processes, suppliers, processItems, processInvoices, processDocuments, 
 import ProcessSuppliersCell from "@/components/ProcessSuppliersCell";
 import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import { and, desc, eq, ilike, inArray, notInArray, or, sql } from "drizzle-orm";
+import { LATE_BY_ETA_SQL, etaLateDays, isCargoPresent } from "@/lib/eta-delay";
+import { LateBadge } from "@/components/shared/StatusBadge";
 import {
   STATUS_BADGE_CLASS,
   STATUS_ICON,
@@ -47,9 +49,11 @@ export default async function ProcessosPage({
     view?: string;
     ativos?: string;
     docsPendentes?: string;
+    atrasados?: string;
   }>;
 }) {
-  const { q = "", modal = "", status = "", view = "list", ativos = "", docsPendentes = "" } = await searchParams;
+  const { q = "", modal = "", status = "", view = "list", ativos = "", docsPendentes = "", atrasados = "" } = await searchParams;
+  const onlyAtrasados = atrasados === "1";
   const onlyAtivos = ativos === "1";
   const onlyDocsPendentes = docsPendentes === "1";
 
@@ -66,6 +70,8 @@ export default async function ProcessosPage({
   if (status) {
     conditions.push(eq(processes.status, status as ProcessStatus));
   }
+  // "Atrasados" é automático: ETA vencida e presença de carga ainda não confirmada (lib/eta-delay.ts).
+  if (onlyAtrasados) conditions.push(sql.raw(`(${LATE_BY_ETA_SQL})`));
   // "Documentos Pendentes" vem do card de KPI do Dashboard — não é exclusivo
   // de "status" (não tem chip próprio na tela), então convive com ele.
   if (onlyDocsPendentes) {
@@ -196,12 +202,26 @@ export default async function ProcessosPage({
           essa busca — ver em Finalizados
         </Link>
       )}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Link
+          href={{ pathname: "/processos", query: onlyAtrasados ? (q ? { q } : {}) : { ...(q ? { q } : {}), atrasados: "1" } }}
+          className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 font-label-md text-label-md transition-colors ${
+            onlyAtrasados
+              ? "border-error/40 bg-error-container text-on-error-container"
+              : "border-outline-variant text-on-surface-variant hover:bg-surface-container-high"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">warning</span>
+          {onlyAtrasados ? "Somente atrasados (ETA vencida) — ver todos" : "Ver somente atrasados"}
+        </Link>
+      </div>
       <form className="flex flex-col md:flex-row gap-4 items-end md:items-center" action="/processos">
         {status && <input type="hidden" name="status" value={status} />}
         {modal && <input type="hidden" name="modal" value={modal} />}
         {view !== "list" && <input type="hidden" name="view" value={view} />}
         {onlyAtivos && <input type="hidden" name="ativos" value="1" />}
         {onlyDocsPendentes && <input type="hidden" name="docsPendentes" value="1" />}
+        {onlyAtrasados && <input type="hidden" name="atrasados" value="1" />}
         <div className="relative flex-1 w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
             search
@@ -287,7 +307,7 @@ export default async function ProcessosPage({
                         </TableCell>
                         <TableCell className="font-mono text-sm text-center">
                           {(() => {
-                            if (p.status === "RECEBIDO") return <span className="text-muted-foreground">—</span>;
+                            if (isCargoPresent(p.currentStep)) return <span className="text-muted-foreground">—</span>;
                             const dias = diasRestantes(p.etaEstimated);
                             if (dias === null) return <span className="text-muted-foreground">—</span>;
                             return <span className={dias < 0 ? "font-bold text-destructive" : dias <= 7 ? "font-bold text-warning" : ""}>{dias}</span>;
@@ -304,7 +324,10 @@ export default async function ProcessosPage({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <StatusBadge status={p.status as ProcessStatus} />
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <StatusBadge status={p.status as ProcessStatus} />
+                            <LateBadge days={etaLateDays(p)} />
+                          </div>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           {(() => {
@@ -348,7 +371,7 @@ export default async function ProcessosPage({
             >
               <div
                 className={`absolute top-0 left-0 w-1 h-full ${
-                  p.status === "ATRASADO" ? "bg-error" : "bg-secondary"
+                  etaLateDays(p) ? "bg-error" : "bg-secondary"
                 }`}
               />
               <div className="flex justify-between items-start">
@@ -377,6 +400,7 @@ export default async function ProcessosPage({
                   </span>
                   {STATUS_LABEL[p.status as ProcessStatus]}
                 </span>
+                <LateBadge days={etaLateDays(p)} className="ml-1" />
               </div>
               <div className="grid grid-cols-2 gap-4 my-2">
                 <div>

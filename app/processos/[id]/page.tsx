@@ -16,6 +16,7 @@ import ProcessEditDetails from "@/components/ProcessEditDetails";
 import VesselTracker from "@/components/VesselTracker";
 import ProcessFinancials from "@/components/ProcessFinancials";
 import { driveDownloadUrl } from "@/lib/drive-links";
+import DriveLinkActions from "@/components/DriveLinkActions";
 import ProcessFreightQuotes, { type FreightQuoteRow } from "@/components/ProcessFreightQuotes";
 import ProcessCompliance from "@/components/ProcessCompliance";
 import LandedCostBreakdown from "@/components/LandedCostBreakdown";
@@ -40,7 +41,10 @@ import {
   purchaseOrders,
 } from "@/db/schema";
 import { desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { etaLateDays } from "@/lib/eta-delay";
+import { LateBadge } from "@/components/shared/StatusBadge";
 import {
+  PROCESS_STATUS_OPTIONS,
   STATUS_BADGE_CLASS,
   STATUS_LABEL,
   WORKFLOW_STEPS,
@@ -318,6 +322,7 @@ export default async function ProcessDetailPage({
   });
 
   const dias = diasRestantes(process.etaEstimated);
+  const lateDays = etaLateDays({ status: process.status, currentStep: process.currentStep, etaEstimated: process.etaEstimated });
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
   const boundUpdateStatus = updateProcessStatus.bind(null, id);
   const boundAbandon = abandonProcess.bind(null, id);
@@ -406,6 +411,20 @@ export default async function ProcessDetailPage({
         </div>
       </div>
 
+      {lateDays && (
+        <div role="alert" className="flex items-start gap-3 rounded-xl border border-error/40 bg-error-container/40 p-4 text-on-error-container">
+          <span className="material-symbols-outlined text-[22px]">warning</span>
+          <div className="text-body-sm font-body-sm">
+            <p className="font-bold">ATRASADO — a ETA ({formatDate(process.etaEstimated)}) venceu há {lateDays} dia(s)</p>
+            <p>
+              A presença de carga ainda não foi confirmada. O alerta se encerra sozinho quando o processo chegar em
+              &quot;Presença de Carga&quot;. Se a previsão mudou, atualize a ETA em Dados do Processo (a alteração fica no
+              histórico).
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-md">
         <div className="lg:col-span-8 flex flex-col justify-center">
           <div className="flex flex-wrap items-center gap-4 mb-2">
@@ -417,6 +436,7 @@ export default async function ProcessDetailPage({
             >
               {STATUS_LABEL[process.status as ProcessStatus]}
             </span>
+            <LateBadge days={lateDays} />
             <details className="relative max-w-full">
               <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
                 <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -465,12 +485,20 @@ export default async function ProcessDetailPage({
               defaultValue={process.status}
               className="min-w-0 max-w-full flex-1 basis-40 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
             >
-              {Object.entries(STATUS_LABEL).map(([value, label]) => (
+              {PROCESS_STATUS_OPTIONS.map((value) => (
                 <option key={value} value={value}>
-                  {label}
+                  {STATUS_LABEL[value]}
                 </option>
               ))}
             </select>
+            <input
+              type="text"
+              name="note"
+              maxLength={500}
+              placeholder="Observação (opcional)"
+              aria-label="Observação da alteração de status"
+              className="min-w-0 max-w-full flex-1 basis-40 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
+            />
             <SubmitButton
               className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
             >
@@ -522,7 +550,7 @@ export default async function ProcessDetailPage({
               Etapa {process.currentStep} de {WORKFLOW_STEPS.length}
             </span>
           </div>
-          <div className="space-y-6 relative ml-2">
+          <div className="space-y-3 relative ml-2">
             {WORKFLOW_STEPS.map((label, idx) => {
               const step = idx + 1;
               const state =
@@ -558,15 +586,11 @@ export default async function ProcessDetailPage({
                     >
                       {label}
                     </p>
-                    <p className="text-xs text-on-surface-variant italic">
-                      {state === "done"
-                        ? "Concluído"
-                        : state === "active"
-                          ? process.etaEstimated
-                            ? `Previsão: ${formatDate(process.etaEstimated)}`
-                            : "Em andamento"
-                          : "Aguardando"}
-                    </p>
+                    {state === "active" && (
+                      <p className="text-xs text-on-surface-variant italic">
+                        {process.etaEstimated ? `Previsão de chegada: ${formatDate(process.etaEstimated)}` : "Em andamento"}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -597,7 +621,7 @@ export default async function ProcessDetailPage({
                   label="ETA Estimado"
                   value={
                     process.etaEstimated
-                      ? `${formatDate(process.etaEstimated)}${dias !== null ? ` (${dias >= 0 ? `faltam ${dias}d` : `${Math.abs(dias)}d atrasado`})` : ""}`
+                      ? `${formatDate(process.etaEstimated)}${dias !== null ? (dias >= 0 ? ` (faltam ${dias}d)` : lateDays ? ` (${lateDays}d atrasado)` : "") : ""}`
                       : "—"
                   }
                 />
@@ -649,17 +673,7 @@ export default async function ProcessDetailPage({
                             {inv.supplierName && inv.supplierId !== process.supplierId && (
                               <span className="font-body-sm text-xs text-outline">· {inv.supplierName}</span>
                             )}
-                            {download && (
-                              <a
-                                href={download}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ml-auto rounded-lg bg-secondary px-2.5 py-1 text-[11px] font-bold text-white hover:opacity-90"
-                                title="Baixar a invoice do Google Drive"
-                              >
-                                Baixar invoice
-                              </a>
-                            )}
+                            {download && <DriveLinkActions url={inv.driveUrl} title={`Invoice ${inv.invoiceNumber}`} compact className="ml-auto" />}
                           </div>
                           <form action={updateProcessInvoiceLink.bind(null, inv.id, id)} className="mt-1.5 flex gap-2">
                             <input
@@ -881,7 +895,7 @@ export default async function ProcessDetailPage({
                   <tr className="bg-surface-container-low border-b border-outline-variant">
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DATA/HORA</th>
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">EVENTO</th>
-                    <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">ORIGEM</th>
+                    <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">RESPONSÁVEL / ORIGEM</th>
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">STATUS</th>
                     <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">
                       <span className="sr-only">Ações</span>

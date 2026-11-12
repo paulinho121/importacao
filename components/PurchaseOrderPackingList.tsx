@@ -6,6 +6,7 @@ import ConfirmActionButton from "@/components/ConfirmActionButton";
 import DocumentViewer from "@/components/DocumentViewer";
 import SubmitButton from "@/components/SubmitButton";
 import { driveDownloadUrl } from "@/lib/drive-links";
+import DriveLinkActions from "@/components/DriveLinkActions";
 
 // Packing list e invoice do pedido: em vez de enviar o arquivo, o time cola aqui o
 // link do Google Drive de cada um (com botão para baixar direto). Arquivos que já
@@ -88,18 +89,7 @@ export default async function PurchaseOrderPackingList({
                   placeholder="Cole o link do Google Drive"
                   className="min-w-0 flex-1 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 text-body-sm font-body-sm focus:border-secondary focus:outline-none disabled:opacity-60"
                 />
-                {href && (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`Baixar a ${f.label.toLowerCase()} do Google Drive`}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-bold text-white hover:opacity-90"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">download</span>
-                    Baixar
-                  </a>
-                )}
+                {href && <DriveLinkActions url={f.value} title={f.label} className="shrink-0" />}
               </div>
             </div>
           );

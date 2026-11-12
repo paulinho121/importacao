@@ -1,126 +1,197 @@
 export type ProcessStatus =
   | "PEDIDO"
+  | "AGUARDANDO_APROVACAO"
+  | "PEDIDO_CONFIRMADO"
+  | "AGUARDANDO_PRODUCAO"
   | "PRODUCAO"
+  | "PRODUCAO_CONCLUIDA"
+  | "AGUARDANDO_COLETA_ORIGEM"
   | "COLETADO_ORIGEM"
   | "AGUARDANDO_EMBARQUE"
   | "EMBARCADO"
   | "EM_TRANSITO"
   | "AGUARDANDO_PRESENCA_CARGA"
   | "PRESENCA_CARGA"
-  | "EM_DESEMBARACO"
   | "CARGA_REGISTRADA"
+  | "EM_ANALISE_ADUANEIRA"
+  | "EM_EXIGENCIA"
+  | "EM_DESEMBARACO"
+  | "AGUARDANDO_LIBERACAO_TERMINAL"
+  | "AGUARDANDO_RETIRADA"
   | "TRANSPORTE_NACIONAL"
   | "RECEBIDO"
-  | "ATRASADO"
+  | "EM_CONFERENCIA"
+  | "EM_ESTOQUE"
   | "CONCLUIDO"
-  | "ABANDONADO";
+  | "ABANDONADO"
+  | "ATRASADO"; // legado: não é mais uma etapa (ver lib/eta-delay.ts), só existe no enum do banco
 
-// Sequência do fluxo definida pelo time (WhatsApp, nov/2026): Pedido, Produção,
-// Coletado na Origem, Aguardando Embarque, Embarcado, Em Trânsito, Aguardando
-// Presença de Carga, Presença de Carga, Desembaraçado, Carga Registrada (DUIMP
-// feita) aguardando retirada, Em Trânsito Nacional, Em Estoque. Os valores do
-// enum no banco foram mantidos (só ganharam rótulos novos); EM_DESEMBARACO
-// exibe "Desembaraçado", TRANSPORTE_NACIONAL "Em Trânsito Nacional" e RECEBIDO
-// "Em Estoque". Atrasado, Finalizado e Abandonado ficam fora da sequência:
-// são ajustes/fechamentos manuais.
-// Processos encerrados: saem do fluxo e vão para /finalizados.
+// Sequência do processo de importação (24 etapas), da negociação ao encerramento.
+// Os códigos antigos do banco foram mantidos quando o sentido é o mesmo:
+// CARGA_REGISTRADA = "DUIMP Registrada", EM_DESEMBARACO = "Desembaraçado",
+// TRANSPORTE_NACIONAL = "Em Trânsito Nacional", RECEBIDO = "Recebido no Armazém",
+// CONCLUIDO = "Finalizado". ATRASADO deixou de ser etapa: é indicador automático
+// pela ETA. Processos encerrados saem do fluxo e vão para /finalizados.
 export const CLOSED_PROCESS_STATUSES = ["CONCLUIDO", "ABANDONADO"] as const;
 
 // A ordem das chaves é a ordem em que o select de status aparece na tela.
 export const STATUS_LABEL: Record<ProcessStatus, string> = {
-  PEDIDO: "Pedido",
+  PEDIDO: "Pedido / Negociação",
+  AGUARDANDO_APROVACAO: "Aguardando Aprovação",
+  PEDIDO_CONFIRMADO: "Pedido Confirmado",
+  AGUARDANDO_PRODUCAO: "Aguardando Produção",
   PRODUCAO: "Produção",
+  PRODUCAO_CONCLUIDA: "Produção Concluída",
+  AGUARDANDO_COLETA_ORIGEM: "Aguardando Coleta na Origem",
   COLETADO_ORIGEM: "Coletado na Origem",
   AGUARDANDO_EMBARQUE: "Aguardando Embarque",
   EMBARCADO: "Embarcado",
-  EM_TRANSITO: "Em Trânsito",
+  EM_TRANSITO: "Em Trânsito Internacional",
   AGUARDANDO_PRESENCA_CARGA: "Aguardando Presença de Carga",
   PRESENCA_CARGA: "Presença de Carga",
+  CARGA_REGISTRADA: "DUIMP Registrada",
+  EM_ANALISE_ADUANEIRA: "Em Análise Aduaneira",
+  EM_EXIGENCIA: "Em Exigência",
   EM_DESEMBARACO: "Desembaraçado",
-  CARGA_REGISTRADA: "Carga Registrada (DUIMP)",
+  AGUARDANDO_LIBERACAO_TERMINAL: "Aguardando Liberação do Terminal",
+  AGUARDANDO_RETIRADA: "Aguardando Retirada",
   TRANSPORTE_NACIONAL: "Em Trânsito Nacional",
-  RECEBIDO: "Em Estoque",
-  ATRASADO: "Atrasado",
+  RECEBIDO: "Recebido no Armazém",
+  EM_CONFERENCIA: "Em Conferência",
+  EM_ESTOQUE: "Em Estoque",
   CONCLUIDO: "Finalizado",
   ABANDONADO: "Abandonado",
+  ATRASADO: "Atrasado",
 };
 
+const NEUTRAL = "bg-surface-container-high text-on-surface-variant";
+const ACTION = "bg-secondary-fixed text-on-secondary-fixed-variant";
+const GOOD = "bg-tertiary-fixed text-on-tertiary-fixed-variant";
+const BAD = "bg-error-container text-on-error-container";
+
 export const STATUS_BADGE_CLASS: Record<ProcessStatus, string> = {
-  PEDIDO: "bg-surface-container-high text-on-surface-variant",
-  PRODUCAO: "bg-surface-container-high text-on-surface-variant",
-  COLETADO_ORIGEM: "bg-surface-container-high text-on-surface-variant",
-  AGUARDANDO_EMBARQUE: "bg-surface-container-high text-on-surface-variant",
-  EMBARCADO: "bg-secondary-fixed text-on-secondary-fixed-variant",
-  EM_TRANSITO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
-  AGUARDANDO_PRESENCA_CARGA: "bg-surface-container-high text-on-surface-variant",
-  PRESENCA_CARGA: "bg-secondary-fixed text-on-secondary-fixed-variant",
-  EM_DESEMBARACO: "bg-secondary-fixed text-on-secondary-fixed-variant",
-  CARGA_REGISTRADA: "bg-secondary-fixed text-on-secondary-fixed-variant",
-  TRANSPORTE_NACIONAL: "bg-secondary-fixed text-on-secondary-fixed-variant",
-  RECEBIDO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
-  ATRASADO: "bg-error-container text-on-error-container",
-  CONCLUIDO: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
-  // Mesmo tratamento visual de "Cancelado" no registro de itens em
-  // importação (lib/status.ts) — vermelho neutro, não é urgência (não
-  // precisa de ação), é só "isso não vingou".
-  ABANDONADO: "bg-error-container text-on-error-container",
+  PEDIDO: NEUTRAL,
+  AGUARDANDO_APROVACAO: NEUTRAL,
+  PEDIDO_CONFIRMADO: ACTION,
+  AGUARDANDO_PRODUCAO: NEUTRAL,
+  PRODUCAO: ACTION,
+  PRODUCAO_CONCLUIDA: ACTION,
+  AGUARDANDO_COLETA_ORIGEM: NEUTRAL,
+  COLETADO_ORIGEM: ACTION,
+  AGUARDANDO_EMBARQUE: NEUTRAL,
+  EMBARCADO: ACTION,
+  EM_TRANSITO: GOOD,
+  AGUARDANDO_PRESENCA_CARGA: NEUTRAL,
+  PRESENCA_CARGA: ACTION,
+  CARGA_REGISTRADA: ACTION,
+  EM_ANALISE_ADUANEIRA: ACTION,
+  EM_EXIGENCIA: "bg-warning/20 text-warning",
+  EM_DESEMBARACO: ACTION,
+  AGUARDANDO_LIBERACAO_TERMINAL: NEUTRAL,
+  AGUARDANDO_RETIRADA: NEUTRAL,
+  TRANSPORTE_NACIONAL: GOOD,
+  RECEBIDO: ACTION,
+  EM_CONFERENCIA: ACTION,
+  EM_ESTOQUE: GOOD,
+  CONCLUIDO: GOOD,
+  // vermelho neutro: "isso não vingou", não é urgência
+  ABANDONADO: BAD,
+  ATRASADO: BAD,
 };
 
 export const STATUS_ICON: Record<ProcessStatus, string> = {
   PEDIDO: "receipt_long",
+  AGUARDANDO_APROVACAO: "hourglass_top",
+  PEDIDO_CONFIRMADO: "verified",
+  AGUARDANDO_PRODUCAO: "schedule",
   PRODUCAO: "precision_manufacturing",
+  PRODUCAO_CONCLUIDA: "task_alt",
+  AGUARDANDO_COLETA_ORIGEM: "schedule",
   COLETADO_ORIGEM: "inventory",
   AGUARDANDO_EMBARQUE: "schedule",
   EMBARCADO: "flight_takeoff",
   EM_TRANSITO: "local_shipping",
   AGUARDANDO_PRESENCA_CARGA: "hourglass_top",
   PRESENCA_CARGA: "how_to_reg",
-  EM_DESEMBARACO: "gavel",
   CARGA_REGISTRADA: "assignment_turned_in",
+  EM_ANALISE_ADUANEIRA: "manage_search",
+  EM_EXIGENCIA: "report",
+  EM_DESEMBARACO: "gavel",
+  AGUARDANDO_LIBERACAO_TERMINAL: "anchor",
+  AGUARDANDO_RETIRADA: "schedule",
   TRANSPORTE_NACIONAL: "local_shipping",
-  RECEBIDO: "inventory_2",
-  ATRASADO: "warning",
+  RECEBIDO: "warehouse",
+  EM_CONFERENCIA: "fact_check",
+  EM_ESTOQUE: "inventory_2",
   CONCLUIDO: "check_circle",
   ABANDONADO: "cancel",
+  ATRASADO: "warning",
 };
 
-// 12 etapas do fluxo, na sequência do time. "Finalizado" (CONCLUIDO) não é
-// uma etapa do stepper — só se atinge via o select manual de status, igual
-// "Atrasado".
+// As 24 etapas, em ordem. "Finalizado" é a última (encerra o processo).
 export const WORKFLOW_STEPS = [
-  "Pedido",
+  "Pedido / Negociação",
+  "Aguardando Aprovação",
+  "Pedido Confirmado",
+  "Aguardando Produção",
   "Produção",
+  "Produção Concluída",
+  "Aguardando Coleta na Origem",
   "Coletado na Origem",
   "Aguardando Embarque",
   "Embarcado",
-  "Em Trânsito",
+  "Em Trânsito Internacional",
   "Aguardando Presença de Carga",
   "Presença de Carga",
+  "DUIMP Registrada",
+  "Em Análise Aduaneira",
+  "Em Exigência",
   "Desembaraçado",
-  "Carga Registrada (DUIMP)",
+  "Aguardando Liberação do Terminal",
+  "Aguardando Retirada",
   "Em Trânsito Nacional",
+  "Recebido no Armazém",
+  "Em Conferência",
   "Em Estoque",
+  "Finalizado",
 ] as const;
 
-// Regra de negócio: qual status resulta de estar em cada etapa do fluxo.
-// ATRASADO/CONCLUIDO ficam fora dessa progressão — são correção/fechamento
-// manual (ver updateProcessStatus), não etapas alcançadas ao avançar.
+// Qual status resulta de estar em cada etapa.
 export const STATUS_BY_STEP: Record<number, ProcessStatus> = {
   1: "PEDIDO",
-  2: "PRODUCAO",
-  3: "COLETADO_ORIGEM",
-  4: "AGUARDANDO_EMBARQUE",
-  5: "EMBARCADO",
-  6: "EM_TRANSITO",
-  7: "AGUARDANDO_PRESENCA_CARGA",
-  8: "PRESENCA_CARGA",
-  9: "EM_DESEMBARACO",
-  10: "CARGA_REGISTRADA",
-  11: "TRANSPORTE_NACIONAL",
-  12: "RECEBIDO",
+  2: "AGUARDANDO_APROVACAO",
+  3: "PEDIDO_CONFIRMADO",
+  4: "AGUARDANDO_PRODUCAO",
+  5: "PRODUCAO",
+  6: "PRODUCAO_CONCLUIDA",
+  7: "AGUARDANDO_COLETA_ORIGEM",
+  8: "COLETADO_ORIGEM",
+  9: "AGUARDANDO_EMBARQUE",
+  10: "EMBARCADO",
+  11: "EM_TRANSITO",
+  12: "AGUARDANDO_PRESENCA_CARGA",
+  13: "PRESENCA_CARGA",
+  14: "CARGA_REGISTRADA",
+  15: "EM_ANALISE_ADUANEIRA",
+  16: "EM_EXIGENCIA",
+  17: "EM_DESEMBARACO",
+  18: "AGUARDANDO_LIBERACAO_TERMINAL",
+  19: "AGUARDANDO_RETIRADA",
+  20: "TRANSPORTE_NACIONAL",
+  21: "RECEBIDO",
+  22: "EM_CONFERENCIA",
+  23: "EM_ESTOQUE",
+  24: "CONCLUIDO",
 };
 
-// Etapa (1..12) de um status da sequência; null para Atrasado/Finalizado/Abandonado.
+// Opções do select de status: a sequência + Abandonado (encerramento manual).
+// Atrasado não aparece: é automático.
+export const PROCESS_STATUS_OPTIONS: ProcessStatus[] = [
+  ...(Object.values(STATUS_BY_STEP) as ProcessStatus[]),
+  "ABANDONADO",
+];
+
+// Etapa (1..24) de um status da sequência; null para Abandonado/Atrasado.
 export function stepOfStatus(status: string): number | null {
   const entry = Object.entries(STATUS_BY_STEP).find(([, st]) => st === status);
   return entry ? Number(entry[0]) : null;

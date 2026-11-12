@@ -28,6 +28,7 @@ import {
 
 import SubmitButton from "@/components/SubmitButton";
 import { driveDownloadUrl } from "@/lib/drive-links";
+import DriveLinkActions from "@/components/DriveLinkActions";
 // Cotações de frete no formato da planilha de comparação do time: uma coluna
 // por agente de carga, lado a lado, com nome da taxa | moeda | custos em cada
 // linha. Tudo é editável na própria tela e cada coluna é salva separadamente.
@@ -1135,12 +1136,7 @@ export default function ProcessFreightQuotes({
                           onChange={(e) => patch(c.key, { driveUrl: e.target.value })}
                           aria-label="Link do Google Drive da cotação"
                           placeholder="Cole o link do Google Drive" className={cellInput} />
-                        {href && (
-                          <a href={href} target="_blank" rel="noopener noreferrer" title="Baixar a cotação do Google Drive"
-                            className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[11px] font-bold text-white hover:opacity-90">
-                            Baixar
-                          </a>
-                        )}
+                        {href && <DriveLinkActions url={c.draft.driveUrl.trim()} title="Cotação" compact className="shrink-0" />}
                       </div>
                     );
                   })}

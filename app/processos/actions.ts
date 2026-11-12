@@ -22,6 +22,8 @@ import { withFlash, withFlashError } from "@/lib/flash";
 import { normalizeDriveUrl } from "@/lib/drive-links";
 import {
   STATUS_BY_STEP,
+  STATUS_LABEL,
+  PROCESS_STATUS_OPTIONS,
   WORKFLOW_STEPS,
   stepOfStatus,
   CUSTOMS_CHANNEL_LABEL,
@@ -460,6 +462,14 @@ export async function fetchExchangeRateAction(
   return null;
 }
 
+// Nome (ou e-mail) de quem está logado, para o histórico do processo.
+async function actorName() {
+  const user = await getCurrentUser().catch(() => null);
+  return user?.name || user?.email || "usuário";
+}
+
+const brDate = (d: string | null | undefined) => (d ? d.split("-").reverse().join("/") : "sem data");
+
 export async function advanceProcessStep(processId: string, _formData: FormData) {
   const [current] = await db
     .select({ currentStep: processes.currentStep })
@@ -479,6 +489,7 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
     processId,
     eventDate: new Date(),
     eventType: `Avançou para: ${WORKFLOW_STEPS[nextStep - 1]}`,
+    origin: `Etapa · ${await actorName()}`,
     statusAtEvent: nextStatus,
   });
 
@@ -490,9 +501,14 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
 export async function updateProcessStatus(processId: string, formData: FormData) {
   const status = String(formData.get("status") ?? "").trim() as ProcessStatus;
   if (!status) throw new Error("Status é obrigatório.");
+  // Atrasado não é etapa (é automático pela ETA): não pode ser escolhido.
+  if (!PROCESS_STATUS_OPTIONS.includes(status)) throw new Error("Status inválido.");
+  const note = String(formData.get("note") ?? "").trim().slice(0, 500);
 
-  // Escolher uma etapa da sequência no select também posiciona o stepper nela
-  // (Atrasado/Finalizado/Abandonado não mudam a etapa).
+  const [before] = await db.select({ status: processes.status }).from(processes).where(eq(processes.id, processId));
+
+  // Escolher uma etapa da sequência também posiciona o stepper nela
+  // (Abandonado não muda a etapa).
   const step = stepOfStatus(status);
 
   await db
@@ -500,10 +516,12 @@ export async function updateProcessStatus(processId: string, formData: FormData)
     .set({ status, ...(step ? { currentStep: step } : {}), updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
+  const from = before ? STATUS_LABEL[before.status as ProcessStatus] : null;
   await db.insert(processEvents).values({
     processId,
     eventDate: new Date(),
-    eventType: "Status alterado manualmente",
+    eventType: `Status: ${from ? `${from} → ` : ""}${STATUS_LABEL[status]}${note ? ` — ${note}` : ""}`,
+    origin: `Status · ${await actorName()}`,
     statusAtEvent: status,
   });
 
@@ -621,9 +639,18 @@ export async function updateProcessDetails(processId: string, formData: FormData
   const known = locationChoice && locationChoice !== "OUTRO";
   const [code, city, state] = known ? locationChoice.split("|") : [null, null, null];
   const [current] = await db
-    .select({ modal: processes.modal })
+    .select({
+      modal: processes.modal,
+      etd: processes.etd,
+      etaEstimated: processes.etaEstimated,
+      etaActual: processes.etaActual,
+      status: processes.status,
+    })
     .from(processes)
     .where(eq(processes.id, processId));
+  const newEtd = optionalDate(formData, "etd");
+  const newEta = optionalDate(formData, "etaEstimated");
+  const newEtaActual = optionalDate(formData, "etaActual");
 
   await db
     .update(processes)
@@ -645,6 +672,29 @@ export async function updateProcessDetails(processId: string, formData: FormData
       updatedAt: new Date(),
     })
     .where(eq(processes.id, processId));
+
+  // Histórico das datas: ETD, ETA e ETA real alteradas (a situação de atraso é
+  // recalculada sozinha com a nova ETA).
+  if (current) {
+    const changes: string[] = [];
+    if ((current.etd ?? null) !== (newEtd ?? null)) changes.push(`ETD alterada: ${brDate(current.etd)} → ${brDate(newEtd)}`);
+    if ((current.etaEstimated ?? null) !== (newEta ?? null))
+      changes.push(`ETA alterada: ${brDate(current.etaEstimated)} → ${brDate(newEta)}`);
+    if ((current.etaActual ?? null) !== (newEtaActual ?? null))
+      changes.push(`ETA real alterada: ${brDate(current.etaActual)} → ${brDate(newEtaActual)}`);
+    if (changes.length > 0) {
+      const author = await actorName();
+      await db.insert(processEvents).values(
+        changes.map((eventType) => ({
+          processId,
+          eventDate: new Date(),
+          eventType,
+          origin: `Previsão · ${author}`,
+          statusAtEvent: current.status,
+        })),
+      );
+    }
+  }
 
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");

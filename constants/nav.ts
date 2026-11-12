@@ -47,7 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Processos", href: "/processos", icon: PackageSearch },
       { label: "Em Trânsito", href: "/processos?status=EM_TRANSITO", icon: Ship },
       { label: "Embarcados", href: "/processos?status=EMBARCADO", icon: Anchor },
-      { label: "Em Estoque", href: "/processos?status=RECEBIDO", icon: PackageCheck },
+      { label: "Em Estoque", href: "/processos?status=EM_ESTOQUE", icon: PackageCheck },
       { label: "Finalizados", href: "/finalizados", icon: Archive },
     ],
   },

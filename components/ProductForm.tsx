@@ -2,6 +2,7 @@ import { CURRENCIES } from "@/lib/currencies";
 import { CP_STATUS_OPTIONS } from "@/lib/product-flow";
 
 import SubmitButton from "@/components/SubmitButton";
+import DriveLinkActions from "@/components/DriveLinkActions";
 const FIELD_INPUT =
   "w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-body-md font-body-md focus:outline-none focus:border-secondary transition-all";
 const FIELD_LABEL = "block font-label-md text-label-md text-on-surface-variant mb-2";
@@ -192,16 +193,7 @@ export default function ProductForm({
               name="datasheetUrl"
               defaultValue={defaultValues?.datasheetUrl ?? ""}
             />
-            {defaultValues?.datasheetUrl && (
-              <a
-                href={defaultValues.datasheetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 px-4 py-3 rounded-lg bg-secondary text-white text-sm font-bold hover:opacity-90 transition-all"
-              >
-                Abrir ficha
-              </a>
-            )}
+            {defaultValues?.datasheetUrl && <DriveLinkActions url={defaultValues.datasheetUrl} title="Ficha técnica" className="shrink-0" />}
           </div>
         </div>
       </div>

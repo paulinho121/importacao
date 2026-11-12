@@ -7,6 +7,7 @@ import ConfirmActionButton from "@/components/ConfirmActionButton";
 import SupplierLogo from "@/components/SupplierLogo";
 import DocumentViewer from "@/components/DocumentViewer";
 import { driveDownloadUrl } from "@/lib/drive-links";
+import DriveLinkActions from "@/components/DriveLinkActions";
 import { PURCHASE_ORDER_STATUS_BADGE_CLASS, PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 
 import SubmitButton from "@/components/SubmitButton";
@@ -155,17 +156,14 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                         {[
                           { label: "Packing list", url: l.packingListUrl },
                           { label: "Invoice", url: l.invoiceUrl },
-                        ].map((x) => {
-                          const href = driveDownloadUrl(x.url);
-                          return href ? (
-                            <li key={x.label} className="flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[14px] text-on-surface-variant">link</span>
-                              <a href={href} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-secondary hover:underline">
-                                {x.label}
-                              </a>
+                        ].map((x) =>
+                          driveDownloadUrl(x.url) ? (
+                            <li key={x.label} className="flex flex-wrap items-center gap-1">
+                              <span className="text-xs font-bold text-on-surface-variant">{x.label}</span>
+                              <DriveLinkActions url={x.url} title={x.label} compact />
                             </li>
-                          ) : null;
-                        })}
+                          ) : null,
+                        )}
                         {(packingByPo.get(l.id) ?? []).map((d) => (
                           <li key={d.id} className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[14px] text-on-surface-variant">inventory</span>
