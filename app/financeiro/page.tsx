@@ -73,7 +73,7 @@ export default async function FinanceiroPage({
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Link
             key={f.key}
@@ -97,7 +97,81 @@ export default async function FinanceiroPage({
         />
       ) : (
         <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile cards view */}
+          <div className="grid gap-3 p-4 md:hidden">
+            {filtered.length === 0 ? (
+              <p className="py-6 text-on-surface-variant text-center text-sm">Nenhuma conta nesse filtro.</p>
+            ) : (
+              filtered.map((r) => {
+                const boundMarkPaid = markPayableAsPaid.bind(null, r.id);
+                return (
+                  <div
+                    key={r.id}
+                    className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4 space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/processos/${r.processId}`}
+                          className="font-mono-data text-sm font-bold text-secondary hover:underline block truncate"
+                        >
+                          {r.processNumber}
+                        </Link>
+                        <p className="font-semibold text-primary text-sm mt-0.5">{r.description}</p>
+                      </div>
+                      <span className="shrink-0 text-xs px-2 py-0.5 rounded-md font-medium bg-surface-container-high text-on-surface-variant">
+                        {PAYABLE_CATEGORY_LABEL[r.category as PayableCategory]}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-outline-variant/40">
+                      <div>
+                        <span className="text-on-surface-variant block">Valor:</span>
+                        <span className="font-mono-data font-bold text-primary text-sm">
+                          {Number(r.amount).toFixed(2)} {r.currency}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-on-surface-variant block">Vencimento:</span>
+                        <span className="font-mono-data text-primary">{formatDate(r.dueDate)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-outline-variant/40">
+                      <div>
+                        {r.paidAt ? (
+                          <span className="px-2 py-1 rounded-full font-label-md text-xs bg-tertiary-fixed text-on-tertiary-fixed-variant">
+                            Pago {formatDate(r.paidAt)}
+                          </span>
+                        ) : r.vencida ? (
+                          <span className="px-2 py-1 rounded-full font-label-md text-xs bg-error-container text-on-error-container font-bold">
+                            Vencida
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 rounded-full font-label-md text-xs bg-surface-container-high text-on-surface-variant">
+                            Em aberto
+                          </span>
+                        )}
+                      </div>
+
+                      {!r.paidAt && (
+                        <form action={boundMarkPaid}>
+                          <SubmitButton
+                            className="px-3 py-1.5 rounded-lg bg-secondary text-white hover:opacity-90 transition-all font-label-md text-xs"
+                          >
+                            Marcar como paga
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { MotionConfig } from "framer-motion";
-import { LayoutDashboard, PackageSearch, Boxes, Building2, Users } from "lucide-react";
+import { LayoutDashboard, ClipboardList, PackageSearch, Boxes, Building2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import PageTransition from "@/components/layout/PageTransition";
@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
 
 const MOBILE_NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pedidos-compra", label: "Pedidos", icon: ClipboardList },
   { href: "/processos", label: "Processos", icon: PackageSearch },
   { href: "/produtos", label: "Produtos", icon: Boxes },
-  { href: "/fornecedores", label: "Fornecedores", icon: Building2 },
-  { href: "/agentes", label: "Agentes", icon: Users },
+  { href: "/fornecedores", label: "Fornec.", icon: Building2 },
 ] as const;
 
 function isActive(pathname: string, href: string) {

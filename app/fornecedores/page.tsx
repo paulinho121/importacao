@@ -24,8 +24,8 @@ export default async function FornecedoresPage() {
     .orderBy(suppliers.name);
 
   return (
-    <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
-      <div className="flex justify-between items-end">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="font-display-lg text-display-lg text-primary">Fornecedores</h2>
           <p className="text-on-surface-variant font-body-md text-body-md mt-1">
@@ -35,7 +35,7 @@ export default async function FornecedoresPage() {
         </div>
         <Link
           href="/fornecedores/novo"
-          className="px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:bg-secondary/90 transition-all shadow-sm flex items-center gap-2"
+          className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-lg bg-secondary text-white font-label-md text-label-md hover:bg-secondary/90 transition-all shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Novo Fornecedor
@@ -43,7 +43,60 @@ export default async function FornecedoresPage() {
       </div>
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile cards view */}
+        <div className="grid gap-3 p-4 md:hidden">
+          {rows.length === 0 ? (
+            <p className="py-6 text-on-surface-variant text-center text-sm">Nenhum fornecedor cadastrado ainda.</p>
+          ) : (
+            rows.map((s) => (
+              <div
+                key={s.id}
+                className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4 space-y-3"
+              >
+                <div className="flex items-center gap-3">
+                  <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/fornecedores/${s.id}`}
+                      className="font-semibold text-primary hover:text-secondary hover:underline block truncate text-base"
+                    >
+                      {s.name}
+                    </Link>
+                    {s.country && <p className="text-xs text-on-surface-variant">{s.country}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-outline-variant/40">
+                  <div>
+                    <span className="text-on-surface-variant block">Incoterm:</span>
+                    <span className="font-medium text-primary">{s.defaultIncoterm ?? "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-on-surface-variant block">Processos:</span>
+                    <span className="font-mono-data font-bold text-primary">{s.processCount}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-on-surface-variant block">Contato:</span>
+                    <span className="text-primary truncate block">{s.contactName ?? s.email ?? "—"}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-outline-variant/40 flex justify-end">
+                  <Link
+                    href={`/fornecedores/${s.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-secondary hover:underline"
+                  >
+                    Ver Fornecedor
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop table view */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-low border-b border-outline-variant">
