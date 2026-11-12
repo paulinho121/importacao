@@ -61,13 +61,13 @@ function SaveButton({ label }: { label: string }) {
 // (referência, modalidade, datas…), que só valem ao criar um processo novo.
 export default function NewProcessForm({
   suggestedNumber,
-  suppliers,
+  suppliers: _suppliers,
   processes,
   orders,
   children,
 }: {
   suggestedNumber: string;
-  suppliers: { id: string; name: string }[];
+  suppliers?: { id: string; name: string }[];
   processes: ProcessOption[];
   orders: OrderOption[];
   children: ReactNode;
@@ -75,6 +75,7 @@ export default function NewProcessForm({
   const [existingId, setExistingId] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pick, setPick] = useState("");
+  const [clientError, setClientError] = useState<string | null>(null);
 
   const existing = processes.find((p) => p.id === existingId) ?? null;
   const selected = selectedIds.map((id) => orders.find((o) => o.id === id)).filter((o): o is OrderOption => Boolean(o));
@@ -93,12 +94,20 @@ export default function NewProcessForm({
     if (!pick) return;
     setSelectedIds((ids) => (ids.includes(pick) ? ids : [...ids, pick]));
     setPick("");
+    setClientError(null);
   }
 
-  const needsManualSupplier = !existing && selected.length === 0;
-
   return (
-    <form action={createProcess} className="space-y-6">
+    <form
+      action={createProcess}
+      onSubmit={(e) => {
+        if (!existingId && selectedIds.length === 0) {
+          e.preventDefault();
+          setClientError("Selecione ao menos um pedido de compra para criar o processo. O fornecedor é definido no pedido.");
+        }
+      }}
+      className="space-y-6"
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label className={labelClass}>Número do Processo</label>
@@ -106,7 +115,10 @@ export default function NewProcessForm({
             className={`${inputClass} appearance-none`}
             name="existingProcessId"
             value={existingId}
-            onChange={(e) => setExistingId(e.target.value)}
+            onChange={(e) => {
+              setExistingId(e.target.value);
+              setClientError(null);
+            }}
           >
             <option value="">➕ Criar novo processo</option>
             {processes.length > 0 && (
@@ -134,42 +146,33 @@ export default function NewProcessForm({
 
         <div>
           <label className={labelClass}>{supplierList.length > 1 ? "Fornecedores" : "Fornecedor"}</label>
-          {needsManualSupplier ? (
-            <>
-              <select className={`${inputClass} appearance-none`} name="supplierId" required defaultValue="">
-                <option value="" disabled>
-                  Selecione o fornecedor (ou adicione um pedido)
-                </option>
-                {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-              {suppliers.length === 0 && (
-                <p className="text-xs text-error mt-1">Nenhum fornecedor cadastrado — cadastre um em /fornecedores/novo primeiro.</p>
-              )}
-            </>
+          {supplierList.length === 0 ? (
+            <div className="flex min-h-[48px] items-center gap-2 rounded-lg border border-dashed border-outline-variant bg-surface-container-low px-3 py-2 text-on-surface-variant">
+              <span className="material-symbols-outlined text-[18px] text-on-surface-variant/60">info</span>
+              <span className="text-body-sm font-body-sm text-on-surface-variant">
+                Capturado automaticamente do Pedido de Compra
+              </span>
+            </div>
           ) : (
             <div className="flex min-h-[48px] flex-wrap items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low p-2">
-              {supplierList.length === 0 ? (
-                <span className="px-1 text-body-sm font-body-sm text-on-surface-variant">Sem fornecedor ainda</span>
-              ) : (
-                supplierList.map((s) => (
-                  <span key={s.id} className="inline-flex items-center gap-2 rounded-md bg-surface-container-lowest px-1.5 py-1">
-                    <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={22} />
-                    <span className="text-sm font-medium uppercase tracking-wide">{s.name}</span>
-                  </span>
-                ))
-              )}
+              {supplierList.map((s) => (
+                <span
+                  key={s.id}
+                  className="inline-flex items-center gap-2 rounded-md bg-surface-container-lowest px-2 py-1 border border-outline-variant/40 shadow-xs"
+                >
+                  <SupplierLogo logoUrl={s.logoUrl} name={s.name} size={22} />
+                  <span className="text-sm font-medium uppercase tracking-wide text-primary">{s.name}</span>
+                </span>
+              ))}
             </div>
           )}
-          {!existing && selected.length > 0 && (
-            <p className="mt-1 text-xs text-on-surface-variant">
-              Carregado dos pedidos escolhidos abaixo
-              {supplierList.length > 1 ? ` — o principal é ${supplierList[0].name}.` : "."}
-            </p>
-          )}
+          <p className="mt-1 text-xs text-on-surface-variant">
+            {supplierList.length === 0
+              ? "O fornecedor é capturado no pedido. Adicione um pedido de compra abaixo."
+              : supplierList.length > 1
+                ? `Capturado dos pedidos selecionados — o principal é ${supplierList[0].name}.`
+                : "Capturado do pedido de compra selecionado."}
+          </p>
         </div>
 
         <div className="sm:col-span-2">
@@ -242,12 +245,26 @@ export default function NewProcessForm({
             </button>
           </div>
           {orders.length === 0 && (
-            <p className="mt-2 text-xs text-on-surface-variant">
-              Nenhum pedido sem processo.{" "}
-              <Link href="/pedidos-compra/novo" className="text-secondary hover:underline">
-                Criar pedido de compra
-              </Link>
-            </p>
+            <div className="mt-3 rounded-lg border border-outline-variant bg-surface-container-low p-4">
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-[20px] text-secondary">info</span>
+                <div>
+                  <p className="font-semibold text-body-md text-primary">Nenhum Pedido de Compra disponível</p>
+                  <p className="text-xs text-on-surface-variant mt-1">
+                    O fornecedor é capturado diretamente na criação do Pedido de Compra. Crie um pedido de compra antes de abrir o processo de importação.
+                  </p>
+                  <div className="mt-3">
+                    <Link
+                      href="/pedidos-compra/novo"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 font-bold text-xs text-white shadow-xs transition-all hover:opacity-90"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">add</span>
+                      Criar Pedido de Compra
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
           {existing && (
             <p className="mt-2 text-xs text-on-surface-variant">
@@ -261,12 +278,19 @@ export default function NewProcessForm({
         <div className={existing ? "hidden" : "contents"}>{children}</div>
       </div>
 
+      {clientError && (
+        <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          <span>{clientError}</span>
+        </div>
+      )}
+
       {/* barra fixa no rodapé da tela: o botão fica sempre à mão, sem rolar até o fim */}
       <div className="sticky bottom-0 z-10 -mx-2 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest/95 px-4 py-3 shadow-md backdrop-blur">
         <p className="text-xs text-on-surface-variant">
           {existing
             ? "Os pedidos escolhidos entram no processo."
-            : "Salve agora e complete o resto depois, na tela do processo, conforme as informações chegarem."}
+            : "O fornecedor e os itens serão carregados do(s) pedido(s) escolhido(s)."}
         </p>
         <SaveButton label={existing ? "Salvar e adicionar ao processo" : "Salvar processo"} />
       </div>

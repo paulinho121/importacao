@@ -18,8 +18,7 @@ async function suggestProcessNumber(): Promise<string> {
 }
 
 export default async function NovoProcessoPage() {
-  const [supplierRows, agentRows, suggestedNumber, openProcessRows, orderRows] = await Promise.all([
-    db.select({ id: suppliers.id, name: suppliers.name }).from(suppliers).orderBy(suppliers.name),
+  const [agentRows, suggestedNumber, openProcessRows, orderRows] = await Promise.all([
     db.select({ id: freightAgents.id, name: freightAgents.name }).from(freightAgents).orderBy(freightAgents.name),
     suggestProcessNumber(),
     // processos em andamento: dá pra colocar mais pedidos neles
@@ -67,7 +66,6 @@ export default async function NovoProcessoPage() {
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
         <NewProcessForm
           suggestedNumber={suggestedNumber}
-          suppliers={supplierRows}
           processes={processOptions}
           orders={orderRows}
         >

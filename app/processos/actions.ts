@@ -128,12 +128,16 @@ export async function createProcess(formData: FormData) {
   ]);
   if (sameNumber) redirect(withFlashError("/processos/novo", duplicateMessage));
 
-  // O fornecedor principal vem do primeiro pedido escolhido; sem pedidos, do campo.
-  let supplierId = String(formData.get("supplierId") ?? "").trim();
-  if (firstPoRows[0]) supplierId = firstPoRows[0].supplierId;
-  if (!supplierId) {
-    redirect(withFlashError("/processos/novo", "Escolha o fornecedor ou adicione um pedido de compra."));
+  // O fornecedor é sempre capturado a partir do pedido de compra selecionado.
+  if (poIds.length === 0 || !firstPoRows[0]?.supplierId) {
+    redirect(
+      withFlashError(
+        "/processos/novo",
+        "Selecione ao menos um pedido de compra para criar o processo. O fornecedor é capturado na criação do pedido.",
+      ),
+    );
   }
+  const supplierId = firstPoRows[0].supplierId;
 
   const modal = resolveModal(formData, null);
   const agentId = optionalText(formData, "agentId");
