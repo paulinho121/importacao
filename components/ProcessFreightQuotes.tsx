@@ -1462,7 +1462,7 @@ function TaxRow({
 }) {
   return (
     <tr>
-      <Lead sec="TAXAS" label={<span className="pl-5 text-[11px] font-semibold text-on-surface-variant">TX-{index + 1}</span>} />
+      <Lead sec="TAXAS" label="" />
       {cols.map((c) => {
         const t = taxOf(c);
         return (
