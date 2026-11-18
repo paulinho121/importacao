@@ -2,7 +2,6 @@
 
 import { db } from "@/db/client";
 import {
-  processEvents,
   processQuoteEvents,
   processSupplierQuoteItems,
   processSupplierQuotes,
@@ -223,29 +222,10 @@ export async function saveSupplierQuote(
           .values({ processId, ...values, ...filePatch })
           .returning({ id: processSupplierQuotes.id });
         id = created.id;
-        await tx.insert(processEvents).values({
-          processId,
-          eventDate: new Date(),
-          eventType: `Cotação com o fornecedor adicionada: ${supplier.name}`,
-          origin: `Cotação · ${actor}`,
-        });
       }
       savedId = id;
       if (items.length > 0) {
         await tx.insert(processSupplierQuoteItems).values(items.map((it) => ({ ...it, quoteId: id! })));
-      }
-
-      // Aprovar a cotação do fornecedor fica registrado no histórico do processo
-      // (não mexe em nada do frete).
-      if (status === "APROVADA" && existing?.status !== "APROVADA") {
-        await tx.insert(processEvents).values({
-          processId,
-          eventDate: new Date(),
-          eventType: `Cotação do fornecedor aprovada: ${supplier.name}${
-            totalValue !== null ? ` · ${formatMoney(totalValue, currency)}` : ""
-          }`,
-          origin: `Cotação · ${actor}`,
-        });
       }
 
       const descriptions = existing
@@ -292,7 +272,6 @@ export async function saveSupplierQuote(
 
 export async function deleteSupplierQuote(quoteId: string, processId: string) {
   const back = `/processos/${processId}`;
-  const actor = await quoteActorName();
   const [quote] = await db
     .select({ storagePath: processSupplierQuotes.storagePath })
     .from(processSupplierQuotes)
@@ -300,16 +279,10 @@ export async function deleteSupplierQuote(quoteId: string, processId: string) {
   if (quote) {
     await db.transaction(async (tx) => {
       await tx.delete(processSupplierQuotes).where(eq(processSupplierQuotes.id, quoteId));
-      // o histórico da cotação some junto; fica o registro no histórico do processo
+      // o histórico da cotação some junto
       await tx
         .delete(processQuoteEvents)
         .where(and(eq(processQuoteEvents.quoteType, "SUPPLIER"), eq(processQuoteEvents.quoteId, quoteId)));
-      await tx.insert(processEvents).values({
-        processId,
-        eventDate: new Date(),
-        eventType: "Cotação com o fornecedor removida",
-        origin: `Cotação · ${actor}`,
-      });
     });
     if (quote.storagePath) await supabaseAdmin.storage.from(DOCUMENTS_BUCKET).remove([quote.storagePath]);
   }

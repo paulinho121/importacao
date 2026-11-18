@@ -26,7 +26,6 @@ import {
   PROCESS_STATUS_OPTIONS,
   WORKFLOW_STEPS,
   stepOfStatus,
-  CUSTOMS_CHANNEL_LABEL,
   type ProcessStatus,
   type CustomsChannel,
 } from "@/lib/status";
@@ -241,12 +240,6 @@ export async function updateProcessNumber(processId: string, formData: FormData)
     .set({ processNumber, updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: `Número do processo alterado para ${processNumber}`,
-  });
-
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   revalidatePath("/");
@@ -311,12 +304,36 @@ export async function updateShipmentInfo(processId: string, formData: FormData) 
 // essa marca que libera a exclusão (eventos automáticos de status/etapa
 // não podem ser apagados por aqui). Data guardada ao meio-dia UTC pra o
 // dia não "virar" ao exibir no fuso do Brasil.
+//
+// O mesmo formulário também altera o status do processo (campo "status"): quem
+// muda o status já registra o andamento junto. A única linha automática do
+// histórico é "Processo criado"; todo o resto é digitado pelo usuário.
 export async function addProcessFollowUp(processId: string, formData: FormData) {
   const text = optionalText(formData, "text");
   if (!text) throw new Error("Descreva o andamento antes de registrar.");
 
   const date = optionalDate(formData, "date");
   if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Data inválida.");
+
+  const chosen = optionalText(formData, "status") as ProcessStatus | null;
+  // Atrasado não é etapa (é automático pela ETA): não pode ser escolhido.
+  if (chosen && !PROCESS_STATUS_OPTIONS.includes(chosen)) throw new Error("Status inválido.");
+
+  const [before] = await db.select({ status: processes.status }).from(processes).where(eq(processes.id, processId));
+  if (!before) throw new Error("Processo não encontrado.");
+
+  let statusAtEvent = before.status;
+  const changedStatus = chosen !== null && chosen !== before.status;
+  if (chosen && changedStatus) {
+    // Escolher uma etapa da sequência também posiciona o stepper nela
+    // (Abandonado não muda a etapa).
+    const step = stepOfStatus(chosen);
+    await db
+      .update(processes)
+      .set({ status: chosen, ...(step ? { currentStep: step } : {}), updatedAt: new Date() })
+      .where(eq(processes.id, processId));
+    statusAtEvent = chosen;
+  }
 
   const user = await getCurrentUser();
   const author = user?.name || user?.email || "usuário";
@@ -326,10 +343,20 @@ export async function addProcessFollowUp(processId: string, formData: FormData) 
     eventDate: date ? new Date(`${date}T12:00:00Z`) : new Date(),
     eventType: text,
     origin: `Manual · ${author}`,
+    statusAtEvent,
   });
 
   revalidatePath(`/processos/${processId}`);
-  redirect(withFlash(`/processos/${processId}`, "Andamento registrado."));
+  revalidatePath("/processos");
+  revalidatePath("/");
+  redirect(
+    withFlash(
+      `/processos/${processId}`,
+      changedStatus
+        ? `Andamento registrado e status alterado para "${STATUS_LABEL[statusAtEvent as ProcessStatus]}".`
+        : "Andamento registrado.",
+    ),
+  );
 }
 
 export async function removeProcessFollowUp(eventId: string, processId: string) {
@@ -383,14 +410,6 @@ export async function updateCustomsChannel(processId: string, formData: FormData
     .update(processes)
     .set({ customsChannel: channel, updatedAt: new Date() })
     .where(eq(processes.id, processId));
-
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: channel
-      ? `Canal de parametrização: ${CUSTOMS_CHANNEL_LABEL[channel]}`
-      : "Canal de parametrização removido",
-  });
 
   revalidatePath(`/processos/${processId}`);
 }
@@ -466,14 +485,6 @@ export async function fetchExchangeRateAction(
   return null;
 }
 
-// Nome (ou e-mail) de quem está logado, para o histórico do processo.
-async function actorName() {
-  const user = await getCurrentUser().catch(() => null);
-  return user?.name || user?.email || "usuário";
-}
-
-const brDate = (d: string | null | undefined) => (d ? d.split("-").reverse().join("/") : "sem data");
-
 export async function advanceProcessStep(processId: string, _formData: FormData) {
   const [current] = await db
     .select({ currentStep: processes.currentStep })
@@ -489,57 +500,10 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
     .set({ currentStep: nextStep, status: nextStatus, updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: `Avançou para: ${WORKFLOW_STEPS[nextStep - 1]}`,
-    origin: `Etapa · ${await actorName()}`,
-    statusAtEvent: nextStatus,
-  });
-
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
   revalidatePath("/");
   redirect(withFlash(`/processos/${processId}`, `Avançou para "${WORKFLOW_STEPS[nextStep - 1]}".`));
-}
-
-export async function updateProcessStatus(processId: string, formData: FormData) {
-  const status = String(formData.get("status") ?? "").trim() as ProcessStatus;
-  if (!status) throw new Error("Status é obrigatório.");
-  // Atrasado não é etapa (é automático pela ETA): não pode ser escolhido.
-  if (!PROCESS_STATUS_OPTIONS.includes(status)) throw new Error("Status inválido.");
-  const note = String(formData.get("note") ?? "").trim().slice(0, 500);
-
-  const [before] = await db.select({ status: processes.status }).from(processes).where(eq(processes.id, processId));
-
-  // Mesmo status e sem observação: não há o que registrar (evita linhas "X → X" no histórico).
-  if (before && before.status === status && !note) {
-    redirect(withFlash(`/processos/${processId}`, `O processo já está em "${STATUS_LABEL[status]}".`));
-  }
-
-  // Escolher uma etapa da sequência também posiciona o stepper nela
-  // (Abandonado não muda a etapa).
-  const step = stepOfStatus(status);
-
-  await db
-    .update(processes)
-    .set({ status, ...(step ? { currentStep: step } : {}), updatedAt: new Date() })
-    .where(eq(processes.id, processId));
-
-  const from = before ? STATUS_LABEL[before.status as ProcessStatus] : null;
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: `Status: ${from ? `${from} → ` : ""}${STATUS_LABEL[status]}${note ? ` — ${note}` : ""}`,
-    origin: `Status · ${await actorName()}`,
-    statusAtEvent: status,
-  });
-
-  revalidatePath(`/processos/${processId}`);
-  revalidatePath("/processos");
-  revalidatePath("/");
-  // Recarrega a tela já no novo status e mostra o aviso (antes não havia retorno visível).
-  redirect(withFlash(`/processos/${processId}`, `Status alterado para "${STATUS_LABEL[status]}".`));
 }
 
 // Encerra o processo imediatamente (fora da progressão normal do
@@ -553,12 +517,17 @@ export async function abandonProcess(processId: string, formData: FormData) {
     .set({ status: "ABANDONADO", updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: reason ? `Processo abandonado: ${reason}` : "Processo abandonado",
-    statusAtEvent: "ABANDONADO",
-  });
+  // O motivo digitado vira um andamento manual (pode ser removido depois).
+  if (reason) {
+    const user = await getCurrentUser().catch(() => null);
+    await db.insert(processEvents).values({
+      processId,
+      eventDate: new Date(),
+      eventType: `Processo abandonado: ${reason}`,
+      origin: `Manual · ${user?.name || user?.email || "usuário"}`,
+      statusAtEvent: "ABANDONADO",
+    });
+  }
 
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
@@ -651,18 +620,9 @@ export async function updateProcessDetails(processId: string, formData: FormData
   const known = locationChoice && locationChoice !== "OUTRO";
   const [code, city, state] = known ? locationChoice.split("|") : [null, null, null];
   const [current] = await db
-    .select({
-      modal: processes.modal,
-      etd: processes.etd,
-      etaEstimated: processes.etaEstimated,
-      etaActual: processes.etaActual,
-      status: processes.status,
-    })
+    .select({ modal: processes.modal })
     .from(processes)
     .where(eq(processes.id, processId));
-  const newEtd = optionalDate(formData, "etd");
-  const newEta = optionalDate(formData, "etaEstimated");
-  const newEtaActual = optionalDate(formData, "etaActual");
 
   await db
     .update(processes)
@@ -684,29 +644,6 @@ export async function updateProcessDetails(processId: string, formData: FormData
       updatedAt: new Date(),
     })
     .where(eq(processes.id, processId));
-
-  // Histórico das datas: ETD, ETA e ETA real alteradas (a situação de atraso é
-  // recalculada sozinha com a nova ETA).
-  if (current) {
-    const changes: string[] = [];
-    if ((current.etd ?? null) !== (newEtd ?? null)) changes.push(`ETD alterada: ${brDate(current.etd)} → ${brDate(newEtd)}`);
-    if ((current.etaEstimated ?? null) !== (newEta ?? null))
-      changes.push(`ETA alterada: ${brDate(current.etaEstimated)} → ${brDate(newEta)}`);
-    if ((current.etaActual ?? null) !== (newEtaActual ?? null))
-      changes.push(`ETA real alterada: ${brDate(current.etaActual)} → ${brDate(newEtaActual)}`);
-    if (changes.length > 0) {
-      const author = await actorName();
-      await db.insert(processEvents).values(
-        changes.map((eventType) => ({
-          processId,
-          eventDate: new Date(),
-          eventType,
-          origin: `Previsão · ${author}`,
-          statusAtEvent: current.status,
-        })),
-      );
-    }
-  }
 
   revalidatePath(`/processos/${processId}`);
   revalidatePath("/processos");
@@ -819,12 +756,6 @@ export async function uploadProcessDocument(
     });
   }
 
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: `Documento enviado: ${docType}`,
-  });
-
   revalidatePath(`/processos/${processId}`);
 }
 
@@ -876,12 +807,6 @@ export async function refreshVesselPosition(
       updatedAt: new Date(),
     })
     .where(eq(processes.id, processId));
-
-  await db.insert(processEvents).values({
-    processId,
-    eventDate: new Date(),
-    eventType: "Posição do navio atualizada",
-  });
 
   revalidatePath(`/processos/${processId}`);
   return null;

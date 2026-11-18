@@ -49,7 +49,6 @@ import { desc, eq, getTableColumns, inArray } from "drizzle-orm";
 import { etaLateDays } from "@/lib/eta-delay";
 import { LateBadge } from "@/components/shared/StatusBadge";
 import {
-  PROCESS_STATUS_OPTIONS,
   STATUS_BADGE_CLASS,
   STATUS_LABEL,
   WORKFLOW_STEPS,
@@ -59,7 +58,6 @@ import {
 } from "@/lib/status";
 import {
   advanceProcessStep,
-  updateProcessStatus,
   updateProcessNumber,
   abandonProcess,
   removeProcessFollowUp,
@@ -386,7 +384,6 @@ export default async function ProcessDetailPage({
   const dias = diasRestantes(process.etaEstimated);
   const lateDays = etaLateDays({ status: process.status, currentStep: process.currentStep, etaEstimated: process.etaEstimated });
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
-  const boundUpdateStatus = updateProcessStatus.bind(null, id);
   const boundAbandon = abandonProcess.bind(null, id);
   const boundUpdateProcessNumber = updateProcessNumber.bind(null, id);
   const boundAddItem = addProcessItem.bind(null, id);
@@ -541,32 +538,6 @@ export default async function ProcessDetailPage({
           </p>
         </div>
         <div className="lg:col-span-4 flex flex-col items-start gap-2 lg:items-end">
-          <form action={boundUpdateStatus} className="flex w-full max-w-full flex-wrap items-center gap-2">
-            <select
-              name="status"
-              defaultValue={process.status}
-              className="min-w-0 max-w-full flex-1 basis-40 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all appearance-none"
-            >
-              {PROCESS_STATUS_OPTIONS.map((value) => (
-                <option key={value} value={value}>
-                  {STATUS_LABEL[value]}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              name="note"
-              maxLength={500}
-              placeholder="Observação (opcional)"
-              aria-label="Observação da alteração de status"
-              className="min-w-0 max-w-full flex-1 basis-40 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-body-sm font-body-sm focus:outline-none focus:border-secondary transition-all"
-            />
-            <SubmitButton
-              className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
-            >
-              Alterar Status
-            </SubmitButton>
-          </form>
           {process.status !== "CONCLUIDO" && process.status !== "ABANDONADO" && (
             <AbandonProcessButton action={boundAbandon} processNumber={process.processNumber} />
           )}
@@ -960,7 +931,7 @@ export default async function ProcessDetailPage({
                 Follow-up e Histórico
               </h3>
             </div>
-            <ProcessFollowUpForm processId={id} />
+            <ProcessFollowUpForm processId={id} currentStatus={process.status} />
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>

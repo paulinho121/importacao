@@ -3,7 +3,6 @@
 import { db } from "@/db/client";
 import {
   freightAgents,
-  processEvents,
   processFreightQuoteLines,
   processFreightQuotes,
   processQuoteEvents,
@@ -361,11 +360,6 @@ export async function saveFreightQuote(
           .values({ processId, ...values, ...filePatch })
           .returning({ id: processFreightQuotes.id });
         id = created.id;
-        await tx.insert(processEvents).values({
-          processId,
-          eventDate: new Date(),
-          eventType: `Cotação de frete adicionada: ${agent.name}`,
-        });
       }
       savedId = id;
       if (lines.length > 0) {
@@ -418,7 +412,6 @@ export async function saveFreightQuote(
 
 export async function deleteFreightQuote(quoteId: string, processId: string) {
   const back = `/processos/${processId}`;
-  const actor = await quoteActorName();
   const [quote] = await db
     .select({ storagePath: processFreightQuotes.storagePath })
     .from(processFreightQuotes)
@@ -426,16 +419,10 @@ export async function deleteFreightQuote(quoteId: string, processId: string) {
   if (quote) {
     await db.transaction(async (tx) => {
       await tx.delete(processFreightQuotes).where(eq(processFreightQuotes.id, quoteId));
-      // o histórico da cotação some junto; fica o registro no histórico do processo
+      // o histórico da cotação some junto
       await tx
         .delete(processQuoteEvents)
         .where(and(eq(processQuoteEvents.quoteType, "FREIGHT"), eq(processQuoteEvents.quoteId, quoteId)));
-      await tx.insert(processEvents).values({
-        processId,
-        eventDate: new Date(),
-        eventType: "Cotação de frete removida",
-        origin: `Cotação · ${actor}`,
-      });
     });
     if (quote.storagePath) await supabaseAdmin.storage.from(DOCUMENTS_BUCKET).remove([quote.storagePath]);
   }
@@ -529,14 +516,6 @@ export async function selectFreightQuote(quoteId: string, processId: string) {
           : []),
       ],
       actor,
-    });
-    await tx.insert(processEvents).values({
-      processId,
-      eventDate: new Date(),
-      eventType:
-        apply.value !== null
-          ? `Cotação de frete escolhida: ${agentName} · frete ${formatMoney(apply.value, apply.currency)}`
-          : `Cotação de frete escolhida: ${agentName}`,
     });
   });
 
