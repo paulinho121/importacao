@@ -175,7 +175,7 @@ export default async function ProcessDetailPage({
       .select()
       .from(processEvents)
       .where(eq(processEvents.processId, id))
-      .orderBy(desc(processEvents.eventDate)),
+      .orderBy(desc(processEvents.eventDate), desc(processEvents.createdAt)),
     db.select().from(processDocuments).where(eq(processDocuments.processId, id)),
     db
       .select({ ...getTableColumns(processInvoices), supplierName: suppliers.name })
