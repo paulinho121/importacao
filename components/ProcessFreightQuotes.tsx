@@ -341,12 +341,14 @@ let seq = 0;
 
 // ----------------------------------------------------------------- estilos
 
+// Campos "fantasma": sem caixa até passar o mouse ou focar, para a grade não ficar
+// poluída com dezenas de caixas abertas.
 const cellInput =
-  "w-full bg-surface-container-low border border-outline-variant/60 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-secondary transition-all";
+  "w-full bg-transparent border border-transparent hover:border-outline-variant/60 hover:bg-surface-container-low rounded-md px-2 py-1 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:bg-surface-container-low focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all disabled:opacity-80";
 const moneyInput = `${cellInput} font-mono-data text-right`;
-const dataCell = "py-1 px-1.5 align-middle border-t border-l border-outline-variant/40";
+const dataCell = "py-1.5 px-2 align-middle border-t border-l border-outline-variant/20";
 const keyCell =
-  "sticky z-10 bg-surface-container-lowest px-2 py-1 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface whitespace-nowrap border-t border-outline-variant/40";
+  "sticky left-0 z-10 bg-surface-container-lowest px-3 py-1.5 text-left align-middle text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant whitespace-nowrap border-t border-outline-variant/20";
 const CURRENCIES = ["USD", "BRL", "EUR", "CNY", "GBP", "JPY", "OTHER"];
 // Blocos coloridos à esquerda, como na planilha do time.
 type SecKey = "GERAIS" | "ROTA" | "CARGA" | "TAXAS" | "TOTAL" | "EXTRAS";
@@ -360,9 +362,8 @@ const SEC: Record<SecKey, string> = {
 };
 
 // Larguras fixas: a tabela não estica quando há poucas cotações (campos ficam juntos do rótulo).
-const BLOCK_W = 88;
-const KEY_W = 140;
-const LABEL_W = BLOCK_W + KEY_W;
+const KEY_W = 150;
+const LABEL_W = KEY_W;
 const COL_W = 112 + 66 + 106;
 const SPAN = 3; // subcolunas por cotação: nome | moeda | custos
 
@@ -441,8 +442,12 @@ export default function ProcessFreightQuotes({
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
   const [userRows, setUserRows] = useState({ origin: DEFAULT_TAX_ROWS, destination: DEFAULT_TAX_ROWS });
-  const [open, setOpen] = useState({ origin: true, destination: true });
-  const toggle = (k: "origin" | "destination") => setOpen((o) => ({ ...o, [k]: !o[k] }));
+  // Seções recolhidas por padrão (só um resumo por cotação); clique no título para editar.
+  // Os campos continuam na página (só escondidos), então salvar não perde nada.
+  const [open, setOpen] = useState({ gerais: false, rota: false, origin: false, destination: false });
+  type OpenKey = keyof typeof open;
+  const toggle = (k: OpenKey) => setOpen((o) => ({ ...o, [k]: !o[k] }));
+  const allOpen = Object.values(open).every(Boolean);
 
 
   // Moeda estrangeira da comparação e o câmbio ("dólar do dia"), só para
@@ -509,6 +514,8 @@ export default function ProcessFreightQuotes({
   }
 
   function addColumn() {
+    // cotação nova: abre as seções para já poder preencher
+    setOpen({ gerais: true, rota: true, origin: true, destination: true });
     const key = `new-${++seq}`;
     const draft = emptyDraft(defaults);
     setCols((prev) => [
@@ -620,12 +627,6 @@ export default function ProcessFreightQuotes({
     Math.max(userRows.destination, ...cols.map((c) => lastFilled(c.draft.destinationTaxes))),
   );
 
-  const detail = (isOpen: boolean, n: number) => (isOpen ? n + (!closed && n < MAX_TAX_ROWS ? 1 : 0) : 0);
-  // linhas do bloco TAXAS: 2 resumos + DTA + Outros + detalhes abertos
-  const taxSpan = 4 + detail(open.origin, rowsOrigin) + detail(open.destination, rowsDestination);
-  // linhas do bloco EXTRAS: observação + (10 dados extras) + (ações)
-  const extrasSpan = 3 + (showMore ? 10 : 0) + (closed ? 0 : 1);
-
   const nCols = cols.length;
   const today = new Date().toISOString().slice(0, 10);
   const F = (c: Col) => `fq-${c.key}`;
@@ -652,6 +653,59 @@ export default function ProcessFreightQuotes({
       );
     });
 
+  // Faixa de título de um grupo de linhas.
+  const titleRow = (sec: SecKey, title: string) => (
+    <tr>
+      <th
+        colSpan={1 + nCols * SPAN}
+        className="sticky left-0 border-t border-outline-variant/40 bg-surface-container-low px-3 py-1.5 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-on-surface-variant"
+      >
+        <span className="mr-2 inline-block h-2 w-2 rounded-full align-middle" style={{ background: SEC[sec] }} />
+        {title}
+      </th>
+    </tr>
+  );
+  // Seção recolhível: título com seta e, fechada, um resumo curto de cada cotação.
+  const bandRow = (sec: SecKey, title: string, key: OpenKey, summary: (c: Col) => ReactNode) => (
+    <tr>
+      <Lead sec={sec} label={<GroupToggle label={title} open={open[key]} onClick={() => toggle(key)} />} />
+      {cols.map((c) => (
+        <td key={c.key} colSpan={SPAN} className={`${dataCell} text-[11px] text-on-surface-variant`}>
+          {open[key] ? null : summary(c)}
+        </td>
+      ))}
+    </tr>
+  );
+  const fmtBR = (d: string) => (d ? d.split("-").reverse().join("/") : "");
+  const gerais = (c: Col) => {
+    const d = c.draft;
+    const modal = MODALIDADES.find((m) => m.value === d.modalidade)?.label;
+    const parts = [modal, d.containerType, d.incoterm.split(" - ")[0]].filter(Boolean);
+    return parts.length > 0 ? <span className="font-semibold text-on-surface">{parts.join(" · ")}</span> : "—";
+  };
+  const rota = (c: Col) => {
+    const d = c.draft;
+    const route = [d.origin, d.destination].filter(Boolean).join(" → ");
+    const transit = d.transitDays
+      ? d.transitDaysMax && d.transitDaysMax !== d.transitDays
+        ? `${d.transitDays}–${d.transitDaysMax} dias`
+        : `${d.transitDays} dias`
+      : "";
+    const dates = [d.etdEstimated && `ETD ${fmtBR(d.etdEstimated)}`, d.etaEstimated && `ETA ${fmtBR(d.etaEstimated)}`]
+      .filter(Boolean)
+      .join(" · ");
+    const expired = d.validUntil && d.validUntil < today;
+    const head = [route, transit].filter(Boolean).join(" · ");
+    if (!head && !dates && !expired) return "—";
+    return (
+      <div className="space-y-0.5 leading-snug">
+        {head && <p className="font-semibold text-on-surface">{head}</p>}
+        {dates && <p>{dates}</p>}
+        {expired && <p className="font-bold text-error">Proposta vencida</p>}
+      </div>
+    );
+  };
+
   return (
     <section className="min-w-0 max-w-full bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-stack-md">
@@ -674,6 +728,15 @@ export default function ProcessFreightQuotes({
               Imprimir cotações
             </a>
           )}
+        {nCols > 0 && (
+          <button
+            type="button"
+            onClick={() => setOpen({ gerais: !allOpen, rota: !allOpen, origin: !allOpen, destination: !allOpen })}
+            className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
+          >
+            {allOpen ? "Recolher detalhes" : "Expandir detalhes"}
+          </button>
+        )}
         {!closed && (
           <button
             type="button"
@@ -737,13 +800,12 @@ export default function ProcessFreightQuotes({
               style={{ width: LABEL_W + nCols * COL_W }}
             >
               <colgroup>
-                <col style={{ width: BLOCK_W }} />
                 <col style={{ width: KEY_W }} />
                 {cols.map((c) => {
                   // sombreado da coluna inteira na cor da empresa; cotação FECHADA fica verde
                   const tint = isFechada(c)
-                    ? "#22c55e30"
-                    : `${COLORS[c.colorIdx % COLORS.length]}${c.colorIdx % 2 ? "26" : "1a"}`;
+                    ? "#22c55e1c"
+                    : `${COLORS[c.colorIdx % COLORS.length]}${c.colorIdx % 2 ? "14" : "0d"}`;
                   return (
                     <Fragment key={c.key}>
                       <col style={{ width: 112, background: tint }} />
@@ -756,10 +818,7 @@ export default function ProcessFreightQuotes({
               <tbody>
                 {/* EMPRESAS (cabeçalho colorido) */}
                 <tr>
-                  <th
-                    colSpan={2}
-                    className="sticky left-0 z-10 bg-surface-container-lowest px-2 py-2 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface"
-                  >
+                  <th className="sticky left-0 z-10 bg-surface-container-lowest px-3 py-2 text-left align-middle text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                     Agente de cargas
                   </th>
                   {cols.map((c) => (
@@ -806,9 +865,10 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* DADOS GERAIS */}
+                {/* IDENTIFICAÇÃO */}
+                {titleRow("GERAIS", "Identificação")}
                 <tr>
-                  <Lead sec="GERAIS" name="Dados gerais" span={5} label="Situação" desc="Situação da proposta" />
+                  <Lead sec="GERAIS" label="Situação" desc="Situação da proposta" />
                   {cols.map((c) => {
                     const st = QUOTE_STATUSES.find((s) => s.value === c.draft.status) ?? QUOTE_STATUSES[0];
                     return (
@@ -820,7 +880,7 @@ export default function ProcessFreightQuotes({
                           disabled={closed}
                           onChange={(e) => patch(c.key, { status: e.target.value })}
                           aria-label="Situação da cotação"
-                          className={`w-full rounded px-2 py-1 text-xs font-bold text-center uppercase appearance-none focus:outline-none ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
+                          className={`w-full rounded-full px-3 py-1 text-[11px] font-bold tracking-wider text-center uppercase appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
                           style={{ background: c.draft.status === "FECHADO" ? "#4ade80" : st.color }}
                         >
                           {QUOTE_STATUSES.map((s) => (
@@ -841,7 +901,8 @@ export default function ProcessFreightQuotes({
                       placeholder="Nº da proposta" className={cellInput} />
                   ))}
                 </tr>
-                <tr>
+                {bandRow("GERAIS", "Embarque", "gerais", gerais)}
+                <tr hidden={!open.gerais}>
                   <Lead sec="GERAIS" label="Modal" desc="Modal de transporte" />
                   {fullCells((c) => (
                     <select form={F(c)} name="modalidade" value={c.draft.modalidade} disabled={closed}
@@ -860,7 +921,7 @@ export default function ProcessFreightQuotes({
                     </select>
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.gerais}>
                   <Lead sec="GERAIS" label="Tipo" desc="Tipo de embarque" />
                   {fullCells((c) => (
                     <select form={F(c)} name="containerType" value={c.draft.containerType} disabled={closed}
@@ -878,7 +939,7 @@ export default function ProcessFreightQuotes({
                     </select>
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.gerais}>
                   <Lead sec="GERAIS" label="Incoterm" desc="Termo de comércio" />
                   {fullCells((c) => (
                     <select form={F(c)} name="incoterm" value={c.draft.incoterm} disabled={closed}
@@ -894,9 +955,9 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* ROTA E PRAZOS */}
-                <tr>
-                  <Lead sec="ROTA" name="Rota e prazos" span={7} label="Trânsito" desc="Dias de trânsito" />
+                {bandRow("ROTA", "Rota e prazos", "rota", rota)}
+                <tr hidden={!open.rota}>
+                  <Lead sec="ROTA" label="Trânsito" desc="Dias de trânsito" />
                   {fullCells((c) => (
                     <div className="flex items-center gap-1">
                       <input form={F(c)} name="transitDays" type="number" min="0" step="1" value={c.draft.transitDays}
@@ -909,7 +970,7 @@ export default function ProcessFreightQuotes({
                     </div>
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="ETD" desc="Previsão de embarque" />
                   {fullCells((c) => (
                     <input form={F(c)} name="etdEstimated" type="date" value={c.draft.etdEstimated} disabled={closed}
@@ -917,7 +978,7 @@ export default function ProcessFreightQuotes({
                       aria-label="Previsão de embarque (ETD)" className={cellInput} />
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="ETA" desc="Previsão de chegada" />
                   {fullCells((c) => (
                     <>
@@ -930,28 +991,28 @@ export default function ProcessFreightQuotes({
                     </>
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="Origem" desc="Aeroporto / porto de origem" />
                   {fullCells((c) => (
                     <input form={F(c)} name="origin" value={c.draft.origin} disabled={closed}
                       onChange={(e) => patch(c.key, { origin: e.target.value })} placeholder="Ex: HKG" className={cellInput} />
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="Destino" desc="Aeroporto / porto de destino" />
                   {fullCells((c) => (
                     <input form={F(c)} name="destination" value={c.draft.destination} disabled={closed}
                       onChange={(e) => patch(c.key, { destination: e.target.value })} placeholder="Ex: GRU" className={cellInput} />
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="Cia" desc="Companhia aérea / armador" />
                   {fullCells((c) => (
                     <input form={F(c)} name="carrier" value={c.draft.carrier} disabled={closed}
                       onChange={(e) => patch(c.key, { carrier: e.target.value })} placeholder="Ex: Qatar Airways" className={cellInput} />
                   ))}
                 </tr>
-                <tr>
+                <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="Validade" desc="Validade da proposta" />
                   {fullCells((c) => (
                     <>
@@ -964,9 +1025,9 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* CARGA */}
+                {titleRow("CARGA", "Carga e frete")}
                 <tr>
-                  <Lead sec="CARGA" name="Carga" span={3} label="Carga (kg)" desc="Peso bruto total" />
+                  <Lead sec="CARGA" label="Carga (kg)" desc="Peso bruto total" />
                   {fullCells((c) => (
                     <input form={F(c)} name="grossWeightKg" type="number" step="any" min="0" value={c.draft.grossWeightKg}
                       disabled={closed} onChange={(e) => patch(c.key, { grossWeightKg: e.target.value })}
@@ -1011,9 +1072,9 @@ export default function ProcessFreightQuotes({
                   })}
                 </tr>
 
-                {/* TAXAS: um resumo por grupo; as taxas por nome abrem logo abaixo */}
+                {titleRow("TAXAS", "Taxas e despesas")}
                 <tr>
-                  <Lead sec="TAXAS" name="Taxas" span={taxSpan}
+                  <Lead sec="TAXAS"
                     label={<GroupToggle label="TX origem" open={open.origin} onClick={() => toggle("origin")} />}
                     desc="Taxa de origem" />
                   {summaryCells("ORIGEM")}
@@ -1088,9 +1149,9 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* TOTAL */}
+                {titleRow("TOTAL", "Totais")}
                 <tr>
-                  <Lead sec="TOTAL" name="Total" span={3} label={`Total ${foreign}`} desc={`Total em ${foreign === "USD" ? "dólares" : foreign}`} />
+                  <Lead sec="TOTAL" label={`Total ${foreign}`} desc={`Total em ${foreign === "USD" ? "dólares" : foreign}`} />
                   {cols.map((c, i) => (
                     <td key={c.key} colSpan={SPAN}
                       className={`${dataCell} align-top text-right font-mono-data text-sm font-extrabold text-primary ${isCheapest(i) ? "bg-green-500/30" : ""}`}>
@@ -1145,9 +1206,9 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {/* OBSERVAÇÃO, DADOS EXTRAS E AÇÕES */}
+                {titleRow("EXTRAS", "Observações e documentos")}
                 <tr>
-                  <Lead sec="EXTRAS" name="Extras" span={extrasSpan} label="Observação" desc="Ajuste / ressalva" />
+                  <Lead sec="EXTRAS" label="Observação" desc="Ajuste / ressalva" />
                   {fullCells((c) => (
                     <textarea form={F(c)} name="notes" rows={2} value={c.draft.notes} disabled={closed}
                       onChange={(e) => patch(c.key, { notes: e.target.value })}
@@ -1392,38 +1453,25 @@ export default function ProcessFreightQuotes({
 
 // ---------------------------------------------------------------- auxiliares
 
-// Células à esquerda de cada linha: bloco colorido da seção (só na 1ª linha,
-// com rowSpan), rótulo em negrito e descrição.
+// Célula de rótulo à esquerda de cada linha, com uma barra fina na cor da seção.
+// `desc` vira dica ao passar o mouse.
 function Lead({
   sec,
-  name,
-  span,
   label,
   desc,
 }: {
   sec: SecKey;
-  name?: string;
-  span?: number;
   label: ReactNode;
   desc?: ReactNode;
 }) {
-  const color = SEC[sec];
-  const band = { backgroundImage: `linear-gradient(${color}1f, ${color}1f)` };
   return (
-    <>
-      {name !== undefined && (
-        <th
-          rowSpan={span}
-          className="sticky left-0 z-10 border-t border-white/25 px-2 text-center align-middle text-[11px] font-extrabold uppercase leading-tight tracking-wide text-white"
-          style={{ background: color }}
-        >
-          {name}
-        </th>
-      )}
-      <th className={keyCell} style={{ left: BLOCK_W, ...band }} title={typeof desc === "string" ? desc : undefined}>
-        {label}
-      </th>
-    </>
+    <th
+      className={keyCell}
+      style={{ boxShadow: `inset 3px 0 0 ${SEC[sec]}` }}
+      title={typeof desc === "string" ? desc : undefined}
+    >
+      {label}
+    </th>
   );
 }
 

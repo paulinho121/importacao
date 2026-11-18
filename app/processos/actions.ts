@@ -29,6 +29,7 @@ import {
   type ProcessStatus,
   type CustomsChannel,
 } from "@/lib/status";
+import { ARRIVAL_CONFIRMED_STEP } from "@/lib/eta-delay";
 import { supabaseAdmin, DOCUMENTS_BUCKET } from "@/lib/supabase-admin";
 import { fetchVesselPosition } from "@/lib/datalastic";
 import { fetchPtaxRate, type PtaxCurrency } from "@/lib/ptax";
@@ -308,6 +309,15 @@ export async function updateShipmentInfo(processId: string, formData: FormData) 
 // O mesmo formulário também altera o status do processo (campo "status"): quem
 // muda o status já registra o andamento junto. A única linha automática do
 // histórico é "Processo criado"; todo o resto é digitado pelo usuário.
+// Data/hora da confirmação de chegada (início das 48 h da presença de carga): grava
+// ao entrar na etapa "Confirmação de Chegada (ETA)" (ou depois dela, vindo de antes)
+// e limpa se o processo voltar para antes dela. Dentro das etapas de chegada, mantém.
+function arrivalPatch(fromStep: number, toStep: number): { arrivalConfirmedAt?: Date | null } {
+  if (toStep >= ARRIVAL_CONFIRMED_STEP && fromStep < ARRIVAL_CONFIRMED_STEP) return { arrivalConfirmedAt: new Date() };
+  if (toStep < ARRIVAL_CONFIRMED_STEP) return { arrivalConfirmedAt: null };
+  return {};
+}
+
 export async function addProcessFollowUp(processId: string, formData: FormData) {
   const text = optionalText(formData, "text");
   if (!text) throw new Error("Descreva o andamento antes de registrar.");
@@ -319,7 +329,10 @@ export async function addProcessFollowUp(processId: string, formData: FormData) 
   // Atrasado não é etapa (é automático pela ETA): não pode ser escolhido.
   if (chosen && !PROCESS_STATUS_OPTIONS.includes(chosen)) throw new Error("Status inválido.");
 
-  const [before] = await db.select({ status: processes.status }).from(processes).where(eq(processes.id, processId));
+  const [before] = await db
+    .select({ status: processes.status, currentStep: processes.currentStep })
+    .from(processes)
+    .where(eq(processes.id, processId));
   if (!before) throw new Error("Processo não encontrado.");
 
   let statusAtEvent = before.status;
@@ -334,6 +347,7 @@ export async function addProcessFollowUp(processId: string, formData: FormData) 
         status: chosen,
         ...(step ? { currentStep: step } : {}),
         statusChangedAt: new Date(),
+        ...arrivalPatch(before.currentStep, step ?? before.currentStep),
         updatedAt: new Date(),
       })
       .where(eq(processes.id, processId));
@@ -533,7 +547,13 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
 
   await db
     .update(processes)
-    .set({ currentStep: nextStep, status: nextStatus, statusChangedAt: new Date(), updatedAt: new Date() })
+    .set({
+      currentStep: nextStep,
+      status: nextStatus,
+      statusChangedAt: new Date(),
+      ...arrivalPatch(current.currentStep, nextStep),
+      updatedAt: new Date(),
+    })
     .where(eq(processes.id, processId));
 
   revalidatePath(`/processos/${processId}`);

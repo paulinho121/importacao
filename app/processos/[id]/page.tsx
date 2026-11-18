@@ -106,6 +106,7 @@ export default async function ProcessDetailPage({
       destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
       statusChangedAt: processes.statusChangedAt,
+      arrivalConfirmedAt: processes.arrivalConfirmedAt,
       updatedAt: processes.updatedAt,
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,

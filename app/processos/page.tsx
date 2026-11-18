@@ -137,6 +137,7 @@ export default async function ProcessosPage({
       destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
       statusChangedAt: processes.statusChangedAt,
+      arrivalConfirmedAt: processes.arrivalConfirmedAt,
       updatedAt: processes.updatedAt,
       agentName: freightAgents.name,
       externalReference: processes.externalReference,

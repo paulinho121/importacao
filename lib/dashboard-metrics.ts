@@ -77,6 +77,7 @@ export async function getDashboardMetrics() {
         modal: processes.modal,
         currentStep: processes.currentStep,
         statusChangedAt: processes.statusChangedAt,
+        arrivalConfirmedAt: processes.arrivalConfirmedAt,
         updatedAt: processes.updatedAt,
         etd: processes.etd,
         etaEstimated: processes.etaEstimated,

@@ -10,6 +10,7 @@ export type ProcessStatus =
   | "AGUARDANDO_EMBARQUE"
   | "EMBARCADO"
   | "EM_TRANSITO"
+  | "CONFIRMACAO_CHEGADA"
   | "AGUARDANDO_PRESENCA_CARGA"
   | "PRESENCA_CARGA"
   | "CARGA_REGISTRADA"
@@ -26,7 +27,7 @@ export type ProcessStatus =
   | "ABANDONADO"
   | "ATRASADO"; // legado: não é mais uma etapa (ver lib/eta-delay.ts), só existe no enum do banco
 
-// Sequência do processo de importação (24 etapas), da negociação ao encerramento.
+// Sequência do processo de importação (25 etapas), da negociação ao encerramento.
 // Os códigos antigos do banco foram mantidos quando o sentido é o mesmo:
 // CARGA_REGISTRADA = "DUIMP Registrada", EM_DESEMBARACO = "Desembaraçado",
 // TRANSPORTE_NACIONAL = "Em Trânsito Nacional", RECEBIDO = "Recebido no Armazém",
@@ -47,6 +48,7 @@ export const STATUS_LABEL: Record<ProcessStatus, string> = {
   AGUARDANDO_EMBARQUE: "Aguardando Embarque",
   EMBARCADO: "Embarcado",
   EM_TRANSITO: "Em Trânsito Internacional",
+  CONFIRMACAO_CHEGADA: "Confirmação de Chegada (ETA)",
   AGUARDANDO_PRESENCA_CARGA: "Aguardando Presença de Carga",
   PRESENCA_CARGA: "Presença de Carga",
   CARGA_REGISTRADA: "DUIMP Registrada",
@@ -81,6 +83,7 @@ export const STATUS_BADGE_CLASS: Record<ProcessStatus, string> = {
   AGUARDANDO_EMBARQUE: NEUTRAL,
   EMBARCADO: ACTION,
   EM_TRANSITO: GOOD,
+  CONFIRMACAO_CHEGADA: ACTION,
   AGUARDANDO_PRESENCA_CARGA: NEUTRAL,
   PRESENCA_CARGA: ACTION,
   CARGA_REGISTRADA: ACTION,
@@ -111,6 +114,7 @@ export const STATUS_ICON: Record<ProcessStatus, string> = {
   AGUARDANDO_EMBARQUE: "schedule",
   EMBARCADO: "flight_takeoff",
   EM_TRANSITO: "local_shipping",
+  CONFIRMACAO_CHEGADA: "event_available",
   AGUARDANDO_PRESENCA_CARGA: "hourglass_top",
   PRESENCA_CARGA: "how_to_reg",
   CARGA_REGISTRADA: "assignment_turned_in",
@@ -128,7 +132,7 @@ export const STATUS_ICON: Record<ProcessStatus, string> = {
   ATRASADO: "warning",
 };
 
-// As 24 etapas, em ordem. "Finalizado" é a última (encerra o processo).
+// As 25 etapas, em ordem. "Finalizado" é a última (encerra o processo).
 export const WORKFLOW_STEPS = [
   "Pedido / Negociação",
   "Aguardando Aprovação",
@@ -141,6 +145,7 @@ export const WORKFLOW_STEPS = [
   "Aguardando Embarque",
   "Embarcado",
   "Em Trânsito Internacional",
+  "Confirmação de Chegada (ETA)",
   "Aguardando Presença de Carga",
   "Presença de Carga",
   "DUIMP Registrada",
@@ -169,19 +174,20 @@ export const STATUS_BY_STEP: Record<number, ProcessStatus> = {
   9: "AGUARDANDO_EMBARQUE",
   10: "EMBARCADO",
   11: "EM_TRANSITO",
-  12: "AGUARDANDO_PRESENCA_CARGA",
-  13: "PRESENCA_CARGA",
-  14: "CARGA_REGISTRADA",
-  15: "EM_ANALISE_ADUANEIRA",
-  16: "EM_EXIGENCIA",
-  17: "EM_DESEMBARACO",
-  18: "AGUARDANDO_LIBERACAO_TERMINAL",
-  19: "AGUARDANDO_RETIRADA",
-  20: "TRANSPORTE_NACIONAL",
-  21: "RECEBIDO",
-  22: "EM_CONFERENCIA",
-  23: "EM_ESTOQUE",
-  24: "CONCLUIDO",
+  12: "CONFIRMACAO_CHEGADA",
+  13: "AGUARDANDO_PRESENCA_CARGA",
+  14: "PRESENCA_CARGA",
+  15: "CARGA_REGISTRADA",
+  16: "EM_ANALISE_ADUANEIRA",
+  17: "EM_EXIGENCIA",
+  18: "EM_DESEMBARACO",
+  19: "AGUARDANDO_LIBERACAO_TERMINAL",
+  20: "AGUARDANDO_RETIRADA",
+  21: "TRANSPORTE_NACIONAL",
+  22: "RECEBIDO",
+  23: "EM_CONFERENCIA",
+  24: "EM_ESTOQUE",
+  25: "CONCLUIDO",
 };
 
 // Opções do select de status: a sequência + Abandonado (encerramento manual).
@@ -191,7 +197,7 @@ export const PROCESS_STATUS_OPTIONS: ProcessStatus[] = [
   "ABANDONADO",
 ];
 
-// Etapa (1..24) de um status da sequência; null para Abandonado/Atrasado.
+// Etapa (1..25) de um status da sequência; null para Abandonado/Atrasado.
 export function stepOfStatus(status: string): number | null {
   const entry = Object.entries(STATUS_BY_STEP).find(([, st]) => st === status);
   return entry ? Number(entry[0]) : null;

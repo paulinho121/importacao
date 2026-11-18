@@ -58,6 +58,9 @@ export const processStatusEnum = pgEnum("process_status", [
   "CARGA_REGISTRADA",
   // Sequência de 24 etapas (nov/2026): novas etapas do processo.
   "AGUARDANDO_APROVACAO",
+  // Sequência de 25 etapas: "Confirmação de Chegada (ETA)" entra entre
+  // "Em Trânsito Internacional" e "Aguardando Presença de Carga".
+  "CONFIRMACAO_CHEGADA",
   "PEDIDO_CONFIRMADO",
   "AGUARDANDO_PRODUCAO",
   "PRODUCAO_CONCLUIDA",
@@ -307,6 +310,9 @@ export const processes = pgTable("processes", {
   // contagem de 48 h da presença de carga (lib/eta-delay.ts). Nulo = nunca mudou
   // depois da criação; o cálculo usa updated_at nesse caso.
   statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
+  // Quando o processo chegou em "Confirmação de Chegada (ETA)": início da contagem
+  // de 48 h para a presença de carga. Zera se o processo voltar para antes dela.
+  arrivalConfirmedAt: timestamp("arrival_confirmed_at", { withTimezone: true }),
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
   volumeM3: numeric("volume_m3", { precision: 10, scale: 2 }),
   // Dados de embarque vistos na planilha "Fluxo de Importação" do time —

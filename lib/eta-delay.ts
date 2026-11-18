@@ -1,17 +1,17 @@
 // Atraso automático pela ETA. "Atrasado" NÃO é uma etapa do processo: é um
 // indicador calculado na hora.
 //
-// Regra: o processo está atrasado quando a ETA (previsão de chegada) já passou
-// e a chegada ainda não foi confirmada. Ao chegar na etapa "Aguardando Presença
-// de Carga" (chegada confirmada) ou em qualquer uma depois dela, o alerta de ETA
-// se encerra e a ETA deixa de ser tratada como pendente.
+// Regra do ETA: o processo está atrasado quando a ETA (previsão de chegada) já passou
+// e a chegada ainda não foi confirmada. Ao chegar na etapa "Confirmação de Chegada
+// (ETA)" (ou em qualquer uma depois dela) o alerta de ETA se encerra e a previsão
+// deixa de ser tratada como pendente.
 //
-// A partir da confirmação de chegada começa uma nova contagem de 48 horas (data e
-// hora em que o status mudou). Se passar disso sem o processo ir para "Presença
-// de Carga", aparece o alerta de pendência de presença de carga.
+// Presença de carga: a partir da confirmação de chegada começa uma contagem de 48
+// horas (data e hora em que o processo entrou nessa etapa). Se passar disso sem o
+// processo chegar em "Presença de Carga", aparece o alerta de pendência.
 
-export const ARRIVAL_CONFIRMED_STEP = 12; // "Aguardando Presença de Carga" = chegada confirmada
-export const CARGO_PRESENT_STEP = 13; // "Presença de Carga"
+export const ARRIVAL_CONFIRMED_STEP = 12; // "Confirmação de Chegada (ETA)"
+export const CARGO_PRESENT_STEP = 14; // "Presença de Carga" (a 13 é "Aguardando Presença de Carga")
 export const PRESENCE_DEADLINE_HOURS = 48;
 const CLOSED = ["CONCLUIDO", "ABANDONADO"];
 
@@ -40,20 +40,22 @@ export const isArrivalConfirmed = (currentStep: number) => currentStep >= ARRIVA
 
 export const isCargoPresent = (currentStep: number) => currentStep >= CARGO_PRESENT_STEP;
 
-// Horas desde a confirmação de chegada, quando o processo continua em "Aguardando
-// Presença de Carga" há 48 h ou mais; senão null.
+// Horas desde a confirmação de chegada, quando o processo continua sem "Presença de
+// Carga" (etapas 12 e 13) há 48 h ou mais; senão null. Sem a data da confirmação
+// (processos antigos), usa a última mudança de status e, por fim, a última atualização.
 export function cargoPresencePendingHours(
   p: {
     status: string;
     currentStep: number;
+    arrivalConfirmedAt?: Date | string | null;
     statusChangedAt: Date | string | null;
     updatedAt: Date | string | null;
   },
   now = new Date(),
 ): number | null {
   if (CLOSED.includes(p.status)) return null;
-  if (p.currentStep !== ARRIVAL_CONFIRMED_STEP) return null;
-  const since = p.statusChangedAt ?? p.updatedAt;
+  if (p.currentStep < ARRIVAL_CONFIRMED_STEP || p.currentStep >= CARGO_PRESENT_STEP) return null;
+  const since = p.arrivalConfirmedAt ?? p.statusChangedAt ?? p.updatedAt;
   if (!since) return null;
   const hours = (now.getTime() - new Date(since).getTime()) / 3_600_000;
   return hours >= PRESENCE_DEADLINE_HOURS ? Math.floor(hours) : null;

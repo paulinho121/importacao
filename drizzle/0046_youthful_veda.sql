@@ -1,0 +1,2 @@
+ALTER TYPE "public"."process_status" ADD VALUE 'CONFIRMACAO_CHEGADA' BEFORE 'PEDIDO_CONFIRMADO';--> statement-breakpoint
+ALTER TABLE "processes" ADD COLUMN "arrival_confirmed_at" timestamp with time zone;
