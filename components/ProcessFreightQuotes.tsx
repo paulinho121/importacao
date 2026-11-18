@@ -1,7 +1,42 @@
 "use client";
 
 import { Fragment, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Building2,
+  CalendarClock,
+  Calculator,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  CircleDollarSign,
+  Clock,
+  Coins,
+  FileText,
+  Flag,
+  Handshake,
+  History as HistoryIcon,
+  Info,
+  Lightbulb,
+  Link2,
+  MapPin,
+  MousePointerClick,
+  Package,
+  Plane,
+  PlaneLanding,
+  PlaneTakeoff,
+  Plus,
+  Printer,
+  Receipt,
+  RefreshCw,
+  Ruler,
+  Scale,
+  Ship,
+  StickyNote,
+  Timer,
+  TrendingUp,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   saveFreightQuote,
@@ -346,9 +381,9 @@ let seq = 0;
 const cellInput =
   "w-full bg-transparent border border-transparent hover:border-outline-variant/60 hover:bg-surface-container-low rounded-md px-2 py-1 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:bg-surface-container-low focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all disabled:opacity-80";
 const moneyInput = `${cellInput} font-mono-data text-right`;
-const dataCell = "py-1.5 px-2 align-middle border-t border-l border-outline-variant/20";
+const dataCell = "py-1.5 px-2 align-middle border-t border-l border-outline-variant/40";
 const keyCell =
-  "sticky left-0 z-10 bg-surface-container-lowest px-3 py-1.5 text-left align-middle text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant whitespace-nowrap border-t border-outline-variant/20";
+  "sticky left-0 z-10 bg-surface-container-lowest px-3 py-1.5 text-left align-middle text-[11px] font-bold uppercase tracking-wider text-on-surface whitespace-nowrap border-t border-outline-variant/40";
 const CURRENCIES = ["USD", "BRL", "EUR", "CNY", "GBP", "JPY", "OTHER"];
 // Blocos coloridos à esquerda, como na planilha do time.
 type SecKey = "GERAIS" | "ROTA" | "CARGA" | "TAXAS" | "TOTAL" | "EXTRAS";
@@ -362,7 +397,7 @@ const SEC: Record<SecKey, string> = {
 };
 
 // Larguras fixas: a tabela não estica quando há poucas cotações (campos ficam juntos do rótulo).
-const KEY_W = 150;
+const KEY_W = 184;
 const LABEL_W = KEY_W;
 const COL_W = 112 + 66 + 106;
 const SPAN = 3; // subcolunas por cotação: nome | moeda | custos
@@ -653,24 +688,29 @@ export default function ProcessFreightQuotes({
       );
     });
 
-  // Faixa de título de um grupo de linhas.
-  const titleRow = (sec: SecKey, title: string) => (
+  // Faixa de título de um grupo de linhas: pílula colorida à esquerda e fundo suave no resto.
+  const titleRow = (sec: SecKey, title: string, Icon?: LucideIcon) => (
     <tr>
-      <th
-        colSpan={1 + nCols * SPAN}
-        className="sticky left-0 border-t border-outline-variant/40 bg-surface-container-low px-3 py-1.5 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-on-surface-variant"
-      >
-        <span className="mr-2 inline-block h-2 w-2 rounded-full align-middle" style={{ background: SEC[sec] }} />
-        {title}
+      <th className="sticky left-0 z-10 border-t border-outline-variant/40 bg-surface-container-lowest px-2 py-2 text-left">
+        <span
+          className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-on-surface"
+          style={{ background: `${SEC[sec]}26` }}
+        >
+          {Icon ? <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: SEC[sec] }} aria-hidden /> : (
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: SEC[sec] }} />
+          )}
+          {title}
+        </span>
       </th>
+      <td colSpan={nCols * SPAN} className="border-t border-outline-variant/40 bg-surface-container-low/70 py-3" />
     </tr>
   );
   // Seção recolhível: título com seta e, fechada, um resumo curto de cada cotação.
-  const bandRow = (sec: SecKey, title: string, key: OpenKey, summary: (c: Col) => ReactNode) => (
+  const bandRow = (sec: SecKey, title: string, key: OpenKey, summary: (c: Col) => ReactNode, icon?: LucideIcon) => (
     <tr>
-      <Lead sec={sec} label={<GroupToggle label={title} open={open[key]} onClick={() => toggle(key)} />} />
+      <Lead sec={sec} label={<GroupToggle label={title} open={open[key]} onClick={() => toggle(key)} icon={icon} />} />
       {cols.map((c) => (
-        <td key={c.key} colSpan={SPAN} className={`${dataCell} text-[11px] text-on-surface-variant`}>
+        <td key={c.key} colSpan={SPAN} className={`${dataCell} text-center text-[11px] text-on-surface-variant`}>
           {open[key] ? null : summary(c)}
         </td>
       ))}
@@ -681,71 +721,104 @@ export default function ProcessFreightQuotes({
     const d = c.draft;
     const modal = MODALIDADES.find((m) => m.value === d.modalidade)?.label;
     const parts = [modal, d.containerType, d.incoterm.split(" - ")[0]].filter(Boolean);
-    return parts.length > 0 ? <span className="font-semibold text-on-surface">{parts.join(" · ")}</span> : "—";
+    return parts.length > 0 ? (
+      <span className="text-xs font-bold text-on-surface">{parts.join(" • ")}</span>
+    ) : (
+      "—"
+    );
   };
   const rota = (c: Col) => {
     const d = c.draft;
+    const color = COLORS[c.colorIdx % COLORS.length];
     const route = [d.origin, d.destination].filter(Boolean).join(" → ");
     const transit = d.transitDays
       ? d.transitDaysMax && d.transitDaysMax !== d.transitDays
-        ? `${d.transitDays}–${d.transitDaysMax} dias`
+        ? `${d.transitDays}-${d.transitDaysMax} dias`
         : `${d.transitDays} dias`
       : "";
     const dates = [d.etdEstimated && `ETD ${fmtBR(d.etdEstimated)}`, d.etaEstimated && `ETA ${fmtBR(d.etaEstimated)}`]
       .filter(Boolean)
-      .join(" · ");
+      .join(" • ");
     const expired = d.validUntil && d.validUntil < today;
-    const head = [route, transit].filter(Boolean).join(" · ");
+    const head = [route, transit].filter(Boolean).join(" • ");
     if (!head && !dates && !expired) return "—";
+    const ModalIcon = d.modalidade === "MARITIMO" ? Ship : d.modalidade === "TERRESTRE" ? Truck : d.modalidade === "AEREO" ? Plane : MapPin;
     return (
-      <div className="space-y-0.5 leading-snug">
-        {head && <p className="font-semibold text-on-surface">{head}</p>}
-        {dates && <p>{dates}</p>}
-        {expired && <p className="font-bold text-error">Proposta vencida</p>}
+      <div className="flex flex-col items-center gap-1.5">
+        {head && (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold text-on-surface"
+            style={{ background: `${color}2e` }}
+          >
+            <ModalIcon className="h-3.5 w-3.5" style={{ color }} aria-hidden />
+            {head}
+          </span>
+        )}
+        {dates && <span className="text-[11px] font-medium text-on-surface-variant">{dates}</span>}
+        {expired && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-error-container px-3 py-1 text-[11px] font-bold text-on-error-container">
+            <Clock className="h-3.5 w-3.5" aria-hidden />
+            Proposta vencida
+          </span>
+        )}
       </div>
     );
   };
 
   return (
-    <section className="min-w-0 max-w-full bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-stack-md">
-        <div>
-          <h3 className="font-headline-sm text-headline-sm text-primary">Cotações de Frete</h3>
-          <p className="text-xs text-on-surface-variant">
-            Uma coluna por agente de carga, como na planilha. Preencha, e clique em Salvar na coluna. Ao escolher uma
-            cotação, o agente e o frete (+ taxas de origem) vão para o processo.
-          </p>
+    <section className="min-w-0 max-w-full bg-surface-container-lowest border border-outline-variant p-gutter rounded-2xl shadow-sm">
+      <div className="mb-stack-md flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-secondary/15 text-secondary">
+            <TrendingUp className="h-7 w-7" aria-hidden />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-headline-sm text-headline-sm text-primary">Cotações de Frete</h3>
+            <p className="text-sm text-on-surface-variant">
+              Compare e escolha a melhor cotação de frete para sua carga, com visão clara de cada opção.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {nCols > 0 && (
+                <a
+                  href={`/processos/${processId}/cotacoes/imprimir`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-2 font-label-md text-label-md text-primary shadow-sm transition-all hover:bg-surface-container-high"
+                  title="Abre o relatório para imprimir ou salvar em PDF (as cotações precisam estar salvas)"
+                >
+                  <Printer className="h-4 w-4" aria-hidden />
+                  Imprimir cotações
+                </a>
+              )}
+              {nCols > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setOpen({ gerais: !allOpen, rota: !allOpen, origin: !allOpen, destination: !allOpen })}
+                  className="inline-flex items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-2 font-label-md text-label-md text-primary shadow-sm transition-all hover:bg-surface-container-high"
+                >
+                  <ChevronsIcon open={allOpen} />
+                  {allOpen ? "Recolher detalhes" : "Expandir detalhes"}
+                </button>
+              )}
+              {!closed && (
+                <button
+                  type="button"
+                  onClick={addColumn}
+                  className="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2 font-label-md text-label-md text-white shadow-sm transition-all hover:opacity-90"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  Adicionar cotação
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {nCols > 0 && (
-            <a
-              href={`/processos/${processId}/cotacoes/imprimir`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
-              title="Abre o relatório para imprimir ou salvar em PDF (as cotações precisam estar salvas)"
-            >
-              Imprimir cotações
-            </a>
-          )}
-        {nCols > 0 && (
-          <button
-            type="button"
-            onClick={() => setOpen({ gerais: !allOpen, rota: !allOpen, origin: !allOpen, destination: !allOpen })}
-            className="px-4 py-2 rounded-lg border border-outline text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all"
-          >
-            {allOpen ? "Recolher detalhes" : "Expandir detalhes"}
-          </button>
-        )}
-        {!closed && (
-          <button
-            type="button"
-            onClick={addColumn}
-            className="px-4 py-2 rounded-lg bg-secondary text-white font-label-md text-label-md hover:opacity-90 transition-all"
-          >
-            + Adicionar cotação
-          </button>
-        )}
+        <div className="hidden max-w-xs items-start gap-3 rounded-2xl bg-secondary/10 p-3 text-xs text-on-surface-variant lg:flex">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
+          <p>
+            <span className="block font-bold text-on-surface">Dica</span>
+            Ao escolher uma cotação, o agente e o frete (+ taxas de origem) vão para o processo.
+          </p>
         </div>
       </div>
 
@@ -763,40 +836,50 @@ export default function ProcessFreightQuotes({
             ))}
           </div>
 
-          <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-surface-container-low px-3 py-2">
-            <label className="text-xs text-on-surface-variant">
-              <span className="block mb-0.5">
-                Dólar do dia — R$ por {foreign} (para somar em reais)
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-outline-variant/60 bg-surface-container-low px-4 py-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary/15 text-secondary">
+              <Coins className="h-5 w-5" aria-hidden />
+            </div>
+            <label className="flex flex-wrap items-center gap-3 text-xs font-semibold text-on-surface">
+              <span>
+                Dólar do dia — R$ por {foreign}
+                <span className="block font-normal text-on-surface-variant">(para fechar em reais)</span>
               </span>
-              <input
-                type="number"
-                step="any"
-                min="0"
-                value={rateText}
-                onChange={(e) => {
-                  setRateText(e.target.value);
-                  setRateNote(null);
-                }}
-                placeholder="Ex: 5,48"
-                className={`${moneyInput} w-32`}
-              />
+              <span className="flex items-center gap-1.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-1.5 shadow-sm">
+                <span className="text-sm font-bold text-on-surface-variant">R$</span>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={rateText}
+                  onChange={(e) => {
+                    setRateText(e.target.value);
+                    setRateNote(null);
+                  }}
+                  placeholder="5,48"
+                  aria-label={`Dólar do dia — R$ por ${foreign}`}
+                  className="w-20 bg-transparent font-mono-data text-base font-bold text-on-surface focus:outline-none"
+                />
+              </span>
             </label>
             <button
               type="button"
               onClick={loadRate}
               disabled={rateLoading}
-              className="px-3 py-1.5 rounded-lg border border-outline text-primary text-xs font-bold hover:bg-surface-container-high disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-2 text-xs font-bold text-primary shadow-sm transition-all hover:bg-surface-container-high disabled:opacity-50"
             >
+              <RefreshCw className={`h-4 w-4 ${rateLoading ? "animate-spin" : ""}`} aria-hidden />
               {rateLoading ? "Buscando…" : `Buscar ${foreign} do dia`}
             </button>
-            <span className="text-[11px] text-on-surface-variant">
+            <span className="flex min-w-0 flex-1 basis-60 items-start gap-2 border-outline-variant/60 text-[11px] text-on-surface-variant lg:border-l lg:pl-4">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
               {rateNote ?? "Usado só para comparar as cotações; não altera o câmbio do processo."}
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table
-              className="table-fixed border-collapse text-body-sm font-body-sm"
+              className="table-fixed border-separate border-spacing-0 text-body-sm font-body-sm"
               style={{ width: LABEL_W + nCols * COL_W }}
             >
               <colgroup>
@@ -804,8 +887,8 @@ export default function ProcessFreightQuotes({
                 {cols.map((c) => {
                   // sombreado da coluna inteira na cor da empresa; cotação FECHADA fica verde
                   const tint = isFechada(c)
-                    ? "#22c55e1c"
-                    : `${COLORS[c.colorIdx % COLORS.length]}${c.colorIdx % 2 ? "14" : "0d"}`;
+                    ? "#22c55e26"
+                    : `${COLORS[c.colorIdx % COLORS.length]}${c.colorIdx % 2 ? "1c" : "14"}`;
                   return (
                     <Fragment key={c.key}>
                       <col style={{ width: 112, background: tint }} />
@@ -825,7 +908,7 @@ export default function ProcessFreightQuotes({
                     <td
                       key={c.key}
                       colSpan={SPAN}
-                      className="p-0 border-l border-outline-variant/40"
+                      className="rounded-t-xl border-l-2 border-surface-container-lowest p-0"
                       style={{
                         background: COLORS[c.colorIdx % COLORS.length],
                         boxShadow: isFechada(c) ? "inset 0 0 0 3px #22c55e" : undefined,
@@ -839,7 +922,7 @@ export default function ProcessFreightQuotes({
                           disabled={closed}
                           onChange={(e) => patch(c.key, { agentId: e.target.value })}
                           aria-label="Agente de carga"
-                          className="w-full bg-transparent text-white font-bold text-xs uppercase focus:outline-none cursor-pointer"
+                          className="w-full cursor-pointer appearance-none bg-transparent pr-6 text-sm font-extrabold uppercase text-white focus:outline-none"
                         >
                           <option value="" className="text-black">
                             Nome — selecione o agente
@@ -850,6 +933,7 @@ export default function ProcessFreightQuotes({
                             </option>
                           ))}
                         </select>
+                        <ChevronDown className="pointer-events-none -ml-6 h-4 w-4 shrink-0 text-white/90" aria-hidden />
                         {isFechada(c) && (
                           <span className="shrink-0 rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
                             FECHADA
@@ -866,29 +950,35 @@ export default function ProcessFreightQuotes({
                 </tr>
 
                 {/* IDENTIFICAÇÃO */}
-                {titleRow("GERAIS", "Identificação")}
+                {titleRow("GERAIS", "Identificação", CheckCircle2)}
                 <tr>
                   <Lead sec="GERAIS" label="Situação" desc="Situação da proposta" />
                   {cols.map((c) => {
-                    const st = QUOTE_STATUSES.find((s) => s.value === c.draft.status) ?? QUOTE_STATUSES[0];
+                    const st = QUOTE_STATUSES.find((x) => x.value === c.draft.status) ?? QUOTE_STATUSES[0];
+                    const tone = c.draft.status === "FECHADO" ? "#16a34a" : st.color;
                     return (
                       <td key={c.key} colSpan={SPAN} className={dataCell}>
-                        <select
-                          form={F(c)}
-                          name="status"
-                          value={c.draft.status}
-                          disabled={closed}
-                          onChange={(e) => patch(c.key, { status: e.target.value })}
-                          aria-label="Situação da cotação"
-                          className={`w-full rounded-full px-3 py-1 text-[11px] font-bold tracking-wider text-center uppercase appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 ${c.draft.status === "FECHADO" ? "text-black" : "text-white"}`}
-                          style={{ background: c.draft.status === "FECHADO" ? "#4ade80" : st.color }}
+                        <div
+                          className="flex items-center justify-center gap-2 rounded-xl border px-3 py-1.5"
+                          style={{ background: `${tone}26`, borderColor: `${tone}66` }}
                         >
-                          {QUOTE_STATUSES.map((s) => (
-                            <option key={s.value} value={s.value} className="text-black">
-                              {s.label}
-                            </option>
-                          ))}
-                        </select>
+                          <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: tone }} aria-hidden />
+                          <select
+                            form={F(c)}
+                            name="status"
+                            value={c.draft.status}
+                            disabled={closed}
+                            onChange={(e) => patch(c.key, { status: e.target.value })}
+                            aria-label="Situação da cotação"
+                            className="min-w-0 cursor-pointer appearance-none bg-transparent text-center text-xs font-extrabold uppercase tracking-wider text-on-surface focus:outline-none"
+                          >
+                            {QUOTE_STATUSES.map((x) => (
+                              <option key={x.value} value={x.value} className="text-black">
+                                {x.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </td>
                     );
                   })}
@@ -898,10 +988,10 @@ export default function ProcessFreightQuotes({
                   {fullCells((c) => (
                     <input form={F(c)} name="proposal" value={c.draft.proposal} disabled={closed}
                       onChange={(e) => patch(c.key, { proposal: e.target.value })}
-                      placeholder="Nº da proposta" className={cellInput} />
+                      placeholder="Nº da proposta" className={`${cellInput} text-center text-sm font-bold`} />
                   ))}
                 </tr>
-                {bandRow("GERAIS", "Embarque", "gerais", gerais)}
+                {bandRow("GERAIS", "Embarque", "gerais", gerais, Package)}
                 <tr hidden={!open.gerais}>
                   <Lead sec="GERAIS" label="Modal" desc="Modal de transporte" />
                   {fullCells((c) => (
@@ -955,7 +1045,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {bandRow("ROTA", "Rota e prazos", "rota", rota)}
+                {bandRow("ROTA", "Rota e prazos", "rota", rota, MapPin)}
                 <tr hidden={!open.rota}>
                   <Lead sec="ROTA" label="Trânsito" desc="Dias de trânsito" />
                   {fullCells((c) => (
@@ -1025,7 +1115,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {titleRow("CARGA", "Carga e frete")}
+                {titleRow("CARGA", "Carga e frete", Package)}
                 <tr>
                   <Lead sec="CARGA" label="Carga (kg)" desc="Peso bruto total" />
                   {fullCells((c) => (
@@ -1072,10 +1162,10 @@ export default function ProcessFreightQuotes({
                   })}
                 </tr>
 
-                {titleRow("TAXAS", "Taxas e despesas")}
+                {titleRow("TAXAS", "Taxas e despesas", Receipt)}
                 <tr>
                   <Lead sec="TAXAS"
-                    label={<GroupToggle label="TX origem" open={open.origin} onClick={() => toggle("origin")} />}
+                    label={<GroupToggle label="TX origem" open={open.origin} onClick={() => toggle("origin")} icon={Receipt} />}
                     desc="Taxa de origem" />
                   {summaryCells("ORIGEM")}
                 </tr>
@@ -1093,7 +1183,7 @@ export default function ProcessFreightQuotes({
                 )}
 
                 <tr>
-                  <Lead sec="TAXAS" label={<GroupToggle label="TX destino" open={open.destination} onClick={() => toggle("destination")} />}
+                  <Lead sec="TAXAS" label={<GroupToggle label="TX destino" open={open.destination} onClick={() => toggle("destination")} icon={Receipt} />}
                     desc="Taxa de destino" />
                   {summaryCells("DESTINO")}
                 </tr>
@@ -1149,7 +1239,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {titleRow("TOTAL", "Totais")}
+                {titleRow("TOTAL", "Totais", Calculator)}
                 <tr>
                   <Lead sec="TOTAL" label={`Total ${foreign}`} desc={`Total em ${foreign === "USD" ? "dólares" : foreign}`} />
                   {cols.map((c, i) => (
@@ -1206,7 +1296,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {titleRow("EXTRAS", "Observações e documentos")}
+                {titleRow("EXTRAS", "Observações e documentos", FileText)}
                 <tr>
                   <Lead sec="EXTRAS" label="Observação" desc="Ajuste / ressalva" />
                   {fullCells((c) => (
@@ -1453,6 +1543,48 @@ export default function ProcessFreightQuotes({
 
 // ---------------------------------------------------------------- auxiliares
 
+function ChevronsIcon({ open }: { open: boolean }) {
+  const Icon = open ? ChevronDown : ChevronRight;
+  return <Icon className="h-4 w-4" aria-hidden />;
+}
+
+// Ícone de cada rótulo da coluna da esquerda.
+const LABEL_ICONS: Record<string, LucideIcon> = {
+  "Situação": CheckCircle2,
+  "Proposta": Handshake,
+  "Modal": Plane,
+  "Tipo": Package,
+  "Incoterm": Flag,
+  "Trânsito": Timer,
+  "ETD": PlaneTakeoff,
+  "ETA": PlaneLanding,
+  "Origem": MapPin,
+  "Destino": Flag,
+  "Cia": Building2,
+  "Validade": CalendarClock,
+  "Carga (kg)": Package,
+  "Frete": Truck,
+  "Carga x Frete": Scale,
+  "DTA": FileText,
+  "Outros": Plus,
+  "Total em moeda": Coins,
+  "Total BRL": CircleDollarSign,
+  "Observação": StickyNote,
+  "Link (Drive)": Link2,
+  "Rota": MapPin,
+  "Data": CalendarClock,
+  "Frequência": Timer,
+  "Mercadoria": Package,
+  "Volumes": Package,
+  "Volume (m³)": Ruler,
+  "Dimensões": Ruler,
+  "Valor da carga": CircleDollarSign,
+  "Coleta": MapPin,
+  "Arquivo": FileText,
+  "Histórico": HistoryIcon,
+  "Ações": MousePointerClick,
+};
+
 // Célula de rótulo à esquerda de cada linha, com uma barra fina na cor da seção.
 // `desc` vira dica ao passar o mouse.
 function Lead({
@@ -1464,19 +1596,37 @@ function Lead({
   label: ReactNode;
   desc?: ReactNode;
 }) {
+  const Icon = typeof label === "string" ? (label.startsWith("Total ") && !LABEL_ICONS[label] ? Calculator : LABEL_ICONS[label]) : undefined;
   return (
     <th
       className={keyCell}
       style={{ boxShadow: `inset 3px 0 0 ${SEC[sec]}` }}
       title={typeof desc === "string" ? desc : undefined}
     >
-      {label}
+      {Icon ? (
+        <span className="flex items-center gap-2">
+          <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: SEC[sec] }} aria-hidden />
+          {label}
+        </span>
+      ) : (
+        label
+      )}
     </th>
   );
 }
 
 // Rótulo de um grupo de taxas, com seta para abrir/fechar o detalhe por nome.
-function GroupToggle({ label, open, onClick }: { label: string; open: boolean; onClick: () => void }) {
+function GroupToggle({
+  label,
+  open,
+  onClick,
+  icon: LeadIcon,
+}: {
+  label: string;
+  open: boolean;
+  onClick: () => void;
+  icon?: LucideIcon;
+}) {
   const Icon = open ? ChevronDown : ChevronRight;
   return (
     <button
@@ -1487,6 +1637,7 @@ function GroupToggle({ label, open, onClick }: { label: string; open: boolean; o
       className="flex w-full items-center gap-1 text-left uppercase hover:text-secondary"
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      {LeadIcon && <LeadIcon className="h-3.5 w-3.5 shrink-0 text-secondary" aria-hidden />}
       {label}
     </button>
   );
