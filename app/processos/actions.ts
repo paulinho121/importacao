@@ -374,6 +374,37 @@ export async function removeProcessFollowUp(eventId: string, processId: string) 
   redirect(withFlash(`/processos/${processId}`, "Andamento removido."));
 }
 
+// Edita um andamento manual (data e texto). Eventos automáticos (ex.: "Processo
+// criado") não podem ser editados. Retorna o resultado em vez de redirecionar
+// para a linha poder sair do modo de edição sem recarregar a página.
+export async function updateProcessFollowUp(
+  eventId: string,
+  processId: string,
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const text = optionalText(formData, "text");
+  if (!text) return { ok: false, error: "Descreva o andamento antes de salvar." };
+  const date = optionalDate(formData, "date");
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: "Informe uma data válida." };
+
+  const [ev] = await db
+    .select({ origin: processEvents.origin })
+    .from(processEvents)
+    .where(and(eq(processEvents.id, eventId), eq(processEvents.processId, processId)));
+  if (!ev) return { ok: false, error: "Andamento não encontrado." };
+  if (!ev.origin?.startsWith("Manual")) {
+    return { ok: false, error: "Só é possível editar andamentos registrados manualmente." };
+  }
+
+  await db
+    .update(processEvents)
+    .set({ eventType: text.slice(0, 500), eventDate: new Date(`${date}T12:00:00Z`) })
+    .where(eq(processEvents.id, eventId));
+
+  revalidatePath(`/processos/${processId}`);
+  return { ok: true };
+}
+
 export async function updateProcessInvoiceValue(
   invoiceId: string,
   processId: string,

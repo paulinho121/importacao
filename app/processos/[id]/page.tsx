@@ -10,6 +10,7 @@ import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import AbandonProcessButton from "@/components/AbandonProcessButton";
 import ProcessShipmentInfo from "@/components/ProcessShipmentInfo";
 import ProcessFollowUpForm from "@/components/ProcessFollowUpForm";
+import FollowUpRow from "@/components/FollowUpRow";
 import ProcessEditDetails from "@/components/ProcessEditDetails";
 // Confirmação "Excluir o item … não pode ser desfeita" — genérico, serve também
 // pro item do processo apesar do nome.
@@ -60,7 +61,6 @@ import {
   advanceProcessStep,
   updateProcessNumber,
   abandonProcess,
-  removeProcessFollowUp,
   addProcessItem,
   addProcessInvoice,
   updateProcessInvoiceLink,
@@ -956,30 +956,21 @@ export default async function ProcessDetailPage({
                   {events.map((ev) => {
                     const isManual = ev.origin?.startsWith("Manual") ?? false;
                     return (
-                      <tr key={ev.id} className="hover:bg-surface-container-high transition-colors">
-                        <td className="px-6 py-3 font-mono-data whitespace-nowrap">
-                          {isManual
+                      <FollowUpRow
+                        key={ev.id}
+                        id={ev.id}
+                        processId={id}
+                        isManual={isManual}
+                        dateLabel={
+                          isManual
                             ? new Date(ev.eventDate).toLocaleDateString("pt-BR", { timeZone: "UTC" })
-                            : new Date(ev.eventDate).toLocaleString("pt-BR")}
-                        </td>
-                        <td className="px-6 py-3 font-medium">{ev.eventType}</td>
-                        <td className="px-6 py-3">{ev.origin ?? "—"}</td>
-                        <td className="px-6 py-3">
-                          {ev.statusAtEvent ? STATUS_LABEL[ev.statusAtEvent as ProcessStatus] : "—"}
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          {isManual && (
-                            <form action={removeProcessFollowUp.bind(null, ev.id, id)}>
-                              <SubmitButton
-                                className="text-error hover:underline text-xs"
-                                aria-label="Remover andamento"
-                              >
-                                Remover
-                              </SubmitButton>
-                            </form>
-                          )}
-                        </td>
-                      </tr>
+                            : new Date(ev.eventDate).toLocaleString("pt-BR")
+                        }
+                        dateValue={isManual ? new Date(ev.eventDate).toISOString().slice(0, 10) : ""}
+                        text={ev.eventType}
+                        origin={ev.origin ?? "—"}
+                        statusLabel={ev.statusAtEvent ? STATUS_LABEL[ev.statusAtEvent as ProcessStatus] : "—"}
+                      />
                     );
                   })}
                 </tbody>
