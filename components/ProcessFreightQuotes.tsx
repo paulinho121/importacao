@@ -347,8 +347,6 @@ const moneyInput = `${cellInput} font-mono-data text-right`;
 const dataCell = "py-1 px-1.5 align-middle border-t border-l border-outline-variant/40";
 const keyCell =
   "sticky z-10 bg-surface-container-lowest px-2 py-1 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface whitespace-nowrap border-t border-outline-variant/40";
-const descCell =
-  "overflow-hidden text-ellipsis whitespace-nowrap px-2 py-1 align-middle text-[11px] text-on-surface-variant border-t border-outline-variant/40";
 const CURRENCIES = ["USD", "BRL", "EUR", "CNY", "GBP", "JPY", "OTHER"];
 // Blocos coloridos à esquerda, como na planilha do time.
 type SecKey = "GERAIS" | "ROTA" | "CARGA" | "TAXAS" | "TOTAL" | "EXTRAS";
@@ -363,9 +361,8 @@ const SEC: Record<SecKey, string> = {
 
 // Larguras fixas: a tabela não estica quando há poucas cotações (campos ficam juntos do rótulo).
 const BLOCK_W = 88;
-const KEY_W = 128;
-const DESC_W = 150;
-const LABEL_W = BLOCK_W + KEY_W + DESC_W;
+const KEY_W = 140;
+const LABEL_W = BLOCK_W + KEY_W;
 const COL_W = 112 + 66 + 106;
 const SPAN = 3; // subcolunas por cotação: nome | moeda | custos
 
@@ -742,7 +739,6 @@ export default function ProcessFreightQuotes({
               <colgroup>
                 <col style={{ width: BLOCK_W }} />
                 <col style={{ width: KEY_W }} />
-                <col style={{ width: DESC_W }} />
                 {cols.map((c) => {
                   // sombreado da coluna inteira na cor da empresa; cotação FECHADA fica verde
                   const tint = isFechada(c)
@@ -761,7 +757,7 @@ export default function ProcessFreightQuotes({
                 {/* EMPRESAS (cabeçalho colorido) */}
                 <tr>
                   <th
-                    colSpan={3}
+                    colSpan={2}
                     className="sticky left-0 z-10 bg-surface-container-lowest px-2 py-2 text-left align-middle text-[11px] font-extrabold uppercase tracking-wide text-on-surface"
                   >
                     Agente de cargas
@@ -1424,12 +1420,9 @@ function Lead({
           {name}
         </th>
       )}
-      <th className={keyCell} style={{ left: BLOCK_W, ...band }}>
+      <th className={keyCell} style={{ left: BLOCK_W, ...band }} title={typeof desc === "string" ? desc : undefined}>
         {label}
       </th>
-      <td className={descCell} style={band} title={typeof desc === "string" ? desc : undefined}>
-        {desc}
-      </td>
     </>
   );
 }
