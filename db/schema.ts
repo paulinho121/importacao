@@ -303,6 +303,10 @@ export const processes = pgTable("processes", {
   destinationBranch: text("destination_branch"),
   status: processStatusEnum("status").notNull().default("AGUARDANDO_EMBARQUE"),
   currentStep: integer("current_step").notNull().default(1),
+  // Quando o status mudou pela última vez (follow-up ou "Avançar etapa"): base da
+  // contagem de 48 h da presença de carga (lib/eta-delay.ts). Nulo = nunca mudou
+  // depois da criação; o cálculo usa updated_at nesse caso.
+  statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
   weightKg: numeric("weight_kg", { precision: 10, scale: 2 }),
   volumeM3: numeric("volume_m3", { precision: 10, scale: 2 }),
   // Dados de embarque vistos na planilha "Fluxo de Importação" do time —

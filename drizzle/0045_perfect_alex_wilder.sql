@@ -1,0 +1,1 @@
+ALTER TABLE "processes" ADD COLUMN "status_changed_at" timestamp with time zone;

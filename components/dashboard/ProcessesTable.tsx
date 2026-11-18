@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ExternalLink, Filter } from "lucide-react";
 import { ModalBadge } from "@/components/shared/ModalBadge";
-import { StatusBadge, LateBadge } from "@/components/shared/StatusBadge";
+import { StatusBadge, LateBadge, PresenceBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import SupplierLogo from "@/components/SupplierLogo";
 import { Button } from "@/components/ui/button";
@@ -185,7 +185,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /></span>
+                      <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
@@ -213,7 +213,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                     <span className="font-mono text-sm font-bold text-on-surface">
                       {r.processNumber}
                     </span>
-                    <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /></span>
+                    <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
                   </div>
 
                   <div className="mt-3 flex items-center gap-3">

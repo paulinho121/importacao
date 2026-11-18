@@ -11,8 +11,8 @@ import { processes, suppliers, processItems, processInvoices, processDocuments, 
 import ProcessSuppliersCell from "@/components/ProcessSuppliersCell";
 import { getSuppliersByProcess } from "@/lib/process-purchase-orders";
 import { and, desc, eq, ilike, inArray, notInArray, or, sql } from "drizzle-orm";
-import { LATE_BY_ETA_SQL, etaLateDays, isCargoPresent } from "@/lib/eta-delay";
-import { LateBadge } from "@/components/shared/StatusBadge";
+import { LATE_BY_ETA_SQL, cargoPresencePendingHours, etaLateDays, isArrivalConfirmed } from "@/lib/eta-delay";
+import { LateBadge, PresenceBadge } from "@/components/shared/StatusBadge";
 import {
   STATUS_BADGE_CLASS,
   STATUS_ICON,
@@ -136,6 +136,8 @@ export default async function ProcessosPage({
       destinationState: processes.destinationState,
       destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
+      statusChangedAt: processes.statusChangedAt,
+      updatedAt: processes.updatedAt,
       agentName: freightAgents.name,
       externalReference: processes.externalReference,
       supplierName: suppliers.name,
@@ -273,6 +275,7 @@ export default async function ProcessosPage({
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <StatusBadge status={p.status as ProcessStatus} />
                       <LateBadge days={etaLateDays(p)} />
+                      <PresenceBadge hours={cargoPresencePendingHours(p)} />
                     </div>
                   </div>
 
@@ -288,7 +291,7 @@ export default async function ProcessosPage({
                       <span className="text-muted-foreground block">ETA Prevista:</span>
                       <span className="font-mono font-medium text-foreground">
                         {formatDate(p.etaEstimated)}
-                        {dias !== null && !isCargoPresent(p.currentStep) && (
+                        {dias !== null && !isArrivalConfirmed(p.currentStep) && (
                           <span
                             className={`ml-1 text-[11px] ${
                               dias < 0 ? "font-bold text-destructive" : dias <= 7 ? "font-bold text-warning" : "text-muted-foreground"
@@ -414,7 +417,7 @@ export default async function ProcessosPage({
                           </TableCell>
                           <TableCell className="font-mono text-sm text-center">
                             {(() => {
-                              if (isCargoPresent(p.currentStep)) return <span className="text-muted-foreground">—</span>;
+                              if (isArrivalConfirmed(p.currentStep)) return <span className="text-muted-foreground">—</span>;
                               const dias = diasRestantes(p.etaEstimated);
                               if (dias === null) return <span className="text-muted-foreground">—</span>;
                               return <span className={dias < 0 ? "font-bold text-destructive" : dias <= 7 ? "font-bold text-warning" : ""}>{dias}</span>;
@@ -434,6 +437,7 @@ export default async function ProcessosPage({
                             <div className="flex flex-wrap items-center gap-1.5">
                               <StatusBadge status={p.status as ProcessStatus} />
                               <LateBadge days={etaLateDays(p)} />
+                              <PresenceBadge hours={cargoPresencePendingHours(p)} />
                             </div>
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
@@ -509,6 +513,7 @@ export default async function ProcessosPage({
                   {STATUS_LABEL[p.status as ProcessStatus]}
                 </span>
                 <LateBadge days={etaLateDays(p)} className="ml-1" />
+                <PresenceBadge hours={cargoPresencePendingHours(p)} className="ml-1" />
               </div>
               <div className="grid grid-cols-2 gap-4 my-2">
                 <div>

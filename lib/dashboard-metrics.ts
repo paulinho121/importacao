@@ -24,7 +24,7 @@ import {
 import type { KpiTrend } from "@/components/dashboard/KpiCard";
 import type { AlertLevel } from "@/components/shared/PriorityBadge";
 import { calcValorAduaneiro } from "@/lib/landed-cost";
-import { etaLateDays, isCargoPresent } from "@/lib/eta-delay";
+import { cargoPresencePendingHours, etaLateDays, isArrivalConfirmed } from "@/lib/eta-delay";
 
 const DAY_MS = 86_400_000;
 // Exportado pra /processos?docsPendentes=1 usar o mesmo limiar do card
@@ -76,6 +76,8 @@ export async function getDashboardMetrics() {
         status: processes.status,
         modal: processes.modal,
         currentStep: processes.currentStep,
+        statusChangedAt: processes.statusChangedAt,
+        updatedAt: processes.updatedAt,
         etd: processes.etd,
         etaEstimated: processes.etaEstimated,
         destination: processes.destination,
@@ -279,7 +281,7 @@ export async function getDashboardMetrics() {
       const dias = diasRestantes(p.etaEstimated);
       const isAtrasado = etaLateDays(p) !== null;
       // chegada próxima só importa enquanto a presença de carga não foi confirmada
-      const isUrgente = dias !== null && dias <= 3 && !isCargoPresent(p.currentStep);
+      const isUrgente = dias !== null && dias <= 3 && !isArrivalConfirmed(p.currentStep);
       return { p, dias, isAtrasado, isUrgente };
     })
     .filter((a) => a.isAtrasado || a.isUrgente)
@@ -411,6 +413,7 @@ export async function getDashboardMetrics() {
         : (p.destination ?? "—"),
       etaEstimated: p.etaEstimated,
       lateDays: etaLateDays(p),
+      presenceHours: cargoPresencePendingHours(p),
       status: p.status,
       agentName: p.agentName,
       // FOB = soma das invoices (na moeda do processo); null enquanto nenhuma invoice tem valor.

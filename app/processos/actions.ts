@@ -330,7 +330,12 @@ export async function addProcessFollowUp(processId: string, formData: FormData) 
     const step = stepOfStatus(chosen);
     await db
       .update(processes)
-      .set({ status: chosen, ...(step ? { currentStep: step } : {}), updatedAt: new Date() })
+      .set({
+        status: chosen,
+        ...(step ? { currentStep: step } : {}),
+        statusChangedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(processes.id, processId));
     statusAtEvent = chosen;
   }
@@ -528,7 +533,7 @@ export async function advanceProcessStep(processId: string, _formData: FormData)
 
   await db
     .update(processes)
-    .set({ currentStep: nextStep, status: nextStatus, updatedAt: new Date() })
+    .set({ currentStep: nextStep, status: nextStatus, statusChangedAt: new Date(), updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
   revalidatePath(`/processos/${processId}`);
@@ -545,7 +550,7 @@ export async function abandonProcess(processId: string, formData: FormData) {
 
   await db
     .update(processes)
-    .set({ status: "ABANDONADO", updatedAt: new Date() })
+    .set({ status: "ABANDONADO", statusChangedAt: new Date(), updatedAt: new Date() })
     .where(eq(processes.id, processId));
 
   // O motivo digitado vira um andamento manual (pode ser removido depois).

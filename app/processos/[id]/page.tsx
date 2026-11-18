@@ -47,8 +47,8 @@ import {
   purchaseOrders,
 } from "@/db/schema";
 import { desc, eq, getTableColumns, inArray } from "drizzle-orm";
-import { etaLateDays } from "@/lib/eta-delay";
-import { LateBadge } from "@/components/shared/StatusBadge";
+import { cargoPresencePendingHours, etaLateDays } from "@/lib/eta-delay";
+import { LateBadge, PresenceBadge } from "@/components/shared/StatusBadge";
 import {
   STATUS_BADGE_CLASS,
   STATUS_LABEL,
@@ -105,6 +105,8 @@ export default async function ProcessDetailPage({
       destinationState: processes.destinationState,
       destinationBranch: processes.destinationBranch,
       currentStep: processes.currentStep,
+      statusChangedAt: processes.statusChangedAt,
+      updatedAt: processes.updatedAt,
       weightKg: processes.weightKg,
       volumeM3: processes.volumeM3,
       notes: processes.notes,
@@ -382,6 +384,7 @@ export default async function ProcessDetailPage({
   });
 
   const dias = diasRestantes(process.etaEstimated);
+  const presenceHours = cargoPresencePendingHours(process);
   const lateDays = etaLateDays({ status: process.status, currentStep: process.currentStep, etaEstimated: process.etaEstimated });
   const boundAdvanceStep = advanceProcessStep.bind(null, id);
   const boundAbandon = abandonProcess.bind(null, id);
@@ -496,6 +499,7 @@ export default async function ProcessDetailPage({
               {STATUS_LABEL[process.status as ProcessStatus]}
             </span>
             <LateBadge days={lateDays} />
+            <PresenceBadge hours={presenceHours} />
             <details className="relative max-w-full">
               <summary className="list-none cursor-pointer flex items-center gap-1 text-secondary hover:underline font-label-md text-label-md">
                 <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -586,7 +590,7 @@ export default async function ProcessDetailPage({
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg">
-        <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
+        <div className="lg:col-span-4 self-start lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-stack-md">
             <h3 className="font-headline-sm text-headline-sm text-primary">Workflow</h3>
             <span className="text-xs text-on-surface-variant font-medium">

@@ -71,6 +71,25 @@ export function LateBadge({ days, className }: { days: number | null | undefined
   );
 }
 
+// Alerta de pendência de presença de carga: a chegada foi confirmada há 48 h ou
+// mais e o processo ainda não está em "Presença de Carga".
+export function PresenceBadge({ hours, className }: { hours: number | null | undefined; className?: string }) {
+  if (!hours) return null;
+  const label = hours >= 72 ? `${Math.floor(hours / 24)}d` : `${hours}h`;
+  return (
+    <span
+      title={`Chegada confirmada há ${hours} h e a presença de carga ainda não foi confirmada (prazo de 48 h)`}
+      className={cn(
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-warning/20 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-warning",
+        className,
+      )}
+    >
+      <AlertTriangle className="h-3 w-3" aria-hidden />
+      Presença pendente · {label}
+    </span>
+  );
+}
+
 export function StatusBadge({
   status,
   className,
