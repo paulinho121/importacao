@@ -1296,7 +1296,7 @@ export default function ProcessFreightQuotes({
                   ))}
                 </tr>
 
-                {titleRow("EXTRAS", "Observações e documentos", FileText)}
+                {titleRow("EXTRAS", "Notas e documentos", FileText)}
                 <tr>
                   <Lead sec="EXTRAS" label="Observação" desc="Ajuste / ressalva" />
                   {fullCells((c) => (
@@ -1316,7 +1316,7 @@ export default function ProcessFreightQuotes({
                           onChange={(e) => patch(c.key, { driveUrl: e.target.value })}
                           aria-label="Link do Google Drive da cotação"
                           placeholder="Cole o link do Google Drive" className={cellInput} />
-                        {href && <DriveLinkActions url={c.draft.driveUrl.trim()} title="Cotação" compact className="shrink-0" />}
+                        {href && <DriveLinkActions url={c.draft.driveUrl.trim()} title="Cotação" iconOnly className="shrink-0" />}
                       </div>
                     );
                   })}
