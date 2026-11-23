@@ -7,6 +7,7 @@ import {
   processDocuments,
   processEvents,
   processInvoices,
+  processFreightQuotes,
   processLpcos,
   products,
   purchaseOrders,
@@ -90,6 +91,7 @@ export async function getDashboardMetrics() {
         supplierCountry: suppliers.country,
         currency: processes.currency,
         agentName: freightAgents.name,
+        externalReference: processes.externalReference,
         internationalFreightValue: processes.internationalFreightValue,
         insuranceValue: processes.insuranceValue,
         exchangeRate: processes.exchangeRate,
@@ -151,6 +153,13 @@ export async function getDashboardMetrics() {
       })
       .from(purchaseOrders),
   ]);
+
+  // Cotação de frete fechada (escolhida) de cada processo: o número dela aparece na tabela.
+  const closedQuoteRows = await db
+    .select({ processId: processFreightQuotes.processId, proposal: processFreightQuotes.proposal })
+    .from(processFreightQuotes)
+    .where(eq(processFreightQuotes.status, "FECHADO"));
+  const closedQuoteByProcess = new Map(closedQuoteRows.map((q) => [q.processId, q.proposal]));
 
   const ativos = processRows.filter((p) => p.status !== "CONCLUIDO" && p.status !== "ABANDONADO");
   const emTransito = processRows.filter((p) => p.status === "EM_TRANSITO");
@@ -417,6 +426,8 @@ export async function getDashboardMetrics() {
       presenceHours: cargoPresencePendingHours(p),
       status: p.status,
       agentName: p.agentName,
+      agentReference: p.externalReference ?? null,
+      closedQuoteProposal: closedQuoteByProcess.get(p.id) ?? null,
       // FOB = soma das invoices (na moeda do processo); null enquanto nenhuma invoice tem valor.
       fobValue: invoiceValueByProcess.get(p.id) ?? null,
       currency: p.currency,

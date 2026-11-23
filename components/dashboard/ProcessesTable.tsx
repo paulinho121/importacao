@@ -24,6 +24,29 @@ type Row = DashboardMetrics["table"][number];
 
 const PAGE_SIZE = 6;
 
+// Agente de carga + referência do agente e número da cotação fechada (embaixo do nome).
+function AgentCell({
+  name,
+  reference,
+  quote,
+}: {
+  name: string | null;
+  reference: string | null;
+  quote: string | null;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="text-sm whitespace-nowrap">{name ?? "—"}</p>
+      {(reference || quote) && (
+        <div className="mt-0.5 space-y-0.5 font-mono text-[11px] whitespace-nowrap text-muted-foreground">
+          {reference && <p>Ref.: {reference}</p>}
+          {quote && <p>Cotação: {quote}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // "Processos Recentes em Acompanhamento": os embarques ativos mais novos, com
 // filtro por texto (o botão "Filtrar" ou Enter aplicam; apagar o campo limpa).
 export function ProcessesTable({ data }: { data: Row[] }) {
@@ -162,7 +185,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm whitespace-nowrap">{r.agentName ?? "—"}</span>
+                      <AgentCell name={r.agentName} reference={r.agentReference} quote={r.closedQuoteProposal} />
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
@@ -235,7 +258,9 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Agente de carga
                       </dt>
-                      <dd className="mt-0.5 truncate text-sm">{r.agentName ?? "—"}</dd>
+                      <dd className="mt-0.5 min-w-0">
+                        <AgentCell name={r.agentName} reference={r.agentReference} quote={r.closedQuoteProposal} />
+                      </dd>
                     </div>
                   </dl>
 
