@@ -24,24 +24,6 @@ type Row = DashboardMetrics["table"][number];
 
 const PAGE_SIZE = 6;
 
-function fob(value: number | null, currency: string | null) {
-  if (value === null) return "—";
-  if (currency && currency !== "OTHER") {
-    try {
-      return new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-      }).format(value);
-    } catch {
-      // código de moeda que o Intl não conhece: cai no número simples
-    }
-  }
-  return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(
-    value,
-  );
-}
-
 // "Processos Recentes em Acompanhamento": os embarques ativos mais novos, com
 // filtro por texto (o botão "Filtrar" ou Enter aplicam; apagar o campo limpa).
 export function ProcessesTable({ data }: { data: Row[] }) {
@@ -133,7 +115,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                   <TableHead>Fornecedor / Origem</TableHead>
                   <TableHead>Modal</TableHead>
                   <TableHead>ETA (Previsão)</TableHead>
-                  <TableHead>Valor (FOB)</TableHead>
+                  <TableHead>Agente de carga</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ação</TableHead>
                 </TableRow>
@@ -180,9 +162,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="font-mono text-sm whitespace-nowrap">
-                        {fob(r.fobValue, r.currency)}
-                      </span>
+                      <span className="text-sm whitespace-nowrap">{r.agentName ?? "—"}</span>
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
@@ -253,11 +233,9 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                     </div>
                     <div className="min-w-0">
                       <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        FOB
+                        Agente de carga
                       </dt>
-                      <dd className="mt-0.5 truncate font-mono text-sm">
-                        {fob(r.fobValue, r.currency)}
-                      </dd>
+                      <dd className="mt-0.5 truncate text-sm">{r.agentName ?? "—"}</dd>
                     </div>
                   </dl>
 
