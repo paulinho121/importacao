@@ -10,14 +10,12 @@ import { driveDownloadUrl, driveOpenUrl, drivePreviewUrl } from "@/lib/drive-lin
 export default function DriveLinkActions({
   url,
   title = "Arquivo",
-  compact = false,
-  iconOnly = false,
   className = "",
 }: {
   url: string | null | undefined;
   title?: string;
+  // Mantidos por compatibilidade com os usos antigos; os botões são sempre só ícones.
   compact?: boolean;
-  // Só ícones (botões quadrados com dica ao passar o mouse): para células estreitas.
   iconOnly?: boolean;
   className?: string;
 }) {
@@ -45,13 +43,14 @@ export default function DriveLinkActions({
   // Botões em formato de pílula, com profundidade e transição suave.
   const base =
     "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 focus-visible:ring-offset-2 active:scale-[0.97]";
-  const size = iconOnly ? "h-8 w-8 rounded-full" : compact ? "h-7 gap-1 rounded-full px-3 text-[11px]" : "h-9 gap-1.5 rounded-full px-4 text-xs";
-  const viewCls = `${base} ${size} border border-secondary/50 bg-surface-container-lowest text-secondary shadow-sm hover:border-secondary hover:bg-secondary/10 hover:shadow-md`;
-  const downloadCls = `${base} ${size} bg-linear-to-br from-secondary to-secondary/80 text-white shadow-md shadow-secondary/30 hover:-translate-y-px hover:shadow-lg hover:shadow-secondary/40`;
-  const icon = iconOnly ? "text-[18px]" : compact ? "text-[14px]" : "text-[16px]";
+  // Só ícones, discretos: contorno leve para ver e um tom suave da cor da marca para baixar.
+  const size = "h-8 w-8 rounded-full";
+  const viewCls = `${base} ${size} border border-outline-variant bg-transparent text-secondary hover:border-secondary hover:bg-secondary/10`;
+  const downloadCls = `${base} ${size} bg-secondary/12 text-secondary hover:bg-secondary hover:text-white`;
+  const icon = "text-[18px]";
 
   return (
-    <span className={`inline-flex ${iconOnly ? "flex-nowrap" : "flex-wrap"} items-center gap-1.5 ${className}`}>
+    <span className={`inline-flex flex-nowrap items-center gap-1.5 ${className}`}>
       {preview ? (
         <button
           type="button"
@@ -61,7 +60,6 @@ export default function DriveLinkActions({
           className={viewCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>visibility</span>
-          {!iconOnly && "Visualizar"}
         </button>
       ) : (
         <a
@@ -73,7 +71,6 @@ export default function DriveLinkActions({
           className={viewCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>open_in_new</span>
-          {!iconOnly && "Abrir"}
         </a>
       )}
       {download && (
@@ -86,7 +83,6 @@ export default function DriveLinkActions({
           className={downloadCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>download</span>
-          {!iconOnly && "Baixar"}
         </a>
       )}
 
