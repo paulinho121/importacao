@@ -14,6 +14,7 @@ import {
   Warehouse,
   Archive,
   Search,
+  Mail,
   type LucideIcon,
 } from "lucide-react";
 
@@ -49,6 +50,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Embarcados", href: "/processos?status=EMBARCADO", icon: Anchor },
       { label: "Em Estoque", href: "/processos?status=EM_ESTOQUE", icon: PackageCheck },
       { label: "Finalizados", href: "/finalizados", icon: Archive },
+      { label: "E-mails", href: "/emails", icon: Mail },
     ],
   },
   {

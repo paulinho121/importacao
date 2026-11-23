@@ -7,6 +7,9 @@ import { NextResponse, type NextRequest } from "next/server";
 // lugar que roda antes de QUALQUER página renderizar. Next 16 renomeou o
 // arquivo (e a função exportada) de "middleware" pra "proxy".
 export async function proxy(request: NextRequest) {
+  // Cron da Vercel: chega sem cookie de sessão. A própria rota confere o CRON_SECRET.
+  if (request.nextUrl.pathname === "/api/gmail/cron") return NextResponse.next();
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

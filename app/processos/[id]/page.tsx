@@ -22,6 +22,8 @@ import ProcessFreightQuotes, { type FreightQuoteRow } from "@/components/Process
 import ProcessSupplierQuotes, { type SupplierQuoteRow } from "@/components/ProcessSupplierQuotes";
 import type { QuoteEventRow, QuoteEventType } from "@/lib/quote-events";
 import ProcessCompliance from "@/components/ProcessCompliance";
+import ProcessEmails from "@/components/ProcessEmails";
+import { loadEmails } from "@/lib/process-emails";
 import LandedCostBreakdown from "@/components/LandedCostBreakdown";
 import ProcessPayables from "@/components/ProcessPayables";
 import SupplierLogo from "@/components/SupplierLogo";
@@ -37,6 +39,7 @@ import {
   processInvoices,
   processLpcos,
   processPayables,
+  processEmails,
   processFreightQuotes,
   processFreightQuoteLines,
   processSupplierQuotes,
@@ -142,6 +145,8 @@ export default async function ProcessDetailPage({
     .where(eq(processes.id, id));
 
   if (!process) notFound();
+
+  const linkedEmails = await loadEmails(eq(processEmails.processId, id), 200);
 
   const [items, events, documents, invoices, lpcos, payables, supplierOptions, agentOptions, freightQuoteRows, processSuppliers, linkedPos, currentUser, supplierQuoteRows, quoteEventRows] = await Promise.all([
     db
@@ -867,6 +872,8 @@ export default async function ProcessDetailPage({
               }}
             />
           )}
+
+          <ProcessEmails processId={id} emails={linkedEmails} />
 
           <section className="bg-surface-container-lowest border border-outline-variant p-gutter rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-stack-md">

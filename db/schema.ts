@@ -1098,3 +1098,68 @@ export const productPhotos = pgTable(
   },
   (t) => [unique("product_photos_product_url_unique").on(t.productId, t.url)],
 );
+
+// Conexão do Gmail por usuário (OAuth próprio do app, escopo somente leitura).
+// O refresh token fica só no servidor: nunca é exibido nem enviado ao browser.
+// Sem RLS liberado para o papel anon/authenticated do Supabase (ver migração 0047).
+export const gmailConnections = pgTable("gmail_connections", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  googleEmail: text("google_email").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  connectedAt: timestamp("connected_at", { withTimezone: true }).notNull().defaultNow(),
+  // Início da janela da próxima sincronização (só avança quando a rodada termina).
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  // Mensagem curta da última falha (sem corpo de e-mail nem token).
+  lastSyncError: text("last_sync_error"),
+});
+
+// E-mails do marcador "Processos". Um e-mail que cai em duas contas conectadas
+// entra uma vez só: gmail_message_id é único por conta, e message_id_header
+// (cabeçalho Message-ID, igual nas duas caixas) é único entre todas.
+// process_id nulo = não vinculado (fica em "E-mails não vinculados").
+export const processEmails = pgTable(
+  "process_emails",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    gmailMessageId: text("gmail_message_id").notNull().unique(),
+    messageIdHeader: text("message_id_header").unique(),
+    mailboxUserId: uuid("mailbox_user_id").references(() => profiles.id, { onDelete: "set null" }),
+    from: text("from"),
+    to: text("to"),
+    subject: text("subject"),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull(),
+    snippet: text("snippet"),
+    bodyText: text("body_text"),
+    processId: uuid("process_id").references(() => processes.id, { onDelete: "set null" }),
+    // "UNLINKED" | "LINKED" — sempre coerente com process_id nas ações do app.
+    status: text("status").notNull().default("UNLINKED"),
+    linkedBy: uuid("linked_by").references(() => profiles.id, { onDelete: "set null" }),
+    linkedAt: timestamp("linked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("process_emails_process_idx").on(t.processId),
+    index("process_emails_sent_at_idx").on(t.sentAt),
+  ],
+);
+
+// Anexos gravados no bucket de documentos (DOCUMENTS_BUCKET). storage_path nulo
+// quando o download ou o upload falhou: o e-mail continua salvo e o anexo aparece
+// como indisponível, nunca some em silêncio.
+export const processEmailAttachments = pgTable(
+  "process_email_attachments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    emailId: uuid("email_id")
+      .notNull()
+      .references(() => processEmails.id, { onDelete: "cascade" }),
+    fileName: text("file_name").notNull(),
+    mimeType: text("mime_type"),
+    sizeBytes: integer("size_bytes"),
+    storagePath: text("storage_path"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("process_email_attachments_email_idx").on(t.emailId)],
+);
