@@ -90,6 +90,8 @@ export default async function ProcessosPage({
     ? or(
         ilike(processes.processNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
+        ilike(freightAgents.name, `%${q}%`),
+        ilike(processes.externalReference, `%${q}%`),
         sql`exists (
           select 1 from ${purchaseOrders} po join ${suppliers} ps on ps.id = po.supplier_id
           where po.process_id = ${processes.id}
