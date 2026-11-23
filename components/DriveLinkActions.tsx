@@ -42,11 +42,12 @@ export default function DriveLinkActions({
 
   if (!openUrl) return null;
 
-  const btn = iconOnly
-    ? "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
-    : compact
-      ? "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold"
-      : "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold";
+  // Botões em formato de pílula, com profundidade e transição suave.
+  const base =
+    "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 focus-visible:ring-offset-2 active:scale-[0.97]";
+  const size = iconOnly ? "h-8 w-8 rounded-full" : compact ? "h-7 gap-1 rounded-full px-3 text-[11px]" : "h-9 gap-1.5 rounded-full px-4 text-xs";
+  const viewCls = `${base} ${size} border border-secondary/50 bg-surface-container-lowest text-secondary shadow-sm hover:border-secondary hover:bg-secondary/10 hover:shadow-md`;
+  const downloadCls = `${base} ${size} bg-linear-to-br from-secondary to-secondary/80 text-white shadow-md shadow-secondary/30 hover:-translate-y-px hover:shadow-lg hover:shadow-secondary/40`;
   const icon = iconOnly ? "text-[18px]" : compact ? "text-[14px]" : "text-[16px]";
 
   return (
@@ -57,7 +58,7 @@ export default function DriveLinkActions({
           onClick={() => setOpen(true)}
           title={`Visualizar ${title.toLowerCase()} na tela`}
           aria-label={`Visualizar ${title.toLowerCase()}`}
-          className={`${btn} border border-secondary text-secondary hover:bg-secondary/10`}
+          className={viewCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>visibility</span>
           {!iconOnly && "Visualizar"}
@@ -69,7 +70,7 @@ export default function DriveLinkActions({
           rel="noopener noreferrer"
           title={`Abrir ${title.toLowerCase()} em uma nova aba`}
           aria-label={`Abrir ${title.toLowerCase()} em uma nova aba`}
-          className={`${btn} border border-secondary text-secondary hover:bg-secondary/10`}
+          className={viewCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>open_in_new</span>
           {!iconOnly && "Abrir"}
@@ -82,7 +83,7 @@ export default function DriveLinkActions({
           rel="noopener noreferrer"
           title={`Baixar ${title.toLowerCase()}`}
           aria-label={`Baixar ${title.toLowerCase()}`}
-          className={`${btn} bg-secondary text-white hover:opacity-90`}
+          className={downloadCls}
         >
           <span className={`material-symbols-outlined ${icon}`}>download</span>
           {!iconOnly && "Baixar"}

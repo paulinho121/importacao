@@ -145,7 +145,7 @@ export default function DocumentViewer({
               </span>
               <a
                 href={`${src}?download=1`}
-                className="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:opacity-90"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-linear-to-br from-secondary to-secondary/80 px-4 text-xs font-semibold text-white shadow-md shadow-secondary/30 transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-secondary/40 active:scale-[0.97]"
               >
                 <span className="material-symbols-outlined text-[16px]">download</span>
                 Baixar

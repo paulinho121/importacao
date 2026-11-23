@@ -551,7 +551,7 @@ export default function ProcessSupplierQuotes({
                         className={input} />
                       {href && (
                         <a href={href} target="_blank" rel="noopener noreferrer" title="Baixar a cotação do Google Drive"
-                          className="shrink-0 rounded bg-secondary px-2 py-1 text-[11px] font-bold text-white hover:opacity-90">
+                          className="inline-flex h-7 shrink-0 items-center rounded-full bg-linear-to-br from-secondary to-secondary/80 px-3 text-[11px] font-semibold text-white shadow-md shadow-secondary/30 transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-secondary/40 active:scale-[0.97]">
                           Baixar
                         </a>
                       )}

@@ -913,8 +913,9 @@ export default async function ProcessDetailPage({
                         href={signedUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-bold text-secondary hover:underline"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-secondary/50 bg-surface-container-lowest px-3.5 text-xs font-semibold text-secondary shadow-sm transition-all duration-200 hover:border-secondary hover:bg-secondary/10 hover:shadow-md active:scale-[0.97]"
                       >
+                        <span className="material-symbols-outlined text-[16px]">visibility</span>
                         Visualizar
                       </a>
                     )}
