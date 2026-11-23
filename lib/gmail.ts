@@ -130,12 +130,26 @@ export async function getMailboxAddress(accessToken: string): Promise<string> {
   return profile.emailAddress;
 }
 
-// Todos os ids que batem com a busca (paginado, com teto de páginas).
-export async function listMessageIds(accessToken: string, query: string, maxPages = 20): Promise<string[]> {
+// ID do marcador pelo nome exato. A busca por nome (label:"...") não acha de forma
+// confiável marcadores com hífen; filtrar pelo ID acha.
+export async function findLabelId(accessToken: string, name: string): Promise<string | null> {
+  const data = await gmailGet<{ labels?: { id: string; name: string }[] }>(accessToken, "/labels");
+  return data.labels?.find((l) => l.name === name)?.id ?? null;
+}
+
+// Todos os ids que batem com a busca (paginado, com teto de páginas). Com labelId,
+// só mensagens com esse marcador.
+export async function listMessageIds(
+  accessToken: string,
+  query: string,
+  maxPages = 20,
+  labelId?: string,
+): Promise<string[]> {
   const ids: string[] = [];
   let pageToken: string | undefined;
   for (let page = 0; page < maxPages; page++) {
     const params: Record<string, string> = { q: query, maxResults: "100", includeSpamTrash: "false" };
+    if (labelId) params.labelIds = labelId;
     if (pageToken) params.pageToken = pageToken;
     const data = await gmailGet<{ messages?: { id: string }[]; nextPageToken?: string }>(
       accessToken,

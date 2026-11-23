@@ -2,9 +2,11 @@
 // documentos. Usada pelo botão "Sincronizar agora" e pelo cron da Vercel.
 //
 // Regras:
-// - Cursor = gmail_connections.last_synced_at. Só avança quando a rodada termina
-//   inteira; se o tempo acabar antes, a próxima rodada retoma (os já importados
-//   são pulados pelo gmail_message_id, então refazer a janela é barato).
+// - Busca: marcador (pelo ID) + janela móvel de INITIAL_LOOKBACK_DAYS. Não usa cursor
+//   pela data de recebimento, porque o marcador pode ser aplicado depois que o e-mail
+//   chegou. gmail_connections.last_synced_at só avança quando a rodada termina inteira;
+//   se o tempo acabar antes, a próxima rodada retoma (os já importados são pulados pelo
+//   gmail_message_id, então refazer a janela é barato).
 // - Nada se perde: e-mail sem processo entra como "não vinculado"; anexo que falha
 //   fica com storage_path nulo e aparece como indisponível.
 // - Nunca logar corpo, assunto, remetente, nome de anexo nem token: só contagens
@@ -16,6 +18,7 @@ import { DOCUMENTS_BUCKET, supabaseAdmin } from "@/lib/supabase-admin";
 import {
   GMAIL_LABEL,
   GmailApiError,
+  findLabelId,
   getAttachmentBytes,
   getMessage,
   listMessageIds,
@@ -23,7 +26,9 @@ import {
 } from "@/lib/gmail";
 import { parseGmailMessage, type ParsedAttachment, type ParsedEmail } from "@/lib/gmail-message";
 
-// Primeira sincronização: quanto para trás olhar. Depois disso o cursor assume.
+// Janela de busca: e-mails recebidos nos últimos N dias que tenham o marcador. É
+// uma janela móvel, não um cursor: o marcador pode ser aplicado depois que o e-mail
+// chegou, então um cursor pela data de recebimento deixaria esse e-mail de fora.
 export const INITIAL_LOOKBACK_DAYS = 90;
 const BATCH_SIZE = 5;
 const DAY_MS = 86_400_000;
@@ -170,14 +175,17 @@ export async function syncGmailConnection(
     return { ok: false, imported: 0, complete: false, needsReconnect: false, message };
   }
 
-  const since = conn.lastSyncedAt ?? new Date(runStart.getTime() - INITIAL_LOOKBACK_DAYS * DAY_MS);
-  // Margem de 1 min para trás: repetir alguns e-mails é inofensivo (são pulados).
-  const afterSeconds = Math.floor(since.getTime() / 1000) - 60;
-  const query = `label:"${GMAIL_LABEL}" after:${afterSeconds}`;
+  const afterSeconds = Math.floor((runStart.getTime() - INITIAL_LOOKBACK_DAYS * DAY_MS) / 1000);
 
   let ids: string[];
   try {
-    ids = await listMessageIds(accessToken, query);
+    const labelId = await findLabelId(accessToken, GMAIL_LABEL);
+    if (!labelId) {
+      const message = `O marcador "${GMAIL_LABEL}" não existe nesta conta do Gmail.`;
+      await recordSyncError(conn.userId, message);
+      return { ok: false, imported: 0, complete: false, needsReconnect: false, message };
+    }
+    ids = await listMessageIds(accessToken, `after:${afterSeconds}`, 20, labelId);
   } catch (e) {
     const message = `Falha ao listar os e-mails no Gmail (${errorLabel(e)}).`;
     await recordSyncError(conn.userId, message);
@@ -223,7 +231,9 @@ export async function syncGmailConnection(
 
   const parts: string[] = [];
   if (imported > 0) parts.push(`${imported} e-mail(s) novo(s) importado(s).`);
-  else if (complete) parts.push("Nenhum e-mail novo.");
+  else if (complete && ids.length === 0)
+    parts.push(`Nenhum e-mail com o marcador "${GMAIL_LABEL}" nos últimos ${INITIAL_LOOKBACK_DAYS} dias.`);
+  else if (complete) parts.push("Todos os e-mails com o marcador já estavam importados.");
   if (timedOut) parts.push("Sincronização parcial: o restante entra na próxima rodada.");
   if (errorNote) parts.push(errorNote);
 
