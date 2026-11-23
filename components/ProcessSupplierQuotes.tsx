@@ -390,7 +390,7 @@ export default function ProcessSupplierQuotes({
                     </select>
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <Field label="Nº da proposta">
                       <input name="proposal" value={d.proposal} disabled={closed}
                         onChange={(e) => patch(c.key, { proposal: e.target.value })}
@@ -437,7 +437,7 @@ export default function ProcessSupplierQuotes({
                     </p>
                   )}
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <Field label="Incoterm">
                       <select name="incoterm" value={d.incoterm} disabled={closed}
                         onChange={(e) => patch(c.key, { incoterm: e.target.value })}

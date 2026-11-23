@@ -451,8 +451,8 @@ export default async function ProcessDetailPage({
   );
 
   return (
-    <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={process.status === "CONCLUIDO" || process.status === "ABANDONADO" ? "/finalizados" : "/processos"}
           className="flex items-center gap-2 text-secondary font-semibold hover:underline group"

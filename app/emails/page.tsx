@@ -40,7 +40,7 @@ export default async function EmailsPage() {
   ]);
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-6">
       <div>
         <h2 className="font-display-lg text-display-lg text-primary">E-mails não vinculados</h2>
         <p className="text-on-surface-variant font-body-md text-body-md mt-1">

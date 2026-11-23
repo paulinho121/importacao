@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ListPageSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
       <div className="flex justify-between items-end">
         <div className="space-y-2">
           <Skeleton className="h-8 w-56" />
@@ -40,7 +40,7 @@ export function ListPageSkeleton({ rows = 6 }: { rows?: number }) {
 
 export function DetailPageSkeleton() {
   return (
-    <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
       <Skeleton className="h-5 w-32" />
       <div className="flex items-center gap-4">
         <Skeleton className="h-9 w-64" />

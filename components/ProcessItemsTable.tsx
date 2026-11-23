@@ -105,7 +105,7 @@ function ItemPanel({ row, processId, invoices }: { row: ProcessItemRow; processI
       {/* 1. editar */}
       <div>
         <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-primary">Editar item</h4>
-        <form action={updateProcessItem.bind(null, row.id, processId)} className="grid grid-cols-2 gap-1.5">
+        <form action={updateProcessItem.bind(null, row.id, processId)} className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {!row.productId && (
             <>
               <input className={`${INPUT} col-span-2`} name="description" defaultValue={row.description} aria-label="Descrição" required />

@@ -24,7 +24,7 @@ export default function MobileNavDrawer() {
     <Sheet>
       <SheetTrigger asChild>
         <button
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground md:h-9 md:w-9 hover:bg-muted hover:text-on-surface transition-colors md:hidden"
           aria-label="Abrir menu"
         >
           <Menu className="h-5 w-5" />

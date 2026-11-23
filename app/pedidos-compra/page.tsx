@@ -47,7 +47,7 @@ export default async function PedidosCompraPage({
     .orderBy(purchaseOrders.createdAt);
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-4 sm:p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="font-display-lg text-display-lg text-primary">Pedidos de Compra</h2>

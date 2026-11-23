@@ -315,7 +315,7 @@ export default async function ProdutosPage({
           : "Nenhum produto cadastrado ainda.";
 
   return (
-    <div className="p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-stack-lg">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="font-display-lg text-display-lg text-primary">Produtos</h2>

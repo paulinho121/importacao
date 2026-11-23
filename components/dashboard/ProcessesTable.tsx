@@ -36,9 +36,9 @@ function AgentCell({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-sm whitespace-nowrap">{name ?? "—"}</p>
+      <p className="text-sm break-words">{name ?? "—"}</p>
       {(reference || quote) && (
-        <div className="mt-0.5 space-y-0.5 font-mono text-[11px] whitespace-nowrap text-muted-foreground">
+        <div className="mt-0.5 space-y-0.5 font-mono text-[11px] break-all text-muted-foreground">
           {reference && <p>Ref.: {reference}</p>}
           {quote && <p>Cotação: {quote}</p>}
         </div>
@@ -212,11 +212,11 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                   href={`/processos/${r.id}`}
                   className="group block rounded-xl border border-border bg-background/40 p-4 transition active:scale-[0.99] hover:border-secondary/50 hover:bg-secondary/5"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-sm font-bold text-on-surface">
+                  <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+                    <span className="min-w-0 break-all font-mono text-sm font-bold text-on-surface">
                       {r.processNumber}
                     </span>
-                    <span className="inline-flex flex-wrap items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
+                    <span className="inline-flex min-w-0 flex-wrap justify-end items-center gap-1.5"><StatusBadge status={r.status as ProcessStatus} /><LateBadge days={r.lateDays} /><PresenceBadge hours={r.presenceHours} /></span>
                   </div>
 
                   <div className="mt-3 flex items-center gap-3">
@@ -237,7 +237,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                     </div>
                   </div>
 
-                  <dl className="mt-4 grid grid-cols-3 gap-2 rounded-lg bg-muted/40 px-3 py-2.5">
+                  <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2.5 rounded-lg bg-muted/40 px-3 py-2.5 sm:grid-cols-3">
                     <div className="min-w-0">
                       <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Modal
@@ -254,7 +254,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
                         {formatDate(r.etaEstimated)}
                       </dd>
                     </div>
-                    <div className="min-w-0">
+                    <div className="col-span-2 min-w-0 sm:col-span-1">
                       <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Agente de carga
                       </dt>

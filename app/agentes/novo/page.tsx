@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function NovoAgentePage() {
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto w-full">
       <div className="mb-8">
         <h2 className="font-display-lg text-display-lg text-primary">
           Cadastro de Agente de Carga

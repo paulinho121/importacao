@@ -127,7 +127,7 @@ export default async function PedidoCompraDetailPage({
   const boundAddToProcess = addToExistingProcess.bind(null, id);
 
   return (
-    <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
       <div className="flex items-center justify-between">
         <Link
           href="/pedidos-compra"

@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState<SignInState, FormData>(signIn, null);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 sm:p-6">
       {/* brilho discreto no topo: identidade sem competir com o formulário */}
       <div
         aria-hidden

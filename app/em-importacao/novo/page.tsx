@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function NovoItemEmImportacaoPage() {
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto w-full">
       <div className="mb-8">
         <h2 className="font-display-lg text-display-lg text-primary">Novo Item em Importação</h2>
         <p className="text-on-surface-variant font-body-md text-body-md mt-1">

@@ -199,7 +199,7 @@ export default function AddItemForm({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <input
             className={`col-span-2 ${INPUT_CLASS}`}
             placeholder="Descrição do item"
@@ -216,7 +216,7 @@ export default function AddItemForm({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <input className={INPUT_CLASS} placeholder="Quantidade" type="number" step="0.01" name="quantity" />
         <input
           className={INPUT_CLASS}

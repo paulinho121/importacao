@@ -50,6 +50,7 @@ function useBreadcrumb(pathname: string) {
 export default function Header() {
   const pathname = usePathname();
   const crumbs = useBreadcrumb(pathname);
+  const [searchOpen, setSearchOpen] = React.useState(false);
   const [dark, setDark] = React.useState(true);
   const user = useCurrentUser();
 
@@ -78,7 +79,7 @@ export default function Header() {
     <header data-app-chrome className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card px-4 lg:px-6">
       <MobileNavDrawer />
       <nav className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
-        <Home className="h-4 w-4 shrink-0" />
+        <Home className="hidden h-4 w-4 shrink-0 sm:block" />
         {crumbs.map((crumb, idx) => (
           <React.Fragment key={crumb.href}>
             {crumbs.length > 1 && (
@@ -108,8 +109,17 @@ export default function Header() {
 
       <div className="ml-auto flex items-center gap-1.5">
         <button
+          type="button"
+          onClick={() => setSearchOpen((open) => !open)}
+          aria-expanded={searchOpen}
+          aria-label="Buscar processos"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors md:hidden"
+        >
+          <Search className="h-[18px] w-[18px]" />
+        </button>
+        <button
           onClick={toggleTheme}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors"
+          className="flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors"
           aria-label="Alternar tema"
         >
           {dark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
@@ -118,13 +128,13 @@ export default function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors"
+              className="relative flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-on-surface transition-colors"
               aria-label="Notificações"
             >
               <Bell className="h-[18px] w-[18px]" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))]">
             <DropdownMenuLabel>Notificações</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="px-2 py-6 text-center text-sm text-muted-foreground">
@@ -160,6 +170,25 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {searchOpen && (
+        <form
+          action="/processos"
+          onSubmit={() => setSearchOpen(false)}
+          className="absolute inset-x-0 top-full z-50 border-b border-border bg-card p-3 shadow-lg md:hidden"
+        >
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              name="q"
+              autoFocus
+              placeholder="Buscar processos..."
+              aria-label="Buscar processos"
+              className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-on-surface placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+        </form>
+      )}
     </header>
   );
 }

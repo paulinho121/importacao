@@ -474,3 +474,13 @@ button:not(:disabled),
     padding-bottom: 0 !important;
   }
 }
+
+/* Celular: campos com 16px impedem o zoom automático do iOS ao tocar no campo.
+   Fica fora de @layer, então vale sobre as classes text-sm/text-xs dos campos. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -18,7 +18,7 @@ export default async function ConfiguracoesPage() {
   ]);
 
   return (
-    <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
+    <div className="p-4 sm:p-6 md:p-10 max-w-[1200px] mx-auto w-full space-y-stack-lg">
       <PageHeader title="Configurações" description="Usuários e acesso ao sistema" />
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">

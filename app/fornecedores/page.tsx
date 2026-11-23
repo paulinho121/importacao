@@ -24,7 +24,7 @@ export default async function FornecedoresPage() {
     .orderBy(suppliers.name);
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-4 sm:p-6 md:p-10 max-w-[1440px] mx-auto w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="font-display-lg text-display-lg text-primary">Fornecedores</h2>

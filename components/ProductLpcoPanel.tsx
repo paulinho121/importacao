@@ -36,7 +36,7 @@ export type ProductLpcoRow = {
 
 function LpcoFields({ lpco, defaultBranch }: { lpco?: ProductLpcoRow; defaultBranch?: string }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       <div>
         <label className={LABEL_CLASS}>Filial</label>
         <select className={`${INPUT_CLASS} appearance-none`} name="branch" defaultValue={lpco?.branch ?? defaultBranch ?? ""} required>

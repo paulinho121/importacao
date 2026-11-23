@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default function NovoFornecedorPage() {
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto w-full">
       <Link
         href="/fornecedores"
         className="mb-6 flex w-fit items-center gap-2 text-secondary font-semibold hover:underline group"

@@ -45,7 +45,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <Suspense fallback={null}>
               <Header />
             </Suspense>
-            <main className="flex-1 pb-20 md:pb-0">
+            <main className="min-w-0 flex-1 overflow-x-clip pb-20 md:pb-0">
               <PageTransition>{children}</PageTransition>
             </main>
           </div>
