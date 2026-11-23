@@ -82,7 +82,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
   );
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <section className="dash-card overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-base font-semibold sm:text-lg tracking-tight text-on-surface">

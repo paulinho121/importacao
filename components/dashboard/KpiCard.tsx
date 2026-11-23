@@ -48,6 +48,7 @@ export function KpiCard({
       animationMode="rotate-on-hover"
       borderWidth={1}
       borderRadius={12}
+      backgroundColor="var(--dash-card)"
       className="h-full px-3 py-2 shadow-sm transition-shadow group-hover:shadow-md"
     >
       <div className="flex min-h-7 items-center gap-1.5 sm:min-h-0">

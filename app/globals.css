@@ -484,3 +484,22 @@ button:not(:disabled),
     font-size: 16px;
   }
 }
+
+/* Cards do dashboard: mais contraste com o fundo da página nos dois temas.
+   Ficam fora de @layer, então valem sobre bg-card/border-border. */
+:root {
+  --dash-card: #ffffff;
+  --dash-card-border: #cdd6e2;
+}
+.dark {
+  --dash-card: #172238;
+  --dash-card-border: #34486b;
+}
+.dash-card {
+  background-color: var(--dash-card);
+  border-color: var(--dash-card-border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 18px -12px rgba(15, 23, 42, 0.25);
+}
+.dark .dash-card {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 28px -14px rgba(0, 0, 0, 0.75);
+}

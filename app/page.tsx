@@ -33,7 +33,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="rounded-card border border-border bg-card p-5">
+        <div className="dash-card rounded-card border border-border bg-card p-5">
           <SectionHeader title="Alertas Prioritários" />
           <div className="mt-4 space-y-2">
             {metrics.alerts.length === 0 ? (
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
 
       {metrics.ncmDivergences.length > 0 && (
         <div className="grid grid-cols-1 gap-4 px-4 lg:px-6">
-          <div className="rounded-card border border-border bg-card p-5">
+          <div className="dash-card rounded-card border border-border bg-card p-5">
             <SectionHeader
               title="NCM Divergente do Decex"
               description="Produtos onde o NCM cadastrado difere da lista oficial de apuração de produção nacional"
