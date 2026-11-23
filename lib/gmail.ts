@@ -5,7 +5,7 @@ import type { GmailMessage } from "@/lib/gmail-message";
 
 export const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 // Só entram e-mails com este marcador no Gmail.
-export const GMAIL_LABEL = "Processos";
+export const GMAIL_LABEL = "Processos - 2026";
 export const GMAIL_STATE_COOKIE = "gmail_oauth_state";
 
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
