@@ -119,6 +119,7 @@ export default async function ProcessosPage({
           .select({ n: sql<number>`count(*)`.mapWith(Number) })
           .from(processes)
           .innerJoin(suppliers, eq(processes.supplierId, suppliers.id))
+          .leftJoin(freightAgents, eq(processes.agentId, freightAgents.id))
           .where(and(inArray(processes.status, CLOSED_STATUSES), qCondition))
       )[0].n
     : 0;
