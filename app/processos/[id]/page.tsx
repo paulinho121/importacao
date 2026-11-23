@@ -547,11 +547,6 @@ export default async function ProcessDetailPage({
             {process.destinationBranch ? ` · Filial: ${branchLabel(process.destinationBranch)}` : ""}
           </p>
         </div>
-        <div className="lg:col-span-4 flex flex-col gap-2 lg:items-end">
-          {process.status !== "CONCLUIDO" && process.status !== "ABANDONADO" && (
-            <AbandonProcessButton action={boundAbandon} processNumber={process.processNumber} />
-          )}
-        </div>
       </div>
 
       <ProcessPurchaseOrders processId={id} closed={isClosed} />
@@ -992,6 +987,12 @@ export default async function ProcessDetailPage({
           </section>
         </div>
       </div>
+
+      {process.status !== "CONCLUIDO" && process.status !== "ABANDONADO" && (
+        <div className="flex flex-col items-stretch gap-2 border-t border-outline-variant pt-6 sm:items-end">
+          <AbandonProcessButton action={boundAbandon} processNumber={process.processNumber} />
+        </div>
+      )}
     </div>
   );
 }
