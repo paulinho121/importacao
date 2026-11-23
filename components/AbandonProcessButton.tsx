@@ -17,7 +17,7 @@ export default function AbandonProcessButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-all"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-error/40 px-4 py-2 font-label-md text-label-md text-error transition-all hover:bg-error/10 sm:w-auto"
       >
         <span className="material-symbols-outlined text-[18px]">cancel</span>
         Abandonar Processo
@@ -37,30 +37,29 @@ export default function AbandonProcessButton({
           e.preventDefault();
         }
       }}
-      className="flex flex-col gap-2 bg-error-container/10 border border-error/30 rounded-xl p-3 max-w-sm"
+      className="flex w-full max-w-sm flex-col gap-2 rounded-xl border border-error/30 bg-card p-4 shadow-sm"
     >
-      <label className="font-label-md text-label-md text-on-surface-variant">
+      <label htmlFor="abandon-reason" className="font-label-md text-label-md text-on-surface-variant">
         Motivo (opcional)
       </label>
       <textarea
+        id="abandon-reason"
         name="reason"
         rows={2}
         placeholder="Ex: pedido cancelado pelo fornecedor"
-        className="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 text-body-sm font-body-sm focus:outline-none focus:border-error transition-all"
+        className="w-full rounded-lg border border-outline-variant bg-surface-container-low p-2.5 font-body-sm text-body-sm focus:border-error focus:outline-none transition-all"
       />
-      <div className="flex items-center gap-2">
-        <SubmitButton
-          className="px-4 py-2 rounded-lg bg-error text-white font-label-md text-label-md hover:opacity-90 transition-all"
-        >
-          Confirmar abandono
-        </SubmitButton>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all"
+          className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface-variant transition-all hover:bg-surface-container-high"
         >
           Cancelar
         </button>
+        <SubmitButton className="rounded-lg bg-error px-4 py-2 font-label-md text-label-md text-white transition-all hover:opacity-90">
+          Confirmar abandono
+        </SubmitButton>
       </div>
     </form>
   );
