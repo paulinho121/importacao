@@ -941,6 +941,9 @@ export const processItems = pgTable("process_items", {
   // vários pedidos, de fornecedores diferentes). Vazio = item digitado no
   // processo. Ao desvincular o pedido do processo, estes itens saem junto.
   purchaseOrderId: uuid("purchase_order_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
+  // Item do pedido que originou esta linha: quando o item do pedido muda, esta linha
+  // é atualizada junto (ver lib/process-purchase-orders.ts). Vazio = item do processo.
+  purchaseOrderItemId: uuid("purchase_order_item_id").references(() => purchaseOrderItems.id, { onDelete: "set null" }),
   // Invoice (do próprio processo) em que o item vem — vazio = não informada.
   invoiceId: uuid("invoice_id").references(() => processInvoices.id, { onDelete: "set null" }),
   // Cobertura cambial do item (sim/não); null = ainda não informado.

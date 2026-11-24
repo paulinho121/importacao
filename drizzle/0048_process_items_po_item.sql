@@ -1,0 +1,2 @@
+ALTER TABLE "process_items" ADD COLUMN "purchase_order_item_id" uuid;--> statement-breakpoint
+ALTER TABLE "process_items" ADD CONSTRAINT "process_items_purchase_order_item_id_purchase_order_items_id_fk" FOREIGN KEY ("purchase_order_item_id") REFERENCES "public"."purchase_order_items"("id") ON DELETE set null ON UPDATE no action;

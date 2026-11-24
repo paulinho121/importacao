@@ -115,10 +115,10 @@ export default async function PedidoCompraDetailPage({
       cartonWeightKg: item.cartonWeightKg !== null ? Number(item.cartonWeightKg) : null,
     },
   }));
-  // Edita em qualquer status, menos Cancelado. Os itens só mudam enquanto o pedido
-  // não está em processo (os itens já foram copiados pra lá).
+  // Edita em qualquer status, menos Cancelado. Mesmo com o pedido em um processo, os
+  // itens podem mudar: a alteração vai junto para o processo.
   const canEdit = po.status !== "CANCELADO";
-  const canEditItems = canEdit && !po.processId;
+  const canEditItems = canEdit;
   const boundAddItem = addPurchaseOrderItem.bind(null, id);
   const boundUpdateStatus = updatePurchaseOrderStatus.bind(null, id);
   const boundUpdatePo = updatePurchaseOrder.bind(null, id);
@@ -379,9 +379,8 @@ export default async function PedidoCompraDetailPage({
             )}
             {canEdit && po.processId && (
               <p className="mt-3 rounded-lg bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant">
-                Este pedido já está em um processo, então os itens não podem ser alterados aqui. Para mudar os itens,
-                retire o pedido do processo, edite e coloque de novo. Os dados do pedido (número, moeda, incoterm,
-                entrega…) continuam editáveis.
+                Este pedido está em um processo: as mudanças nos itens (quantidade, preço, inclusão e remoção) são
+                aplicadas automaticamente no processo.
               </p>
             )}
           </section>

@@ -17,7 +17,13 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase-server";
 import { withFlash, withFlashError } from "@/lib/flash";
 import { isUniqueViolation } from "@/lib/db-errors";
-import { LinkError, linkPurchaseOrderToProcess, syncPackingListToProcess } from "@/lib/process-purchase-orders";
+import {
+  LinkError,
+  linkPurchaseOrderToProcess,
+  removePurchaseOrderItemFromProcess,
+  syncPackingListToProcess,
+  syncPurchaseOrderItemToProcess,
+} from "@/lib/process-purchase-orders";
 import { logPurchaseOrderEvent } from "@/lib/purchase-order-events";
 import { PURCHASE_ORDER_STATUS_LABEL, type PurchaseOrderStatus } from "@/lib/status";
 import { normalizeDriveUrl } from "@/lib/drive-links";
@@ -141,6 +147,22 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
     }
     if (raced) redirect(withFlashError(`/pedidos-compra/${poId}`, duplicateMessage));
     await logPurchaseOrderEvent(db, poId, "EDITADO", changes.join(" · "));
+
+    // Moeda e incoterm do processo acompanham o pedido, desde que o processo ainda use
+    // o valor do pedido (se foi ajustado no processo, não é sobrescrito).
+    if (po.processId) {
+      const [proc] = await db
+        .select({ currency: processes.currency, incoterm: processes.incoterm })
+        .from(processes)
+        .where(eq(processes.id, po.processId));
+      const patch: Partial<typeof processes.$inferInsert> = {};
+      if (proc && next.currency !== po.currency && proc.currency === po.currency) patch.currency = next.currency;
+      if (proc && next.incoterm !== po.incoterm && proc.incoterm === po.incoterm) patch.incoterm = next.incoterm;
+      if (Object.keys(patch).length > 0) {
+        await db.update(processes).set({ ...patch, updatedAt: new Date() }).where(eq(processes.id, po.processId));
+      }
+      revalidatePath(`/processos/${po.processId}`);
+    }
   }
 
   revalidatePath("/pedidos-compra");
@@ -234,38 +256,44 @@ export async function addPurchaseOrderItem(poId: string, formData: FormData) {
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
   }
-  if (po.processId) {
-    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
-  }
 
+  let values: typeof purchaseOrderItems.$inferInsert;
+  let logText: string;
   if (productId) {
     if (!product) throw new Error("Produto não encontrado.");
-    await db.insert(purchaseOrderItems).values({
-      purchaseOrderId: poId,
-      productId,
-      sku: product.sku,
-      description: product.description,
-      quantity,
-      unitPrice,
-    });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
+    values = { purchaseOrderId: poId, productId, sku: product.sku, description: product.description, quantity, unitPrice };
+    logText = `${product.sku} — ${product.description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`;
   } else {
     const description = optionalText(formData, "description");
     if (!description) throw new Error("Descrição é obrigatória para item avulso.");
-    await db.insert(purchaseOrderItems).values({
-      purchaseOrderId: poId,
-      sku: optionalText(formData, "sku"),
-      description,
-      quantity,
-      unitPrice,
-    });
-    await logPurchaseOrderEvent(db, poId, "ITEM_ADICIONADO", `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`);
+    values = { purchaseOrderId: poId, sku: optionalText(formData, "sku"), description, quantity, unitPrice };
+    logText = `${description} · qtd ${quantity ?? "—"} · preço ${unitPrice ?? "—"}`;
   }
 
+  await db.transaction(async (tx) => {
+    const [created] = await tx.insert(purchaseOrderItems).values(values).returning();
+    // Pedido já em processo: o item entra no processo também.
+    if (po.processId) {
+      await tx.insert(processItems).values({
+        processId: po.processId,
+        purchaseOrderId: poId,
+        purchaseOrderItemId: created.id,
+        productId: created.productId,
+        sku: created.sku,
+        description: created.description,
+        quantity: created.quantity,
+        unitValueOverride: created.unitPrice,
+      });
+    }
+    await logPurchaseOrderEvent(tx, poId, "ITEM_ADICIONADO", logText);
+  });
+
   revalidatePath(`/pedidos-compra/${poId}`);
+  if (po.processId) revalidatePath(`/processos/${po.processId}`);
 }
 
-// Altera quantidade e preço de um item (pedido ainda fora de processo).
+// Altera quantidade e preço de um item. Se o pedido está em processo, a mudança
+// vai junto para o processo (o item do processo é atualizado automaticamente).
 export async function updatePurchaseOrderItem(itemId: string, poId: string, formData: FormData) {
   const [[po], [item]] = await Promise.all([
     db
@@ -281,14 +309,14 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
   }
-  if (po.processId) {
-    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
-  }
   if (!item) throw new Error("Item não encontrado.");
 
   const quantity = optionalNumber(formData, "quantity");
   const unitPrice = optionalNumber(formData, "unitPrice");
-  await db.update(purchaseOrderItems).set({ quantity, unitPrice }).where(eq(purchaseOrderItems.id, itemId));
+  await db.transaction(async (tx) => {
+    await tx.update(purchaseOrderItems).set({ quantity, unitPrice }).where(eq(purchaseOrderItems.id, itemId));
+    if (po.processId) await syncPurchaseOrderItemToProcess(tx, itemId);
+  });
 
   const changes: string[] = [];
   if (Number(quantity ?? 0) !== Number(item.quantity ?? 0)) changes.push(`qtd ${item.quantity ?? "—"} → ${quantity ?? "—"}`);
@@ -299,8 +327,10 @@ export async function updatePurchaseOrderItem(itemId: string, poId: string, form
 
   revalidatePath(`/pedidos-compra/${poId}`);
   revalidatePath("/pedidos-compra");
+  if (po.processId) revalidatePath(`/processos/${po.processId}`);
 }
 
+// Remove um item do pedido; se o pedido está em processo, o item sai do processo também.
 export async function removePurchaseOrderItem(itemId: string, poId: string) {
   const [[po], [item]] = await Promise.all([
     db
@@ -316,13 +346,14 @@ export async function removePurchaseOrderItem(itemId: string, poId: string) {
   if (po.status === "CANCELADO") {
     redirect(withFlashError(`/pedidos-compra/${poId}`, "Pedido cancelado não pode ser alterado."));
   }
-  if (po.processId) {
-    redirect(withFlashError(`/pedidos-compra/${poId}`, "Este pedido já está em um processo. Remova-o do processo para alterar os itens."));
-  }
 
-  await db.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
+  await db.transaction(async (tx) => {
+    await removePurchaseOrderItemFromProcess(tx, itemId);
+    await tx.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
+  });
   if (item) await logPurchaseOrderEvent(db, poId, "ITEM_REMOVIDO", `${item.sku ? `${item.sku} — ` : ""}${item.description}`);
   revalidatePath(`/pedidos-compra/${poId}`);
+  if (po.processId) revalidatePath(`/processos/${po.processId}`);
 }
 
 export async function updatePurchaseOrderStatus(poId: string, formData: FormData) {
@@ -401,6 +432,7 @@ export async function convertToProcess(poId: string, formData: FormData) {
             quantity: item.quantity,
             unitValueOverride: item.unitPrice,
             purchaseOrderId: poId,
+            purchaseOrderItemId: item.id,
           })),
         );
       }

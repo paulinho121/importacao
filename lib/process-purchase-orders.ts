@@ -1,6 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
+  itemReservations,
   processDocuments,
   processes,
   processItems,
@@ -48,6 +49,7 @@ export async function linkPurchaseOrderToProcess(tx: Tx, poId: string, processId
       items.map((item) => ({
         processId,
         purchaseOrderId: poId,
+        purchaseOrderItemId: item.id,
         productId: item.productId,
         sku: item.sku,
         description: item.description,
@@ -63,6 +65,49 @@ export async function linkPurchaseOrderToProcess(tx: Tx, poId: string, processId
   await syncPackingListToProcess(tx, processId);
   await logPurchaseOrderEvent(tx, poId, "PROCESSO_VINCULADO", `${process.processNumber} · ${items.length} ${items.length === 1 ? "item" : "itens"}`);
   return { itemCount: items.length };
+}
+
+// Item do pedido alterado (quantidade, preço, produto, descrição): atualiza as linhas
+// do processo que vieram dele. Só os campos que vêm do pedido mudam; reservas, invoice
+// e cobertura cambial do processo ficam como estão.
+export async function syncPurchaseOrderItemToProcess(tx: Tx | typeof db, itemId: string) {
+  const [item] = await tx.select().from(purchaseOrderItems).where(eq(purchaseOrderItems.id, itemId));
+  if (!item) return;
+  await tx
+    .update(processItems)
+    .set({
+      productId: item.productId,
+      sku: item.sku,
+      description: item.description,
+      quantity: item.quantity,
+      unitValueOverride: item.unitPrice,
+    })
+    .where(eq(processItems.purchaseOrderItemId, itemId));
+}
+
+// Item removido do pedido: sai do processo. Se a linha já tem reservas (dados do
+// processo), ela não é apagada (as reservas iriam junto): fica no processo como item
+// digitado no processo, sem vínculo com o pedido.
+export async function removePurchaseOrderItemFromProcess(tx: Tx | typeof db, itemId: string) {
+  const linked = await tx
+    .select({ id: processItems.id })
+    .from(processItems)
+    .where(eq(processItems.purchaseOrderItemId, itemId));
+  for (const row of linked) {
+    const [reserved] = await tx
+      .select({ id: itemReservations.id })
+      .from(itemReservations)
+      .where(eq(itemReservations.itemId, row.id))
+      .limit(1);
+    if (reserved) {
+      await tx
+        .update(processItems)
+        .set({ purchaseOrderItemId: null, purchaseOrderId: null })
+        .where(eq(processItems.id, row.id));
+    } else {
+      await tx.delete(processItems).where(eq(processItems.id, row.id));
+    }
+  }
 }
 
 // A packing list anexada ao pedido vai junto pro processo: se o espaço "Packing
