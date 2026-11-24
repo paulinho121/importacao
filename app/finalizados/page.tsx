@@ -60,6 +60,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
     conditions.push(
       or(
         ilike(processes.processNumber, `%${q}%`),
+        ilike(processes.customsDeclarationNumber, `%${q}%`),
         ilike(suppliers.name, `%${q}%`),
         sql`exists (
           select 1 from ${purchaseOrders} po join ${suppliers} ps on ps.id = po.supplier_id
@@ -169,7 +170,7 @@ export default async function FinalizadosPage({ searchParams }: { searchParams: 
             type="text"
             name="q"
             defaultValue={q}
-            placeholder="Nº do processo, fornecedor, invoice, SKU ou nome do item..."
+            placeholder="Nº do processo, DUIMP, fornecedor, invoice, SKU ou nome do item..."
           />
         </div>
         <div>

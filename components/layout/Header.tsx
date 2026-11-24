@@ -101,7 +101,7 @@ export default function Header() {
         <input
           type="text"
           name="q"
-          placeholder="Buscar processos por número, fornecedor, invoice ou item..."
+          placeholder="Buscar por processo, DUIMP, fornecedor, invoice ou item..."
           aria-label="Buscar processos"
           className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-on-surface placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />

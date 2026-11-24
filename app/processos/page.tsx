@@ -92,6 +92,7 @@ export default async function ProcessosPage({
         ilike(suppliers.name, `%${q}%`),
         ilike(freightAgents.name, `%${q}%`),
         ilike(processes.externalReference, `%${q}%`),
+        ilike(processes.customsDeclarationNumber, `%${q}%`),
         sql`exists (
           select 1 from ${purchaseOrders} po join ${suppliers} ps on ps.id = po.supplier_id
           where po.process_id = ${processes.id}
@@ -234,7 +235,7 @@ export default async function ProcessosPage({
           </span>
           <input
             className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:border-secondary transition-colors font-body-md text-body-md"
-            placeholder="Buscar por processo, produto, fornecedor ou invoice..."
+            placeholder="Buscar por processo, DUIMP, produto, fornecedor ou invoice..."
             type="text"
             name="q"
             defaultValue={q}

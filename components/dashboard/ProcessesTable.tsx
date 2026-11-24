@@ -68,6 +68,7 @@ export function ProcessesTable({ data }: { data: Row[] }) {
         r.supplierCountry,
         r.destination,
         r.agentName,
+        r.customsDeclarationNumber,
       ]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(query)),

@@ -92,6 +92,7 @@ export async function getDashboardMetrics() {
         currency: processes.currency,
         agentName: freightAgents.name,
         externalReference: processes.externalReference,
+        customsDeclarationNumber: processes.customsDeclarationNumber,
         internationalFreightValue: processes.internationalFreightValue,
         insuranceValue: processes.insuranceValue,
         exchangeRate: processes.exchangeRate,
@@ -427,6 +428,7 @@ export async function getDashboardMetrics() {
       status: p.status,
       agentName: p.agentName,
       agentReference: p.externalReference ?? null,
+      customsDeclarationNumber: p.customsDeclarationNumber ?? null,
       closedQuoteProposal: closedQuoteByProcess.get(p.id) ?? null,
       // FOB = soma das invoices (na moeda do processo); null enquanto nenhuma invoice tem valor.
       fobValue: invoiceValueByProcess.get(p.id) ?? null,
