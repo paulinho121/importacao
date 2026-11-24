@@ -121,7 +121,6 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                 <th className="py-2 pr-3 font-label-md text-right">QTD</th>
                 <th className="py-2 pr-3 font-label-md text-right">VALOR</th>
                 <th className="py-2 pr-3 font-label-md">PACKING LIST</th>
-                <th className="py-2" />
               </tr>
             </thead>
             <tbody>
@@ -177,15 +176,6 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                       </ul>
                     )}
                   </td>
-                  <td className="py-2 text-right">
-                    {!closed && (
-                      <ConfirmActionButton
-                        action={removePurchaseOrderFromProcess.bind(null, processId, l.id)}
-                        label="Remover"
-                        message={`Remover o pedido ${l.poNumber} deste processo? Os itens que vieram dele também saem do processo.`}
-                      />
-                    )}
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -199,7 +189,7 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
                     <div key={cur}>{money(v, cur === "—" ? null : cur)}</div>
                   ))}
                 </td>
-                <td colSpan={2} />
+                <td />
               </tr>
             </tfoot>
           </table>
@@ -214,7 +204,35 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
       )}
 
       {!closed && (
-        <form action={boundAdd} className="mt-4 flex flex-col gap-2 border-t border-outline-variant pt-4 sm:flex-row sm:items-end">
+        <details className="group mt-4 border-t border-outline-variant pt-4">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface-variant transition-all hover:bg-surface-container-high">
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+            Editar pedidos do processo
+          </summary>
+
+          {linked.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Pedidos neste processo</p>
+              <ul className="divide-y divide-outline-variant/50 rounded-lg border border-outline-variant">
+                {linked.map((l) => (
+                  <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="font-mono-data text-sm text-on-surface">{l.poNumber}</p>
+                      <p className="truncate text-xs text-on-surface-variant">{l.supplierName}</p>
+                    </div>
+                    <ConfirmActionButton
+                      action={removePurchaseOrderFromProcess.bind(null, processId, l.id)}
+                      label="Remover do processo"
+                      message={`Remover o pedido ${l.poNumber} deste processo? Os itens que vieram dele também saem do processo. O pedido continua em Pedidos de compra.`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-error/40 px-3 py-1.5 text-xs font-medium text-error transition-all hover:bg-error/10"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <form action={boundAdd} className="mt-4 flex flex-col gap-2 border-t border-outline-variant pt-4 sm:flex-row sm:items-end">
           <div className="flex-1">
             <label className="mb-1 block font-label-md text-label-md text-on-surface-variant">Adicionar pedido de compra</label>
             <select
@@ -240,7 +258,8 @@ export default async function ProcessPurchaseOrders({ processId, closed }: { pro
           >
             Adicionar ao processo
           </SubmitButton>
-        </form>
+          </form>
+        </details>
       )}
       {!closed && available.length === 0 && (
         <div className="mt-3 rounded-lg border border-dashed border-outline-variant p-4 text-body-sm font-body-sm">
